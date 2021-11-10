@@ -37,7 +37,7 @@ jobs:
 #    - run: mkdir -p path/to/artifact
 #    - run: echo hello > path/to/artifact/world.txt
     
-    - run: Remove-Item * -Exclude TwoDacConsistencyLogger
+    - run: Remove-Item * -Force -Recurse -Exclude TwoDacConsistencyLogger
       shell: powershell
     - run: Remove-Item TwoDacConsistencyLogger/*.exp
       shell: powershell
