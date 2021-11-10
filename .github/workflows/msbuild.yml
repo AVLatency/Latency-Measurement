@@ -37,7 +37,16 @@ jobs:
 #    - run: mkdir -p path/to/artifact
 #    - run: echo hello > path/to/artifact/world.txt
     
+    - run: Remove-Item * -Exclude TwoDacConsistencyLogger
+      shell: powershell
+    - run: Remove-Item TwoDacConsistencyLogger/*.exp
+      shell: powershell
+    - run: Remove-Item TwoDacConsistencyLogger/*.lib
+      shell: powershell
+    - run: Remove-Item TwoDacConsistencyLogger/*.pdb
+      shell: powershell
+    
     - uses: actions/upload-artifact@v2
       with:
         name: TwoDacConsistencyLogger
-        path: TwoDacConsistencyLogger/Release/TwoDacConsistencyLogger
+        path: TwoDacConsistencyLogger/Release
