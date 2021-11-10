@@ -43,7 +43,7 @@ jobs:
       shell: powershell
     
     - uses: actions/upload-artifact@v2
-      #if: !startsWith(github.ref, 'refs/tags/TwoDacConsistencyLogger-v')
+      if: !startsWith(github.ref, 'refs/tags/TwoDacConsistencyLogger-v')
       with:
         name: TwoDacConsistencyLogger
         path: TwoDacConsistencyLogger/Release
