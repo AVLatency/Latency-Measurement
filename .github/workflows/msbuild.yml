@@ -1,9 +1,10 @@
 name: MSBuild
 
-on:
-  push:
-    tags:
-    - '*'
+#on:
+#  push:
+#    tags:
+#    - '*'
+on: workflow_dispatch
 
 env:
   # Path to the solution file relative to the root of the project.
