@@ -49,17 +49,9 @@ jobs:
         name: TwoDacConsistencyLogger
         path: TwoDacConsistencyLogger/Release
     
-    - uses: bhowell2/github-substring-action@v1.0.0
-      if: startsWith(github.ref, 'refs/tags/TwoDacConsistencyLogger-v')
-      id: tag
-      with:
-        value: ${{github.ref}}
-        index_of_str: "refs/tags/"
-# steps.tag.outputs.substring = 'c123'
-        
     - name: Creating tag artifact
       uses: actions/upload-artifact@v2
       if: startsWith(github.ref, 'refs/tags/TwoDacConsistencyLogger-v')
       with:
-        name: ${{steps.tag.outputs.substring}}
+        name: ${{github.ref_name}}
         path: TwoDacConsistencyLogger/Release
