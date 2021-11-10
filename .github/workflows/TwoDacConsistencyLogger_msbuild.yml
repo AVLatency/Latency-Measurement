@@ -53,7 +53,7 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/TwoDacConsistencyLogger-v')
       id: tag
       with:
-        value: ${github.ref}
+        value: ${{github.ref}}
         index_of_str: "refs/tags/"
 # steps.tag.outputs.substring = 'c123'
         
@@ -61,5 +61,5 @@ jobs:
       uses: actions/upload-artifact@v2
       if: startsWith(github.ref, 'refs/tags/TwoDacConsistencyLogger-v')
       with:
-        name: ${steps.tag.outputs.substring}
+        name: ${{steps.tag.outputs.substring}}
         path: TwoDacConsistencyLogger/Release
