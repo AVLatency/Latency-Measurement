@@ -38,7 +38,8 @@ jobs:
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
 
     - name: Removing all but executable files from build
-      run: Remove-Item -Recurse -Force TwoDacConsistencyLogger/Release/*.tlog 
+      run: |
+        Remove-Item -Recurse -Force TwoDacConsistencyLogger/Release/*.tlog
         Remove-Item TwoDacConsistencyLogger/Release/*.*
         Remove-Item TwoDacConsistencyLogger/Release/TwoDacConsistencyLogger/*.exp
         Remove-Item TwoDacConsistencyLogger/Release/TwoDacConsistencyLogger/*.lib
