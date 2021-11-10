@@ -39,5 +39,5 @@ jobs:
     
     - uses: actions/upload-artifact@v2
       with:
-        name: TwoDacConsistencyLoggerArtifact
-        path: TwoDacConsistencyLogger\Release\TwoDacConsistencyLogger.exe
+        name: TwoDacConsistencyLogger
+        path: TwoDacConsistencyLogger/Release/TwoDacConsistencyLogger/*.exe
