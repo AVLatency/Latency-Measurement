@@ -37,13 +37,13 @@ jobs:
 #    - run: mkdir -p path/to/artifact
 #    - run: echo hello > path/to/artifact/world.txt
     
-    - run: Remove-Item * -Force -Recurse -Exclude TwoDacConsistencyLogger
+    - run: Remove-Item TwoDacConsistencyLogger/Release/* -Force -Recurse -Exclude TwoDacConsistencyLogger
       shell: powershell
-    - run: Remove-Item TwoDacConsistencyLogger/*.exp
+    - run: Remove-Item TwoDacConsistencyLogger/Release/TwoDacConsistencyLogger/*.exp
       shell: powershell
-    - run: Remove-Item TwoDacConsistencyLogger/*.lib
+    - run: Remove-Item TwoDacConsistencyLogger/Release/TwoDacConsistencyLogger/*.lib
       shell: powershell
-    - run: Remove-Item TwoDacConsistencyLogger/*.pdb
+    - run: Remove-Item TwoDacConsistencyLogger/Release/TwoDacConsistencyLogger/*.pdb
       shell: powershell
     
     - uses: actions/upload-artifact@v2
