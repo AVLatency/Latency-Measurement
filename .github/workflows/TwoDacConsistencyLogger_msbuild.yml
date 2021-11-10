@@ -42,15 +42,13 @@ jobs:
         Remove-Item TwoDacConsistencyLogger/Release/TwoDacConsistencyLogger/*.pdb
       shell: powershell
     
-    - name: Creating non tag archive
-      uses: actions/upload-artifact@v2
-      if: !startsWith(github.ref, 'refs/tags/TwoDacConsistencyLogger-v')
+    - uses: actions/upload-artifact@v2
+      #if: !startsWith(github.ref, 'refs/tags/TwoDacConsistencyLogger-v')
       with:
         name: TwoDacConsistencyLogger
         path: TwoDacConsistencyLogger/Release
         
-    - name: Creating tagged archive
-      uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v2
       if: startsWith(github.ref, 'refs/tags/TwoDacConsistencyLogger-v')
       with:
         name: ${GITHUB_REF/refs\/tags\//}
