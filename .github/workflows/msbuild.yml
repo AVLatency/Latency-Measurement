@@ -4,7 +4,8 @@ name: MSBuild
 #  push:
 #    tags:
 #    - '*'
-on: workflow_dispatch
+#on: workflow_dispatch
+on: [push]
 
 env:
   # Path to the solution file relative to the root of the project.
@@ -55,6 +56,7 @@ jobs:
   # You may pin to the exact commit or the version.
   # uses: softprops/action-gh-release@6034af24fba4e5a8e975aaa6056554efe4c794d0
       uses: softprops/action-gh-release@v0.1.13
+      if: startsWith(github.ref, 'refs/tags/TwoDacConsistencyLogger-v')
       #with:
       #  # Note-worthy description of changes in release
       #  body: # optional
