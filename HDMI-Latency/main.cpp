@@ -8,6 +8,7 @@
 #include <d3d11.h>
 #include <tchar.h>
 #include "stb_image_dx11.h"
+#include "resource.h"
 
 // Data
 static ID3D11Device*            g_pd3dDevice = NULL;
@@ -21,7 +22,7 @@ int my_image_width = 0;
 int my_image_height = 0;
 
 // Forward declarations of helper functions
-void LoadResources();
+void LoadResources(HINSTANCE hInstance);
 bool CreateDeviceD3D(HWND hWnd);
 void CleanupDeviceD3D();
 void CreateRenderTarget();
@@ -96,7 +97,7 @@ int main(int, char**)
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != NULL);
 
-    LoadResources();
+    LoadResources(wc.hInstance);
 
     // Our state
     bool show_demo_window = true;
@@ -225,9 +226,25 @@ int main(int, char**)
 
 // Helper functions
 
-void LoadResources()
+void LoadResources(HINSTANCE hInstance)
 {
-    bool ret = LoadTextureFromFile("HDMI-Latency_cable-map.png", &my_texture, &my_image_width, &my_image_height, g_pd3dDevice);
+    // Instructions on how to include binary data in Visual Studio resources: https://blog.kowalczyk.info/article/zy/embedding-binary-resources-on-windows.html
+    HGLOBAL     res_handle = NULL;
+    HRSRC       res;
+    unsigned char* res_data;
+    DWORD       res_size;
+
+    // NOTE: providing g_hInstance is important, NULL might not work
+    res = FindResource(hInstance, MAKEINTRESOURCE(HDMI_CABLE_MAP), RT_RCDATA);
+    if (!res)
+        return;
+    res_handle = LoadResource(NULL, res);
+    if (!res_handle)
+        return;
+    res_data = (unsigned char*)LockResource(res_handle);
+    res_size = SizeofResource(NULL, res);
+
+    bool ret = LoadTextureFromData(res_data, res_size, &my_texture, &my_image_width, &my_image_height, g_pd3dDevice);
     IM_ASSERT(ret);
 }
 

@@ -2,7 +2,7 @@
 // Microsoft Visual C++ generated include file.
 // Used by HDMI-Latency.rc
 //
-#define IDR_RCDATA1                     101
+#define HDMI_CABLE_MAP 300
 
 // Next default values for new objects
 // 

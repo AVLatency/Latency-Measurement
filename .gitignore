@@ -57,3 +57,6 @@ build/
 
 # Nuget stuff
 packages/
+
+# Resource cache files
+*.aps
