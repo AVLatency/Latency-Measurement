@@ -13,4 +13,11 @@
   <ItemGroup>
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)stb_image.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)stb_image_dx11.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)stb_image_dx11.cpp" />
+  </ItemGroup>
 </Project>

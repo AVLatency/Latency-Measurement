@@ -7,6 +7,7 @@
 #include "imgui_impl_dx11.h"
 #include <d3d11.h>
 #include <tchar.h>
+#include "stb_image_dx11.h"
 
 // Data
 static ID3D11Device*            g_pd3dDevice = NULL;
@@ -14,7 +15,13 @@ static ID3D11DeviceContext*     g_pd3dDeviceContext = NULL;
 static IDXGISwapChain*          g_pSwapChain = NULL;
 static ID3D11RenderTargetView*  g_mainRenderTargetView = NULL;
 
+// Resources
+ID3D11ShaderResourceView* my_texture = NULL;
+int my_image_width = 0;
+int my_image_height = 0;
+
 // Forward declarations of helper functions
+void LoadResources();
 bool CreateDeviceD3D(HWND hWnd);
 void CleanupDeviceD3D();
 void CreateRenderTarget();
@@ -89,6 +96,8 @@ int main(int, char**)
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != NULL);
 
+    LoadResources();
+
     // Our state
     bool show_demo_window = true;
     bool show_another_window = false;
@@ -151,8 +160,8 @@ int main(int, char**)
         }
 
 
-
-
+        float cableMapScale = 0.7;
+        ImGui::Image((void*)my_texture, ImVec2(my_image_width * cableMapScale, my_image_height * cableMapScale));
 
 
 
@@ -215,6 +224,12 @@ int main(int, char**)
 }
 
 // Helper functions
+
+void LoadResources()
+{
+    bool ret = LoadTextureFromFile("HDMI-Latency_cable-map.png", &my_texture, &my_image_width, &my_image_height, g_pd3dDevice);
+    IM_ASSERT(ret);
+}
 
 bool CreateDeviceD3D(HWND hWnd)
 {
