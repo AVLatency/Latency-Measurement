@@ -160,7 +160,7 @@ int main(int, char**)
             ImGui::EndMenuBar();
         }
 
-
+        ImGui::Text("Cable Diagram:");
         float cableMapScale = 0.7;
         ImGui::Image((void*)my_texture, ImVec2(my_image_width * cableMapScale, my_image_height * cableMapScale));
 
