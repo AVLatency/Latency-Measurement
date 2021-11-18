@@ -27,7 +27,11 @@ bool CreateDeviceD3D(HWND hWnd);
 void CleanupDeviceD3D();
 void CreateRenderTarget();
 void CleanupRenderTarget();
+void HelpMarker(const char* desc);
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+enum struct AppState { GettingStarted, Calibration, Measurement };
+AppState CurrentAppState = AppState::GettingStarted;
 
 // Main code
 int main(int, char**)
@@ -161,11 +165,57 @@ int main(int, char**)
         }
 
         ImGui::Text("Cable Diagram:");
+        ImGui::SameLine(); HelpMarker(
+            "Before starting you must connect your HDMI and audio cables as described in this diagram.\n\n"
+            "You can use either a line in or mic input on your computer, but when using certain microphones you may find the mic input works better.\n\n"
+            "To record the Device Under Test (DUT) you can use a microphone or directly connect to the headphone or speaker output of the DUT.\n"
+            "- If you use a microphone, make sure to position it as close as possible to the speaker (the tweeter if there are separate speaker components) because sound travels slowly.\n"
+            "- If you use DUT headphone output, remember that speaker and headphone output can sometimes have a very different latency.\n"
+            "- If you directly connect to DUT speaker output, remember to start the volume low as some devices may be capable of high voltage outputs that could, theoretically, damage your audio input device.\n\n"
+            "Your \"HDMI Audio Device\" must be capabile of analog audio output AND HDMI audio output at the same time. The time offset between analog audio output and HDMI audio output must be known. A list of capable devices can be found on the GitHub wiki.\n\n"
+            "GitHub Wiki: github.com/AVLatency/Latency-Measurement/wiki");
         float cableMapScale = 0.7;
         ImGui::Image((void*)my_texture, ImVec2(my_image_width * cableMapScale, my_image_height * cableMapScale));
 
+        if (ImGui::BeginTabBar("Main Tabs"))
+        {
+            if (CurrentAppState == AppState::GettingStarted)
+            {
+                if (ImGui::BeginTabItem("Getting Started"))
+                {
+                    ImGui::Text("Welcome to the AV Latency.com HDMI latency measurement tool!");
+                    ImGui::Spacing();
+                    ImGui::Text("Before starting, please connect your cables as described in the diagram above.");
+                    ImGui::Spacing();
+                    ImGui::Text("You can find help text by hovering your mouse over these:");
+                    ImGui::SameLine(); HelpMarker("Click \"Let's Go!\" once you've connected all your HDMI and audio cables to get started!");
+                    ImGui::Spacing();
 
+                    if (ImGui::Button("Let's Go!"))
+                    {
+                        CurrentAppState = AppState::Calibration;
+                    }
 
+                    ImGui::EndTabItem();
+                }
+            }
+            else if (CurrentAppState == AppState::Calibration)
+            {
+                if (ImGui::BeginTabItem("Calibration"))
+                {
+
+                    ImGui::EndTabItem();
+                }
+            }
+            else if (CurrentAppState == AppState::Measurement)
+            {
+                if (ImGui::BeginTabItem("Measurement"))
+                {
+                }
+            }
+
+            ImGui::EndTabBar();
+        }
 
         ImGui::End();
 
@@ -297,6 +347,21 @@ void CreateRenderTarget()
 void CleanupRenderTarget()
 {
     if (g_mainRenderTargetView) { g_mainRenderTargetView->Release(); g_mainRenderTargetView = NULL; }
+}
+
+// Helper to display a little (?) mark which shows a tooltip when hovered.
+// In your own code you may want to display an actual icon if you are using a merged icon fonts (see docs/FONTS.md)
+void HelpMarker(const char* desc)
+{
+    ImGui::TextDisabled("(?)");
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted(desc);
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
 }
 
 #ifndef WM_DPICHANGED
