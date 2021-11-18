@@ -157,6 +157,7 @@
     <ClInclude Include="..\imgui\imgui_internal.h" />
     <ClInclude Include="..\imgui\backends\imgui_impl_dx11.h" />
     <ClInclude Include="..\imgui\backends\imgui_impl_win32.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\imgui\imgui.cpp" />
@@ -171,6 +172,9 @@
   <ItemGroup>
     <None Include="..\imgui\misc\debuggers\imgui.natvis" />
     <None Include="..\README.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="HDMI-Latency.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

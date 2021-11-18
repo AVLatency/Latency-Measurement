@@ -24,6 +24,7 @@
     <ClInclude Include="..\imgui\backends\imgui_impl_dx11.h">
       <Filter>sources</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\imgui\imgui.cpp">
@@ -56,5 +57,8 @@
     <None Include="..\imgui\misc\debuggers\imgui.natvis">
       <Filter>sources</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="HDMI-Latency.rc" />
   </ItemGroup>
 </Project>
