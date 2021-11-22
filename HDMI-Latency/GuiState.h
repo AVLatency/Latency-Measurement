@@ -2,12 +2,10 @@
 
 enum struct GuiState
 {
-	GettingStarted,
+	GettingStarted = 0,
 	SelectAudioDevices,
-	AdjustLeftVolume,
-	CancellingAdjustLeftVolume,
-	AdjustRightVolume,
-	CancellingAdjustRightVolume,
+	AdjustVolume,
+	CancellingAdjustVolume,
 	MeasurementConfig,
 	Measuring,
 	CancellingMeasuring,

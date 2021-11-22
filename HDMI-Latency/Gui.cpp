@@ -1,7 +1,5 @@
 #include "Gui.h"
 #include "imgui.h"
-
-
 #include "resource.h"
 
 bool Gui::DoGui()
@@ -15,6 +13,8 @@ bool Gui::DoGui()
     ImGui::Begin("GUI", NULL, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_HorizontalScrollbar);
 
     bool openAboutDialog = false;
+    bool openEdidReminderDialog = false;
+
     // Menu Bar
     if (ImGui::BeginMenuBar())
     {
@@ -53,53 +53,95 @@ bool Gui::DoGui()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::Text("Getting Started");
+        ImGui::Text("1) Getting Started");
         ImGui::Spacing();
-        ImGui::Text("Step 1: Input/Output Setup");
+        ImGui::Text("2) Input/Output Devices");
         ImGui::Spacing();
-        ImGui::Text("Step 2: Measurement Config");
+        ImGui::Text("3) Adjust Volumes");
+        ImGui::Spacing();
+        ImGui::Text("4) Measurement Config");
         ImGui::Spacing();
 
         ImGui::TableSetColumnIndex(1);
 
-        if (ImGui::BeginTabBar("Main Tabs"))
+        switch (state)
         {
-            if (state == GuiState::GettingStarted)
+        case GuiState::GettingStarted:
+        {
+
+            ImGui::Text("Welcome to the AV Latency.com HDMI latency measurement tool!");
+            ImGui::Spacing();
+            ImGui::Text("Before starting, please connect your cables as described in the diagram above.");
+            ImGui::Spacing();
+            ImGui::Text("You can find help text by hovering your mouse over these:");
+            ImGui::SameLine(); HelpMarker("Click \"Let's Go!\" once you've connected all your HDMI and audio cables to get started!");
+            ImGui::Spacing();
+
+            if (ImGui::Button("Let's Go!"))
             {
-                if (ImGui::BeginTabItem("Getting Started"))
+                openEdidReminderDialog = true;
+            }
+        }
+            break;
+        case GuiState::SelectAudioDevices:
+        case GuiState::AdjustVolume:
+        case GuiState::CancellingAdjustVolume:
+        {
+            bool disabled = state > GuiState::SelectAudioDevices;
+            if (disabled)
+            {
+                ImGui::BeginDisabled();
+            }
+
+            const char* items[] = { "Device 1", "Device 2" };
+            ImGui::Combo("Output Device", &outputDeviceIndex, items, 2);
+            ImGui::Combo("Input Device", &inputDeviceIndex, items, 2);
+
+            if (ImGui::Button("Adjust Volumes"))
+            {
+                state = GuiState::AdjustVolume;
+            }
+
+            if (disabled)
+            {
+                ImGui::EndDisabled();
+                disabled = false;
+            }
+
+            if (state >= GuiState::AdjustVolume)
+            {
+                ImGui::Text("Left Channel (HDMI Audio Device)");
+                ImGui::SameLine(); HelpMarker("Adjust the volume of your input device through the Windows control panel to make the monitor match the refrence image. "
+                    "You may need to turn down the Microphone Boost in the Levels section of Additional device properties.");
+
+                ImGui::Text("Right Channel (DUT)");
+                ImGui::SameLine(); HelpMarker("Adjust the output volume of your Device Under Test (DUT) to give a smooth and clear normalized recording.");
+
+                if (state == GuiState::AdjustVolume)
                 {
-                    ImGui::Text("Welcome to the AV Latency.com HDMI latency measurement tool!");
-                    ImGui::Spacing();
-                    ImGui::Text("Before starting, please connect your cables as described in the diagram above.");
-                    ImGui::Spacing();
-                    ImGui::Text("You can find help text by hovering your mouse over these:");
-                    ImGui::SameLine(); HelpMarker("Click \"Let's Go!\" once you've connected all your HDMI and audio cables to get started!");
-                    ImGui::Spacing();
-
-                    if (ImGui::Button("Let's Go!"))
+                    if (ImGui::Button("Cancel"))
                     {
-                        
+                        state = GuiState::SelectAudioDevices;
+                        // TODO: state = GuiState::CancellingAdjustVolume;
                     }
-
-                    ImGui::EndTabItem();
+                    ImGui::SameLine();
+                    if (ImGui::Button("Finish"))
+                    {
+                        state = GuiState::MeasurementConfig;
+                    }
                 }
             }
-            //else if (state == AppState::Calibration)
-            //{
-            //    if (ImGui::BeginTabItem("Calibration"))
-            //    {
+        }
+            break;
+        case GuiState::MeasurementConfig:
+        case GuiState::Measuring:
+        case GuiState::CancellingMeasuring:
+        {
 
-            //        ImGui::EndTabItem();
-            //    }
-            //}
-            //else if (state == AppState::Measurement)
-            //{
-            //    if (ImGui::BeginTabItem("Measurement"))
-            //    {
-            //    }
-            //}
-
-            ImGui::EndTabBar();
+        }
+            break;
+        case GuiState::Results:
+            break;
         }
 
         ImGui::EndTable();
@@ -108,13 +150,12 @@ bool Gui::DoGui()
     ImGui::End();
 
     // Menu modal dialogs:
+    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
 
     if (openAboutDialog)
     {
         ImGui::OpenPopup("About");
     }
-    // Always center this window when appearing
-    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 
     if (ImGui::BeginPopupModal("About", NULL, ImGuiWindowFlags_AlwaysAutoResize))
@@ -124,6 +165,30 @@ bool Gui::DoGui()
 
         ImGui::SetItemDefaultFocus();
         if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+
+        ImGui::EndPopup();
+    }
+
+    if (openEdidReminderDialog)
+    {
+        ImGui::OpenPopup("Reminder: EDID Mode");
+    }
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+    if (ImGui::BeginPopupModal("Reminder: EDID Mode", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("Set the EDID mode of your HDMI Audio Device to match the EDID of your DUT.");
+        ImGui::Spacing();
+        ImGui::Text("For HDMI audio extractors, set the switch to \"TV\" or \"Passthrough\".");
+
+        // TODO: Image of switch set to the TV position
+
+        ImGui::SetItemDefaultFocus();
+        if (ImGui::Button("OK", ImVec2(120, 0)))
+        {
+            state = GuiState::SelectAudioDevices;
+            ImGui::CloseCurrentPopup();
+        }
 
         ImGui::EndPopup();
     }

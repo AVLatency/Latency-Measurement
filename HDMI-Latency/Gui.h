@@ -12,7 +12,8 @@ public:
 private:
 	Resources& resources;
 	GuiState state = GuiState::GettingStarted;
+	int outputDeviceIndex = 0;
+	int inputDeviceIndex = 0;
 
 	void HelpMarker(const char* desc);
-
 };
