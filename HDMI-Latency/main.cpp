@@ -5,10 +5,8 @@
 #include "imgui.h"
 #include "imgui_impl_win32.h"
 #include "imgui_impl_dx11.h"
-#include <d3d11.h>
 #include <tchar.h>
-#include "stb_image_dx11.h"
-#include "resource.h"
+#include "Gui.h"
 
 // Data
 static ID3D11Device*            g_pd3dDevice = NULL;
@@ -16,22 +14,12 @@ static ID3D11DeviceContext*     g_pd3dDeviceContext = NULL;
 static IDXGISwapChain*          g_pSwapChain = NULL;
 static ID3D11RenderTargetView*  g_mainRenderTargetView = NULL;
 
-// Resources
-ID3D11ShaderResourceView* my_texture = NULL;
-int my_image_width = 0;
-int my_image_height = 0;
-
 // Forward declarations of helper functions
-void LoadResources(HINSTANCE hInstance);
 bool CreateDeviceD3D(HWND hWnd);
 void CleanupDeviceD3D();
 void CreateRenderTarget();
 void CleanupRenderTarget();
-void HelpMarker(const char* desc);
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
-enum struct AppState { GettingStarted, Calibration, Measurement };
-AppState CurrentAppState = AppState::GettingStarted;
 
 // Main code
 int main(int, char**)
@@ -101,11 +89,8 @@ int main(int, char**)
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != NULL);
 
-    LoadResources(wc.hInstance);
-
-    // Our state
-    bool show_demo_window = true;
-    bool show_another_window = false;
+    Resources resources(wc.hInstance, g_pd3dDevice);
+    Gui gui(resources);
 
     // Main loop
     bool done = false;
@@ -132,116 +117,7 @@ int main(int, char**)
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-
-
-
-
-
-
-        const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x, main_viewport->WorkPos.y), ImGuiCond_Always);
-        ImGui::SetNextWindowSize(ImVec2(main_viewport->WorkSize.x, main_viewport->WorkSize.y), ImGuiCond_Always);
-        //ImGui::SetNextWindowContentSize(ImVec2(1000, 0.0f));
-        ImGui::Begin("GUI", NULL, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_HorizontalScrollbar);
-
-        bool openAboutDialog = false;
-        // Menu Bar
-        if (ImGui::BeginMenuBar())
-        {
-            if (ImGui::BeginMenu("File"))
-            {
-                if (ImGui::MenuItem("Exit", "Alt+F4"))
-                {
-                    done = true;
-                }
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu("Help"))
-            {
-                openAboutDialog = ImGui::MenuItem("About", "");
-                ImGui::EndMenu();
-            }
-            ImGui::EndMenuBar();
-        }
-
-        ImGui::Text("Cable Diagram:");
-        ImGui::SameLine(); HelpMarker(
-            "Before starting you must connect your HDMI and audio cables as described in this diagram.\n\n"
-            "You can use either a line in or mic input on your computer, but when using certain microphones you may find the mic input works better.\n\n"
-            "To record the Device Under Test (DUT) you can use a microphone or directly connect to the headphone or speaker output of the DUT.\n"
-            "- If you use a microphone, make sure to position it as close as possible to the speaker (the tweeter if there are separate speaker components) because sound travels slowly.\n"
-            "- If you use DUT headphone output, remember that speaker and headphone output can sometimes have a very different latency.\n"
-            "- If you directly connect to DUT speaker output, remember to start the volume low as some devices may be capable of high voltage outputs that could, theoretically, damage your audio input device.\n\n"
-            "Your \"HDMI Audio Device\" must be capabile of analog audio output AND HDMI audio output at the same time. The time offset between analog audio output and HDMI audio output must be known. A list of capable devices can be found on the GitHub wiki.\n\n"
-            "GitHub Wiki: github.com/AVLatency/Latency-Measurement/wiki");
-        float cableMapScale = 0.7;
-        ImGui::Image((void*)my_texture, ImVec2(my_image_width * cableMapScale, my_image_height * cableMapScale));
-
-        if (ImGui::BeginTabBar("Main Tabs"))
-        {
-            if (CurrentAppState == AppState::GettingStarted)
-            {
-                if (ImGui::BeginTabItem("Getting Started"))
-                {
-                    ImGui::Text("Welcome to the AV Latency.com HDMI latency measurement tool!");
-                    ImGui::Spacing();
-                    ImGui::Text("Before starting, please connect your cables as described in the diagram above.");
-                    ImGui::Spacing();
-                    ImGui::Text("You can find help text by hovering your mouse over these:");
-                    ImGui::SameLine(); HelpMarker("Click \"Let's Go!\" once you've connected all your HDMI and audio cables to get started!");
-                    ImGui::Spacing();
-
-                    if (ImGui::Button("Let's Go!"))
-                    {
-                        CurrentAppState = AppState::Calibration;
-                    }
-
-                    ImGui::EndTabItem();
-                }
-            }
-            else if (CurrentAppState == AppState::Calibration)
-            {
-                if (ImGui::BeginTabItem("Calibration"))
-                {
-
-                    ImGui::EndTabItem();
-                }
-            }
-            else if (CurrentAppState == AppState::Measurement)
-            {
-                if (ImGui::BeginTabItem("Measurement"))
-                {
-                }
-            }
-
-            ImGui::EndTabBar();
-        }
-
-        ImGui::End();
-
-        // Menu modal dialogs:
-
-        if (openAboutDialog)
-        {
-            ImGui::OpenPopup("About");
-        }
-        // Always center this window when appearing
-        ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-
-        if (ImGui::BeginPopupModal("About", NULL, ImGuiWindowFlags_AlwaysAutoResize))
-        {
-            ImGui::Text("AV Latency.com HDMI Latency Measurement Tool\n\nFind out more about audio/video latency, input lag, and lip sync error at avlatency.com\nFind out more about this tool at github.com/AVLatency/Latency-Measurement");
-            ImGui::Separator();
-
-            ImGui::SetItemDefaultFocus();
-            if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
-
-            ImGui::EndPopup();
-        }
-
-
-
+        done = gui.DoGui();
 
         // Rendering
         ImGui::Render();
@@ -275,28 +151,6 @@ int main(int, char**)
 }
 
 // Helper functions
-
-void LoadResources(HINSTANCE hInstance)
-{
-    // Instructions on how to include binary data in Visual Studio resources: https://blog.kowalczyk.info/article/zy/embedding-binary-resources-on-windows.html
-    HGLOBAL     res_handle = NULL;
-    HRSRC       res;
-    unsigned char* res_data;
-    DWORD       res_size;
-
-    // NOTE: providing g_hInstance is important, NULL might not work
-    res = FindResource(hInstance, MAKEINTRESOURCE(HDMI_CABLE_MAP), RT_RCDATA);
-    if (!res)
-        return;
-    res_handle = LoadResource(NULL, res);
-    if (!res_handle)
-        return;
-    res_data = (unsigned char*)LockResource(res_handle);
-    res_size = SizeofResource(NULL, res);
-
-    bool ret = LoadTextureFromData(res_data, res_size, &my_texture, &my_image_width, &my_image_height, g_pd3dDevice);
-    IM_ASSERT(ret);
-}
 
 bool CreateDeviceD3D(HWND hWnd)
 {
@@ -347,21 +201,6 @@ void CreateRenderTarget()
 void CleanupRenderTarget()
 {
     if (g_mainRenderTargetView) { g_mainRenderTargetView->Release(); g_mainRenderTargetView = NULL; }
-}
-
-// Helper to display a little (?) mark which shows a tooltip when hovered.
-// In your own code you may want to display an actual icon if you are using a merged icon fonts (see docs/FONTS.md)
-void HelpMarker(const char* desc)
-{
-    ImGui::TextDisabled("(?)");
-    if (ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-        ImGui::TextUnformatted(desc);
-        ImGui::PopTextWrapPos();
-        ImGui::EndTooltip();
-    }
 }
 
 #ifndef WM_DPICHANGED

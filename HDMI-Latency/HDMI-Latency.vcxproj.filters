@@ -25,6 +25,9 @@
       <Filter>sources</Filter>
     </ClInclude>
     <ClInclude Include="resource.h" />
+    <ClInclude Include="GuiState.h" />
+    <ClInclude Include="Gui.h" />
+    <ClInclude Include="Resources.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\imgui\imgui.cpp">
@@ -51,6 +54,8 @@
     <ClCompile Include="..\imgui\imgui_tables.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
+    <ClCompile Include="Gui.cpp" />
+    <ClCompile Include="Resources.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />
