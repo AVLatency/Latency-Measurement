@@ -1,6 +1,7 @@
 #include "Gui.h"
 #include "imgui.h"
 #include "resource.h"
+#include "AudioEndpointHelper.h"
 
 bool Gui::DoGui()
 {
@@ -98,14 +99,53 @@ bool Gui::DoGui()
                 ImGui::BeginDisabled();
             }
 
-            const char* items[] = { "Device 1", "Device 2" };
-            ImGui::Combo("Output Device", &outputDeviceIndex, items, 2);
-            ImGui::Combo("Input Device", &inputDeviceIndex, items, 2);
-
-            ImGui::Spacing();
-            if (ImGui::Button("Adjust Volumes"))
+            if (ImGui::Button("Refresh Audio Devices"))
             {
-                state = GuiState::AdjustVolume;
+                RefreshAudioEndpoints();
+            }
+
+            if (outputAudioEndpoints.size() < 1 || inputAudioEndpoints.size() < 1)
+            {
+                ImGui::Text("Error: cannot find an input or output audio device.");
+            }
+            else
+            {
+                if (ImGui::BeginCombo("Output Device", outputAudioEndpoints[outputDeviceIndex].Name.c_str()))
+                {
+                    for (int i = 0; i < outputAudioEndpoints.size(); i++)
+                    {
+                        const bool is_selected = (outputDeviceIndex == i);
+                        if (ImGui::Selectable(outputAudioEndpoints[i].Name.c_str(), is_selected))
+                        {
+                            outputDeviceIndex = i;
+                        }
+                        // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                        if (is_selected)
+                            ImGui::SetItemDefaultFocus();
+                    }
+                    ImGui::EndCombo();
+                }
+                if (ImGui::BeginCombo("Input Device", inputAudioEndpoints[inputDeviceIndex].Name.c_str()))
+                {
+                    for (int i = 0; i < inputAudioEndpoints.size(); i++)
+                    {
+                        const bool is_selected = (inputDeviceIndex == i);
+                        if (ImGui::Selectable(inputAudioEndpoints[i].Name.c_str(), is_selected))
+                        {
+                            inputDeviceIndex = i;
+                        }
+                        // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                        if (is_selected)
+                            ImGui::SetItemDefaultFocus();
+                    }
+                    ImGui::EndCombo();
+                }
+
+                ImGui::Spacing();
+                if (ImGui::Button("Adjust Volumes"))
+                {
+                    state = GuiState::AdjustVolume;
+                }
             }
 
             if (disabled)
@@ -258,6 +298,7 @@ bool Gui::DoGui()
         ImGui::SetItemDefaultFocus();
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {
+            RefreshAudioEndpoints();
             state = GuiState::SelectAudioDevices;
             ImGui::CloseCurrentPopup();
         }
@@ -281,4 +322,10 @@ void Gui::HelpMarker(const char* desc)
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
     }
+}
+
+void Gui::RefreshAudioEndpoints()
+{
+    outputAudioEndpoints = AudioEndpointHelper::GetAudioEndPoints(eRender);
+    inputAudioEndpoints = AudioEndpointHelper::GetAudioEndPoints(eCapture);
 }

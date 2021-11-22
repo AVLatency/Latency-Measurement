@@ -14,10 +14,14 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)AudioEndpoint.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)AudioEndpointHelper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)stb_image.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)stb_image_dx11.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)AudioEndpoint.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)AudioEndpointHelper.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)stb_image_dx11.cpp" />
   </ItemGroup>
 </Project>

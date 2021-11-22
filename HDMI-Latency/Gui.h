@@ -2,6 +2,8 @@
 
 #include "GuiState.h"
 #include "Resources.h"
+#include <vector>
+#include <AudioEndpoint.h>
 
 class Gui
 {
@@ -14,6 +16,9 @@ private:
 	GuiState state = GuiState::GettingStarted;
 	int outputDeviceIndex = 0;
 	int inputDeviceIndex = 0;
+	std::vector<AudioEndpoint> outputAudioEndpoints;
+	std::vector<AudioEndpoint> inputAudioEndpoints;
 
 	void HelpMarker(const char* desc);
+	void RefreshAudioEndpoints();
 };
