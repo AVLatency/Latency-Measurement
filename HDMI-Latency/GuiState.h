@@ -6,6 +6,7 @@ enum struct GuiState
 	SelectAudioDevices,
 	AdjustVolume,
 	CancellingAdjustVolume,
+	FinishingAdjustVolume,
 	MeasurementConfig,
 	Measuring,
 	CancellingMeasuring,

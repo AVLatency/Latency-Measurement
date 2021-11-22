@@ -61,6 +61,10 @@ bool Gui::DoGui()
         ImGui::Spacing();
         ImGui::Text("4) Measurement Config");
         ImGui::Spacing();
+        ImGui::Text("5) Measurement");
+        ImGui::Spacing();
+        ImGui::Text("6) Results");
+        ImGui::Spacing();
 
         ImGui::TableSetColumnIndex(1);
 
@@ -86,6 +90,7 @@ bool Gui::DoGui()
         case GuiState::SelectAudioDevices:
         case GuiState::AdjustVolume:
         case GuiState::CancellingAdjustVolume:
+        case GuiState::FinishingAdjustVolume:
         {
             bool disabled = state > GuiState::SelectAudioDevices;
             if (disabled)
@@ -110,12 +115,41 @@ bool Gui::DoGui()
 
             if (state >= GuiState::AdjustVolume)
             {
+                ImGui::Spacing();
                 ImGui::Text("Left Channel (HDMI Audio Device)");
                 ImGui::SameLine(); HelpMarker("Adjust the volume of your input device through the Windows control panel to make the monitor match the refrence image. "
                     "You may need to turn down the Microphone Boost in the Levels section of Additional device properties.");
 
+                if (ImGui::BeginTable("LeftChannelVolumeTable", 2, ImGuiTableFlags_Borders))
+                {
+                    ImGui::TableNextRow();
+                    ImGui::TableSetColumnIndex(0);
+                    ImGui::Text("Reference Image");
+                    // TODO: wave view
+                    ImGui::TableSetColumnIndex(1);
+                    ImGui::Text("Monitor");
+                    // TODO: wave view
+                    ImGui::EndTable();
+                }
+
+                ImGui::Spacing();
                 ImGui::Text("Right Channel (DUT)");
                 ImGui::SameLine(); HelpMarker("Adjust the output volume of your Device Under Test (DUT) to give a smooth and clear normalized recording.");
+                if (ImGui::BeginTable("RightChannelVolumeTable", 2, ImGuiTableFlags_Borders))
+                {
+                    ImGui::TableNextRow();
+                    ImGui::TableSetColumnIndex(1);
+                    ImGui::Text("Monitor (Raw)");
+                    // TODO: wave view
+                    ImGui::TableNextRow();
+                    ImGui::TableSetColumnIndex(0);
+                    ImGui::Text("Reference Image (Normalized)");
+                    // TODO: wave view
+                    ImGui::TableSetColumnIndex(1);
+                    ImGui::Text("Monitor (Normalized)");
+                    // TODO: wave view
+                    ImGui::EndTable();
+                }
 
                 if (state == GuiState::AdjustVolume)
                 {
@@ -128,6 +162,7 @@ bool Gui::DoGui()
                     if (ImGui::Button("Finish"))
                     {
                         state = GuiState::MeasurementConfig;
+                        // TODO: state = GuiState::FinishingAdjustVolume;
                     }
                 }
             }
