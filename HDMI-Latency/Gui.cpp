@@ -102,6 +102,7 @@ bool Gui::DoGui()
             ImGui::Combo("Output Device", &outputDeviceIndex, items, 2);
             ImGui::Combo("Input Device", &inputDeviceIndex, items, 2);
 
+            ImGui::Spacing();
             if (ImGui::Button("Adjust Volumes"))
             {
                 state = GuiState::AdjustVolume;
@@ -153,6 +154,7 @@ bool Gui::DoGui()
 
                 if (state == GuiState::AdjustVolume)
                 {
+                    ImGui::Spacing();
                     if (ImGui::Button("Cancel"))
                     {
                         state = GuiState::SelectAudioDevices;
@@ -172,7 +174,41 @@ bool Gui::DoGui()
         case GuiState::Measuring:
         case GuiState::CancellingMeasuring:
         {
+            bool disabled = state > GuiState::MeasurementConfig;
+            if (disabled)
+            {
+                ImGui::BeginDisabled();
+            }
 
+            ImGui::Text("TODO: Measurement configf");
+
+            if (disabled)
+            {
+                ImGui::EndDisabled();
+                disabled = false;
+            }
+
+            if (state == GuiState::MeasurementConfig)
+            {
+                if (ImGui::Button("Start"))
+                {
+                    state = GuiState::Measuring;
+                }
+            }
+            else
+            {
+                ImGui::Text("Measurement in progres...");
+                ImGui::ProgressBar(.3f);
+                ImGui::Text("Currently measuring 2ch-48000Hz-16bit-PCM-0x0...");
+                ImGui::ProgressBar(.57f);
+
+                ImGui::Spacing();
+                if (ImGui::Button("Stop"))
+                {
+                    state = GuiState::Results;
+                    // TODO: state = GuiState::CancellingMeasuring;
+                }
+            }
         }
             break;
         case GuiState::Results:
@@ -215,6 +251,7 @@ bool Gui::DoGui()
         ImGui::Text("Set the EDID mode of your HDMI Audio Device to match the EDID of your DUT.");
         ImGui::Spacing();
         ImGui::Text("For HDMI audio extractors, set the switch to \"TV\" or \"Passthrough\".");
+        ImGui::Spacing();
 
         // TODO: Image of switch set to the TV position
 
