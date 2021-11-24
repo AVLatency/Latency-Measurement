@@ -1,8 +1,10 @@
 #include "AdjustVolumeManager.h"
+#include <WinBase.h>
 
 
 AdjustVolumeManager::AdjustVolumeManager()
 {
+	SetThreadExecutionState(ES_DISPLAY_REQUIRED); // Prevent display from turning off while running this tool.
 	working = true;
 
 	input = new WasapiInput(true, 0.5);
@@ -30,6 +32,7 @@ void AdjustVolumeManager::Tick()
 			outputThread->join();
 			outputThread->join();
 			working = false;
+			SetThreadExecutionState(0); // Reset prevent display from turning off while running this tool.
 		}
 		else
 		{

@@ -162,6 +162,22 @@ void WasapiInput::StartRecording()
         SAFE_RELEASE(pCaptureClient)
 }
 
+HRESULT WasapiInput::SetFormat(WAVEFORMATEX* wfex)
+{
+    return 0;
+}
+
+HRESULT WasapiInput::CopyData(BYTE* pData, UINT32 bufferFrameCount, BOOL* bDone)
+{
+
+    return 0;
+}
+
+void WasapiInput::ThrowAwayRecording()
+{
+
+}
+
 void WasapiInput::StopRecording()
 {
     stopRequested = true;

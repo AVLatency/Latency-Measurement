@@ -20,5 +20,9 @@ private:
 	bool loop;
 	double bufferDurationInSeconds;
 	bool stopRequested = false;
+
+	HRESULT SetFormat(WAVEFORMATEX* wfex);
+	HRESULT CopyData(BYTE* pData, UINT32 bufferFrameCount, BOOL* bDone);
+	void ThrowAwayRecording();
 };
 
