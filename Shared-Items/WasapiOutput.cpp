@@ -4,6 +4,8 @@
 #include <avrt.h>
 #pragma comment(lib, "avrt.lib")
 
+const int INT24_MAX = (1 << 23) - 1;
+
 // REFERENCE_TIME time units per second and per millisecond
 #define REFTIMES_PER_SEC  10000000
 #define REFTIMES_PER_MILLISEC  10000
@@ -34,7 +36,6 @@ void WasapiOutput::StartPlayback()
     REFERENCE_TIME hnsRequestedDuration = 0;
     IAudioClient* pAudioClient = NULL;
     IAudioRenderClient* pRenderClient = NULL;
-    WAVEFORMATEX* pwfx = NULL;
     HANDLE hEvent = NULL;
     HANDLE hTask = NULL;
     UINT32 bufferFrameCount;
@@ -49,7 +50,7 @@ void WasapiOutput::StartPlayback()
 
         // Call a helper function to negotiate with the audio
         // device for an exclusive-mode stream format.
-        hr = GetStreamFormat(pAudioClient, &pwfx);
+        //TODO: hr = GetStreamFormat(pAudioClient, &pwfx);
     EXIT_ON_ERROR(hr)
 
         // Initialize the stream to play at the minimum latency.
@@ -61,26 +62,26 @@ void WasapiOutput::StartPlayback()
             AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
             hnsRequestedDuration,
             hnsRequestedDuration,
-            pwfx,
+            waveFormat,
             NULL);
     if (hr == AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED) {
         // Align the buffer if needed, see IAudioClient::Initialize() documentation
         UINT32 nFrames = 0;
         hr = pAudioClient->GetBufferSize(&nFrames);
         EXIT_ON_ERROR(hr)
-            hnsRequestedDuration = (REFERENCE_TIME)((double)REFTIMES_PER_SEC / pwfx->nSamplesPerSec * nFrames + 0.5);
+            hnsRequestedDuration = (REFERENCE_TIME)((double)REFTIMES_PER_SEC / waveFormat->nSamplesPerSec * nFrames + 0.5);
         hr = pAudioClient->Initialize(
             AUDCLNT_SHAREMODE_EXCLUSIVE,
             AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
             hnsRequestedDuration,
             hnsRequestedDuration,
-            pwfx,
+            waveFormat,
             NULL);
     }
     EXIT_ON_ERROR(hr)
 
         // Tell the audio source which format to use.
-        hr = pMySource->SetFormat(pwfx);
+        //TODO: hr = pMySource->SetFormat(pwfx);
     EXIT_ON_ERROR(hr)
 
         // Create an event handle and register it for
@@ -109,7 +110,7 @@ void WasapiOutput::StartPlayback()
         hr = pRenderClient->GetBuffer(bufferFrameCount, &pData);
     EXIT_ON_ERROR(hr)
 
-        hr = pMySource->LoadData(bufferFrameCount, pData, &flags);
+        hr = LoadData(bufferFrameCount, pData, &flags);
     EXIT_ON_ERROR(hr)
 
         hr = pRenderClient->ReleaseBuffer(bufferFrameCount, flags);
@@ -145,7 +146,7 @@ void WasapiOutput::StartPlayback()
             EXIT_ON_ERROR(hr)
 
                 // Load the buffer with data from the audio source.
-                hr = pMySource->LoadData(bufferFrameCount, pData, &flags);
+                hr = LoadData(bufferFrameCount, pData, &flags);
             EXIT_ON_ERROR(hr)
 
                 hr = pRenderClient->ReleaseBuffer(bufferFrameCount, flags);
@@ -167,8 +168,7 @@ void WasapiOutput::StartPlayback()
     {
         AvRevertMmThreadCharacteristics(hTask);
     }
-    CoTaskMemFree(pwfx);
-    SAFE_RELEASE(pEnumerator)
+
         SAFE_RELEASE(pAudioClient)
         SAFE_RELEASE(pRenderClient)
 }
@@ -176,4 +176,175 @@ void WasapiOutput::StartPlayback()
 void WasapiOutput::StopPlayback()
 {
 
+}
+
+WORD WasapiOutput::GetFormatID()
+{
+    if (waveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
+    {
+        return EXTRACT_WAVEFORMATEX_ID(&(reinterpret_cast<WAVEFORMATEXTENSIBLE*>(waveFormat)->SubFormat));
+    }
+    else
+    {
+        return waveFormat->wFormatTag;
+    }
+}
+
+HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flags)
+{
+    if (sampleIndex >= audioSamplesLength)
+    {
+        *flags = AUDCLNT_BUFFERFLAGS_SILENT;
+        return S_OK;
+    }
+
+    WORD numChannels = waveFormat->nChannels;
+    if (GetFormatID() == WAVE_FORMAT_IEEE_FLOAT && waveFormat->wBitsPerSample == 32)
+    {
+        float* castData = (float*)pData;
+        for (UINT32 i = 0; i < bufferFrameCount * numChannels; i += numChannels)
+        {
+            if (sampleIndex < audioSamplesLength)
+            {
+                for (int c = 0; c < numChannels; c++)
+                {
+                    if (c == 0)
+                    {
+                        castData[i + c] = audioSamples[sampleIndex];
+                    }
+                    else
+                    {
+                        castData[i + c] = 0;
+                    }
+                }
+                sampleIndex++;
+            }
+            else
+            {
+                for (int c = 0; c < numChannels; c++)
+                {
+                    castData[i + c] = 0;
+                }
+            }
+        }
+    }
+    else if (GetFormatID() == WAVE_FORMAT_PCM && waveFormat->wBitsPerSample == 16)
+    {
+        // This is confirmed to be Little Endian on my computer!
+        // (settings bytes manually as big endian results in garbage, but setting
+        // them little endian manually works perfectly)
+
+        INT16* castData = (INT16*)pData;
+        for (UINT32 i = 0; i < bufferFrameCount * numChannels; i += numChannels)
+        {
+            if (sampleIndex < audioSamplesLength)
+            {
+                for (int c = 0; c < numChannels; c++)
+                {
+                    if (c == 0)
+                    {
+                        castData[i + c] = (INT16)(round(audioSamples[sampleIndex] * SHRT_MAX));
+                    }
+                    else
+                    {
+                        castData[i + c] = 0;
+                    }
+                }
+                sampleIndex++;
+            }
+            else
+            {
+                for (int c = 0; c < numChannels; c++)
+                {
+                    castData[i + c] = 0;
+                }
+            }
+        }
+    }
+    else if (GetFormatID() == WAVE_FORMAT_PCM && waveFormat->wBitsPerSample == 24)
+    {
+        // nBlockAlign and bufferFrameCount are only used for the buffer size!
+        int dataLength = bufferFrameCount * waveFormat->nBlockAlign;
+        // Actual frame size is 32 bits for 24 bit audio:
+        int bytesPerSampleWithPadding = 32 / 8;
+        int bytesPerFrame = bytesPerSampleWithPadding * waveFormat->nChannels;
+
+        for (int i = 0; i < dataLength; i += bytesPerFrame)
+        {
+            if (sampleIndex < audioSamplesLength)
+            {
+                int thirtyTwoBit = (int)round(audioSamples[sampleIndex] * INT24_MAX);
+
+                for (int c = 0; c < numChannels; c++)
+                {
+                    int channelOffset = c * bytesPerSampleWithPadding;
+                    if (c == 0)
+                    {
+                        pData[i + channelOffset + 0] = 0; // padding
+                        pData[i + channelOffset + 1] = thirtyTwoBit; // little endian, least significant first
+                        pData[i + channelOffset + 2] = thirtyTwoBit >> 8;
+                        pData[i + channelOffset + 3] = thirtyTwoBit >> 16;
+                        pData[i + channelOffset + 3] |= (thirtyTwoBit >> 31) << 7; // negative bit
+                    }
+                    else
+                    {
+                        pData[i + channelOffset + 0] = 0; // padding
+                        pData[i + channelOffset + 1] = 0; // little endian, least significant first
+                        pData[i + channelOffset + 2] = 0;
+                        pData[i + channelOffset + 3] = 0;
+                    }
+                }
+                sampleIndex++;
+            }
+            else
+            {
+                for (int c = 0; c < numChannels; c++)
+                {
+                    int channelOffset = c * bytesPerSampleWithPadding;
+
+                    pData[i + channelOffset + 0] = 0; // padding
+                    pData[i + channelOffset + 1] = 0; // little endian, least significant first
+                    pData[i + channelOffset + 2] = 0;
+                    pData[i + channelOffset + 3] = 0;
+                }
+            }
+        }
+    }
+    else if (GetFormatID() == WAVE_FORMAT_PCM && waveFormat->wBitsPerSample == 32)
+    {
+        INT32* castData = (INT32*)pData;
+        for (UINT32 i = 0; i < bufferFrameCount * numChannels; i += numChannels)
+        {
+            if (sampleIndex < audioSamplesLength)
+            {
+                for (int c = 0; c < numChannels; c++)
+                {
+                    if (c == 0)
+                    {
+                        castData[i + c] = (INT32)(round(audioSamples[sampleIndex] * INT_MAX));
+                    }
+                    else
+                    {
+                        castData[i + c] = 0;
+                    }
+                }
+                sampleIndex++;
+            }
+            else
+            {
+                for (int c = 0; c < numChannels; c++)
+                {
+                    castData[i + c] = 0;
+                }
+            }
+        }
+    }
+    else
+    {
+        *flags = AUDCLNT_BUFFERFLAGS_SILENT;
+        return -1; // TODO: a proper error message?
+    }
+
+    *flags = sampleIndex < audioSamplesLength ? 0 : AUDCLNT_BUFFERFLAGS_SILENT;
+    return S_OK;
 }
