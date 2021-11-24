@@ -3,6 +3,15 @@
 #include "resource.h"
 #include "AudioEndpointHelper.h"
 
+
+Gui::~Gui()
+{
+    if (adjustVolumeManager != nullptr)
+    {
+        delete adjustVolumeManager;
+    }
+}
+
 bool Gui::DoGui()
 {
     bool done = false;
@@ -93,6 +102,11 @@ bool Gui::DoGui()
         case GuiState::CancellingAdjustVolume:
         case GuiState::FinishingAdjustVolume:
         {
+            if (adjustVolumeManager != nullptr)
+            {
+                adjustVolumeManager->Tick();
+            }
+
             bool disabled = state > GuiState::SelectAudioDevices;
             if (disabled)
             {
@@ -145,6 +159,7 @@ bool Gui::DoGui()
                 if (ImGui::Button("Adjust Volumes"))
                 {
                     state = GuiState::AdjustVolume;
+                    StartAjdustVolumeAudio();
                 }
             }
 
@@ -197,15 +212,26 @@ bool Gui::DoGui()
                     ImGui::Spacing();
                     if (ImGui::Button("Cancel"))
                     {
-                        state = GuiState::SelectAudioDevices;
-                        // TODO: state = GuiState::CancellingAdjustVolume;
+                        state = GuiState::CancellingAdjustVolume;
                     }
                     ImGui::SameLine();
                     if (ImGui::Button("Finish"))
                     {
-                        state = GuiState::MeasurementConfig;
-                        // TODO: state = GuiState::FinishingAdjustVolume;
+                        state = GuiState::FinishingAdjustVolume;
                     }
+                }
+            }
+
+            if (adjustVolumeManager == nullptr ||
+                (adjustVolumeManager != nullptr && !adjustVolumeManager->working))
+            {
+                if (state == GuiState::CancellingAdjustVolume)
+                {
+                    state = GuiState::SelectAudioDevices;
+                }
+                else if (state == GuiState::FinishingAdjustVolume)
+                {
+                    state = GuiState::MeasurementConfig;
                 }
             }
         }
@@ -328,4 +354,18 @@ void Gui::RefreshAudioEndpoints()
 {
     outputAudioEndpoints = AudioEndpointHelper::GetAudioEndPoints(eRender);
     inputAudioEndpoints = AudioEndpointHelper::GetAudioEndPoints(eCapture);
+}
+
+void Gui::StartAjdustVolumeAudio()
+{
+    // Save the old one if it's still in the middle of working. Otherwise, make a new one.
+    if (adjustVolumeManager != nullptr && !adjustVolumeManager->working)
+    {
+        delete adjustVolumeManager;
+        adjustVolumeManager = nullptr;
+    }
+    if (adjustVolumeManager == nullptr)
+    {
+        adjustVolumeManager = new AdjustVolumeManager();
+    }
 }

@@ -1,7 +1,5 @@
 #include "AudioEndpoint.h"
 
-
-
 #define SAFE_RELEASE(punk)  \
               if ((punk) != NULL)  \
                 { (punk)->Release(); (punk) = NULL; }
@@ -19,7 +17,6 @@ AudioEndpoint::AudioEndpoint(const AudioEndpoint & other)
     ID = other.ID;
 }
 
-
 AudioEndpoint::AudioEndpoint(const AudioEndpoint&& other)
 {
     Device = other.Device;
@@ -27,7 +24,6 @@ AudioEndpoint::AudioEndpoint(const AudioEndpoint&& other)
     Name = other.Name;
     ID = other.ID;
 }
-
 
 AudioEndpoint::~AudioEndpoint()
 {

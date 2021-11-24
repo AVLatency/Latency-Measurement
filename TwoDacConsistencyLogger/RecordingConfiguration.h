@@ -7,7 +7,7 @@ public:
 	WAVEFORMATEX* WaveFormat;
 
     // Test wave is constructed like this:
-	// Quiet 4.8 kHz tone played constantly throughout
+	// Quiet 4.8 kHz tone played at start
 	// - Primary purpose is to wake up audio devices that might be sleeping during audio silence.
 	// - This also gives an indication to the user that the test is in progress.
 	// - Frequency doesn't matter. Just something that isn't horribly high pitched.

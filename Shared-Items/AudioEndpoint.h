@@ -13,5 +13,4 @@ public:
 	AudioEndpoint(const AudioEndpoint& other);
 	AudioEndpoint(const AudioEndpoint&& other);
 	~AudioEndpoint();
-
 };
