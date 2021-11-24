@@ -2,6 +2,7 @@
 #include "WasapiInput.h"
 #include "WasapiOutput.h"
 #include <thread>
+#include "AudioEndpoint.h"
 
 class AdjustVolumeManager
 {
@@ -11,7 +12,7 @@ public:
 
 	bool working = false;
 
-	AdjustVolumeManager();
+	AdjustVolumeManager(const AudioEndpoint& inputEndpoint);
 	~AdjustVolumeManager();
 	void Tick();
 	void Stop();

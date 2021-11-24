@@ -12,7 +12,8 @@
                 { (punk)->Release(); (punk) = NULL; }
 
 
-WasapiInput::WasapiInput(bool loop, double bufferDurationInSeconds)
+WasapiInput::WasapiInput(const AudioEndpoint& endpoint, bool loop, double bufferDurationInSeconds)
+    : endpoint(endpoint)
 {
     this->loop = loop;
     this->bufferDurationInSeconds = bufferDurationInSeconds;
@@ -33,8 +34,6 @@ WasapiInput::~WasapiInput()
 void WasapiInput::StartRecording()
 {
     recordingInProgress = true;
-    const CLSID CLSID_MMDeviceEnumerator = __uuidof(MMDeviceEnumerator);
-    const IID IID_IMMDeviceEnumerator = __uuidof(IMMDeviceEnumerator);
     const IID IID_IAudioClient = __uuidof(IAudioClient);
     const IID IID_IAudioCaptureClient = __uuidof(IAudioCaptureClient);
 
@@ -43,8 +42,6 @@ void WasapiInput::StartRecording()
     REFERENCE_TIME hnsActualDuration;
     UINT32 bufferFrameCount;
     UINT32 numFramesAvailable;
-    IMMDeviceEnumerator* pEnumerator = NULL;
-    IMMDevice* pDevice = NULL;
     IAudioClient* pAudioClient = NULL;
     IAudioCaptureClient* pCaptureClient = NULL;
     WAVEFORMATEX* pWaveFormat = NULL;
@@ -54,19 +51,7 @@ void WasapiInput::StartRecording()
     DWORD flags;
     bool pastInitialDiscontinuity = false;
 
-    hr = CoInitialize(NULL);
-
-    hr = CoCreateInstance(
-        CLSID_MMDeviceEnumerator, NULL,
-        CLSCTX_ALL, IID_IMMDeviceEnumerator,
-        (void**)&pEnumerator);
-    EXIT_ON_ERROR(hr)
-
-        hr = pEnumerator->GetDefaultAudioEndpoint(
-            eCapture, eConsole, &pDevice);
-    EXIT_ON_ERROR(hr)
-
-        hr = pDevice->Activate(
+        hr = endpoint.Device->Activate(
             IID_IAudioClient, CLSCTX_ALL,
             NULL, (void**)&pAudioClient);
     EXIT_ON_ERROR(hr)
@@ -154,10 +139,7 @@ void WasapiInput::StartRecording()
     EXIT_ON_ERROR(hr)
 
         Exit:
-    CoUninitialize();
     CoTaskMemFree(pWaveFormat);
-    SAFE_RELEASE(pEnumerator)
-        SAFE_RELEASE(pDevice)
         SAFE_RELEASE(pAudioClient)
         SAFE_RELEASE(pCaptureClient)
 }

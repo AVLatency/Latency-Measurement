@@ -2,12 +2,12 @@
 #include <WinBase.h>
 
 
-AdjustVolumeManager::AdjustVolumeManager()
+AdjustVolumeManager::AdjustVolumeManager(const AudioEndpoint& inputEndpoint)
 {
 	SetThreadExecutionState(ES_DISPLAY_REQUIRED); // Prevent display from turning off while running this tool.
 	working = true;
 
-	input = new WasapiInput(true, 0.5);
+	input = new WasapiInput(inputEndpoint, true, 0.5);
 	inputThread = new std::thread([this] { input->StartRecording(); });
 
 	output = new WasapiOutput();

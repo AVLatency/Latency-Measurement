@@ -1,5 +1,7 @@
 #pragma once
 #include <Audioclient.h>
+#include "AudioEndpoint.h"
+
 class WasapiInput
 {
 public:
@@ -12,7 +14,7 @@ public:
 
 	bool recordingInProgress = false;
 
-	WasapiInput(bool loop, double bufferDurationInSeconds);
+	WasapiInput(const AudioEndpoint& endpoint, bool loop, double bufferDurationInSeconds);
 	~WasapiInput();
 	void StartRecording();
 	void StopRecording();
@@ -20,6 +22,7 @@ private:
 	bool loop;
 	double bufferDurationInSeconds;
 	bool stopRequested = false;
+	const AudioEndpoint& endpoint;
 
 	HRESULT SetFormat(WAVEFORMATEX* wfex);
 	HRESULT CopyData(BYTE* pData, UINT32 bufferFrameCount, BOOL* bDone);

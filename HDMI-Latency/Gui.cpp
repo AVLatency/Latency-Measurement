@@ -366,6 +366,6 @@ void Gui::StartAjdustVolumeAudio()
     }
     if (adjustVolumeManager == nullptr)
     {
-        adjustVolumeManager = new AdjustVolumeManager();
+        adjustVolumeManager = new AdjustVolumeManager(inputAudioEndpoints[inputDeviceIndex]);
     }
 }
