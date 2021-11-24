@@ -112,7 +112,7 @@ void WasapiInput::StartRecording()
                         }
                     if (flags & AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY)
                     {
-                        if (pastInitialDiscontinuity)
+                        if (pastInitialDiscontinuity && !loop)
                         {
                             ThrowAwayRecording();
                         }
@@ -144,9 +144,78 @@ void WasapiInput::StartRecording()
         SAFE_RELEASE(pCaptureClient)
 }
 
+UINT16 WasapiInput::GetFormatID()
+{
+    return EXTRACT_WAVEFORMATEX_ID(&waveFormat.SubFormat);
+}
+
 HRESULT WasapiInput::SetFormat(WAVEFORMATEX* wfex)
 {
-    return 0;
+    if (wfex->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
+    {
+        //typedef struct {
+        //	WAVEFORMATEX    Format;
+        //	union {
+        //		WORD wValidBitsPerSample;       /* bits of precision  */
+        //		WORD wSamplesPerBlock;          /* valid if wBitsPerSample==0 */
+        //		WORD wReserved;                 /* If neither applies, set to zero. */
+        //	} Samples;
+        //	DWORD           dwChannelMask;      /* which channels are */
+        //  GUID            SubFormat;
+        waveFormat = *reinterpret_cast<const WAVEFORMATEXTENSIBLE*>(wfex);
+    }
+    else
+    {
+        //typedef struct tWAVEFORMATEX
+        //{
+        //	WORD    wFormatTag;        /* waveFormat type */
+        //	WORD    nChannels;         /* number of channels (i.e. mono, stereo...) */
+        //	DWORD   nSamplesPerSec;    /* sample rate */
+        //	DWORD   nAvgBytesPerSec;   /* for buffer estimation */
+        //	WORD    nBlockAlign;       /* block size of data */
+        //	WORD    wBitsPerSample;    /* Number of bits per sample of mono data */
+        //	WORD    cbSize;            /* The count in bytes of the size of
+        //									extra information (after cbSize) */
+
+        // This is just an old-style WAVEFORMATEX struct, so convert it to the new WAVEFORMATEXTENSIBLE waveFormat:
+        waveFormat.Format = *wfex;
+        waveFormat.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
+        waveFormat.Samples.wReserved = 0;
+        waveFormat.Samples.wSamplesPerBlock = 0;
+        waveFormat.Samples.wValidBitsPerSample = waveFormat.Format.wBitsPerSample;
+        waveFormat.dwChannelMask = 0;
+        INIT_WAVEFORMATEX_GUID(&waveFormat.SubFormat, wfex->wFormatTag);
+    }
+
+    printf("WasapiInput::SetFormat\nFormat type: 0x%.4x\nChannels: %u\nSamples Per Sec: %u\nAvg Bytes Per Sec: %u\nBlock Align: %u\nBits Per Sample: %u\ncbSize: %u\nValid Bits Per Sample: %u\nSamples Per Block: %u\nChannel Mask: 0x%.8x\n",
+        GetFormatID(),
+        waveFormat.Format.nChannels,
+        waveFormat.Format.nSamplesPerSec,
+        waveFormat.Format.nAvgBytesPerSec,
+        waveFormat.Format.nBlockAlign,
+        waveFormat.Format.wBitsPerSample,
+        waveFormat.Format.cbSize,
+        waveFormat.Samples.wValidBitsPerSample,
+        waveFormat.Samples.wSamplesPerBlock,
+        waveFormat.dwChannelMask);
+
+    if (waveFormat.Samples.wValidBitsPerSample != waveFormat.Format.wBitsPerSample)
+    {
+        return -1; // Not supported yet!
+    }
+    else if (waveFormat.Format.nChannels != 2)
+    {
+        return -1; // Not supported! // TODO: Maybe this is supported...
+    }
+
+    recordingBufferLength = recordedAudioNumChannels * round(waveFormat.Format.nSamplesPerSec * bufferDurationInSeconds);
+    recordingBuffer1 = new float[recordingBufferLength];
+    if (loop)
+    {
+        recordingBuffer2 = new float[recordingBufferLength];
+    }
+
+    return S_OK;
 }
 
 HRESULT WasapiInput::CopyData(BYTE* pData, UINT32 bufferFrameCount, BOOL* bDone)
@@ -155,12 +224,36 @@ HRESULT WasapiInput::CopyData(BYTE* pData, UINT32 bufferFrameCount, BOOL* bDone)
     return 0;
 }
 
+bool WasapiInput::FinishedRecording()
+{
+    return loop ? false : (recordedAudioIndex >= recordingBufferLength);
+}
+
 void WasapiInput::ThrowAwayRecording()
 {
-
+    // Write garbage to the recording and set it to be completed
+    RecordingFailed = true;
+    bool high = true;
+    for (int i = 0; i < recordingBufferLength;)
+    {
+        CurrentBuffer()[i] = high ? 1 : -1;
+        i++;
+        if (recordingBufferLength % 2 == 0)
+        {
+            CurrentBuffer()[i] = high ? 1 : -1;
+            i++;
+        }
+        high = !high;
+    }
+    recordedAudioIndex = recordingBufferLength;
 }
 
 void WasapiInput::StopRecording()
 {
     stopRequested = true;
+}
+
+float* WasapiInput::CurrentBuffer()
+{
+    return recordingToBuffer1 ? recordingBuffer1 : recordingBuffer2;
 }

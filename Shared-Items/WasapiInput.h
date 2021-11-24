@@ -14,6 +14,13 @@ public:
 
 	bool recordingInProgress = false;
 
+	/// <summary>
+	/// Only when not looping will this be set
+	/// </summary>
+	bool RecordingFailed = false;
+
+	WAVEFORMATEXTENSIBLE waveFormat{};
+
 	WasapiInput(const AudioEndpoint& endpoint, bool loop, double bufferDurationInSeconds);
 	~WasapiInput();
 	void StartRecording();
@@ -21,11 +28,15 @@ public:
 private:
 	bool loop;
 	double bufferDurationInSeconds;
+	int recordedAudioIndex = 0;
 	bool stopRequested = false;
 	const AudioEndpoint& endpoint;
 
+	UINT16 GetFormatID();
 	HRESULT SetFormat(WAVEFORMATEX* wfex);
 	HRESULT CopyData(BYTE* pData, UINT32 bufferFrameCount, BOOL* bDone);
+	bool FinishedRecording();
 	void ThrowAwayRecording();
+	float* CurrentBuffer();
 };
 
