@@ -2,25 +2,32 @@
 #include <WinBase.h>
 
 
-AdjustVolumeManager::AdjustVolumeManager(const AudioEndpoint& inputEndpoint)
+AdjustVolumeManager::AdjustVolumeManager(const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint)
 {
 	SetThreadExecutionState(ES_DISPLAY_REQUIRED); // Prevent display from turning off while running this tool.
 	working = true;
 
+	int samplesLength = 1000;
+	float* samples = new float[samplesLength];
+	for (int i = 0; i < samplesLength; i++)
+	{
+		samples[i] = sin(i / 200);
+	}
+
+	output = new WasapiOutput(outputEndpoint, true, samples, samplesLength);
+	outputThread = new std::thread([this] { output->StartPlayback(); });
+
 	input = new WasapiInput(inputEndpoint, true, recordBufferDurationInSeconds);
 	inputThread = new std::thread([this] { input->StartRecording(); });
-
-	output = new WasapiOutput();
-	outputThread = new std::thread([this] { /* TODO: output->StartPlayback(); */});
 }
 
 AdjustVolumeManager::~AdjustVolumeManager()
 {
-	delete input;
 	delete output;
+	delete input;
 
-	delete inputThread;
 	delete outputThread;
+	delete inputThread;
 
 	if (lastInputBufferCopy != nullptr)
 	{
@@ -64,6 +71,11 @@ void AdjustVolumeManager::Tick()
 
 void AdjustVolumeManager::CopyBuffer(float* sourceBuffer, int sourceBufferLength)
 {
+	// TODO: Get rid of all of this and do a direct analysis on the sourceBuffer to find the
+	// loudest part of each channnel of the wave and then copy them, centered around this loudest
+	// part. Because it's centered on the loudest part, this point needs to be be a certain
+	// distance from the beginning or end, based on the tick frequency.
+
 	if (lastInputBufferCopy == nullptr)
 	{
 		lastInputBufferCopy = new float[sourceBufferLength];
@@ -84,5 +96,5 @@ void AdjustVolumeManager::CopyBuffer(float* sourceBuffer, int sourceBufferLength
 void AdjustVolumeManager::Stop()
 {
 	input->StopRecording();
-	// TODO: output->StopPlayback();
+	output->StopPlayback();
 }

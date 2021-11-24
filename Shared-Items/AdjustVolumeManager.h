@@ -7,15 +7,15 @@
 class AdjustVolumeManager
 {
 public:
-	WasapiInput* input = nullptr;
 	WasapiOutput* output = nullptr;
+	WasapiInput* input = nullptr;
 
 	bool working = false;
 
 	float* lastRecordedSegment = nullptr;
 	int lastRecordedSegmentLength = 0;
 
-	AdjustVolumeManager(const AudioEndpoint& inputEndpoint);
+	AdjustVolumeManager(const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint);
 	~AdjustVolumeManager();
 	void Tick();
 	void Stop();
@@ -23,8 +23,8 @@ public:
 private:
 	const double recordBufferDurationInSeconds = 0.5;
 	bool lastBufferFlipWasTo1 = true;
-	std::thread* inputThread = nullptr;
 	std::thread* outputThread = nullptr;
+	std::thread* inputThread = nullptr;
 
 	float* lastInputBufferCopy = nullptr;
 
