@@ -1,5 +1,15 @@
 #include "WasapiInput.h"
+#include <mmdeviceapi.h>
 
+// REFERENCE_TIME time units per second and per millisecond
+#define REFTIMES_PER_SEC  10000000
+#define REFTIMES_PER_MILLISEC  10000
+
+#define EXIT_ON_ERROR(hres)  \
+              if (FAILED(hres)) { goto Exit; }
+#define SAFE_RELEASE(punk)  \
+              if ((punk) != NULL)  \
+                { (punk)->Release(); (punk) = NULL; }
 
 
 WasapiInput::WasapiInput(bool loop, double bufferDurationInSeconds)
@@ -23,6 +33,10 @@ WasapiInput::~WasapiInput()
 void WasapiInput::StartRecording()
 {
     recordingInProgress = true;
+    const CLSID CLSID_MMDeviceEnumerator = __uuidof(MMDeviceEnumerator);
+    const IID IID_IMMDeviceEnumerator = __uuidof(IMMDeviceEnumerator);
+    const IID IID_IAudioClient = __uuidof(IAudioClient);
+    const IID IID_IAudioCaptureClient = __uuidof(IAudioCaptureClient);
 
     HRESULT hr;
     REFERENCE_TIME hnsRequestedDuration = REFTIMES_PER_SEC;
@@ -33,11 +47,14 @@ void WasapiInput::StartRecording()
     IMMDevice* pDevice = NULL;
     IAudioClient* pAudioClient = NULL;
     IAudioCaptureClient* pCaptureClient = NULL;
-    WAVEFORMATEX* pwfx = NULL;
+    WAVEFORMATEX* pWaveFormat = NULL;
     UINT32 packetLength = 0;
     BOOL bDone = FALSE;
     BYTE* pData;
     DWORD flags;
+    bool pastInitialDiscontinuity = false;
+
+    hr = CoInitialize(NULL);
 
     hr = CoCreateInstance(
         CLSID_MMDeviceEnumerator, NULL,
@@ -54,7 +71,7 @@ void WasapiInput::StartRecording()
             NULL, (void**)&pAudioClient);
     EXIT_ON_ERROR(hr)
 
-        hr = pAudioClient->GetMixFormat(&pwfx);
+        hr = pAudioClient->GetMixFormat(&pWaveFormat);
     EXIT_ON_ERROR(hr)
 
         hr = pAudioClient->Initialize(
@@ -62,7 +79,7 @@ void WasapiInput::StartRecording()
             0,
             hnsRequestedDuration,
             0,
-            pwfx,
+            pWaveFormat,
             NULL);
     EXIT_ON_ERROR(hr)
 
@@ -76,12 +93,12 @@ void WasapiInput::StartRecording()
     EXIT_ON_ERROR(hr)
 
         // Notify the audio sink which format to use.
-        hr = pMySink->SetFormat(pwfx);
+        hr = SetFormat(pWaveFormat);
     EXIT_ON_ERROR(hr)
 
         // Calculate the actual duration of the allocated buffer.
         hnsActualDuration = (double)REFTIMES_PER_SEC *
-        bufferFrameCount / pwfx->nSamplesPerSec;
+        bufferFrameCount / pWaveFormat->nSamplesPerSec;
 
     hr = pAudioClient->Start();  // Start recording.
     EXIT_ON_ERROR(hr)
@@ -101,16 +118,27 @@ void WasapiInput::StartRecording()
                     hr = pCaptureClient->GetBuffer(
                         &pData,
                         &numFramesAvailable,
-                        &flags, NULL, NULL);
+                        &flags, NULL, NULL); // TODO: pu64QPCPosition parameter could be used for Bluetooth latency testing!
                     EXIT_ON_ERROR(hr)
 
                         if (flags & AUDCLNT_BUFFERFLAGS_SILENT)
                         {
                             pData = NULL;  // Tell CopyData to write silence.
                         }
+                    if (flags & AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY)
+                    {
+                        if (pastInitialDiscontinuity)
+                        {
+                            ThrowAwayRecording();
+                        }
+                    }
+                    else
+                    {
+                        pastInitialDiscontinuity = true;
+                    }
 
                     // Copy the available capture data to the audio sink.
-                    hr = pMySink->CopyData(
+                    hr = CopyData(
                         pData, numFramesAvailable, &bDone);
                     EXIT_ON_ERROR(hr)
 
@@ -126,13 +154,12 @@ void WasapiInput::StartRecording()
     EXIT_ON_ERROR(hr)
 
         Exit:
-    CoTaskMemFree(pwfx);
+    CoUninitialize();
+    CoTaskMemFree(pWaveFormat);
     SAFE_RELEASE(pEnumerator)
         SAFE_RELEASE(pDevice)
         SAFE_RELEASE(pAudioClient)
         SAFE_RELEASE(pCaptureClient)
-
-        return hr;
 }
 
 void WasapiInput::StopRecording()
