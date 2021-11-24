@@ -29,6 +29,8 @@ WasapiOutput::~WasapiOutput()
 
 void WasapiOutput::StartPlayback()
 {
+    playbackInProgress = true;
+
     const IID IID_IAudioClient = __uuidof(IAudioClient);
     const IID IID_IAudioRenderClient = __uuidof(IAudioRenderClient);
 
@@ -129,7 +131,7 @@ void WasapiOutput::StartPlayback()
     EXIT_ON_ERROR(hr)
 
         // Each loop fills one of the two buffers.
-        while (flags != AUDCLNT_BUFFERFLAGS_SILENT)
+        while (flags != AUDCLNT_BUFFERFLAGS_SILENT && !stopRequested)
         {
             // Wait for next buffer event to be signaled.
             DWORD retval = WaitForSingleObject(hEvent, 2000);
@@ -169,13 +171,15 @@ void WasapiOutput::StartPlayback()
         AvRevertMmThreadCharacteristics(hTask);
     }
 
-        SAFE_RELEASE(pAudioClient)
+    SAFE_RELEASE(pAudioClient)
         SAFE_RELEASE(pRenderClient)
+
+    playbackInProgress = false;
 }
 
 void WasapiOutput::StopPlayback()
 {
-
+    stopRequested = true;
 }
 
 WORD WasapiOutput::GetFormatID()

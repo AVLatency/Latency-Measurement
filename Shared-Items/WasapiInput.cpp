@@ -32,6 +32,7 @@ WasapiInput::~WasapiInput()
 void WasapiInput::StartRecording()
 {
     recordingInProgress = true;
+
     const IID IID_IAudioClient = __uuidof(IAudioClient);
     const IID IID_IAudioCaptureClient = __uuidof(IAudioCaptureClient);
 
@@ -87,7 +88,7 @@ void WasapiInput::StartRecording()
     EXIT_ON_ERROR(hr)
 
         // Each loop fills about half of the shared buffer.
-        while (bDone == FALSE)
+        while (bDone == FALSE && !stopRequested)
         {
             // Sleep for half the buffer duration.
             Sleep(hnsActualDuration / REFTIMES_PER_MILLISEC / 2);
@@ -95,47 +96,42 @@ void WasapiInput::StartRecording()
             hr = pCaptureClient->GetNextPacketSize(&packetLength);
             EXIT_ON_ERROR(hr)
 
-                while (packetLength != 0)
+            while (packetLength != 0)
+            {
+                // Get the available data in the shared buffer.
+                hr = pCaptureClient->GetBuffer(
+                    &pData,
+                    &numFramesAvailable,
+                    &flags, NULL, NULL); // TODO: pu64QPCPosition parameter could be used for Bluetooth latency testing!
+                EXIT_ON_ERROR(hr)
+
+                    if (flags & AUDCLNT_BUFFERFLAGS_SILENT)
+                    {
+                        pData = NULL;  // Tell CopyData to write silence.
+                    }
+                if (flags & AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY)
                 {
-                    // Get the available data in the shared buffer.
-                    hr = pCaptureClient->GetBuffer(
-                        &pData,
-                        &numFramesAvailable,
-                        &flags, NULL, NULL); // TODO: pu64QPCPosition parameter could be used for Bluetooth latency testing!
-                    EXIT_ON_ERROR(hr)
-
-                        if (flags & AUDCLNT_BUFFERFLAGS_SILENT)
-                        {
-                            pData = NULL;  // Tell CopyData to write silence.
-                        }
-                    if (flags & AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY)
+                    if (pastInitialDiscontinuity && !loop)
                     {
-                        if (pastInitialDiscontinuity && !loop)
-                        {
-                            ThrowAwayRecording();
-                        }
-                    }
-                    else
-                    {
-                        pastInitialDiscontinuity = true;
-                    }
-
-                    // Copy the available capture data to the audio sink.
-                    hr = CopyData(
-                        pData, numFramesAvailable, &bDone);
-                    EXIT_ON_ERROR(hr)
-
-                        hr = pCaptureClient->ReleaseBuffer(numFramesAvailable);
-                    EXIT_ON_ERROR(hr)
-
-                        hr = pCaptureClient->GetNextPacketSize(&packetLength);
-                    EXIT_ON_ERROR(hr)
-
-                    if (stopRequested)
-                    {
-                        bDone = true;
+                        ThrowAwayRecording();
                     }
                 }
+                else
+                {
+                    pastInitialDiscontinuity = true;
+                }
+
+                // Copy the available capture data to the audio sink.
+                hr = CopyData(
+                    pData, numFramesAvailable, &bDone);
+                EXIT_ON_ERROR(hr)
+
+                    hr = pCaptureClient->ReleaseBuffer(numFramesAvailable);
+                EXIT_ON_ERROR(hr)
+
+                    hr = pCaptureClient->GetNextPacketSize(&packetLength);
+                EXIT_ON_ERROR(hr)
+            }
         }
 
     hr = pAudioClient->Stop();  // Stop recording.
