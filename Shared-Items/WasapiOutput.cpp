@@ -50,11 +50,6 @@ void WasapiOutput::StartPlayback()
             NULL, (void**)&pAudioClient);
     EXIT_ON_ERROR(hr)
 
-        // Call a helper function to negotiate with the audio
-        // device for an exclusive-mode stream format.
-        //TODO: hr = GetStreamFormat(pAudioClient, &pwfx);
-    EXIT_ON_ERROR(hr)
-
         // Initialize the stream to play at the minimum latency.
         hr = pAudioClient->GetDevicePeriod(NULL, &hnsRequestedDuration);
     EXIT_ON_ERROR(hr)
@@ -80,10 +75,6 @@ void WasapiOutput::StartPlayback()
             waveFormat,
             NULL);
     }
-    EXIT_ON_ERROR(hr)
-
-        // Tell the audio source which format to use.
-        //TODO: hr = pMySource->SetFormat(pwfx);
     EXIT_ON_ERROR(hr)
 
         // Create an event handle and register it for
@@ -196,7 +187,7 @@ WORD WasapiOutput::GetFormatID()
 
 HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flags)
 {
-    if (sampleIndex >= audioSamplesLength)
+    if (FinishedPlayback(true))
     {
         *flags = AUDCLNT_BUFFERFLAGS_SILENT;
         return S_OK;
@@ -208,7 +199,7 @@ HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flag
         float* castData = (float*)pData;
         for (UINT32 i = 0; i < bufferFrameCount * numChannels; i += numChannels)
         {
-            if (sampleIndex < audioSamplesLength)
+            if (!FinishedPlayback(true))
             {
                 for (int c = 0; c < numChannels; c++)
                 {
@@ -241,7 +232,7 @@ HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flag
         INT16* castData = (INT16*)pData;
         for (UINT32 i = 0; i < bufferFrameCount * numChannels; i += numChannels)
         {
-            if (sampleIndex < audioSamplesLength)
+            if (!FinishedPlayback(true))
             {
                 for (int c = 0; c < numChannels; c++)
                 {
@@ -275,7 +266,7 @@ HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flag
 
         for (int i = 0; i < dataLength; i += bytesPerFrame)
         {
-            if (sampleIndex < audioSamplesLength)
+            if (!FinishedPlayback(true))
             {
                 int thirtyTwoBit = (int)round(audioSamples[sampleIndex] * INT24_MAX);
 
@@ -319,7 +310,7 @@ HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flag
         INT32* castData = (INT32*)pData;
         for (UINT32 i = 0; i < bufferFrameCount * numChannels; i += numChannels)
         {
-            if (sampleIndex < audioSamplesLength)
+            if (!FinishedPlayback(true))
             {
                 for (int c = 0; c < numChannels; c++)
                 {
@@ -349,6 +340,23 @@ HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flag
         return -1; // TODO: a proper error message?
     }
 
-    *flags = sampleIndex < audioSamplesLength ? 0 : AUDCLNT_BUFFERFLAGS_SILENT;
+    *flags = FinishedPlayback(true) ? AUDCLNT_BUFFERFLAGS_SILENT : 0;
     return S_OK;
+}
+
+bool WasapiOutput::FinishedPlayback(bool loopIfNeeded)
+{
+    bool endOfSamplesReached = sampleIndex >= audioSamplesLength;
+    if (loop)
+    {
+        if (loopIfNeeded && endOfSamplesReached)
+        {
+            sampleIndex = 0;
+        }
+        return false;
+    }
+    else
+    {
+        return endOfSamplesReached;
+    }
 }

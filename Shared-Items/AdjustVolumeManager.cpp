@@ -14,7 +14,7 @@ AdjustVolumeManager::AdjustVolumeManager(const AudioEndpoint& outputEndpoint, co
 		samples[i] = sin(i / 200);
 	}
 
-	output = new WasapiOutput(outputEndpoint, true, samples, samplesLength);
+	output = new WasapiOutput(outputEndpoint, true, samples, samplesLength, NULL); // TODO: provide wave format!
 	outputThread = new std::thread([this] { output->StartPlayback(); });
 
 	input = new WasapiInput(inputEndpoint, true, recordBufferDurationInSeconds);
