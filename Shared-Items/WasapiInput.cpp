@@ -13,10 +13,8 @@
 
 
 WasapiInput::WasapiInput(const AudioEndpoint& endpoint, bool loop, double bufferDurationInSeconds)
-    : endpoint(endpoint)
+    : endpoint(endpoint), loop(loop), bufferDurationInSeconds(bufferDurationInSeconds)
 {
-    this->loop = loop;
-    this->bufferDurationInSeconds = bufferDurationInSeconds;
 }
 
 WasapiInput::~WasapiInput()
@@ -132,6 +130,11 @@ void WasapiInput::StartRecording()
 
                         hr = pCaptureClient->GetNextPacketSize(&packetLength);
                     EXIT_ON_ERROR(hr)
+
+                    if (stopRequested)
+                    {
+                        bDone = true;
+                    }
                 }
         }
 
@@ -142,6 +145,8 @@ void WasapiInput::StartRecording()
     CoTaskMemFree(pWaveFormat);
         SAFE_RELEASE(pAudioClient)
         SAFE_RELEASE(pCaptureClient)
+
+    recordingInProgress = false;
 }
 
 UINT16 WasapiInput::GetFormatID()
@@ -203,9 +208,9 @@ HRESULT WasapiInput::SetFormat(WAVEFORMATEX* wfex)
     {
         return -1; // Not supported yet!
     }
-    else if (waveFormat.Format.nChannels != 2)
+    else if (waveFormat.Format.nChannels < 2)
     {
-        return -1; // Not supported! // TODO: Maybe this is supported...
+        return -1; // Only one input is useless to these latency measuremnet tools
     }
 
     recordingBufferLength = recordedAudioNumChannels * round(waveFormat.Format.nSamplesPerSec * bufferDurationInSeconds);
@@ -220,18 +225,128 @@ HRESULT WasapiInput::SetFormat(WAVEFORMATEX* wfex)
 
 HRESULT WasapiInput::CopyData(BYTE* pData, UINT32 bufferFrameCount, BOOL* bDone)
 {
+    if (FinishedRecording(false))
+    {
+        *bDone = true;
+        return S_OK;
+    }
 
-    return 0;
+    WORD numChannels = waveFormat.Format.nChannels;
+    if (GetFormatID() == WAVE_FORMAT_IEEE_FLOAT && waveFormat.Format.wBitsPerSample == 32)
+    {
+        float* castData = (float*)pData;
+        for (UINT32 i = 0; i < bufferFrameCount * numChannels; i += numChannels)
+        {
+            for (int c = 0; c < recordedAudioNumChannels; c++)
+            {
+                CurrentBuffer()[recordedAudioIndex] = pData == NULL ? 0.0f : castData[i + c];
+                recordedAudioIndex++;
+                if (FinishedRecording(loop))
+                {
+                    *bDone = true;
+                    return S_OK;
+                }
+            }
+        }
+
+        return S_OK;
+    }
+    else if (GetFormatID() == WAVE_FORMAT_PCM && waveFormat.Format.wBitsPerSample == 16)
+    {
+        // This is confirmed to be Little Endian on my computer!
+        // (settings bytes manually as big endian results in garbage, but setting
+        // them little endian manually works perfectly)
+
+        INT16* castData = (INT16*)pData;
+        for (UINT32 i = 0; i < bufferFrameCount * numChannels; i += numChannels)
+        {
+            for (int c = 0; c < recordedAudioNumChannels; c++)
+            {
+                CurrentBuffer()[recordedAudioIndex] = pData == NULL ? 0.0f : castData[i + c] / (float)SHRT_MIN * -1.0f;
+                recordedAudioIndex++;
+                if (FinishedRecording(loop))
+                {
+                    *bDone = true;
+                    return S_OK;
+                }
+            }
+        }
+
+        return S_OK;
+    }
+    else if (GetFormatID() == WAVE_FORMAT_PCM && waveFormat.Format.wBitsPerSample == 24)
+    {
+        //// nBlockAlign and bufferFrameCount are only used for the buffer size!
+        //int dataLength = bufferFrameCount * waveFormat.Format.nBlockAlign;
+        //// Actual frame size is 32 bits for 24 bit audio:
+        //int bytesPerSampleWithPadding = 32 / 8;
+        //int bytesPerFrame = bytesPerSampleWithPadding * waveFormat.Format.nChannels;
+
+        //for (int i = 0; i < dataLength; i += bytesPerFrame)
+        //{
+        //	int thirtyTwoBit = (int)round(sin(1) * INT24_MAX);
+
+        //	for (int c = 0; c < numChannels; c++)
+        //	{
+        //		int channelOffset = c * bytesPerSampleWithPadding;
+
+        //		pData[i + channelOffset + 0] = 0; // padding
+        //		pData[i + channelOffset + 1] = thirtyTwoBit; // little endian, least significant first
+        //		pData[i + channelOffset + 2] = thirtyTwoBit >> 8;
+        //		pData[i + channelOffset + 3] = thirtyTwoBit >> 16;
+        //		pData[i + channelOffset + 3] |= (thirtyTwoBit >> 31) << 7; // negative bit
+        //	}
+        //}
+
+        //return S_OK;
+        return -1; // TODO: write this when I'm making something public facing.
+    }
+    else if (GetFormatID() == WAVE_FORMAT_PCM && waveFormat.Format.wBitsPerSample == 32)
+    {
+        INT32* castData = (INT32*)pData;
+        for (UINT32 i = 0; i < bufferFrameCount * numChannels; i += numChannels)
+        {
+            for (int c = 0; c < recordedAudioNumChannels; c++)
+            {
+                CurrentBuffer()[recordedAudioIndex] = pData == NULL ? 0.0f : castData[i + c] / (float)INT_MIN * -1.0f;
+                recordedAudioIndex++;
+                if (FinishedRecording(loop))
+                {
+                    *bDone = true;
+                    return S_OK;
+                }
+            }
+        }
+
+        return S_OK;
+    }
+    else
+    {
+        return -1;
+    }
 }
 
-bool WasapiInput::FinishedRecording()
+bool WasapiInput::FinishedRecording(bool flipBuffersIfNeeded)
 {
-    return loop ? false : (recordedAudioIndex >= recordingBufferLength);
+    bool endOfBufferReached = recordedAudioIndex >= recordingBufferLength;
+    if (loop)
+    {
+        if(flipBuffersIfNeeded && endOfBufferReached)
+        {
+            recordedAudioIndex = 0;
+            recordingToBuffer1 = !recordingToBuffer1;
+        }
+        return false;
+    }
+    else
+    {
+        return endOfBufferReached;
+    }
 }
 
 void WasapiInput::ThrowAwayRecording()
 {
-    // Write garbage to the recording and set it to be completed
+    // Write easily identifyable garbage to the recording and set it to be completed
     RecordingFailed = true;
     bool high = true;
     for (int i = 0; i < recordingBufferLength;)

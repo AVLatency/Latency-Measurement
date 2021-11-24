@@ -154,6 +154,7 @@ bool Gui::DoGui()
                     }
                     ImGui::EndCombo();
                 }
+                ImGui::SameLine(); HelpMarker("The input device must be configured to have at least two channels. It can be pretty much any sample rate and bit depth, but at least 48 kHz 16 bit is recommended.");
 
                 ImGui::Spacing();
                 if (ImGui::Button("Adjust Volumes"))
@@ -184,7 +185,14 @@ bool Gui::DoGui()
                     // TODO: wave view
                     ImGui::TableSetColumnIndex(1);
                     ImGui::Text("Monitor");
-                    // TODO: wave view
+                    if (adjustVolumeManager != nullptr && adjustVolumeManager->lastRecordedSegment != nullptr)
+                    {
+                        ImGui::PlotLines("Monitor", adjustVolumeManager->lastRecordedSegment, adjustVolumeManager->lastRecordedSegmentLength/2, 0, NULL, -1, 1, ImVec2(100, 100), sizeof(float) * 2);
+                    }
+                    //if (adjustVolumeManager != nullptr && adjustVolumeManager->input->recordingBuffer1 != nullptr)
+                    //{
+                    //    ImGui::PlotLines("Monitor", adjustVolumeManager->input->recordingBuffer1, adjustVolumeManager->input->recordingBufferLength / 2, 0, NULL, -1, 1, ImVec2(100, 100), sizeof(float) * 2);
+                    //}
                     ImGui::EndTable();
                 }
 
@@ -196,7 +204,10 @@ bool Gui::DoGui()
                     ImGui::TableNextRow();
                     ImGui::TableSetColumnIndex(1);
                     ImGui::Text("Monitor (Raw)");
-                    // TODO: wave view
+                    if (adjustVolumeManager != nullptr && adjustVolumeManager->lastRecordedSegment != nullptr)
+                    {
+                        ImGui::PlotLines("Monitor (Raw)", &(adjustVolumeManager->lastRecordedSegment[1]), adjustVolumeManager->lastRecordedSegmentLength / 2, 0, NULL, -1, 1, ImVec2(100, 100), sizeof(float) * 2);
+                    }
                     ImGui::TableNextRow();
                     ImGui::TableSetColumnIndex(0);
                     ImGui::Text("Reference Image (Normalized)");

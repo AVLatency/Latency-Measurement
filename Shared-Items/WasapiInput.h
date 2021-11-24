@@ -35,7 +35,7 @@ private:
 	UINT16 GetFormatID();
 	HRESULT SetFormat(WAVEFORMATEX* wfex);
 	HRESULT CopyData(BYTE* pData, UINT32 bufferFrameCount, BOOL* bDone);
-	bool FinishedRecording();
+	bool FinishedRecording(bool flipBuffersIfNeeded);
 	void ThrowAwayRecording();
 	float* CurrentBuffer();
 };
