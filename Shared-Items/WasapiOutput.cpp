@@ -27,15 +27,11 @@ WasapiOutput::~WasapiOutput()
 
 void WasapiOutput::StartPlayback()
 {
-    const CLSID CLSID_MMDeviceEnumerator = __uuidof(MMDeviceEnumerator);
-    const IID IID_IMMDeviceEnumerator = __uuidof(IMMDeviceEnumerator);
     const IID IID_IAudioClient = __uuidof(IAudioClient);
     const IID IID_IAudioRenderClient = __uuidof(IAudioRenderClient);
 
     HRESULT hr;
     REFERENCE_TIME hnsRequestedDuration = 0;
-    IMMDeviceEnumerator* pEnumerator = NULL;
-    IMMDevice* pDevice = NULL;
     IAudioClient* pAudioClient = NULL;
     IAudioRenderClient* pRenderClient = NULL;
     WAVEFORMATEX* pwfx = NULL;
@@ -46,17 +42,7 @@ void WasapiOutput::StartPlayback()
     DWORD flags = 0;
     DWORD taskIndex = 0;
 
-    hr = CoCreateInstance(
-        CLSID_MMDeviceEnumerator, NULL,
-        CLSCTX_ALL, IID_IMMDeviceEnumerator,
-        (void**)&pEnumerator);
-    EXIT_ON_ERROR(hr)
-
-        hr = pEnumerator->GetDefaultAudioEndpoint(
-            eRender, eConsole, &pDevice);
-    EXIT_ON_ERROR(hr)
-
-        hr = pDevice->Activate(
+        hr = endpoint.Device->Activate(
             IID_IAudioClient, CLSCTX_ALL,
             NULL, (void**)&pAudioClient);
     EXIT_ON_ERROR(hr)
@@ -183,7 +169,6 @@ void WasapiOutput::StartPlayback()
     }
     CoTaskMemFree(pwfx);
     SAFE_RELEASE(pEnumerator)
-        SAFE_RELEASE(pDevice)
         SAFE_RELEASE(pAudioClient)
         SAFE_RELEASE(pRenderClient)
 }
