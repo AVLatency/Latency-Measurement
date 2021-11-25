@@ -211,9 +211,9 @@ void AdjustVolumeManager::CopyBuffer(float* sourceBuffer, int sourceBufferLength
 	rightChannelNormalizedTickMonitorSamples = new float[tickMonitorSamplesLength];
 
 	// Find the peaks in the sourceBuffer, excluding some padding on the left and right of the source buffer:
-	int leftMaxAbsIndex = 0;
-	int rightMaxAbsIndex = 0;
 	int padding = tickMonitorSamplesLength * 2;
+	int leftMaxAbsIndex = padding;
+	int rightMaxAbsIndex = padding;
 	for (int i = padding; i < perChannelSourceBufferLength - padding; i++)
 	{
 		if (abs(leftSourceBuffer[i]) > abs(leftSourceBuffer[leftMaxAbsIndex]))
@@ -232,20 +232,24 @@ void AdjustVolumeManager::CopyBuffer(float* sourceBuffer, int sourceBufferLength
 	int leftChannelTickStart;
 	if (abs(leftSourceBuffer[leftMaxAbsIndex + (tickSamplesLength / 2)]) > abs(leftSourceBuffer[leftMaxAbsIndex - (tickSamplesLength / 2)]))
 	{
-		leftChannelTickStart = leftMaxAbsIndex + tickSamplesLength / 2;
+		// Middle of tick is to the right of MaxAbsIndex
+		leftChannelTickStart = leftMaxAbsIndex - (tickSamplesLength / 4);
 	}
 	else
 	{
-		leftChannelTickStart = leftMaxAbsIndex - tickSamplesLength / 2;
+		// Middle of tick is to the left of MaxAbsIndex
+		leftChannelTickStart = leftMaxAbsIndex - (tickSamplesLength * 3 / 4);
 	}
 	int rightChannelTickStart;
 	if (abs(rightSourceBuffer[rightMaxAbsIndex + (tickSamplesLength / 2)]) > abs(rightSourceBuffer[rightMaxAbsIndex - (tickSamplesLength / 2)]))
 	{
-		rightChannelTickStart = rightMaxAbsIndex + tickSamplesLength / 2;
+		// Middle of tick is to the right of MaxAbsIndex
+		rightChannelTickStart = rightMaxAbsIndex - (tickSamplesLength / 4);
 	}
 	else
 	{
-		rightChannelTickStart = rightMaxAbsIndex - tickSamplesLength / 2;
+		// Middle of tick is to the left of MaxAbsIndex
+		rightChannelTickStart = rightMaxAbsIndex - (tickSamplesLength * 3 / 4);
 	}
 
 	// Fill in the sample buffers
