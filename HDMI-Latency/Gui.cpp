@@ -173,7 +173,7 @@ bool Gui::DoGui()
             if (state >= GuiState::AdjustVolume)
             {
                 ImGui::Spacing();
-                ImGui::Text("Input: Left Channel (HDMI Audio Device)");
+                ImGui::Text("Step 1: Input Left Channel (HDMI Audio Device)");
                 ImGui::SameLine(); HelpMarker("Adjust the volume of your input device through the Windows control panel to make the monitor match the refrence image. "
                     "You may need to turn down the Microphone Boost in the Levels section of Additional device properties.");
 
@@ -197,7 +197,7 @@ bool Gui::DoGui()
                 }
 
                 ImGui::Spacing();
-                ImGui::Text("Input: Right Channel (DUT)");
+                ImGui::Text("Step 2: Input Right Channel (DUT)");
                 ImGui::SameLine(); HelpMarker("Adjust the output volume of your Device Under Test (DUT) to give a smooth and clear normalized recording.");
                 if (ImGui::BeginTable("RightChannelVolumeTable", 2, ImGuiTableFlags_Borders))
                 {

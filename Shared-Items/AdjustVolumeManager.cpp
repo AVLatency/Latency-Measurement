@@ -15,7 +15,7 @@ AdjustVolumeManager::AdjustVolumeManager(const AudioEndpoint& outputEndpoint, co
 	float* samples = new float[samplesLength];
 	for (int i = 0; i < samplesLength; i++)
 	{
-		samples[i] = sin(i / 200);
+		samples[i] = sin(i / 20);
 	}
 
 	WAVEFORMATEX* waveFormat = GetWaveFormat(outputEndpoint);

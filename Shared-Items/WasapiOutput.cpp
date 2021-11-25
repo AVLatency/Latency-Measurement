@@ -45,6 +45,9 @@ void WasapiOutput::StartPlayback()
     DWORD flags = 0;
     DWORD taskIndex = 0;
 
+    hr = CoInitialize(NULL);
+    EXIT_ON_ERROR(hr)
+
         hr = endpoint.Device->Activate(
             IID_IAudioClient, CLSCTX_ALL,
             NULL, (void**)&pAudioClient);
@@ -152,7 +155,7 @@ void WasapiOutput::StartPlayback()
     hr = pAudioClient->Stop();  // Stop playing.
     EXIT_ON_ERROR(hr)
 
-        Exit:
+    Exit:
     if (hEvent != NULL)
     {
         CloseHandle(hEvent);
@@ -163,7 +166,8 @@ void WasapiOutput::StartPlayback()
     }
 
     SAFE_RELEASE(pAudioClient)
-        SAFE_RELEASE(pRenderClient)
+    SAFE_RELEASE(pRenderClient)
+    CoUninitialize();
 
     playbackInProgress = false;
 }
