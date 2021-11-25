@@ -1,10 +1,13 @@
 #pragma once
 #include <audioclient.h>
 
-struct RecordingConfiguration
+struct GeneratedSamples
 {
 public:
+	enum struct WaveType { LatencyMeasurement, VolumeAdjustment };
+
 	WAVEFORMATEX* WaveFormat;
+	WaveType Type;
 
     // Test wave is constructed like this:
 	// Quiet [constantToneFreq] Hz tone played at start
@@ -25,8 +28,8 @@ public:
 	// - This gives time for the audio to feedback into the recording input.
 	// - Audio will immediately stop being recorded when playback has finished, which means some
 	//   of the end of this test wave will be cut off.
-	float* testWave;
-	int testWaveLength;
+	float* samples;
+	int samplesLength;
 
 	/// <summary>
 	/// Time relative to tick 1 in the tick pattern
@@ -41,14 +44,15 @@ public:
 	/// </summary>
 	double constantToneFreq = 300;
 
-	RecordingConfiguration(WAVEFORMATEX* waveFormat);
-	~RecordingConfiguration();
+	GeneratedSamples(WAVEFORMATEX* waveFormat, WaveType type);
+	~GeneratedSamples();
 
 	double TestWaveDurationInSeconds() const;
 
 	static int GetTickFrequency(int sampleRate);
 
 private:
-	void CreateTestWave();
+	void GenerateLatencyMeasurementSamples();
+	void GenerateVolumeAdjustmentSamples();
 };
 

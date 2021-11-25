@@ -185,9 +185,9 @@ bool Gui::DoGui()
                     // TODO: wave view
                     ImGui::TableSetColumnIndex(1);
                     ImGui::Text("Monitor");
-                    if (adjustVolumeManager != nullptr && adjustVolumeManager->lastRecordedSegment != nullptr)
+                    if (adjustVolumeManager != nullptr && adjustVolumeManager->leftChannelTickMonitorSamples != nullptr)
                     {
-                        ImGui::PlotLines("", adjustVolumeManager->lastRecordedSegment, adjustVolumeManager->lastRecordedSegmentLength/2, 0, NULL, -1, 1, ImVec2(100, 100), sizeof(float) * 2);
+                        ImGui::PlotLines("", adjustVolumeManager->leftChannelTickMonitorSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, ImVec2(100, 100));
                     }
                     //if (adjustVolumeManager != nullptr && adjustVolumeManager->lastInputBufferCopy != nullptr)
                     //{
@@ -205,9 +205,9 @@ bool Gui::DoGui()
                     ImGui::TableNextRow();
                     ImGui::TableSetColumnIndex(1);
                     ImGui::Text("Monitor (Raw)");
-                    if (adjustVolumeManager != nullptr && adjustVolumeManager->lastRecordedSegment != nullptr)
+                    if (adjustVolumeManager != nullptr && adjustVolumeManager->rightChannelTickMonitorSamples != nullptr)
                     {
-                        ImGui::PlotLines("", &(adjustVolumeManager->lastRecordedSegment[1]), adjustVolumeManager->lastRecordedSegmentLength / 2, 0, NULL, -1, 1, ImVec2(100, 100), sizeof(float) * 2);
+                        ImGui::PlotLines("", adjustVolumeManager->rightChannelTickMonitorSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, ImVec2(100, 100));
                     }
                     ImGui::TableNextRow();
                     ImGui::TableSetColumnIndex(0);
@@ -215,7 +215,10 @@ bool Gui::DoGui()
                     // TODO: wave view
                     ImGui::TableSetColumnIndex(1);
                     ImGui::Text("Monitor (Normalized)");
-                    // TODO: wave view
+                    if (adjustVolumeManager != nullptr && adjustVolumeManager->rightChannelNormalizedTickMonitorSamples != nullptr)
+                    {
+                        ImGui::PlotLines("", adjustVolumeManager->rightChannelNormalizedTickMonitorSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, ImVec2(100, 100));
+                    }
                     ImGui::EndTable();
                 }
 
@@ -383,7 +386,7 @@ void Gui::StartAjdustVolumeAudio()
     // Save the old one if it's still in the middle of working. Otherwise, make a new one.
     if (adjustVolumeManager != nullptr && !adjustVolumeManager->working)
     {
-        delete adjustVolumeManager;
+        //delete adjustVolumeManager; // TODO: This is crashing: figure out why
         adjustVolumeManager = nullptr;
     }
     if (adjustVolumeManager == nullptr)

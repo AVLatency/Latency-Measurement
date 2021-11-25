@@ -1,31 +1,40 @@
-#include "RecordingConfiguration.h"
+#include "GeneratedSamples.h"
 #include <cmath>
 // for M_PI:
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-RecordingConfiguration::RecordingConfiguration(WAVEFORMATEX* waveFormat)
+GeneratedSamples::GeneratedSamples(WAVEFORMATEX* waveFormat, WaveType type)
+    : WaveFormat(waveFormat), Type(type)
 {
-	this->WaveFormat = waveFormat;
-    CreateTestWave();
+    switch (Type)
+    {
+    case GeneratedSamples::WaveType::VolumeAdjustment:
+        GenerateVolumeAdjustmentSamples();
+        break;
+    case GeneratedSamples::WaveType::LatencyMeasurement:
+    default:
+        GenerateLatencyMeasurementSamples();
+        break;
+    }
 }
 
-RecordingConfiguration::~RecordingConfiguration()
+GeneratedSamples::~GeneratedSamples()
 {
-    delete[] testWave;
+    delete[] samples;
 }
 
-double RecordingConfiguration::TestWaveDurationInSeconds() const
+double GeneratedSamples::TestWaveDurationInSeconds() const
 {
-    return testWaveLength / (double)WaveFormat->nSamplesPerSec;
+    return samplesLength / (double)WaveFormat->nSamplesPerSec;
 }
 
-int RecordingConfiguration::GetTickFrequency(int sampleRate)
+int GeneratedSamples::GetTickFrequency(int sampleRate)
 {
     return sampleRate == 44100 ? 11025 : 12000;
 }
 
-void RecordingConfiguration::CreateTestWave()
+void GeneratedSamples::GenerateLatencyMeasurementSamples()
 {
     int sampleRate = WaveFormat->nSamplesPerSec;
 
@@ -47,8 +56,8 @@ void RecordingConfiguration::CreateTestWave()
 
     // Wave generation:
     int totalSamples = (int)(tickTimesInSamples[tickTimesInSamplesLength - 1] + endPadding * sampleRate);
-    testWave = new float[totalSamples];
-    testWaveLength = totalSamples;
+    samples = new float[totalSamples];
+    samplesLength = totalSamples;
 
     // Wake-up Constant tone generation
     for (int i = 0; i < totalSamples; i++)
@@ -57,12 +66,12 @@ void RecordingConfiguration::CreateTestWave()
         if (i < (startPadding * sampleRate) - ((sampleRate / constantToneFreq) * 2))
         {
             double time = (double)i / sampleRate;
-            testWave[i] = (float)(sin(M_PI * 2 * constantToneFreq * time) * constantToneAmp);
+            samples[i] = (float)(sin(M_PI * 2 * constantToneFreq * time) * constantToneAmp);
         }
         else
         {
             // Fill in the rest with no sound
-            testWave[i] = 0;
+            samples[i] = 0;
         }
     }
 
@@ -80,9 +89,43 @@ void RecordingConfiguration::CreateTestWave()
     {
         for (int i = 0; i < tickSamplesLength; i++)
         {
-            testWave[tickTimesInSamples[tickNum] + i] += (float)(tickSamples[i] * tickAmp);
+            samples[tickTimesInSamples[tickNum] + i] += (float)(tickSamples[i] * tickAmp);
         }
     }
 
     delete[] tickSamples;
+}
+
+void GeneratedSamples::GenerateVolumeAdjustmentSamples()
+{
+    int sampleRate = WaveFormat->nSamplesPerSec;
+
+    // Timing
+    double durationSeconds = 0.1f;
+
+    // Frequencies
+    int tickFreq = GetTickFrequency(sampleRate);
+
+    // Amplitudes
+    double tickAmp = 0.6;
+
+    // Wave generation:
+    int totalSamples = (int)(durationSeconds * sampleRate);
+    samples = new float[totalSamples];
+    samplesLength = totalSamples;
+
+    // Tick followed by silence
+    int tickSamplesLength = sampleRate / tickFreq;
+    for (int i = 0; i < totalSamples; i++)
+    {
+        if (i < tickSamplesLength)
+        {
+            double time = (double)i / sampleRate;
+            samples[i] = (float)sin(M_PI * 2 * tickFreq * time);
+        }
+        else
+        {
+            samples[i] = 0;
+        }
+    }
 }

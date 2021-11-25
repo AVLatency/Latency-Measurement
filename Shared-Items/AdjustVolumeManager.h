@@ -3,6 +3,7 @@
 #include "WasapiOutput.h"
 #include <thread>
 #include "AudioEndpoint.h"
+#include "GeneratedSamples.h"
 
 class AdjustVolumeManager
 {
@@ -12,8 +13,10 @@ public:
 
 	bool working = false;
 
-	float* lastRecordedSegment = nullptr;
-	int lastRecordedSegmentLength = 0;
+	float* leftChannelTickMonitorSamples = nullptr;
+	float* rightChannelTickMonitorSamples = nullptr;
+	float* rightChannelNormalizedTickMonitorSamples = nullptr;
+	int tickMonitorSamplesLength = 0;
 
 	AdjustVolumeManager(const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint);
 	~AdjustVolumeManager();
@@ -25,9 +28,9 @@ private:
 	bool lastBufferFlipWasTo1 = true;
 	std::thread* outputThread = nullptr;
 	std::thread* inputThread = nullptr;
+	GeneratedSamples* generatedSamples = nullptr;
 
-	float* lastInputBufferCopy = nullptr;
-
+	void SafeDeleteMonitorSamples();
 	WAVEFORMATEX* GetWaveFormat(const AudioEndpoint& endpoint);
 	void SetBitsPerSample(WAVEFORMATEX* wfx, WORD bitsPerSample);
 

@@ -11,18 +11,13 @@ AdjustVolumeManager::AdjustVolumeManager(const AudioEndpoint& outputEndpoint, co
 	SetThreadExecutionState(ES_DISPLAY_REQUIRED); // Prevent display from turning off while running this tool.
 	working = true;
 
-	int samplesLength = 1000;
-	float* samples = new float[samplesLength];
-	for (int i = 0; i < samplesLength; i++)
-	{
-		samples[i] = sin(i / 20);
-	}
-
 	WAVEFORMATEX* waveFormat = GetWaveFormat(outputEndpoint);
 
 	if (waveFormat != NULL)
 	{
-		output = new WasapiOutput(outputEndpoint, true, samples, samplesLength, waveFormat);
+		generatedSamples = new GeneratedSamples(waveFormat, GeneratedSamples::WaveType::VolumeAdjustment);
+
+		output = new WasapiOutput(outputEndpoint, true, generatedSamples->samples, generatedSamples->samplesLength, waveFormat);
 		outputThread = new std::thread([this] { output->StartPlayback(); });
 
 		input = new WasapiInput(inputEndpoint, true, recordBufferDurationInSeconds);
@@ -42,13 +37,30 @@ AdjustVolumeManager::~AdjustVolumeManager()
 	delete outputThread;
 	delete inputThread;
 
-	if (lastInputBufferCopy != nullptr)
+	SafeDeleteMonitorSamples();
+
+	if (generatedSamples != nullptr)
 	{
-		delete[] lastInputBufferCopy;
+		delete generatedSamples;
 	}
-	if (lastRecordedSegment != nullptr)
+}
+
+void AdjustVolumeManager::SafeDeleteMonitorSamples()
+{
+	if (leftChannelTickMonitorSamples != nullptr)
 	{
-		delete[] lastRecordedSegment;
+		delete[] leftChannelTickMonitorSamples;
+		leftChannelTickMonitorSamples = nullptr;
+	}
+	if (rightChannelTickMonitorSamples != nullptr)
+	{
+		delete[] rightChannelTickMonitorSamples;
+		rightChannelTickMonitorSamples = nullptr;
+	}
+	if (rightChannelNormalizedTickMonitorSamples != nullptr)
+	{
+		delete[] rightChannelNormalizedTickMonitorSamples;
+		rightChannelNormalizedTickMonitorSamples = nullptr;
 	}
 }
 
@@ -178,26 +190,76 @@ void AdjustVolumeManager::Tick()
 
 void AdjustVolumeManager::CopyBuffer(float* sourceBuffer, int sourceBufferLength)
 {
-	// TODO: Get rid of all of this and do a direct analysis on the sourceBuffer to find the
-	// loudest part of each channnel of the wave and then copy them, centered around this loudest
-	// part. Because it's centered on the loudest part, this point needs to be be a certain
-	// distance from the beginning or end, based on the tick frequency.
-
-	if (lastInputBufferCopy == nullptr)
+	int perChannelSourceBufferLength = sourceBufferLength / input->recordedAudioNumChannels;
+	// Making math a lot simpler by copying to one sample array per recorded channel:
+	float* leftSourceBuffer = new float[perChannelSourceBufferLength];
+	float* rightSourceBuffer = new float[perChannelSourceBufferLength];
+	int channelIndex = 0;
+	for (int i = 0; i < sourceBufferLength; i += input->recordedAudioNumChannels)
 	{
-		lastInputBufferCopy = new float[sourceBufferLength];
-	}
-	std::copy(sourceBuffer, &sourceBuffer[sourceBufferLength - 1], lastInputBufferCopy);
-
-	if (lastRecordedSegment != nullptr)
-	{
-		delete[] lastRecordedSegment;
+		leftSourceBuffer[channelIndex] = sourceBuffer[i];
+		rightSourceBuffer[channelIndex] = sourceBuffer[i + 1];
+		channelIndex++;
 	}
 
-	//Temp test stuff:
-	lastRecordedSegmentLength = 2 * 1000;
-	lastRecordedSegment = new float[lastRecordedSegmentLength];
-	std::copy(lastInputBufferCopy, &lastInputBufferCopy[lastRecordedSegmentLength - 1], lastRecordedSegment);
+	// Get some info about the ticks that were generated and create the sample buffers
+	int tickSamplesLength = input->waveFormat.Format.nSamplesPerSec / generatedSamples->GetTickFrequency(generatedSamples->WaveFormat->nSamplesPerSec);
+	tickMonitorSamplesLength = 3 * tickSamplesLength;
+	SafeDeleteMonitorSamples();
+	leftChannelTickMonitorSamples = new float[tickMonitorSamplesLength];
+	rightChannelTickMonitorSamples = new float[tickMonitorSamplesLength];
+	rightChannelNormalizedTickMonitorSamples = new float[tickMonitorSamplesLength];
+
+	// Find the peaks in the sourceBuffer, excluding some padding on the left and right of the source buffer:
+	int leftMaxAbsIndex = 0;
+	int rightMaxAbsIndex = 0;
+	int padding = tickMonitorSamplesLength * 2;
+	for (int i = padding; i < perChannelSourceBufferLength - padding; i++)
+	{
+		if (abs(leftSourceBuffer[i]) > abs(leftSourceBuffer[leftMaxAbsIndex]))
+		{
+			leftMaxAbsIndex = i;
+		}
+		if (abs(rightSourceBuffer[i]) > abs(rightSourceBuffer[rightMaxAbsIndex]))
+		{
+			rightMaxAbsIndex = i;
+		}
+	}
+
+	// Find the middle of the detected ticks:
+	// This math hackery depends on all indexing of sourceBuffer to be divisible by 8 to make sure
+	// that we're always indexing the right channel.
+	int leftChannelTickStart;
+	if (abs(leftSourceBuffer[leftMaxAbsIndex + (tickSamplesLength / 2)]) > abs(leftSourceBuffer[leftMaxAbsIndex - (tickSamplesLength / 2)]))
+	{
+		leftChannelTickStart = leftMaxAbsIndex + tickSamplesLength / 2;
+	}
+	else
+	{
+		leftChannelTickStart = leftMaxAbsIndex - tickSamplesLength / 2;
+	}
+	int rightChannelTickStart;
+	if (abs(rightSourceBuffer[rightMaxAbsIndex + (tickSamplesLength / 2)]) > abs(rightSourceBuffer[rightMaxAbsIndex - (tickSamplesLength / 2)]))
+	{
+		rightChannelTickStart = rightMaxAbsIndex + tickSamplesLength / 2;
+	}
+	else
+	{
+		rightChannelTickStart = rightMaxAbsIndex - tickSamplesLength / 2;
+	}
+
+	// Fill in the sample buffers
+	for (int i = 0; i < tickMonitorSamplesLength; i++)
+	{
+		leftChannelTickMonitorSamples[i] = leftSourceBuffer[leftChannelTickStart - tickSamplesLength + i];
+		float rightSample = rightSourceBuffer[rightChannelTickStart - tickSamplesLength + i];
+		rightChannelTickMonitorSamples[i] = rightSample;
+		float normalizedRightSample = rightSample / abs(rightSourceBuffer[rightMaxAbsIndex]);
+		rightChannelNormalizedTickMonitorSamples[i] = normalizedRightSample;
+	}
+
+	delete[] leftSourceBuffer;
+	delete[] rightSourceBuffer;
 }
 
 void AdjustVolumeManager::Stop()
