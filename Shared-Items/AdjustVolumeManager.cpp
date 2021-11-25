@@ -2,6 +2,10 @@
 #include <WinBase.h>
 
 
+#define SAFE_RELEASE(punk)  \
+              if ((punk) != NULL)  \
+                { (punk)->Release(); (punk) = NULL; }
+
 AdjustVolumeManager::AdjustVolumeManager(const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint)
 {
 	SetThreadExecutionState(ES_DISPLAY_REQUIRED); // Prevent display from turning off while running this tool.
@@ -14,11 +18,20 @@ AdjustVolumeManager::AdjustVolumeManager(const AudioEndpoint& outputEndpoint, co
 		samples[i] = sin(i / 200);
 	}
 
-	output = new WasapiOutput(outputEndpoint, true, samples, samplesLength, NULL); // TODO: provide wave format!
-	outputThread = new std::thread([this] { output->StartPlayback(); });
+	WAVEFORMATEX* waveFormat = GetWaveFormat(outputEndpoint);
 
-	input = new WasapiInput(inputEndpoint, true, recordBufferDurationInSeconds);
-	inputThread = new std::thread([this] { input->StartRecording(); });
+	if (waveFormat != NULL)
+	{
+		output = new WasapiOutput(outputEndpoint, true, samples, samplesLength, waveFormat);
+		outputThread = new std::thread([this] { output->StartPlayback(); });
+
+		input = new WasapiInput(inputEndpoint, true, recordBufferDurationInSeconds);
+		inputThread = new std::thread([this] { input->StartRecording(); });
+	}
+	else
+	{
+		throw "Could not find a suitable wave format for adjusting volume."; // TODO: error handling
+	}
 }
 
 AdjustVolumeManager::~AdjustVolumeManager()
@@ -37,6 +50,100 @@ AdjustVolumeManager::~AdjustVolumeManager()
 	{
 		delete[] lastRecordedSegment;
 	}
+}
+
+/// <summary>
+/// Attempts to find a 2 channel, 48 kHz, 16-bit PCM wave format that the driver supports in exclusive mode.
+/// </summary>
+WAVEFORMATEX* AdjustVolumeManager::GetWaveFormat(const AudioEndpoint& endpoint)
+{
+	WAVEFORMATEX* result = NULL;
+
+	const IID IID_IAudioClient = __uuidof(IAudioClient);
+	IAudioClient* pAudioClient = NULL;
+	HRESULT hr = endpoint.Device->Activate(IID_IAudioClient, CLSCTX_ALL, NULL, (void**)&pAudioClient);
+	if (!FAILED(hr))
+	{
+		WAVEFORMATEXTENSIBLE* extensibleFormat = new WAVEFORMATEXTENSIBLE();
+		memset(extensibleFormat, 0, sizeof(WAVEFORMATEXTENSIBLE));
+		extensibleFormat->Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
+		extensibleFormat->Format.nChannels = 2;
+		extensibleFormat->Format.nSamplesPerSec = 48000;
+		SetBitsPerSample(&extensibleFormat->Format, 16);
+		extensibleFormat->Format.cbSize = 22;
+		extensibleFormat->Samples.wValidBitsPerSample = (WORD)extensibleFormat->Format.wBitsPerSample;
+		extensibleFormat->dwChannelMask = 0;
+		extensibleFormat->SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
+
+		WAVEFORMATEX* closestMatch = NULL;
+		hr = pAudioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, (WAVEFORMATEX*)extensibleFormat, &closestMatch);
+		if (hr == S_OK)
+		{
+			// this format is supported!
+			result = (WAVEFORMATEX*)extensibleFormat; // TODO: memory management for extensibleFormat, which is now leaking.
+		}
+		else if (closestMatch != NULL)
+		{
+			result = closestMatch; // TODO: memory management for closestMatch, which is now leaking.
+		}
+		else
+		{
+			extensibleFormat->dwChannelMask = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT;
+			hr = pAudioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, (WAVEFORMATEX*)extensibleFormat, &closestMatch);
+			if (hr == S_OK)
+			{
+				// this format is supported!
+				result = (WAVEFORMATEX*)extensibleFormat; // TODO: memory management for extensibleFormat, which is now leaking.
+			}
+			else if (closestMatch != NULL)
+			{
+				result = closestMatch; // TODO: memory management for closestMatch, which is now leaking.
+			}
+			else
+			{
+				WAVEFORMATEX* exFormat = new WAVEFORMATEX();
+				memset(exFormat, 0, sizeof(WAVEFORMATEX));
+				exFormat->wFormatTag = WAVE_FORMAT_PCM;
+				exFormat->nChannels = 2;
+				exFormat->nSamplesPerSec = 48000;
+				SetBitsPerSample(exFormat, 16);
+				exFormat->cbSize = 0;
+
+				hr = pAudioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, exFormat, &closestMatch);
+				if (hr == S_OK)
+				{
+					// this format is supported!
+					result = exFormat; // TODO: memory management for exFormat, which is now leaking.
+				}
+				else if (closestMatch != NULL)
+				{
+					result = closestMatch; // TODO: memory management for closestMatch, which is now leaking.
+				}
+				else
+				{
+					// Couldn't find a suitable format. TODO: error handling.
+				}
+
+				if (result != exFormat)
+				{
+					delete exFormat;
+				}
+			}
+		}
+		if (result != (WAVEFORMATEX*)extensibleFormat)
+		{
+			delete extensibleFormat;
+		}
+	}
+	SAFE_RELEASE(pAudioClient)
+	return result;
+}
+
+void AdjustVolumeManager::SetBitsPerSample(WAVEFORMATEX* wfx, WORD bitsPerSample)
+{
+	wfx->wBitsPerSample = bitsPerSample;
+	wfx->nBlockAlign = wfx->wBitsPerSample / 8 * wfx->nChannels;
+	wfx->nAvgBytesPerSec = wfx->nBlockAlign * wfx->nSamplesPerSec;
 }
 
 void AdjustVolumeManager::Tick()

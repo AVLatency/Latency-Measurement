@@ -28,6 +28,9 @@ private:
 
 	float* lastInputBufferCopy = nullptr;
 
+	WAVEFORMATEX* GetWaveFormat(const AudioEndpoint& endpoint);
+	void SetBitsPerSample(WAVEFORMATEX* wfx, WORD bitsPerSample);
+
 	void CopyBuffer(float* sourceBuffer, int sourceBufferLength);
 };
 

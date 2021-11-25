@@ -208,8 +208,7 @@ void TestManager::PopulateExtensibleFormats()
 	extensibleFormat.Format.nSamplesPerSec = 44100;
 	SetBitsPerSample(&extensibleFormat.Format, 16);
 	extensibleFormat.Format.cbSize = 22;
-	extensibleFormat.Samples.wValidBitsPerSample = (WORD)extensibleFormat.Format.nSamplesPerSec;
-	extensibleFormat.Samples.wSamplesPerBlock = 0;
+	extensibleFormat.Samples.wValidBitsPerSample = (WORD)extensibleFormat.Format.wBitsPerSample;
 	extensibleFormat.dwChannelMask = 0; // This could be all types of who knows!
 	extensibleFormat.SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
 
