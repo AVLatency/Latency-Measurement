@@ -189,9 +189,10 @@ bool Gui::DoGui()
                     {
                         ImGui::PlotLines("", adjustVolumeManager->lastRecordedSegment, adjustVolumeManager->lastRecordedSegmentLength/2, 0, NULL, -1, 1, ImVec2(100, 100), sizeof(float) * 2);
                     }
-                    //if (adjustVolumeManager != nullptr && adjustVolumeManager->input->recordingBuffer1 != nullptr)
+                    //if (adjustVolumeManager != nullptr && adjustVolumeManager->lastInputBufferCopy != nullptr)
                     //{
-                    //    ImGui::PlotLines("", adjustVolumeManager->input->recordingBuffer1, adjustVolumeManager->input->recordingBufferLength / 2, 0, NULL, -1, 1, ImVec2(100, 100), sizeof(float) * 2);
+                    //    auto buffer = adjustVolumeManager->lastInputBufferCopy;
+                    //    ImGui::PlotLines("", buffer, adjustVolumeManager->input->recordingBufferLength / 2, 0, NULL, -1, 1, ImVec2(400, 100), sizeof(float) * 2);
                     //}
                     ImGui::EndTable();
                 }
@@ -373,6 +374,8 @@ void Gui::RefreshAudioEndpoints()
 {
     outputAudioEndpoints = AudioEndpointHelper::GetAudioEndPoints(eRender);
     inputAudioEndpoints = AudioEndpointHelper::GetAudioEndPoints(eCapture);
+    outputDeviceIndex = 0;
+    inputDeviceIndex = 0;
 }
 
 void Gui::StartAjdustVolumeAudio()
