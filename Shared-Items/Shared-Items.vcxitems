@@ -17,6 +17,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)AdjustVolumeManager.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)AudioEndpoint.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)AudioEndpointHelper.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)RecordingConfiguration.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)stb_image.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)stb_image_dx11.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)WasapiInput.h" />
@@ -26,6 +27,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)AdjustVolumeManager.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)AudioEndpoint.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)AudioEndpointHelper.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)RecordingConfiguration.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)stb_image_dx11.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)WasapiInput.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)WasapiOutput.cpp" />
