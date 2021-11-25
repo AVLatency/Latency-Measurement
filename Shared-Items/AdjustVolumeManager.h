@@ -16,6 +16,8 @@ public:
 	float* leftChannelTickMonitorSamples = nullptr;
 	float* rightChannelTickMonitorSamples = nullptr;
 	float* rightChannelNormalizedTickMonitorSamples = nullptr;
+	float* leftChannelTickReferenceSamples = nullptr;
+	float* rightChannelNormalizedTickReferenceSamples = nullptr;
 	int tickMonitorSamplesLength = 0;
 
 	AdjustVolumeManager(const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint);

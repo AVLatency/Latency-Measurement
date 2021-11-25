@@ -1,5 +1,8 @@
 #include "AdjustVolumeManager.h"
 #include <WinBase.h>
+// for M_PI:
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 
 #define SAFE_RELEASE(punk)  \
@@ -61,6 +64,16 @@ void AdjustVolumeManager::SafeDeleteMonitorSamples()
 	{
 		delete[] rightChannelNormalizedTickMonitorSamples;
 		rightChannelNormalizedTickMonitorSamples = nullptr;
+	}
+	if (leftChannelTickReferenceSamples != nullptr)
+	{
+		delete[] leftChannelTickReferenceSamples;
+		leftChannelTickReferenceSamples = nullptr;
+	}
+	if (rightChannelNormalizedTickReferenceSamples != nullptr)
+	{
+		delete[] rightChannelNormalizedTickReferenceSamples;
+		rightChannelNormalizedTickReferenceSamples = nullptr;
 	}
 }
 
@@ -203,12 +216,15 @@ void AdjustVolumeManager::CopyBuffer(float* sourceBuffer, int sourceBufferLength
 	}
 
 	// Get some info about the ticks that were generated and create the sample buffers
-	int tickSamplesLength = input->waveFormat.Format.nSamplesPerSec / generatedSamples->GetTickFrequency(generatedSamples->WaveFormat->nSamplesPerSec);
+	int tickFrequency = generatedSamples->GetTickFrequency(generatedSamples->WaveFormat->nSamplesPerSec);
+	int tickSamplesLength = input->waveFormat.Format.nSamplesPerSec / tickFrequency;
 	tickMonitorSamplesLength = 3 * tickSamplesLength;
 	SafeDeleteMonitorSamples();
 	leftChannelTickMonitorSamples = new float[tickMonitorSamplesLength];
 	rightChannelTickMonitorSamples = new float[tickMonitorSamplesLength];
 	rightChannelNormalizedTickMonitorSamples = new float[tickMonitorSamplesLength];
+	leftChannelTickReferenceSamples = new float[tickMonitorSamplesLength];
+	rightChannelNormalizedTickReferenceSamples = new float[tickMonitorSamplesLength];
 
 	// Find the peaks in the sourceBuffer, excluding some padding on the left and right of the source buffer:
 	int padding = tickMonitorSamplesLength * 2;
@@ -260,6 +276,25 @@ void AdjustVolumeManager::CopyBuffer(float* sourceBuffer, int sourceBufferLength
 		rightChannelTickMonitorSamples[i] = rightSample;
 		float normalizedRightSample = rightSample / abs(rightSourceBuffer[rightMaxAbsIndex]);
 		rightChannelNormalizedTickMonitorSamples[i] = normalizedRightSample;
+	}
+
+
+	// Finally, generate the reference samples, using some of the variables from above:
+	for (int i = 0; i < tickMonitorSamplesLength; i++)
+	{
+		if (i >= tickSamplesLength && i < tickSamplesLength * 2)
+		{
+			double time = (double)(i - tickSamplesLength) / input->waveFormat.Format.nSamplesPerSec;
+			float sample = (float)sin(M_PI * 2 * tickFrequency * time);
+			leftChannelTickReferenceSamples[i] = sample * 0.75;
+			rightChannelNormalizedTickReferenceSamples[i] = sample;
+		}
+		else
+		{
+			// left or right padding
+			leftChannelTickReferenceSamples[i] = 0;
+			rightChannelNormalizedTickReferenceSamples[i] = 0;
+		}
 	}
 
 	delete[] leftSourceBuffer;
