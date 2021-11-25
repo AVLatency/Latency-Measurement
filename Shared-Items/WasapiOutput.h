@@ -7,7 +7,7 @@ class WasapiOutput
 public:
 	bool playbackInProgress = false;
 
-	///<param name="audioSamples">Memory for these samples will be owned by this object. They will be deleted in the deconstructor.</param>
+	///<param name="audioSamples">These provided samples must remain in memory so long as WasapiOutput might be reading them. They will not be deleted by WasapiOutput.</param>
 	WasapiOutput(const AudioEndpoint& endpoint, bool loop, float* audioSamples, int audioSamplesLength, WAVEFORMATEX* waveFormat);
 	~WasapiOutput();
 

@@ -9,6 +9,7 @@ Gui::~Gui()
     if (adjustVolumeManager != nullptr)
     {
         delete adjustVolumeManager;
+        adjustVolumeManager = nullptr;
     }
 }
 
@@ -403,7 +404,7 @@ void Gui::StartAjdustVolumeAudio()
     // Save the old one if it's still in the middle of working. Otherwise, make a new one.
     if (adjustVolumeManager != nullptr && !adjustVolumeManager->working)
     {
-        //delete adjustVolumeManager; // TODO: This is crashing: figure out why
+        delete adjustVolumeManager;
         adjustVolumeManager = nullptr;
     }
     if (adjustVolumeManager == nullptr)

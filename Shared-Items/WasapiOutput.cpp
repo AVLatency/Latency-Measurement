@@ -24,7 +24,6 @@ WasapiOutput::WasapiOutput(const AudioEndpoint& endpoint, bool loop, float* audi
 
 WasapiOutput::~WasapiOutput()
 {
-	delete[] audioSamples;
 }
 
 void WasapiOutput::StartPlayback()
