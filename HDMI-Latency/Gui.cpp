@@ -59,7 +59,7 @@ bool Gui::DoGui()
         "- Directly connect to DUT speaker output: Start the volume low as some amplifiers may be capable of high voltage outputs that could damage your audio input device.\n\n"
         "Your \"HDMI Audio Device\" must be capabile of analog audio output AND HDMI audio output at the same time. The time offset between analog audio output and HDMI audio output must be known. A list of capable devices can be found on the GitHub wiki.\n\n"
         "GitHub Wiki: github.com/AVLatency/Latency-Measurement/wiki");
-    float cableMapScale = 0.7 * Gui::DpiScale;
+    float cableMapScale = 0.55 * Gui::DpiScale;
     ImGui::Image((void*)resources.my_texture, ImVec2(resources.my_image_width * cableMapScale, resources.my_image_height * cableMapScale));
 
     if (ImGui::BeginTable("MainViewTopLevelTable", 2, ImGuiTableFlags_Borders))
@@ -144,6 +144,7 @@ bool Gui::DoGui()
                     }
                     ImGui::EndCombo();
                 }
+                ImGui::SameLine(); HelpMarker("Select your HDMI audio output.");
                 if (ImGui::BeginCombo("Input Device", inputAudioEndpoints[inputDeviceIndex].Name.c_str()))
                 {
                     for (int i = 0; i < inputAudioEndpoints.size(); i++)
