@@ -26,7 +26,6 @@ bool Gui::DoGui()
     const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x, main_viewport->WorkPos.y), ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImVec2(main_viewport->WorkSize.x, main_viewport->WorkSize.y), ImGuiCond_Always);
-    //ImGui::SetNextWindowContentSize(ImVec2(1000, 0.0f));
     ImGui::Begin("GUI", NULL, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_HorizontalScrollbar);
 
     bool openAboutDialog = false;
@@ -54,11 +53,10 @@ bool Gui::DoGui()
     ImGui::Text("Cable Diagram:");
     ImGui::SameLine(); HelpMarker(
         "Before starting you must connect your HDMI and audio cables as described in this diagram.\n\n"
-        "You can use either a line in or mic input on your computer, but when using certain microphones you may find the mic input works better.\n\n"
-        "To record the Device Under Test (DUT) you can use a microphone or directly connect to the headphone or speaker output of the DUT.\n"
-        "- If you use a microphone, make sure to position it as close as possible to the speaker (the tweeter if there are separate speaker components) because sound travels slowly.\n"
-        "- If you use DUT headphone output, remember that speaker and headphone output can sometimes have a very different latency.\n"
-        "- If you directly connect to DUT speaker output, remember to start the volume low as some devices may be capable of high voltage outputs that could, theoretically, damage your audio input device.\n\n"
+        "To record audio output from the Device Under Test (DUT) you can use a microphone or directly connect to the headphone or speaker output of the DUT.\n\n"
+        "- Microphone: Make sure to position the mic as close as possible to the speaker because sound travels measurably slow. Position the mic close to the tweeter if there are separate speaker components.\n"
+        "- DUT headphone output: Note that speaker and headphone output can sometimes have different latency.\n"
+        "- Directly connect to DUT speaker output: Start the volume low as some amplifiers may be capable of high voltage outputs that could damage your audio input device.\n\n"
         "Your \"HDMI Audio Device\" must be capabile of analog audio output AND HDMI audio output at the same time. The time offset between analog audio output and HDMI audio output must be known. A list of capable devices can be found on the GitHub wiki.\n\n"
         "GitHub Wiki: github.com/AVLatency/Latency-Measurement/wiki");
     float cableMapScale = 0.7 * Gui::DpiScale;
@@ -95,10 +93,10 @@ bool Gui::DoGui()
             ImGui::Text("Before starting, please connect your cables as described in the diagram above.");
             ImGui::Spacing();
             ImGui::Text("You can find help text by hovering your mouse over these:");
-            ImGui::SameLine(); HelpMarker("Click \"Let's Go!\" once you've connected all your HDMI and audio cables to get started!");
+            ImGui::SameLine(); HelpMarker("Click \"Next\" once you've connected all your HDMI and audio cables to get started!");
             ImGui::Spacing();
 
-            if (ImGui::Button("Let's Go!"))
+            if (ImGui::Button("Next"))
             {
                 openEdidReminderDialog = true;
             }
@@ -161,7 +159,8 @@ bool Gui::DoGui()
                     }
                     ImGui::EndCombo();
                 }
-                ImGui::SameLine(); HelpMarker("The input device must be configured to have at least two channels. It can be pretty much any sample rate and bit depth, but at least 48 kHz 16 bit is recommended.");
+                ImGui::SameLine(); HelpMarker("You can use either a line in or mic input on your computer, but when using certain microphones you may find the mic input works better.\n\n"
+                    "This input device must be configured to have at least two channels. It can be any sample rate and bit depth, but at least 48 kHz 16 bit is recommended.");
 
                 ImGui::Spacing();
                 if (ImGui::Button("Adjust Volumes"))
