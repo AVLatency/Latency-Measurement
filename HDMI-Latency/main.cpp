@@ -9,6 +9,7 @@
 #include "Gui.h"
 #include "FontHelper.h"
 #include "resource.h"
+#include <shellscalingapi.h>
 
 // Data
 static ID3D11Device*            g_pd3dDevice = NULL;
@@ -27,10 +28,21 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 int main(int, char**)
 {
     // Create application window
-    //ImGui_ImplWin32_EnableDpiAwareness();
+    ImGui_ImplWin32_EnableDpiAwareness();
+
+    int windowWidth = 860;
+    int windowHeight = 800;
+    RECT r;
+    r.left = 100;
+    r.top = 100;
+    r.right = r.left + 860 * 1.5; // take a guess that they might have a 1.5 DPI scaling factor when figuring out where the window might end up
+    r.bottom = r.top + 800 * 1.5;
+    const auto mon = ::MonitorFromRect(&r, MONITOR_DEFAULTTOPRIMARY);
+    Gui::DpiScale = ImGui_ImplWin32_GetDpiScaleForMonitor(mon);
+
     WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, _T("AV Latency.com HDMI Latency"), NULL };
     ::RegisterClassEx(&wc);
-    HWND hwnd = ::CreateWindow(wc.lpszClassName, _T("AV Latency.com HDMI Latency"), WS_OVERLAPPEDWINDOW, 100, 100, 860, 800, NULL, NULL, wc.hInstance, NULL);
+    HWND hwnd = ::CreateWindow(wc.lpszClassName, _T("AV Latency.com HDMI Latency"), WS_OVERLAPPEDWINDOW, r.left, r.top, windowWidth * Gui::DpiScale, windowHeight * Gui::DpiScale, NULL, NULL, wc.hInstance, NULL);
 
     // Initialize Direct3D
     if (!CreateDeviceD3D(hwnd))
@@ -76,7 +88,11 @@ int main(int, char**)
     ImGui_ImplWin32_Init(hwnd);
     ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
 
-    FontHelper::LoadFonts(wc.hInstance, io, FONT_REGULAR, FONT_BOLD);
+    // Refresh this dpiScale variable in case the window was actually created on a different monitor than we anticipated previously:
+    Gui::DpiScale = ImGui_ImplWin32_GetDpiScaleForHwnd(hwnd);
+
+    FontHelper::LoadFonts(wc.hInstance, io, FONT_REGULAR, FONT_BOLD, Gui::DpiScale);
+    style.ScaleAllSizes(Gui::DpiScale);
 
     Resources resources(wc.hInstance, g_pd3dDevice);
     Gui gui(resources);

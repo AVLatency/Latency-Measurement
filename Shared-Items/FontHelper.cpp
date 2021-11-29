@@ -1,9 +1,9 @@
 #include "FontHelper.h"
-
+#include <cmath>
 ImFont* FontHelper::BoldFont = nullptr;
 ImFont* FontHelper::HeaderFont = nullptr;
 
-void FontHelper::LoadFonts(HINSTANCE hInstance, ImGuiIO& io, int regularFontId, int boldFontId)
+void FontHelper::LoadFonts(HINSTANCE hInstance, ImGuiIO& io, int regularFontId, int boldFontId, float dpiScale)
 {
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
@@ -14,9 +14,9 @@ void FontHelper::LoadFonts(HINSTANCE hInstance, ImGuiIO& io, int regularFontId, 
     // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
 
     // First is default, don't need to save a ref to it:
-    LoadFont(hInstance, io, regularFontId, 15.0f);
-    FontHelper::BoldFont = LoadFont(hInstance, io, boldFontId, 15.0f);
-    FontHelper::HeaderFont = LoadFont(hInstance, io, boldFontId, 20.0f);
+    LoadFont(hInstance, io, regularFontId, std::floor(dpiScale * 15));
+    FontHelper::BoldFont = LoadFont(hInstance, io, boldFontId, std::floor(dpiScale * 15));
+    FontHelper::HeaderFont = LoadFont(hInstance, io, boldFontId, std::floor(dpiScale * 20));
 
     // TODO: Unicode support: ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
     // IM_ASSERT(font != NULL);

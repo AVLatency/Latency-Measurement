@@ -4,6 +4,7 @@
 #include "AudioEndpointHelper.h"
 #include "FontHelper.h"
 
+float Gui::DpiScale = 1.0f;
 
 Gui::~Gui()
 {
@@ -56,7 +57,7 @@ bool Gui::DoGui()
         "- If you directly connect to DUT speaker output, remember to start the volume low as some devices may be capable of high voltage outputs that could, theoretically, damage your audio input device.\n\n"
         "Your \"HDMI Audio Device\" must be capabile of analog audio output AND HDMI audio output at the same time. The time offset between analog audio output and HDMI audio output must be known. A list of capable devices can be found on the GitHub wiki.\n\n"
         "GitHub Wiki: github.com/AVLatency/Latency-Measurement/wiki");
-    float cableMapScale = 0.7;
+    float cableMapScale = 0.7 * Gui::DpiScale;
     ImGui::Image((void*)resources.my_texture, ImVec2(resources.my_image_width * cableMapScale, resources.my_image_height * cableMapScale));
 
     if (ImGui::BeginTable("MainViewTopLevelTable", 2, ImGuiTableFlags_Borders))
@@ -179,7 +180,8 @@ bool Gui::DoGui()
                 ImGui::SameLine(); HelpMarker("Adjust the volume of your input device through the Windows control panel to make the monitor amplitude fit with some headroom to spare. "
                     "You may need to turn down the Microphone Boost in the Levels section of Additional device properties.");
 
-                float columnWidth = 110;
+                float columnWidth = 110 * Gui::DpiScale;
+                ImVec2 plotDimensions(100 * Gui::DpiScale, 100 * Gui::DpiScale);
 
                 if (ImGui::BeginTable("LeftChannelVolumeTable", 2, ImGuiTableFlags_Borders))
                 {
@@ -189,13 +191,13 @@ bool Gui::DoGui()
                     ImGui::Text("Reference Image");
                     if (adjustVolumeManager != nullptr && adjustVolumeManager->leftChannelTickReferenceSamples != nullptr)
                     {
-                        ImGui::PlotLines("", adjustVolumeManager->leftChannelTickReferenceSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, ImVec2(100, 100));
+                        ImGui::PlotLines("", adjustVolumeManager->leftChannelTickReferenceSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
                     }
                     ImGui::TableSetColumnIndex(1);
                     ImGui::Text("Monitor");
                     if (adjustVolumeManager != nullptr && adjustVolumeManager->leftChannelTickMonitorSamples != nullptr)
                     {
-                        ImGui::PlotLines("", adjustVolumeManager->leftChannelTickMonitorSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, ImVec2(100, 100));
+                        ImGui::PlotLines("", adjustVolumeManager->leftChannelTickMonitorSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
                     }
                     //if (adjustVolumeManager != nullptr && adjustVolumeManager->lastInputBufferCopy != nullptr)
                     //{
@@ -216,7 +218,7 @@ bool Gui::DoGui()
                     ImGui::Text("Reference Image\n(Normalized)");
                     if (adjustVolumeManager != nullptr && adjustVolumeManager->rightChannelNormalizedTickReferenceSamples != nullptr)
                     {
-                        ImGui::PlotLines("", adjustVolumeManager->rightChannelNormalizedTickReferenceSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, ImVec2(100, 100));
+                        ImGui::PlotLines("", adjustVolumeManager->rightChannelNormalizedTickReferenceSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
                     }
                     ImGui::TableSetColumnIndex(1);
 
@@ -227,13 +229,13 @@ bool Gui::DoGui()
                         ImGui::Text("Monitor\n(Normalized)");
                         if (adjustVolumeManager != nullptr && adjustVolumeManager->rightChannelNormalizedTickMonitorSamples != nullptr)
                         {
-                            ImGui::PlotLines("", adjustVolumeManager->rightChannelNormalizedTickMonitorSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, ImVec2(100, 100));
+                            ImGui::PlotLines("", adjustVolumeManager->rightChannelNormalizedTickMonitorSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
                         }
                         ImGui::TableSetColumnIndex(1);
                         ImGui::Text("Monitor\n(Raw)");
                         if (adjustVolumeManager != nullptr && adjustVolumeManager->rightChannelTickMonitorSamples != nullptr)
                         {
-                            ImGui::PlotLines("", adjustVolumeManager->rightChannelTickMonitorSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, ImVec2(100, 100));
+                            ImGui::PlotLines("", adjustVolumeManager->rightChannelTickMonitorSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
                         }
                         ImGui::EndTable();
                     }

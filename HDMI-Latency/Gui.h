@@ -9,6 +9,8 @@
 class Gui
 {
 public:
+	static float DpiScale;
+
 	Gui(Resources& loadedResources) : resources(loadedResources) {};
 	~Gui();
 	bool DoGui();
