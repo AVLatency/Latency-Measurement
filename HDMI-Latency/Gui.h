@@ -24,6 +24,8 @@ private:
 	AdjustVolumeManager* adjustVolumeManager = nullptr;
 
 	void HelpMarker(const char* desc);
+	void OptionallyBoldText(const char* text, bool bold);
+
 	void RefreshAudioEndpoints();
 
 	void StartAjdustVolumeAudio();

@@ -13,6 +13,8 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 HDMI_CABLE_MAP RCDATA "HDMI-Latency_cable-map.png"
+FONT_REGULAR RCDATA "../Shared-Items/Fonts/Inter-Regular.ttf"
+FONT_BOLD RCDATA "../Shared-Items/Fonts/Inter-Bold.ttf"
 
 /////////////////////////////////////////////////////////////////////////////
 // English (United States) resources

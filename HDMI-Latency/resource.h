@@ -3,6 +3,8 @@
 // Used by HDMI-Latency.rc
 //
 #define HDMI_CABLE_MAP 300
+#define FONT_REGULAR 401
+#define FONT_BOLD 402
 
 // Next default values for new objects
 // 

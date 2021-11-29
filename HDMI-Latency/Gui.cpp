@@ -2,6 +2,7 @@
 #include "imgui.h"
 #include "resource.h"
 #include "AudioEndpointHelper.h"
+#include "FontHelper.h"
 
 
 Gui::~Gui()
@@ -64,17 +65,17 @@ bool Gui::DoGui()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::Text("1) Getting Started");
+        OptionallyBoldText("1) Getting Started", state == GuiState::GettingStarted);
         ImGui::Spacing();
-        ImGui::Text("2) Input/Output Devices");
+        OptionallyBoldText("2) Input/Output Devices", state == GuiState::SelectAudioDevices);
         ImGui::Spacing();
-        ImGui::Text("3) Adjust Volumes");
+        OptionallyBoldText("3) Adjust Volumes", state == GuiState::AdjustVolume || state == GuiState::CancellingAdjustVolume || state == GuiState::FinishingAdjustVolume);
         ImGui::Spacing();
-        ImGui::Text("4) Measurement Config");
+        OptionallyBoldText("4) Measurement Config", state == GuiState::MeasurementConfig);
         ImGui::Spacing();
-        ImGui::Text("5) Measurement");
+        OptionallyBoldText("5) Measurement", state == GuiState::Measuring || state == GuiState::CancellingMeasuring);
         ImGui::Spacing();
-        ImGui::Text("6) Results");
+        OptionallyBoldText("6) Results", state == GuiState::Results);
         ImGui::Spacing();
 
         ImGui::TableSetColumnIndex(1);
@@ -388,6 +389,19 @@ void Gui::HelpMarker(const char* desc)
         ImGui::TextUnformatted(desc);
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
+    }
+}
+
+void Gui::OptionallyBoldText(const char* text, bool bold)
+{
+    if (bold)
+    {
+        ImGui::PushFont(FontHelper::BoldFont);
+    }
+    ImGui::Text(text);
+    if (bold)
+    {
+        ImGui::PopFont();
     }
 }
 
