@@ -23,6 +23,21 @@ bool Gui::DoGui()
 
     ImGui::PushFont(FontHelper::RegularFont);
 
+    auto csvInputFilter = [](ImGuiInputTextCallbackData* data)
+    {
+        if (strchr("\"", (char)data->EventChar)
+            || strchr(",", (char)data->EventChar)
+            || strchr("\n", (char)data->EventChar)
+            || strchr("\r", (char)data->EventChar))
+        {
+            return 1;
+        }
+        else
+        {
+            return 0;
+        }
+    };
+
     const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x, main_viewport->WorkPos.y), ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImVec2(main_viewport->WorkSize.x, main_viewport->WorkSize.y), ImGuiCond_Always);
@@ -60,7 +75,7 @@ bool Gui::DoGui()
         "Your \"HDMI Audio Device\" must be capabile of analog audio output AND HDMI audio output at the same time. The time offset between analog audio output and HDMI audio output must be known. A list of capable devices can be found on the GitHub wiki.\n\n"
         "GitHub Wiki: github.com/AVLatency/Latency-Measurement/wiki");
     float cableMapScale = 0.55 * Gui::DpiScale;
-    ImGui::Image((void*)resources.my_texture, ImVec2(resources.my_image_width * cableMapScale, resources.my_image_height * cableMapScale));
+    ImGui::Image((void*)resources.CableMapTexture, ImVec2(resources.CableMapTextureWidth * cableMapScale, resources.CableMapTextureHeight * cableMapScale));
 
     if (ImGui::BeginTable("MainViewTopLevelTable", 2, ImGuiTableFlags_Borders))
     {
@@ -180,24 +195,29 @@ bool Gui::DoGui()
             if (state >= GuiState::AdjustVolume)
             {
                 ImGui::Spacing();
+                ImGui::PushFont(FontHelper::BoldFont);
                 ImGui::Text("Input: Left Channel (HDMI Audio Device)");
+                ImGui::PopFont();
                 ImGui::SameLine(); HelpMarker("Adjust the volume of your input device through the Windows control panel to make the monitor amplitude fit with some headroom to spare. "
                     "You may need to turn down the Microphone Boost in the Levels section of Additional device properties.");
 
-                float columnWidth = 110 * Gui::DpiScale;
-                ImVec2 plotDimensions(100 * Gui::DpiScale, 100 * Gui::DpiScale);
+                float columnWidth = 110 * DpiScale;
+                ImVec2 plotDimensions(100 * DpiScale, 100 * DpiScale);
 
                 if (ImGui::BeginTable("LeftChannelVolumeTable", 2, ImGuiTableFlags_Borders))
                 {
-                    ImGui::TableSetupColumn("column", ImGuiTableColumnFlags_WidthFixed, columnWidth);
+                    ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, columnWidth);
+                    ImGui::TableSetupColumn("column2", ImGuiTableColumnFlags_WidthFixed, columnWidth);
+
                     ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
+
+                    ImGui::TableNextColumn();
                     ImGui::Text("Reference Image");
                     if (adjustVolumeManager != nullptr && adjustVolumeManager->leftChannelTickReferenceSamples != nullptr)
                     {
                         ImGui::PlotLines("", adjustVolumeManager->leftChannelTickReferenceSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
                     }
-                    ImGui::TableSetColumnIndex(1);
+                    ImGui::TableNextColumn();
                     ImGui::Text("Monitor");
                     if (adjustVolumeManager != nullptr && adjustVolumeManager->leftChannelTickMonitorSamples != nullptr)
                     {
@@ -212,30 +232,35 @@ bool Gui::DoGui()
                 }
 
                 ImGui::Spacing();
+                ImGui::PushFont(FontHelper::BoldFont);
                 ImGui::Text("Input: Right Channel (DUT)");
+                ImGui::PopFont();
                 ImGui::SameLine(); HelpMarker("Adjust the output volume of your Device Under Test (DUT) to give a consistent normalized recording.");
                 if (ImGui::BeginTable("RightChannelVolumeTable", 2, ImGuiTableFlags_Borders))
                 {
-                    ImGui::TableSetupColumn("column", ImGuiTableColumnFlags_WidthFixed, columnWidth);
+                    ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, columnWidth);
+                    ImGui::TableSetupColumn("column2", ImGuiTableColumnFlags_WidthFixed, columnWidth * 2.5);
+
                     ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
+
+                    ImGui::TableNextColumn();
                     ImGui::Text("Reference Image\n(Normalized)");
                     if (adjustVolumeManager != nullptr && adjustVolumeManager->rightChannelNormalizedTickReferenceSamples != nullptr)
                     {
                         ImGui::PlotLines("", adjustVolumeManager->rightChannelNormalizedTickReferenceSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
                     }
-                    ImGui::TableSetColumnIndex(1);
 
+                    ImGui::TableNextColumn();
                     if (ImGui::BeginTable("RightChannelVolumeMontiorsTable", 2, ImGuiTableFlags_SizingFixedFit))
                     {
                         ImGui::TableNextRow();
-                        ImGui::TableSetColumnIndex(0);
+                        ImGui::TableNextColumn();
                         ImGui::Text("Monitor\n(Normalized)");
                         if (adjustVolumeManager != nullptr && adjustVolumeManager->rightChannelNormalizedTickMonitorSamples != nullptr)
                         {
                             ImGui::PlotLines("", adjustVolumeManager->rightChannelNormalizedTickMonitorSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
                         }
-                        ImGui::TableSetColumnIndex(1);
+                        ImGui::TableNextColumn();
                         ImGui::Text("Monitor\n(Raw)");
                         if (adjustVolumeManager != nullptr && adjustVolumeManager->rightChannelTickMonitorSamples != nullptr)
                         {
@@ -294,7 +319,79 @@ bool Gui::DoGui()
                 ImGui::BeginDisabled();
             }
 
-            ImGui::Text("TODO: Measurement configf");
+            // TODO: probably need an image spacer to force table width :(((
+            ImGui::Spacing();
+            if (ImGui::BeginTable("MeasurementConfig", 3, ImGuiTableFlags_Borders, ImVec2(1000 * DpiScale, 0)))
+            {
+                //ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, 200 * DpiScale);
+                //ImGui::TableSetupColumn("column2", ImGuiTableColumnFlags_WidthFixed, 100 * DpiScale);
+                //ImGui::TableSetupColumn("column3", ImGuiTableColumnFlags_WidthFixed, 300 * DpiScale);
+
+                ImGui::TableNextRow();
+
+                ImGui::TableNextColumn();
+                ImGui::PushFont(FontHelper::BoldFont);
+                ImGui::Text("Output Offset Profile");
+                ImGui::PopFont();
+                ImGui::Spacing();
+
+                std::vector<const char*> outputOffsetProfiles;
+                outputOffsetProfiles.push_back("HDV-MB01");
+                outputOffsetProfiles.push_back("None");
+
+                if (ImGui::BeginListBox("", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing())))
+                {
+                    for (int n = 0; n < outputOffsetProfiles.size(); n++)
+                    {
+                        const bool is_selected = (outputOffsetProfileIndex == n);
+                        if (ImGui::Selectable(outputOffsetProfiles[n], is_selected))
+                        {
+                            outputOffsetProfileIndex = n;
+                        }
+                        if (outputOffsetProfiles[n] == "HDV-MB01")
+                        {
+                            ImGui::SameLine();
+                            HelpMarker("Also sold under these names:\n\n"
+                                "J-Tech Digital JTD18G - H5CH\n"
+                                "Monoprice Blackbird 24278\n"
+                                "OREI HDA - 912\n");
+                        }
+                        // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                        if (is_selected)
+                        {
+                            ImGui::SetItemDefaultFocus();
+                        }
+                    }
+                    ImGui::EndListBox();
+                }
+                ImGui::Spacing();
+
+                if (outputOffsetProfiles[outputOffsetProfileIndex] == "HDV-MB01")
+                {
+                    float imageScale = 0.55 * Gui::DpiScale;
+                    ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
+                }
+                else if (outputOffsetProfiles[outputOffsetProfileIndex] == "None")
+                {
+                    ImGui::InputText("HDMI Audio Device name", HDMIAudioDeviceNameInput, IM_ARRAYSIZE(HDMIAudioDeviceNameInput), ImGuiInputTextFlags_CallbackCharFilter, csvInputFilter);
+                    ImGui::TextWrapped("Warning: using an HDMI Audio Device that has does not have an output offset profile may result in inaccurate measurements!");
+                }
+
+                ImGui::TableNextColumn();
+                ImGui::PushFont(FontHelper::BoldFont);
+                ImGui::Text("Audio Formats");
+                ImGui::PopFont();
+                ImGui::Spacing();
+
+
+                ImGui::TableNextColumn();
+                ImGui::PushFont(FontHelper::BoldFont);
+                ImGui::Text("Test Notes");
+                ImGui::PopFont();
+                ImGui::Spacing();
+
+                ImGui::EndTable();
+            }
 
             if (disabled)
             {
@@ -302,6 +399,7 @@ bool Gui::DoGui()
                 disabled = false;
             }
 
+            ImGui::Spacing();
             if (state == GuiState::MeasurementConfig)
             {
                 if (ImGui::Button("Start"))
@@ -364,6 +462,10 @@ bool Gui::DoGui()
     {
         ImGui::Text("Set the EDID mode of your HDMI Audio Device to match the EDID of your DUT.");
         ImGui::Spacing();
+
+        float imageScale = 0.6 * Gui::DpiScale;
+        ImGui::Image((void*)resources.EDIDModeTexture, ImVec2(resources.EDIDModeTextureWidth * imageScale, resources.EDIDModeTextureHeight * imageScale));
+
         ImGui::Text("For HDMI audio extractors, set the switch to \"TV\" or \"Passthrough\".");
         ImGui::Spacing();
 

@@ -25,6 +25,9 @@ private:
 	std::vector<AudioEndpoint> outputAudioEndpoints;
 	std::vector<AudioEndpoint> inputAudioEndpoints;
 
+	int outputOffsetProfileIndex = 0;
+	char HDMIAudioDeviceNameInput[128] = "Unknown";
+
 	AdjustVolumeManager* adjustVolumeManager = nullptr;
 
 	void HelpMarker(const char* desc);
