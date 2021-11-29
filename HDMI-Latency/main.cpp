@@ -117,6 +117,18 @@ int main(int, char**)
         if (done)
             break;
 
+        if (Gui::DpiScaleChanged)
+        {
+            // Reload the fonts at the new scale
+            FontHelper::LoadFonts(wc.hInstance, io, FONT_REGULAR, FONT_BOLD, Gui::DpiScale);
+
+            // Resize the styles
+            ImGuiStyle& style = ImGui::GetStyle();
+            style.ScaleAllSizes(Gui::DpiScale / Gui::PreviousDpiScale);
+
+            Gui::DpiScaleChanged = false;
+        }
+
         // Start the Dear ImGui frame
         ImGui_ImplDX11_NewFrame();
         ImGui_ImplWin32_NewFrame();
@@ -239,13 +251,20 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
         ::PostQuitMessage(0);
         return 0;
     case WM_DPICHANGED:
-        if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DpiEnableScaleViewports)
-        {
-            //const int dpi = HIWORD(wParam);
-            //printf("WM_DPICHANGED to %d (%.0f%%)\n", dpi, (float)dpi / 96.0f * 100.0f);
-            const RECT* suggested_rect = (RECT*)lParam;
-            ::SetWindowPos(hWnd, NULL, suggested_rect->left, suggested_rect->top, suggested_rect->right - suggested_rect->left, suggested_rect->bottom - suggested_rect->top, SWP_NOZORDER | SWP_NOACTIVATE);
-        }
+        auto g_dpi = HIWORD(wParam);
+        RECT* const prcNewWindow = (RECT*)lParam;
+        SetWindowPos(hWnd,
+            NULL,
+            prcNewWindow->left,
+            prcNewWindow->top,
+            prcNewWindow->right - prcNewWindow->left,
+            prcNewWindow->bottom - prcNewWindow->top,
+            SWP_NOZORDER | SWP_NOACTIVATE);
+
+        Gui::PreviousDpiScale = Gui::DpiScale;
+        Gui::DpiScale = (float)g_dpi / USER_DEFAULT_SCREEN_DPI;
+        Gui::DpiScaleChanged = true;
+
         break;
     }
     return ::DefWindowProc(hWnd, msg, wParam, lParam);

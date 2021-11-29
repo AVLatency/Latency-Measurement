@@ -10,6 +10,8 @@ class Gui
 {
 public:
 	static float DpiScale;
+	static bool DpiScaleChanged;
+	static float PreviousDpiScale;
 
 	Gui(Resources& loadedResources) : resources(loadedResources) {};
 	~Gui();

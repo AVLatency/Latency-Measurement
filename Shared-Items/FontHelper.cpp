@@ -1,10 +1,23 @@
 #include "FontHelper.h"
 #include <cmath>
+#include "imgui_impl_dx11.h"
+
+ImFont* FontHelper::RegularFont = nullptr;
 ImFont* FontHelper::BoldFont = nullptr;
 ImFont* FontHelper::HeaderFont = nullptr;
 
+bool FontHelper::initialized = false;
+
 void FontHelper::LoadFonts(HINSTANCE hInstance, ImGuiIO& io, int regularFontId, int boldFontId, float dpiScale)
 {
+    if (initialized)
+    {
+        // TODO: fix memory leak with fonts from previous DPI scales.
+        // The following seems to crash. Deleting the ImFont objects also results in a crash later on.
+        // ...Not sure how to delete the old ones from memory.
+        //io.Fonts->Clear();
+    }
+
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
     // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
@@ -14,12 +27,22 @@ void FontHelper::LoadFonts(HINSTANCE hInstance, ImGuiIO& io, int regularFontId, 
     // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
 
     // First is default, don't need to save a ref to it:
-    LoadFont(hInstance, io, regularFontId, std::floor(dpiScale * 15));
-    FontHelper::BoldFont = LoadFont(hInstance, io, boldFontId, std::floor(dpiScale * 15));
-    FontHelper::HeaderFont = LoadFont(hInstance, io, boldFontId, std::floor(dpiScale * 20));
+    RegularFont = LoadFont(hInstance, io, regularFontId, std::floor(dpiScale * 15));
+    IM_ASSERT(RegularFont != NULL);
+    BoldFont = LoadFont(hInstance, io, boldFontId, std::floor(dpiScale * 15));
+    IM_ASSERT(BoldFont != NULL);
+    HeaderFont = LoadFont(hInstance, io, boldFontId, std::floor(dpiScale * 20));
+    IM_ASSERT(HeaderFont != NULL);
 
     // TODO: Unicode support: ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
     // IM_ASSERT(font != NULL);
+
+    if (initialized)
+    {
+        io.Fonts->Build();
+        ImGui_ImplDX11_InvalidateDeviceObjects(); // Fixes crash https://github.com/ocornut/imgui/issues/2311#issuecomment-460039964
+    }
+    initialized = true;
 }
 
 ImFont* FontHelper::LoadFont(HINSTANCE hInstance, ImGuiIO& io, int fontResourceId, float fontSize)

@@ -5,6 +5,8 @@
 #include "FontHelper.h"
 
 float Gui::DpiScale = 1.0f;
+bool Gui::DpiScaleChanged = false;
+float Gui::PreviousDpiScale = 1.0f;
 
 Gui::~Gui()
 {
@@ -18,6 +20,8 @@ Gui::~Gui()
 bool Gui::DoGui()
 {
     bool done = false;
+
+    ImGui::PushFont(FontHelper::RegularFont);
 
     const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x, main_viewport->WorkPos.y), ImGuiCond_Always);
@@ -375,6 +379,8 @@ bool Gui::DoGui()
 
         ImGui::EndPopup();
     }
+
+    ImGui::PopFont();
 
     return done;
 }
