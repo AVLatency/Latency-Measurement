@@ -77,7 +77,7 @@ bool Gui::DoGui()
     float cableMapScale = 0.55 * Gui::DpiScale;
     ImGui::Image((void*)resources.CableMapTexture, ImVec2(resources.CableMapTextureWidth * cableMapScale, resources.CableMapTextureHeight * cableMapScale));
 
-    if (ImGui::BeginTable("MainViewTopLevelTable", 2, ImGuiTableFlags_Borders))
+    if (ImGui::BeginTable("MainViewTopLevelTable", 2, ImGuiTableFlags_Borders, ImVec2(1200 * DpiScale, 0)))
     {
         ImGui::TableSetupColumn("MainViewTopLevelTableCol1", ImGuiTableColumnFlags_WidthFixed);
 

@@ -30,13 +30,13 @@ int main(int, char**)
     // Create application window
     ImGui_ImplWin32_EnableDpiAwareness();
 
-    int windowWidth = 860;
-    int windowHeight = 800;
+    int windowWidth = 1280;
+    int windowHeight = 720;
     RECT r;
     r.left = 100;
     r.top = 100;
-    r.right = r.left + 860 * 1.5; // take a guess that they might have a 1.5 DPI scaling factor when figuring out where the window might end up
-    r.bottom = r.top + 800 * 1.5;
+    r.right = r.left + windowWidth * 1.5; // take a guess that they might have a 1.5 DPI scaling factor when figuring out where the window might end up
+    r.bottom = r.top + windowHeight * 1.5;
     const auto mon = ::MonitorFromRect(&r, MONITOR_DEFAULTTOPRIMARY);
     Gui::DpiScale = ImGui_ImplWin32_GetDpiScaleForMonitor(mon);
 
