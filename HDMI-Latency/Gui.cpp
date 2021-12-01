@@ -415,10 +415,31 @@ bool Gui::DoGui()
                 {
                     for (AudioFormat& format : supportedFormats)
                     {
+                        if (true)
+                        {
+                            ImGui::Text("[U]"); ImGui::SameLine();
+                        }
+                        ImGui::SetCursorPosX(DpiScale * 35);
                         ImGui::Checkbox(format.FormatString.c_str(), &format.UserSelected);
+                        if (format.WaveFormat->nChannels == 2 && format.WaveFormat->nSamplesPerSec == 48000 && format.WaveFormat->wBitsPerSample == 16)
+                        {
+                            ImGui::SameLine();
+                            ImGui::PushFont(FontHelper::BoldFont);
+                            ImGui::Text("[Leo Bodnar]");
+                            ImGui::PopFont();
+                            ImGui::SameLine(); HelpMarker("This audio format is used by the Leo Bodnar Input Lag Tester. "
+                                "For instructions on how to measure and calculate video latency with the Leo Bodnar tool and how to calculate lip sync error with the results from this software, visit avlatency.com.\n\n"
+                                "Please note that some TVs will switch to \"PC\" video mode when connected to a computer and will not switch to \"PC\" video mode when using the Leo Bodnar tester. "
+                                "Please ensure both tests are using the same video mode to accurately calculate lip sync error.");
+                        }
                     }
                     ImGui::EndChild();
                 }
+
+                ImGui::Text("[V] Verified");
+                ImGui::SameLine(); HelpMarker("The output offset for this audio format has been verified using a tool such as the Murideo SEVEN Generator.");
+                ImGui::Text("[U] Unverified");
+                ImGui::SameLine(); HelpMarker("The output offset for this audio format has not been verified using tools such as the Murideo SEVEN Generator. Measurement results may not be accurate, depending on whether the HDMI Audio Device has a different output offset for different formats. This does not affect the consistency of results.");
 
                 if (ImGui::TreeNode("Channel descriptions"))
                 {
@@ -549,7 +570,9 @@ bool Gui::DoGui()
 // In your own code you may want to display an actual icon if you are using a merged icon fonts (see docs/FONTS.md)
 void Gui::HelpMarker(const char* desc)
 {
+    ImGui::PushFont(FontHelper::BoldFont);
     ImGui::TextDisabled("(?)");
+    ImGui::PopFont();
     if (ImGui::IsItemHovered())
     {
         ImGui::BeginTooltip();

@@ -34,6 +34,11 @@ AudioEndpoint::~AudioEndpoint()
 
 void AudioEndpoint::PopulateSupportedFormats()
 {
+	if (SupportedFormats.size() > 0)
+	{
+		return;
+	}
+
 	const IID IID_IAudioClient = __uuidof(IAudioClient);
 	IAudioClient* pAudioClient = NULL;
 	HRESULT hr = Device->Activate(IID_IAudioClient, CLSCTX_ALL, NULL, (void**)&pAudioClient);
