@@ -329,7 +329,7 @@ bool Gui::DoGui()
             if (ImGui::BeginTable("MeasurementConfig", 3))
             {
                 ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, 150 * DpiScale);
-                ImGui::TableSetupColumn("column2", ImGuiTableColumnFlags_WidthFixed, 200 * DpiScale);
+                ImGui::TableSetupColumn("column2", ImGuiTableColumnFlags_WidthFixed, 400 * DpiScale);
 
                 ImGui::TableNextRow();
 
@@ -339,6 +339,7 @@ bool Gui::DoGui()
                 ImGui::PopFont();
                 ImGui::Spacing();
 
+                // TODO: Actually load and list the output offset profiles
                 std::vector<const char*> outputOffsetProfiles;
                 outputOffsetProfiles.push_back("HDV-MB01");
                 outputOffsetProfiles.push_back("None");
@@ -386,6 +387,57 @@ bool Gui::DoGui()
                 ImGui::PopFont();
                 ImGui::Spacing();
 
+                std::vector<AudioFormat>& supportedFormats = outputAudioEndpoints[outputDeviceIndex].SupportedFormats;
+
+                if (ImGui::Button("Select Default"))
+                {
+                    for (AudioFormat& format : supportedFormats)
+                    {
+                        format.UserSelected = false;
+                    }
+                    outputAudioEndpoints[outputDeviceIndex].SelectDefaultFormats();
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Select All"))
+                {
+                    for (AudioFormat& format : supportedFormats)
+                    {
+                        format.UserSelected = true;
+                    }
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Select None"))
+                {
+                    for (AudioFormat& format : supportedFormats)
+                    {
+                        format.UserSelected = false;
+                    }
+                }
+
+                if (ImGui::BeginChild("formatsChildWindow", ImVec2(0, 300), true, ImGuiWindowFlags_HorizontalScrollbar))
+                {
+                    for (AudioFormat& format : supportedFormats)
+                    {
+                        ImGui::Checkbox(format.FormatString.c_str(), &format.UserSelected);
+                    }
+                    ImGui::EndChild();
+                }
+
+                if (ImGui::TreeNode("Channel descriptions"))
+                {
+                    ImGui::Text("FL: Front Left\n"
+                        "FR: Front Right\n"
+                        "FC: Front Center\n"
+                        "RC: Rear Center\n"
+                        "RL: Rear Left (a.k.a. Side Left or Surround Left)\n"
+                        "RR: Rear Right (a.k.a. Side Right or Surround Right)\n"
+                        "RLC: Rear Left of Center\n"
+                        "RRC: Rear Right of Center\n"
+                        "FLC: Front Left of Center\n"
+                        "FRC: Front Right of Center\n"
+                        "LFE: Low Frequency Effect (subwoofer)\n");
+                    ImGui::TreePop();
+                }
 
                 ImGui::TableNextColumn();
                 ImGui::PushFont(FontHelper::BoldFont);

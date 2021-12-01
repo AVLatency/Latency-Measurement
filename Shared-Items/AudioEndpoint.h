@@ -19,8 +19,11 @@ public:
 	~AudioEndpoint();
 
 	void PopulateSupportedFormats();
+	void SelectDefaultFormats();
 
 private:
-	bool SupportsExtensibleFormat(int numChannels, int samplesPerSec, int bitsPerSample);
-	bool SupportsExtensibleFormat(int numChannels, int samplesPerSec);
+	bool SupportsFormat(int numChannels, int samplesPerSec, int bitsPerSample);
+	bool SupportsFormat(int numChannels, int samplesPerSec);
+
+	std::vector<AudioFormat*> GetFormats(int numChannels, int samplesPerSec, int bitsPerSample);
 };

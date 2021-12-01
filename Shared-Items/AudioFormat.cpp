@@ -5,7 +5,7 @@ AudioFormat::AudioFormat(WAVEFORMATEX* waveFormat) : WaveFormat(waveFormat)
 {
     FormatString = std::format("{}ch-{}kHz-{}bit-{}",
         waveFormat->nChannels,
-        waveFormat->nSamplesPerSec,// == 44100 ? "44.1" : std::format("{}", waveFormat->nSamplesPerSec / 1000)),
+        (waveFormat->nSamplesPerSec == 44100 ? "44.1" : std::format("{}", waveFormat->nSamplesPerSec / 1000)),
         waveFormat->wBitsPerSample,
         GetChannelInfoString(waveFormat));
 }
