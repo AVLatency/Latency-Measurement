@@ -77,12 +77,12 @@ bool Gui::DoGui()
     float cableMapScale = 0.55 * Gui::DpiScale;
     ImGui::Image((void*)resources.CableMapTexture, ImVec2(resources.CableMapTextureWidth * cableMapScale, resources.CableMapTextureHeight * cableMapScale));
 
-    if (ImGui::BeginTable("MainViewTopLevelTable", 2, ImGuiTableFlags_Borders, ImVec2(1200 * DpiScale, 0)))
+    if (ImGui::BeginTable("MainViewTopLevelTable", 2, ImGuiTableFlags_Borders, ImVec2(1235 * DpiScale, 0)))
     {
-        ImGui::TableSetupColumn("MainViewTopLevelTableCol1", ImGuiTableColumnFlags_WidthFixed);
+        ImGui::TableSetupColumn("Col1", ImGuiTableColumnFlags_WidthFixed);
 
         ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
+        ImGui::TableNextColumn();
         OptionallyBoldText("1) Getting Started", state == GuiState::GettingStarted);
         ImGui::Spacing();
         OptionallyBoldText("2) Input/Output Devices", state == GuiState::SelectAudioDevices);
@@ -96,7 +96,7 @@ bool Gui::DoGui()
         OptionallyBoldText("6) Results", state == GuiState::Results);
         ImGui::Spacing();
 
-        ImGui::TableSetColumnIndex(1);
+        ImGui::TableNextColumn();
 
         switch (state)
         {
@@ -201,28 +201,30 @@ bool Gui::DoGui()
                 ImGui::SameLine(); HelpMarker("Adjust the volume of your input device through the Windows control panel to make the monitor amplitude fit with some headroom to spare. "
                     "You may need to turn down the Microphone Boost in the Levels section of Additional device properties.");
 
+                float fullTableWidth = 400 * DpiScale;
                 float columnWidth = 110 * DpiScale;
                 ImVec2 plotDimensions(100 * DpiScale, 100 * DpiScale);
 
-                if (ImGui::BeginTable("LeftChannelVolumeTable", 2, ImGuiTableFlags_Borders))
+                if (ImGui::BeginTable("LeftChannelVolumeTable", 2, ImGuiTableFlags_None, ImVec2(fullTableWidth, 0)))
                 {
                     ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, columnWidth);
-                    ImGui::TableSetupColumn("column2", ImGuiTableColumnFlags_WidthFixed, columnWidth);
 
                     ImGui::TableNextRow();
-
                     ImGui::TableNextColumn();
                     ImGui::Text("Reference Image");
                     if (adjustVolumeManager != nullptr && adjustVolumeManager->leftChannelTickReferenceSamples != nullptr)
                     {
                         ImGui::PlotLines("", adjustVolumeManager->leftChannelTickReferenceSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
                     }
+                    ImGui::Spacing();
+
                     ImGui::TableNextColumn();
                     ImGui::Text("Monitor");
                     if (adjustVolumeManager != nullptr && adjustVolumeManager->leftChannelTickMonitorSamples != nullptr)
                     {
                         ImGui::PlotLines("", adjustVolumeManager->leftChannelTickMonitorSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
                     }
+                    ImGui::Spacing();
                     //if (adjustVolumeManager != nullptr && adjustVolumeManager->lastInputBufferCopy != nullptr)
                     //{
                     //    auto buffer = adjustVolumeManager->lastInputBufferCopy;
@@ -236,19 +238,18 @@ bool Gui::DoGui()
                 ImGui::Text("Input: Right Channel (DUT)");
                 ImGui::PopFont();
                 ImGui::SameLine(); HelpMarker("Adjust the output volume of your Device Under Test (DUT) to give a consistent normalized recording.");
-                if (ImGui::BeginTable("RightChannelVolumeTable", 2, ImGuiTableFlags_Borders))
+                if (ImGui::BeginTable("RightChannelVolumeTable", 2, ImGuiTableFlags_None, ImVec2(fullTableWidth, 0)))
                 {
                     ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, columnWidth);
-                    ImGui::TableSetupColumn("column2", ImGuiTableColumnFlags_WidthFixed, columnWidth * 2.5);
 
                     ImGui::TableNextRow();
-
                     ImGui::TableNextColumn();
                     ImGui::Text("Reference Image\n(Normalized)");
                     if (adjustVolumeManager != nullptr && adjustVolumeManager->rightChannelNormalizedTickReferenceSamples != nullptr)
                     {
                         ImGui::PlotLines("", adjustVolumeManager->rightChannelNormalizedTickReferenceSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
                     }
+                    ImGui::Spacing();
 
                     ImGui::TableNextColumn();
                     if (ImGui::BeginTable("RightChannelVolumeMontiorsTable", 2, ImGuiTableFlags_SizingFixedFit))
@@ -260,12 +261,15 @@ bool Gui::DoGui()
                         {
                             ImGui::PlotLines("", adjustVolumeManager->rightChannelNormalizedTickMonitorSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
                         }
+                        ImGui::Spacing();
+
                         ImGui::TableNextColumn();
                         ImGui::Text("Monitor\n(Raw)");
                         if (adjustVolumeManager != nullptr && adjustVolumeManager->rightChannelTickMonitorSamples != nullptr)
                         {
                             ImGui::PlotLines("", adjustVolumeManager->rightChannelTickMonitorSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
                         }
+                        ImGui::Spacing();
                         ImGui::EndTable();
                     }
 
@@ -292,6 +296,7 @@ bool Gui::DoGui()
                             adjustVolumeManager->Stop();
                         }
                     }
+                    ImGui::Spacing();
                 }
             }
 
