@@ -76,7 +76,9 @@ void AudioEndpoint::PopulateSupportedFormats()
 			// Furthermore, WAVEFORMATEX formats' bit depth property are not respected on NVIDIA drivers
 			// (24 bit WAVEFORMATEX actually produce a 16 bit HDMI signal)
 			// For these reasons, ignore any WAVEFORMATEX formats that are duplicates of WAVEFORMATEXTENSIBLE ones.
-							// Only add formats with no channel masks if there are no supported formats with channel masks
+
+			// TODO: Verify using an HDMI analyzer that this bit about bit depths is true for NVIDA, AMD, and Intel audio drivers.
+			
 			if (!SupportsFormat(waveFormat->nChannels, waveFormat->nSamplesPerSec))
 			{
 				hr = pAudioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, waveFormat, NULL);
@@ -124,7 +126,7 @@ void AudioEndpoint::SelectDefaultFormats()
 		{
 			if (format->WaveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
 			{
-				if (reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->WaveFormat)->dwChannelMask == SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT)
+				if (reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->WaveFormat)->dwChannelMask == (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT))
 				{
 					format->UserSelected = true;
 				}
@@ -145,10 +147,8 @@ void AudioEndpoint::SelectDefaultFormats()
 		{
 			if (format->WaveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
 			{
-				DWORD channelMask = reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->WaveFormat)->dwChannelMask;
 				// KSAUDIO_SPEAKER_5POINT1_SURROUND (using side/surround speakers)
-				DWORD targetChannelMask = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_SIDE_LEFT | SPEAKER_SIDE_RIGHT;
-				if (channelMask == targetChannelMask)
+				if (reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->WaveFormat)->dwChannelMask == (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_SIDE_LEFT | SPEAKER_SIDE_RIGHT))
 				{
 					format->UserSelected = true;
 					foundIt = true;
@@ -161,10 +161,8 @@ void AudioEndpoint::SelectDefaultFormats()
 			{
 				if (format->WaveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
 				{
-					DWORD channelMask = reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->WaveFormat)->dwChannelMask;
 					// KSAUDIO_SPEAKER_5POINT1 (using rear left/right of center speakers)
-					DWORD targetChannelMask = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT;
-					if (channelMask == targetChannelMask)
+					if (reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->WaveFormat)->dwChannelMask == (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT))
 					{
 						format->UserSelected = true;
 					}
@@ -185,10 +183,8 @@ void AudioEndpoint::SelectDefaultFormats()
 		{
 			if (format->WaveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
 			{
-				DWORD channelMask = reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->WaveFormat)->dwChannelMask;
 				// KSAUDIO_SPEAKER_7POINT1_SURROUND
-				DWORD targetChannelMask = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT | SPEAKER_SIDE_LEFT | SPEAKER_SIDE_RIGHT;
-				if (channelMask == targetChannelMask)
+				if (reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->WaveFormat)->dwChannelMask == (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT | SPEAKER_SIDE_LEFT | SPEAKER_SIDE_RIGHT))
 				{
 					format->UserSelected = true;
 				}
