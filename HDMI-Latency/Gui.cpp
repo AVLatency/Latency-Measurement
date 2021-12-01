@@ -328,7 +328,7 @@ bool Gui::DoGui()
             ImGui::Spacing();
             if (ImGui::BeginTable("MeasurementConfig", 3))
             {
-                ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, 150 * DpiScale);
+                ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, 200 * DpiScale);
                 ImGui::TableSetupColumn("column2", ImGuiTableColumnFlags_WidthFixed, 400 * DpiScale);
 
                 ImGui::TableNextRow();
@@ -353,14 +353,6 @@ bool Gui::DoGui()
                         {
                             outputOffsetProfileIndex = n;
                         }
-                        if (outputOffsetProfiles[n] == "HDV-MB01")
-                        {
-                            ImGui::SameLine();
-                            HelpMarker("Also sold under these names:\n\n"
-                                "J-Tech Digital JTD18G - H5CH\n"
-                                "Monoprice Blackbird 24278\n"
-                                "OREI HDA - 912\n");
-                        }
                         // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
                         if (is_selected)
                         {
@@ -375,6 +367,11 @@ bool Gui::DoGui()
                 {
                     float imageScale = 0.45 * Gui::DpiScale;
                     ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
+                    ImGui::TextWrapped("Also sold under these names:");
+                    ImGui::Spacing();
+                    ImGui::TextWrapped("- J-Tech Digital JTD18G - H5CH\n"
+                        "- Monoprice Blackbird 24278\n"
+                        "- OREI HDA - 912\n");
                 }
                 else if (outputOffsetProfiles[outputOffsetProfileIndex] == "None")
                 {
