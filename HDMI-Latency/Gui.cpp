@@ -310,6 +310,7 @@ bool Gui::DoGui()
                 else if (state == GuiState::FinishingAdjustVolume)
                 {
                     state = GuiState::MeasurementConfig;
+                    outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats();
                 }
             }
         }

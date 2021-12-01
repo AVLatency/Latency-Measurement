@@ -17,8 +17,10 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)AdjustVolumeManager.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)AudioEndpoint.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)AudioEndpointHelper.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)AudioFormat.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)FontHelper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)GeneratedSamples.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)HdmiWaveFormats.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)stb_image.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)stb_image_dx11.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)WasapiInput.h" />
@@ -28,8 +30,10 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)AdjustVolumeManager.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)AudioEndpoint.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)AudioEndpointHelper.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)AudioFormat.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)FontHelper.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)GeneratedSamples.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)HdmiWaveFormats.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)stb_image_dx11.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)WasapiInput.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)WasapiOutput.cpp" />
