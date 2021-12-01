@@ -346,6 +346,7 @@ bool Gui::DoGui()
 
                 if (ImGui::BeginListBox("", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing())))
                 {
+                    int oldIndex = outputOffsetProfileIndex;
                     for (int n = 0; n < outputOffsetProfiles.size(); n++)
                     {
                         const bool is_selected = (outputOffsetProfileIndex == n);
@@ -357,6 +358,18 @@ bool Gui::DoGui()
                         if (is_selected)
                         {
                             ImGui::SetItemDefaultFocus();
+                        }
+                    }
+                    if (oldIndex != outputOffsetProfileIndex)
+                    {
+                        // User just changed the selection, so update the test notes:
+                        if (outputOffsetProfileIndex != outputOffsetProfiles.size() - 1)
+                        {
+                            strcpy(HDMIAudioDeviceNameInput, outputOffsetProfiles[outputOffsetProfileIndex]);
+                        }
+                        else
+                        {
+                            strcpy(HDMIAudioDeviceNameInput, "Unknown");
                         }
                     }
                     ImGui::EndListBox();
@@ -375,7 +388,7 @@ bool Gui::DoGui()
                 }
                 else if (outputOffsetProfiles[outputOffsetProfileIndex] == "None")
                 {
-                    ImGui::TextWrapped("WARNING: using an HDMI Audio Device that has does not have an output offset profile may result in inaccurate measurements!");
+                ImGui::TextWrapped("WARNING: using an HDMI Audio Device that has does not have an output offset profile may result in inaccurate measurements!");
                 }
 
                 ImGui::TableNextColumn();
@@ -415,7 +428,11 @@ bool Gui::DoGui()
                 {
                     for (AudioFormat& format : supportedFormats)
                     {
-                        if (true)
+                        if (false) // TODO: base this on the output offset profile
+                        {
+                            ImGui::Text("[V]"); ImGui::SameLine();
+                        }
+                        else
                         {
                             ImGui::Text("[U]"); ImGui::SameLine();
                         }
@@ -439,7 +456,8 @@ bool Gui::DoGui()
                 ImGui::Text("[V] Verified");
                 ImGui::SameLine(); HelpMarker("The output offset for this audio format has been verified using a tool such as the Murideo SEVEN Generator.");
                 ImGui::Text("[U] Unverified");
-                ImGui::SameLine(); HelpMarker("The output offset for this audio format has not been verified using tools such as the Murideo SEVEN Generator. Measurement results may not be accurate, depending on whether the HDMI Audio Device has a different output offset for different formats. This does not affect the consistency of results.");
+                ImGui::SameLine(); HelpMarker("The output offset for this audio format has not been verified using tools such as the Murideo SEVEN Generator.\n\n"
+                    "Measurement results may not be accurate, depending on whether the HDMI Audio Device has a different output offset for different formats. This does not affect the consistency of results.");
 
                 if (ImGui::TreeNode("Channel descriptions"))
                 {
@@ -462,6 +480,16 @@ bool Gui::DoGui()
                 ImGui::Text("Test Notes");
                 ImGui::PopFont();
                 ImGui::Spacing();
+
+                if (outputOffsetProfileIndex != outputOffsetProfiles.size() - 1)
+                {
+                    ImGui::BeginDisabled();
+                }
+                ImGui::InputText("HDMI Audio Device", HDMIAudioDeviceNameInput, IM_ARRAYSIZE(HDMIAudioDeviceNameInput), ImGuiInputTextFlags_CallbackCharFilter, csvInputFilter);
+                if (outputOffsetProfileIndex != outputOffsetProfiles.size() - 1)
+                {
+                    ImGui::EndDisabled();
+                }
 
                 ImGui::EndTable();
             }
