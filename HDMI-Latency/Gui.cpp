@@ -201,11 +201,10 @@ bool Gui::DoGui()
                 ImGui::SameLine(); HelpMarker("Adjust the volume of your input device through the Windows control panel to make the monitor amplitude fit with some headroom to spare. "
                     "You may need to turn down the Microphone Boost in the Levels section of Additional device properties.");
 
-                float fullTableWidth = 400 * DpiScale;
                 float columnWidth = 110 * DpiScale;
                 ImVec2 plotDimensions(100 * DpiScale, 100 * DpiScale);
 
-                if (ImGui::BeginTable("LeftChannelVolumeTable", 2, ImGuiTableFlags_None, ImVec2(fullTableWidth, 0)))
+                if (ImGui::BeginTable("LeftChannelVolumeTable", 2, ImGuiTableFlags_SizingFixedFit))
                 {
                     ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, columnWidth);
 
@@ -238,6 +237,7 @@ bool Gui::DoGui()
                 ImGui::Text("Input: Right Channel (DUT)");
                 ImGui::PopFont();
                 ImGui::SameLine(); HelpMarker("Adjust the output volume of your Device Under Test (DUT) to give a consistent normalized recording.");
+                float fullTableWidth = 400 * DpiScale; // Need to set this explictly instead of just using ImGuiTableFlags_SizingFixedFit because there is another table inside that uses ImGuiTableFlags_SizingFixedFit
                 if (ImGui::BeginTable("RightChannelVolumeTable", 2, ImGuiTableFlags_None, ImVec2(fullTableWidth, 0)))
                 {
                     ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, columnWidth);
@@ -324,13 +324,11 @@ bool Gui::DoGui()
                 ImGui::BeginDisabled();
             }
 
-            // TODO: probably need an image spacer to force table width :(((
             ImGui::Spacing();
-            if (ImGui::BeginTable("MeasurementConfig", 3, ImGuiTableFlags_Borders, ImVec2(1000 * DpiScale, 0)))
+            if (ImGui::BeginTable("MeasurementConfig", 3))
             {
-                //ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, 200 * DpiScale);
-                //ImGui::TableSetupColumn("column2", ImGuiTableColumnFlags_WidthFixed, 100 * DpiScale);
-                //ImGui::TableSetupColumn("column3", ImGuiTableColumnFlags_WidthFixed, 300 * DpiScale);
+                ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, 150 * DpiScale);
+                ImGui::TableSetupColumn("column2", ImGuiTableColumnFlags_WidthFixed, 200 * DpiScale);
 
                 ImGui::TableNextRow();
 
@@ -373,13 +371,12 @@ bool Gui::DoGui()
 
                 if (outputOffsetProfiles[outputOffsetProfileIndex] == "HDV-MB01")
                 {
-                    float imageScale = 0.55 * Gui::DpiScale;
+                    float imageScale = 0.45 * Gui::DpiScale;
                     ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
                 }
                 else if (outputOffsetProfiles[outputOffsetProfileIndex] == "None")
                 {
-                    ImGui::InputText("HDMI Audio Device name", HDMIAudioDeviceNameInput, IM_ARRAYSIZE(HDMIAudioDeviceNameInput), ImGuiInputTextFlags_CallbackCharFilter, csvInputFilter);
-                    ImGui::TextWrapped("Warning: using an HDMI Audio Device that has does not have an output offset profile may result in inaccurate measurements!");
+                    ImGui::TextWrapped("WARNING: using an HDMI Audio Device that has does not have an output offset profile may result in inaccurate measurements!");
                 }
 
                 ImGui::TableNextColumn();
@@ -407,7 +404,12 @@ bool Gui::DoGui()
             ImGui::Spacing();
             if (state == GuiState::MeasurementConfig)
             {
-                if (ImGui::Button("Start"))
+                if (ImGui::Button("Back"))
+                {
+                    state = GuiState::SelectAudioDevices;
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Start Measurement"))
                 {
                     state = GuiState::Measuring;
                 }
@@ -426,6 +428,7 @@ bool Gui::DoGui()
                     // TODO: state = GuiState::CancellingMeasuring;
                 }
             }
+            ImGui::Spacing();
         }
             break;
         case GuiState::Results:
