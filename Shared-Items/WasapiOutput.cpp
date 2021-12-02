@@ -1,4 +1,5 @@
 #include "WasapiOutput.h"
+#include "TestConfiguration.h"
 
 // Needed for AvSetMmThreadCharacteristics and AvRevertMmThreadCharacteristics:
 #include <avrt.h>
@@ -196,6 +197,7 @@ HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flag
         return S_OK;
     }
 
+    float volume = TestConfiguration::OutputVolume;
     WORD numChannels = waveFormat->nChannels;
     if (GetFormatID() == WAVE_FORMAT_IEEE_FLOAT && waveFormat->wBitsPerSample == 32)
     {
@@ -208,7 +210,7 @@ HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flag
                 {
                     if (c == 0)
                     {
-                        castData[i + c] = audioSamples[sampleIndex];
+                        castData[i + c] = audioSamples[sampleIndex] * volume;
                     }
                     else
                     {
@@ -241,7 +243,7 @@ HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flag
                 {
                     if (c == 0)
                     {
-                        castData[i + c] = (INT16)(round(audioSamples[sampleIndex] * SHRT_MAX));
+                        castData[i + c] = (INT16)(round(audioSamples[sampleIndex] * volume * SHRT_MAX));
                     }
                     else
                     {
@@ -271,7 +273,7 @@ HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flag
         {
             if (!FinishedPlayback(true))
             {
-                int thirtyTwoBit = (int)round(audioSamples[sampleIndex] * INT24_MAX);
+                int thirtyTwoBit = (int)round(audioSamples[sampleIndex] * volume * INT24_MAX);
 
                 for (int c = 0; c < numChannels; c++)
                 {
@@ -319,7 +321,7 @@ HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flag
                 {
                     if (c == 0)
                     {
-                        castData[i + c] = (INT32)(round(audioSamples[sampleIndex] * INT_MAX));
+                        castData[i + c] = (INT32)(round(audioSamples[sampleIndex] * volume * INT_MAX));
                     }
                     else
                     {

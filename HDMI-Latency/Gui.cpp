@@ -270,7 +270,8 @@ bool Gui::DoGui()
                         ImGui::Text("");
                         ImGui::Text("");
                         PeakLevel(adjustVolumeManager->rightChannelGrade, "Adjust the output volume of your Device Under Test (DUT) to give a consistent normalized recording.\n\n"
-                            "When the DUT is muted, this peak level should be \"Quiet\". If it is not, this likely means you are getting cable crosstalk and your mesaurements will incorrectly be 0 ms audio latency!");
+                            "When the DUT is muted, this peak level should be \"Quiet\". If it is not, this likely means you are getting cable crosstalk and your mesaurements will incorrectly be 0 ms audio latency!\n\n"
+                            "To solve the problem of cable crosstalk, try turning down the output volume in the advanced settings or using a physical, inline volume control on your HDMI Audio Device output.");
 
                         ImGui::EndTable();
                     }
@@ -279,6 +280,8 @@ bool Gui::DoGui()
 
                 if (ImGui::TreeNode("Advanced Configuration"))
                 {
+                    ImGui::DragFloat("Output Volume", &TestConfiguration::OutputVolume, .001f, .1f, 1);
+                    ImGui::SameLine(); HelpMarker("Should normally be left at 1. If you are experiencing cable crosstalk, you can try turning this volume down or using a physical, inline volume control on your HDMI Audio Device output.");
                     ImGui::DragFloat("Detection Threshold Multiplier", &TestConfiguration::DetectionThresholdMultiplier, .001f, .0001f, 1);
                     ImGui::SameLine(); HelpMarker("Should normally be left at 1. If you are using a microphone that is extremely quiet, lowering this multiplier may help at the risk of incorrectly detecting crosstalk on the left and right audio input.");
                     ImGui::TreePop();

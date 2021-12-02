@@ -3,6 +3,7 @@
 // for M_PI:
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include "TestConfiguration.h"
 
 GeneratedSamples::GeneratedSamples(WAVEFORMATEX* waveFormat, WaveType type)
     : WaveFormat(waveFormat), Type(type)
