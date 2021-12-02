@@ -481,7 +481,7 @@ bool Gui::DoGui()
                     ImGui::TreePop();
                 }
                 ImGui::Spacing();
-
+                ImGui::Text("");
                 ImGui::PushFont(FontHelper::BoldFont);
                 ImGui::Text("Test Configuration");
                 ImGui::PopFont();
@@ -496,6 +496,7 @@ bool Gui::DoGui()
                     ImGui::TreePop();
                 }
                 ImGui::PopItemWidth();
+                ImGui::Spacing();
 
                 ImGui::TableNextColumn();
                 ImGui::PushFont(FontHelper::BoldFont);
