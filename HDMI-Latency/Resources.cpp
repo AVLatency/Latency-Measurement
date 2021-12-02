@@ -9,6 +9,7 @@ Resources::Resources(HINSTANCE hInstance, ID3D11Device* g_pd3dDevice)
     LoadImage(hInstance, g_pd3dDevice, HDMI_CABLE_MAP, &CableMapTexture, &CableMapTextureWidth, &CableMapTextureHeight);
     LoadImage(hInstance, g_pd3dDevice, HDMI_EDID_MODE, &EDIDModeTexture, &EDIDModeTextureWidth, &EDIDModeTextureHeight);
     LoadImage(hInstance, g_pd3dDevice, HDMI_HDV_MB01, &HDV_MB01Texture, &HDV_MB01TextureWidth, &HDV_MB01TextureHeight);
+    LoadImage(hInstance, g_pd3dDevice, HDMI_WINDOWS_DISPLAY_SETTINGS, &WindowsDisplaySettingsTexture, &WindowsDisplaySettingsTextureWidth, &WindowsDisplaySettingsTextureHeight);
 }
 
 void Resources::LoadImage(HINSTANCE hInstance, ID3D11Device* g_pd3dDevice, int resourceID, ID3D11ShaderResourceView** outTexture, int* outWidth, int* outHeight)

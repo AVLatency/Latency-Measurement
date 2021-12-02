@@ -1,6 +1,36 @@
 #pragma once
 class TestNotes
 {
-	char HDMIAudioDevice[128] = "";
-};
+public:
+	static TestNotes Notes;
 
+	bool HDMIAudioDeviceUseOutputOffsetProfile = true;
+	char HDMIAudioDevice[128] = "";
+	int RecordingMethodIndex = 0;
+	const char* RecordingMethodOptions[4] = { "", "Microphone	", "Direct Line", "Other" };
+	char RecordingMethodOther[128] = "";
+
+	char DutModel[128] = "";
+	char DutFirmwareVersion[128] = "";
+	int DutOutputTypeIndex = 0;
+	const char* DutOutputTypeOptions[4] = { "", "Speaker", "Headphone Output", "Other" };
+	char DutOutputTypeOther[128] = "";
+	char DutVideoMode[128] = "";
+	char DutAudioSettings[128] = "";
+	char DutOtherSettings[128] = "";
+
+	int VideoResIndex = 0;
+	const char* VideoResOptions[6] = { "", "1280x720", "1920x1080", "3840x2160", "7680x4320", "Other" };
+	char VideoResolutionOther[128] = "";
+	char VideoRefreshRate[128] = "";
+	char VideoBitDepth[128] = "";
+	char VideoColorFormat[128] = "";
+	int VideoColorSpaceIndex = 0;
+	const char* VideoColorSpaceOptions[4] = { "", "SDR", "HDR", "Other" };
+	char VideoColorSpaceOther[128] = "";
+
+	char Notes1[128] = "";
+	char Notes2[128] = "";
+	char Notes3[128] = "";
+	char Notes4[128] = "";
+};

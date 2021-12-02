@@ -5,6 +5,7 @@
 #include <vector>
 #include <AudioEndpoint.h>
 #include "AdjustVolumeManager.h"
+#include "imgui.h"
 
 class Gui
 {
@@ -26,12 +27,13 @@ private:
 	std::vector<AudioEndpoint> inputAudioEndpoints;
 
 	int outputOffsetProfileIndex = 0;
-	char HDMIAudioDeviceNameInput[128] = "Unknown";
 
 	AdjustVolumeManager* adjustVolumeManager = nullptr;
 
 	void HelpMarker(const char* desc);
+	void OtherCombo(const char* comboName, const char* inputTextName, int* index, const char** options, int optionsLength, char* otherText, int otherTextLength);
 	void OptionallyBoldText(const char* text, bool bold);
+	static int CsvInputFilter(ImGuiInputTextCallbackData* data);
 
 	void RefreshAudioEndpoints();
 
