@@ -489,13 +489,23 @@ bool Gui::DoGui()
                 ImGui::Text("Test Configuration");
                 ImGui::PopFont();
 
-                ImGui::PushItemWidth(150);
+                ImGui::PushItemWidth(150 * DpiScale);
                 ImGui::DragInt("Number of Measurements", &TestConfiguration::NumMeasurements, .05f, 1, 100);
                 ImGui::SameLine(); HelpMarker("The number of measurements for each of the selected audio formats. A higher number of measurements will give a more accurate average audio latency result.");
                 if (ImGui::TreeNode("Advanced Configuration"))
                 {
                     ImGui::DragInt("Attempts Before Skipping a Format", &TestConfiguration::AttemptsBeforeFail, .05f, 1, 10);
                     ImGui::SameLine(); HelpMarker("The number of measurement attempts for a specific format before this format is skipped altogether for the remainder of the test. Setting this number too low may cause formats to be incorrectly skipped when the DUT is simply taking time to wake up/sync to a new audio format.");
+
+                    ImGui::Checkbox("Save Individual Recording Results", &TestConfiguration::SaveIndividualRecordingResults);
+                    ImGui::SameLine(); HelpMarker("Useful for debugging.");
+                    if (TestConfiguration::SaveIndividualRecordingResults)
+                    {
+                        ImGui::Indent(0);
+                        ImGui::Checkbox("Save Individual Recording WAV Files", &TestConfiguration::SaveIndividualWavFiles);
+                        ImGui::Unindent();
+                    }
+
                     ImGui::TreePop();
                 }
                 ImGui::PopItemWidth();
@@ -512,7 +522,7 @@ bool Gui::DoGui()
                 {
                     ImGui::BeginDisabled();
                     char tempStr[128];
-                    strcpy(tempStr, outputOffsetProfiles[outputOffsetProfileIndex]);
+                    strcpy_s(tempStr, outputOffsetProfiles[outputOffsetProfileIndex]);
                     ImGui::InputText("HDMI Audio Device", tempStr, IM_ARRAYSIZE(tempStr));
                     ImGui::EndDisabled();
                 }
