@@ -30,8 +30,9 @@ void HdmiWaveFormats::RecordExtensibleSubFormat(WAVEFORMATEXTENSIBLE* extensible
 	extensibleFormat->SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
 	RecordExtensibleChannels(extensibleFormat);
 
-	extensibleFormat->SubFormat = KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
-	RecordExtensibleChannels(extensibleFormat);
+	// HDMI doesn't support floating point audio formats, as far as I'm aware.
+	//extensibleFormat->SubFormat = KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
+	//RecordExtensibleChannels(extensibleFormat);
 }
 
 void HdmiWaveFormats::RecordExtensibleChannels(WAVEFORMATEXTENSIBLE* extensibleFormat)

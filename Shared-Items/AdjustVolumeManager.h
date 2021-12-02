@@ -8,6 +8,8 @@
 class AdjustVolumeManager
 {
 public:
+	enum struct PeakLevelGrade { Good, Loud, Quiet };
+
 	WasapiOutput* output = nullptr;
 	WasapiInput* input = nullptr;
 
@@ -19,6 +21,9 @@ public:
 	float* leftChannelTickReferenceSamples = nullptr;
 	float* rightChannelNormalizedTickReferenceSamples = nullptr;
 	int tickMonitorSamplesLength = 0;
+
+	PeakLevelGrade leftChannelGrade = PeakLevelGrade::Quiet;
+	PeakLevelGrade rightChannelGrade = PeakLevelGrade::Quiet;
 
 	AdjustVolumeManager(const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint);
 	~AdjustVolumeManager();
@@ -37,5 +42,7 @@ private:
 	void SetBitsPerSample(WAVEFORMATEX* wfx, WORD bitsPerSample);
 
 	void CopyBuffer(float* sourceBuffer, int sourceBufferLength);
+
+	AdjustVolumeManager::PeakLevelGrade GetGrade(float value);
 };
 

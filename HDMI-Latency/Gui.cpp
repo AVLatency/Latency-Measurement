@@ -4,6 +4,7 @@
 #include "AudioEndpointHelper.h"
 #include "FontHelper.h"
 #include "TestNotes.h"
+#include "TestConfiguration.h"
 
 float Gui::DpiScale = 1.0f;
 bool Gui::DpiScaleChanged = false;
@@ -195,7 +196,7 @@ bool Gui::DoGui()
                 float columnWidth = 110 * DpiScale;
                 ImVec2 plotDimensions(100 * DpiScale, 100 * DpiScale);
 
-                if (ImGui::BeginTable("LeftChannelVolumeTable", 2, ImGuiTableFlags_SizingFixedFit))
+                if (ImGui::BeginTable("LeftChannelVolumeTable", 3, ImGuiTableFlags_SizingFixedFit))
                 {
                     ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, columnWidth);
 
@@ -220,6 +221,11 @@ bool Gui::DoGui()
                     //    auto buffer = adjustVolumeManager->lastInputBufferCopy;
                     //    ImGui::PlotLines("", buffer, adjustVolumeManager->input->recordingBufferLength / 2, 0, NULL, -1, 1, ImVec2(400, 100), sizeof(float) * 2);
                     //}
+
+                    ImGui::TableNextColumn();
+                    ImGui::Text("");
+                    PeakLevel(adjustVolumeManager->leftChannelGrade);
+
                     ImGui::EndTable();
                 }
 
@@ -228,7 +234,7 @@ bool Gui::DoGui()
                 ImGui::Text("Input: Right Channel (DUT)");
                 ImGui::PopFont();
                 ImGui::SameLine(); HelpMarker("Adjust the output volume of your Device Under Test (DUT) to give a consistent normalized recording.");
-                float fullTableWidth = 400 * DpiScale; // Need to set this explictly instead of just using ImGuiTableFlags_SizingFixedFit because there is another table inside that uses ImGuiTableFlags_SizingFixedFit
+                float fullTableWidth = 600 * DpiScale; // Need to set this explictly instead of just using ImGuiTableFlags_SizingFixedFit because there is another table inside that uses ImGuiTableFlags_SizingFixedFit
                 if (ImGui::BeginTable("RightChannelVolumeTable", 2, ImGuiTableFlags_None, ImVec2(fullTableWidth, 0)))
                 {
                     ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, columnWidth);
@@ -243,7 +249,7 @@ bool Gui::DoGui()
                     ImGui::Spacing();
 
                     ImGui::TableNextColumn();
-                    if (ImGui::BeginTable("RightChannelVolumeMontiorsTable", 2, ImGuiTableFlags_SizingFixedFit))
+                    if (ImGui::BeginTable("RightChannelVolumeMontiorsTable", 3, ImGuiTableFlags_SizingFixedFit))
                     {
                         ImGui::TableNextRow();
                         ImGui::TableNextColumn();
@@ -261,10 +267,22 @@ bool Gui::DoGui()
                             ImGui::PlotLines("", adjustVolumeManager->rightChannelTickMonitorSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
                         }
                         ImGui::Spacing();
+
+                        ImGui::TableNextColumn();
+                        ImGui::Text("");
+                        ImGui::Text("");
+                        PeakLevel(adjustVolumeManager->rightChannelGrade);
+
                         ImGui::EndTable();
                     }
-
                     ImGui::EndTable();
+                }
+
+                if (ImGui::TreeNode("Advanced Configuration"))
+                {
+                    ImGui::DragFloat("Detection Threshold Multiplier", &TestConfiguration::DetectionThresholdMultiplier, .001f, .0001f, 1);
+                    ImGui::SameLine(); HelpMarker("Should normally be left at 1. If you are using a microphone that is extremely quiet, lowering this multiplier may help at the risk of incorrectly detecting crosstalk on the left and right audio input.");
+                    ImGui::TreePop();
                 }
 
                 if (state == GuiState::AdjustVolume)
@@ -279,6 +297,12 @@ bool Gui::DoGui()
                         }
                     }
                     ImGui::SameLine();
+                    bool disabled = adjustVolumeManager->leftChannelGrade == AdjustVolumeManager::PeakLevelGrade::Quiet
+                        || adjustVolumeManager->rightChannelGrade == AdjustVolumeManager::PeakLevelGrade::Quiet;
+                    if (disabled)
+                    {
+                        ImGui::BeginDisabled();
+                    }
                     if (ImGui::Button("Finish"))
                     {
                         state = GuiState::FinishingAdjustVolume;
@@ -286,6 +310,10 @@ bool Gui::DoGui()
                         {
                             adjustVolumeManager->Stop();
                         }
+                    }
+                    if (disabled)
+                    {
+                        ImGui::EndDisabled();
                     }
                     ImGui::Spacing();
                 }
@@ -359,7 +387,7 @@ bool Gui::DoGui()
                 {
                     float imageScale = 0.45 * Gui::DpiScale;
                     ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
-                    ImGui::TextWrapped("Also sold under these names:");
+                    ImGui::TextWrapped("The HDV-MB01 is also sold under these names:");
                     ImGui::Spacing();
                     ImGui::TextWrapped("- J-Tech Digital JTD18G - H5CH\n"
                         "- Monoprice Blackbird 24278\n"
@@ -367,12 +395,12 @@ bool Gui::DoGui()
                 }
                 else if (outputOffsetProfiles[outputOffsetProfileIndex] == "None")
                 {
-                    ImGui::TextWrapped("WARNING: using an HDMI Audio Device that has does not have an output offset profile may result in inaccurate measurements!");
+                    ImGui::TextWrapped("WARNING: using an HDMI Audio Device that does not have an output offset profile may result in inaccurate measurements!");
                 }
 
                 ImGui::TableNextColumn();
                 ImGui::PushFont(FontHelper::BoldFont);
-                ImGui::Text("Audio Formats");
+                ImGui::Text("Audio Formats (LPCM)");
                 ImGui::PopFont();
                 ImGui::Spacing();
 
@@ -453,6 +481,22 @@ bool Gui::DoGui()
                         "LFE: Low Frequency Effect (subwoofer)\n");
                     ImGui::TreePop();
                 }
+                ImGui::Spacing();
+
+                ImGui::PushFont(FontHelper::BoldFont);
+                ImGui::Text("Test Configuration");
+                ImGui::PopFont();
+
+                ImGui::PushItemWidth(150);
+                ImGui::DragInt("Number of Measurements", &TestConfiguration::NumMeasurements, .05f, 1, 100);
+                ImGui::SameLine(); HelpMarker("The number of measurements for each of the selected audio formats. A higher number of measurements will give a more accurate average audio latency result.");
+                if (ImGui::TreeNode("Advanced Configuration"))
+                {
+                    ImGui::DragInt("Attempts Before Skipping a Format", &TestConfiguration::AttemptsBeforeFail, .05f, 1, 10);
+                    ImGui::SameLine(); HelpMarker("The number of measurement attempts for a specific format before this format is skipped altogether for the remainder of the test. Setting this number too low may cause formats to be incorrectly skipped when the DUT is simply taking time to wake up/sync to a new audio format.");
+                    ImGui::TreePop();
+                }
+                ImGui::PopItemWidth();
 
                 ImGui::TableNextColumn();
                 ImGui::PushFont(FontHelper::BoldFont);
@@ -660,6 +704,27 @@ void Gui::OptionallyBoldText(const char* text, bool bold)
     {
         ImGui::PopFont();
     }
+}
+
+void Gui::PeakLevel(AdjustVolumeManager::PeakLevelGrade grade)
+{
+    ImGui::Text("Peak level:");
+    ImGui::PushFont(FontHelper::BoldFont);
+    switch (grade)
+    {
+    case AdjustVolumeManager::PeakLevelGrade::Good:
+        ImGui::Text("Good");
+        break;
+    case AdjustVolumeManager::PeakLevelGrade::Loud:
+        ImGui::Text("Loud");
+        break;
+    case AdjustVolumeManager::PeakLevelGrade::Quiet:
+        ImGui::TextColored((ImVec4)ImColor::HSV(0, 0.6f, 0.6f), "Quiet");
+        break;
+    default:
+        break;
+    }
+    ImGui::PopFont();
 }
 
 int Gui::CsvInputFilter(ImGuiInputTextCallbackData* data)

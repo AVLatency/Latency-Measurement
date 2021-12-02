@@ -23,6 +23,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)HdmiWaveFormats.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)stb_image.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)stb_image_dx11.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)TestConfiguration.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)WasapiInput.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)WasapiOutput.h" />
   </ItemGroup>
@@ -35,6 +36,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)GeneratedSamples.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)HdmiWaveFormats.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)stb_image_dx11.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)TestConfiguration.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)WasapiInput.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)WasapiOutput.cpp" />
   </ItemGroup>

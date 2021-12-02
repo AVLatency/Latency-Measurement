@@ -3,6 +3,7 @@
 // for M_PI:
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include "TestConfiguration.h"
 
 
 #define SAFE_RELEASE(punk)  \
@@ -297,6 +298,9 @@ void AdjustVolumeManager::CopyBuffer(float* sourceBuffer, int sourceBufferLength
 		}
 	}
 
+	leftChannelGrade = GetGrade(abs(leftSourceBuffer[leftMaxAbsIndex]));
+	rightChannelGrade = GetGrade(abs(rightSourceBuffer[rightMaxAbsIndex]));
+
 	delete[] leftSourceBuffer;
 	delete[] rightSourceBuffer;
 }
@@ -305,4 +309,20 @@ void AdjustVolumeManager::Stop()
 {
 	input->StopRecording();
 	output->StopPlayback();
+}
+
+AdjustVolumeManager::PeakLevelGrade AdjustVolumeManager::GetGrade(float value)
+{
+	if (value < TestConfiguration::DetectionThreshold())
+	{
+		return AdjustVolumeManager::PeakLevelGrade::Quiet;
+	}
+	else if (value > 0.95)
+	{
+		return AdjustVolumeManager::PeakLevelGrade::Loud;
+	}
+	else
+	{
+		return AdjustVolumeManager::PeakLevelGrade::Good;
+	}
 }
