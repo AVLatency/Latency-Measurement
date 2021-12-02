@@ -121,7 +121,7 @@ void GeneratedSamples::GenerateVolumeAdjustmentSamples()
         if (i < tickSamplesLength)
         {
             double time = (double)i / sampleRate;
-            samples[i] = (float)sin(M_PI * 2 * tickFreq * time);
+            samples[i] = (float)sin(M_PI * 2 * tickFreq * time) * tickAmp;
         }
         else
         {

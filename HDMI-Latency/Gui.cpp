@@ -190,8 +190,6 @@ bool Gui::DoGui()
                 ImGui::PushFont(FontHelper::BoldFont);
                 ImGui::Text("Input: Left Channel (HDMI Audio Device)");
                 ImGui::PopFont();
-                ImGui::SameLine(); HelpMarker("Adjust the volume of your input device through the Windows control panel to make the monitor amplitude fit with some headroom to spare. "
-                    "You may need to turn down the Microphone Boost in the Levels section of Additional device properties.");
 
                 float columnWidth = 110 * DpiScale;
                 ImVec2 plotDimensions(100 * DpiScale, 100 * DpiScale);
@@ -224,7 +222,8 @@ bool Gui::DoGui()
 
                     ImGui::TableNextColumn();
                     ImGui::Text("");
-                    PeakLevel(adjustVolumeManager->leftChannelGrade);
+                    PeakLevel(adjustVolumeManager->leftChannelGrade, "Adjust the volume of your input device through the Windows control panel to make the monitor amplitude fit with some headroom to spare. "
+                        "You may need to turn down the Microphone Boost in the Levels section of Additional device properties.");
 
                     ImGui::EndTable();
                 }
@@ -233,7 +232,6 @@ bool Gui::DoGui()
                 ImGui::PushFont(FontHelper::BoldFont);
                 ImGui::Text("Input: Right Channel (DUT)");
                 ImGui::PopFont();
-                ImGui::SameLine(); HelpMarker("Adjust the output volume of your Device Under Test (DUT) to give a consistent normalized recording.");
                 float fullTableWidth = 600 * DpiScale; // Need to set this explictly instead of just using ImGuiTableFlags_SizingFixedFit because there is another table inside that uses ImGuiTableFlags_SizingFixedFit
                 if (ImGui::BeginTable("RightChannelVolumeTable", 2, ImGuiTableFlags_None, ImVec2(fullTableWidth, 0)))
                 {
@@ -271,7 +269,8 @@ bool Gui::DoGui()
                         ImGui::TableNextColumn();
                         ImGui::Text("");
                         ImGui::Text("");
-                        PeakLevel(adjustVolumeManager->rightChannelGrade);
+                        PeakLevel(adjustVolumeManager->rightChannelGrade, "Adjust the output volume of your Device Under Test (DUT) to give a consistent normalized recording.\n\n"
+                            "When the DUT is muted, this peak level should be \"Quiet\". If it is not, this likely means you are getting cable crosstalk and your mesaurements will incorrectly be 0 ms audio latency!");
 
                         ImGui::EndTable();
                     }
@@ -706,9 +705,10 @@ void Gui::OptionallyBoldText(const char* text, bool bold)
     }
 }
 
-void Gui::PeakLevel(AdjustVolumeManager::PeakLevelGrade grade)
+void Gui::PeakLevel(AdjustVolumeManager::PeakLevelGrade grade, const char* helpText)
 {
     ImGui::Text("Peak level:");
+    ImGui::SameLine(); HelpMarker(helpText);
     ImGui::PushFont(FontHelper::BoldFont);
     switch (grade)
     {

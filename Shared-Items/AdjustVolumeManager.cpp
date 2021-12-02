@@ -317,7 +317,7 @@ AdjustVolumeManager::PeakLevelGrade AdjustVolumeManager::GetGrade(float value)
 	{
 		return AdjustVolumeManager::PeakLevelGrade::Quiet;
 	}
-	else if (value > 0.95)
+	else if (value > 0.9)
 	{
 		return AdjustVolumeManager::PeakLevelGrade::Loud;
 	}

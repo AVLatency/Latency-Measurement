@@ -33,7 +33,7 @@ private:
 	void HelpMarker(const char* desc);
 	void OtherCombo(const char* comboName, const char* inputTextName, int* index, const char** options, int optionsLength, char* otherText, int otherTextLength);
 	void OptionallyBoldText(const char* text, bool bold);
-	void PeakLevel(AdjustVolumeManager::PeakLevelGrade grade);
+	void PeakLevel(AdjustVolumeManager::PeakLevelGrade grade, const char* helpText);
 	static int CsvInputFilter(ImGuiInputTextCallbackData* data);
 
 	void RefreshAudioEndpoints();
