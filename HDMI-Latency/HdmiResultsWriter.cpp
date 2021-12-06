@@ -1,8 +1,10 @@
 #include "HdmiResultsWriter.h"
+#include "TestNotes.h"
+#include <imgui.h>
 
 HdmiResultsWriter HdmiResultsWriter::Writer;
 
-void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstream& detailedResultsStream, const GeneratedSamples& generatedSamples, AudioFormat* audioFormat, int inputSampleRate, RecordingResult& result)
+void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstream& detailedResultsStream, const GeneratedSamples& generatedSamples, AudioFormat* audioFormat, int inputSampleRate, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result)
 {
     if (writeHeader)
     {
@@ -66,57 +68,61 @@ void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::f
     }
 
     // TODO
-    //detailedResultsStream << "\"" << StringHelper::GetTimeString(result.Time, false) << "\","; //"Time,";
-    //detailedResultsStream << "\"" << audioFormat->FormatString << "\","; //"Audio Format,";
-    //detailedResultsStream << "\"" << result.GUID << ".wav\","; //"Recording,";
-    //detailedResultsStream << "\"" << "\",";
-    //detailedResultsStream << "\"" << result.Offset() << "\","; //"Audio Latency (ms),"; // TODO
-    //detailedResultsStream << "\"" << "No" << "\","; //"Verified,"; // TODO
-    //detailedResultsStream << "\"" << "\",";
-    //detailedResultsStream << "\"" << result.Offset() << "\","; //"Raw Offset (ms),";
-    //detailedResultsStream << "\"" << "TODO" << "\","; //"Output Offset Profile,"; // TODO
-    //detailedResultsStream << "\"" << "TODO" << "\","; //"Output Offset Profile Value (ms),"; // TODO
-    //detailedResultsStream << "\"" << "\",";
-    //detailedResultsStream << "\"" << sysInfo.Display << "\","; //"Display,";
-    //detailedResultsStream << "\"" << sysInfo.ComputerName << "\","; //"Computer Name,";
-    //detailedResultsStream << "\"" << sysInfo.AdditionalNotes << "\","; //"Additional Notes,";
-    //detailedResultsStream << "\"" << "\",";
-    //detailedResultsStream << "\"" << outputDeviceName << "\","; //"Audio output device,";
-    //detailedResultsStream << "\"" << sysInfo.AudioOutputDrivers << "\","; //"Audio output drivers,";
-    //detailedResultsStream << "\"" << sysInfo.VideoOutputDrivers << "\","; //"video output drivers,";
-    //detailedResultsStream << "\"" << sysInfo.WindowsVersion << "\","; //"Windows version,";
-    //detailedResultsStream << "\"" << "\",";
-    //detailedResultsStream << "\"" << inputDeviceName << "\","; //"Audio input device,";
-    //detailedResultsStream << "\"" << inputSampleRate << "\","; //"Audio input sample rate,";
-    //detailedResultsStream << "\"" << "\",";
-    //detailedResultsStream << "\"" << sysInfo.Extractor << "\","; //"Extractor,";
-    //detailedResultsStream << "\"" << sysInfo.DAC << "\","; //"DAC,";
-    //detailedResultsStream << "\"" << "\",";
-    //detailedResultsStream << "\"" << config.WaveFormat->nChannels << "\","; //"Channels,";
-    //detailedResultsStream << "\"" << config.WaveFormat->nSamplesPerSec << "\","; //"SampleRate,";
-    //detailedResultsStream << "\"" << config.WaveFormat->wBitsPerSample << "\","; //"BitDepth,";
-    //detailedResultsStream << "\"" << GetAudioDataFormatString(config.WaveFormat) << "\","; //"AudioFormat,";
-    //detailedResultsStream << "\"" << GetChannelMaskString(config.WaveFormat) << "\","; //"ChannelMask,";
-    //detailedResultsStream << "\"" << sysInfo.VideoRes << "\","; //"VideoRes,";
-    //detailedResultsStream << "\"" << sysInfo.VideoRefresh << "\","; //"VideoRefresh,";
-    //detailedResultsStream << "\"" << sysInfo.VideoBitDepth << "\","; //"VideoBitDepth,";
-    //detailedResultsStream << "\"" << sysInfo.VideoFormat << "\","; //"VideoFormat,";
-    //detailedResultsStream << "\"" << sysInfo.VideoRange << "\","; //"VideoRange,";
-    //detailedResultsStream << "\"" << "\",";
-    //detailedResultsStream << "\"" << result.Channel1.MillisecondsToTick1() << "\","; //"Ch 1 Milliseconds to Tick 1,";
-    //detailedResultsStream << "\"" << result.Channel2.MillisecondsToTick1() << "\","; //"Ch 2 Milliseconds to Tick 1,";
-    //detailedResultsStream << "\"" << result.Channel1.RelMillisecondsToTick2() << "\","; //"Ch 1 Rel Milliseconds to Tick 2,";
-    //detailedResultsStream << "\"" << result.Channel2.RelMillisecondsToTick2() << "\","; //"Ch 2 Rel Milliseconds to Tick 2,";
-    //detailedResultsStream << "\"" << result.Channel1.RelMillisecondsToTick3() << "\","; //"Ch 1 Rel Milliseconds to Tick 3,";
-    //detailedResultsStream << "\"" << result.Channel2.RelMillisecondsToTick3() << "\","; //"Ch 2 Rel Milliseconds to Tick 3,";
-    //detailedResultsStream << "\"" << (result.Channel1.PhaseInverted ? "true" : "false") << "\","; //"Ch 1 Phase Inverted,";
-    //detailedResultsStream << "\"" << result.Channel1.SamplesToTick1 << "\","; //"Ch 1 Samples to Tick 1,";
-    //detailedResultsStream << "\"" << result.Channel1.SamplesToTick2 << "\","; //"Ch 1 Samples to Tick 2,";
-    //detailedResultsStream << "\"" << result.Channel1.SamplesToTick3 << "\","; //"Ch 1 Samples to Tick 3,";
-    //detailedResultsStream << "\"" << (result.Channel2.PhaseInverted ? "true" : "false") << "\","; //"Ch 2 Phase Inverted,";
-    //detailedResultsStream << "\"" << result.Channel2.SamplesToTick1 << "\","; //"Ch 2 Samples to Tick 1,";
-    //detailedResultsStream << "\"" << result.Channel2.SamplesToTick2 << "\","; //"Ch 2 Samples to Tick 2,";
-    //detailedResultsStream << "\"" << result.Channel2.SamplesToTick3 << "\","; //"Ch 2 Samples to Tick 3,";
-    //detailedResultsStream << "\"" << result.Channel1.InvalidReason << "\","; //"Ch 1 Invalid Reason,";
-    //detailedResultsStream << "\"" << result.Channel2.InvalidReason << "\"" << endl; //"Ch 2 Invalid Reason";
+    detailedResultsStream << "\"" << StringHelper::GetTimeString(result.Time, false) << "\","; //"Time,";
+    detailedResultsStream << "\"" << audioFormat->FormatString << "\","; //"Audio Format,";
+    detailedResultsStream << "\"" << result.GUID << ".wav\","; //"Recording,";
+    detailedResultsStream << "\"" << "\",";
+    detailedResultsStream << "\"" << result.Offset() << "\","; //"Audio Latency (ms),"; // TODO
+    detailedResultsStream << "\"" << "No" << "\","; //"Verified,"; // TODO
+    detailedResultsStream << "\"" << "\",";
+    detailedResultsStream << "\"" << result.Offset() << "\","; //"Raw Offset (ms),";
+    detailedResultsStream << "\"" << "TODO" << "\","; //"Output Offset Profile,"; // TODO
+    detailedResultsStream << "\"" << "TODO" << "\","; //"Output Offset Profile Value (ms),"; // TODO
+    detailedResultsStream << "\"" << "\",";
+    detailedResultsStream << "\"" << TestNotes::Notes.DutModel << "\","; //"DUT Model,";
+    detailedResultsStream << "\"" << TestNotes::Notes.DutFirmwareVersion << "\","; //"DUT Firmware Version,";
+    detailedResultsStream << "\"" << TestNotes::Notes.DutOutputType() << "\","; //"DUT,";
+    detailedResultsStream << "\"" << TestNotes::Notes.DutVideoMode << "\","; //"DUT Video Mode,";
+    detailedResultsStream << "\"" << TestNotes::Notes.DutAudioSettings << "\",";
+    detailedResultsStream << "\"" << TestNotes::Notes.DutOtherSettings << "\",";
+    detailedResultsStream << "\"" << "\",";
+    detailedResultsStream << "\"" << "LPCM" << "\","; //"Audio Format,";
+    detailedResultsStream << "\"" << audioFormat->WaveFormat->nChannels << "\",";
+    detailedResultsStream << "\"" << audioFormat->WaveFormat->nSamplesPerSec << "\",";
+    detailedResultsStream << "\"" << audioFormat->WaveFormat->wBitsPerSample << "\",";
+    detailedResultsStream << "\"" << AudioFormat::GetChannelInfoString(audioFormat->WaveFormat) << "\",";
+    detailedResultsStream << "\"" << "\",";
+    detailedResultsStream << "\"" << TestNotes::Notes.VideoRes() << "\",";
+    detailedResultsStream << "\"" << TestNotes::Notes.VideoRefreshRate << "\",";
+    detailedResultsStream << "\"" << TestNotes::Notes.VideoBitDepth << "\",";
+    detailedResultsStream << "\"" << TestNotes::Notes.VideoColorFormat << "\",";
+    detailedResultsStream << "\"" << TestNotes::Notes.VideoColorSpace() << "\",";
+    detailedResultsStream << "\"" << "\",";
+    detailedResultsStream << "\"" << TestNotes::Notes.Notes1 << "\",";
+    detailedResultsStream << "\"" << TestNotes::Notes.Notes2 << "\",";
+    detailedResultsStream << "\"" << TestNotes::Notes.Notes3 << "\",";
+    detailedResultsStream << "\"" << TestNotes::Notes.Notes4 << "\",";
+    detailedResultsStream << "\"" << "\",";
+    detailedResultsStream << "\"" << outputEndpoint.Name << " (" << outputEndpoint.ID << ")" << "\","; //"Audio output device,";
+    detailedResultsStream << "\"" << inputEndpoint.Name << " (" << inputEndpoint.ID << ")" << "\","; //"Audio input device,";
+    detailedResultsStream << "\"" << inputSampleRate << "\","; //"Audio input sample rate,";
+    detailedResultsStream << "\"" << "\",";
+    detailedResultsStream << "\"" << "\",";
+    detailedResultsStream << "\"" << "\",";
+    detailedResultsStream << "\"" << result.Channel1.MillisecondsToTick1() << "\","; //"Ch 1 Milliseconds to Tick 1,";
+    detailedResultsStream << "\"" << result.Channel2.MillisecondsToTick1() << "\","; //"Ch 2 Milliseconds to Tick 1,";
+    detailedResultsStream << "\"" << result.Channel1.RelMillisecondsToTick2() << "\","; //"Ch 1 Rel Milliseconds to Tick 2,";
+    detailedResultsStream << "\"" << result.Channel2.RelMillisecondsToTick2() << "\","; //"Ch 2 Rel Milliseconds to Tick 2,";
+    detailedResultsStream << "\"" << result.Channel1.RelMillisecondsToTick3() << "\","; //"Ch 1 Rel Milliseconds to Tick 3,";
+    detailedResultsStream << "\"" << result.Channel2.RelMillisecondsToTick3() << "\","; //"Ch 2 Rel Milliseconds to Tick 3,";
+    detailedResultsStream << "\"" << (result.Channel1.PhaseInverted ? "true" : "false") << "\","; //"Ch 1 Phase Inverted,";
+    detailedResultsStream << "\"" << result.Channel1.SamplesToTick1 << "\","; //"Ch 1 Samples to Tick 1,";
+    detailedResultsStream << "\"" << result.Channel1.SamplesToTick2 << "\","; //"Ch 1 Samples to Tick 2,";
+    detailedResultsStream << "\"" << result.Channel1.SamplesToTick3 << "\","; //"Ch 1 Samples to Tick 3,";
+    detailedResultsStream << "\"" << (result.Channel2.PhaseInverted ? "true" : "false") << "\","; //"Ch 2 Phase Inverted,";
+    detailedResultsStream << "\"" << result.Channel2.SamplesToTick1 << "\","; //"Ch 2 Samples to Tick 1,";
+    detailedResultsStream << "\"" << result.Channel2.SamplesToTick2 << "\","; //"Ch 2 Samples to Tick 2,";
+    detailedResultsStream << "\"" << result.Channel2.SamplesToTick3 << "\","; //"Ch 2 Samples to Tick 3,";
+    detailedResultsStream << "\"" << result.Channel1.InvalidReason << "\","; //"Ch 1 Invalid Reason,";
+    detailedResultsStream << "\"" << result.Channel2.InvalidReason << "\"" << std::endl; //"Ch 2 Invalid Reason";
 }

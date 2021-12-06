@@ -15,7 +15,7 @@ using namespace std;
 const std::string RecordingAnalyzer::validRecordingsFilename{ "Valid-Individual-Recordings.csv" };
 const std::string RecordingAnalyzer::invalidRecordingsFilename{ "Invalid-Individual-Recordings.csv" };
 
-RecordingResult RecordingAnalyzer::AnalyzeRecording(IResultsWriter& writer, const GeneratedSamples& generatedSamples, const WasapiOutput& output, const WasapiInput& input, AudioFormat* audioFormat, std::string testFileString)
+RecordingResult RecordingAnalyzer::AnalyzeRecording(IResultsWriter& writer, const GeneratedSamples& generatedSamples, const WasapiOutput& output, const WasapiInput& input, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, AudioFormat* audioFormat, std::string testFileString)
 {
     RecordingResult result;
 
@@ -44,7 +44,7 @@ RecordingResult RecordingAnalyzer::AnalyzeRecording(IResultsWriter& writer, cons
 
     if (TestConfiguration::SaveIndividualRecordingResults)
     {
-        SaveResult(writer, generatedSamples, audioFormat, input.waveFormat.Format.nSamplesPerSec, result, std::format("{}/{}", StringHelper::GetRootPath(), testFileString));
+        SaveResult(writer, generatedSamples, audioFormat, input.waveFormat.Format.nSamplesPerSec, outputEndpoint, inputEndpoint, result, std::format("{}/{}", StringHelper::GetRootPath(), testFileString));
     }
 
     delete[] ch1RecordedSamples;
@@ -322,7 +322,7 @@ void RecordingAnalyzer::SaveRecording(const WasapiInput& input, std::string path
     write_word(f, file_length - data_chunk_pos + 8, 4); // size of all the actual audio data in bytes. (Adding 8 to account for the "data----" characters)
 }
 
-void RecordingAnalyzer::SaveResult(IResultsWriter& writer, const GeneratedSamples& generatedSamples, AudioFormat* audioFormat, int inputSampleRate, RecordingResult& result, std::string testRootPath)
+void RecordingAnalyzer::SaveResult(IResultsWriter& writer, const GeneratedSamples& generatedSamples, AudioFormat* audioFormat, int inputSampleRate, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result, std::string testRootPath)
 {
     filesystem::create_directories(filesystem::path(testRootPath));
 
@@ -336,7 +336,7 @@ void RecordingAnalyzer::SaveResult(IResultsWriter& writer, const GeneratedSample
     }
     std::fstream detailedResultsStream{ detailedResultsCsvPath, std::ios_base::app };
 
-    writer.WriteIndividualRecordingResults(writeHeader, detailedResultsStream, generatedSamples, audioFormat, inputSampleRate, result);
+    writer.WriteIndividualRecordingResults(writeHeader, detailedResultsStream, generatedSamples, audioFormat, inputSampleRate, outputEndpoint, inputEndpoint, result);
 
     detailedResultsStream.close();
 }

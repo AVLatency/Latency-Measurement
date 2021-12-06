@@ -96,7 +96,7 @@ bool TestManager::PerformRecording(AudioFormat* audioFormat)
 		outputThread.join();
 		inputThread.join();
 
-		RecordingResult result = RecordingAnalyzer::AnalyzeRecording(resultsWriter, *generatedSamples, *output, *input, audioFormat, TestFileString);
+		RecordingResult result = RecordingAnalyzer::AnalyzeRecording(resultsWriter, *generatedSamples, *output, *input, outputEndpoint, inputEndpoint, audioFormat, TestFileString);
 		validResult = result.Channel1.ValidResult && result.Channel2.ValidResult;
 
 		delete output;
