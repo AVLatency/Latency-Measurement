@@ -596,21 +596,34 @@ bool Gui::DoGui()
                 ImGui::SameLine();
                 if (ImGui::Button("Start Measurement"))
                 {
+                    StartTest();
                     state = GuiState::Measuring;
                 }
             }
             else
             {
-                ImGui::Text("Measurement in progres...");
-                ImGui::ProgressBar(.3f);
-                ImGui::Text("Currently measuring 2ch-48000Hz-16bit-PCM-0x0...");
-                ImGui::ProgressBar(.57f);
-
-                ImGui::Spacing();
-                if (ImGui::Button("Stop"))
+                if (testManager->IsFinished)
                 {
+                    delete(testManager);
+                    testManager = nullptr;
                     state = GuiState::Results;
-                    // TODO: state = GuiState::CancellingMeasuring;
+                }
+                else
+                {
+                    ImGui::Text("Measurement in progres...");
+                    ImGui::ProgressBar(testManager->PassCount / (float)testManager->TotalPasses);
+                    ImGui::Text("TODO: Currently measuring 2ch-48000Hz-16bit-PCM-0x0...");
+                    ImGui::ProgressBar(testManager->RecordingCount / (float)testManager->TotalRecordingsPerPass);
+
+                    if (state != GuiState::CancellingMeasuring)
+                    {
+                        ImGui::Spacing();
+                        if(ImGui::Button("Stop"))
+                        {
+                            testManager->StopRequested = true;
+                            state = GuiState::CancellingMeasuring;
+                        }
+                    }
                 }
             }
             ImGui::Spacing();
@@ -775,5 +788,28 @@ void Gui::StartAjdustVolumeAudio()
     if (adjustVolumeManager == nullptr)
     {
         adjustVolumeManager = new AdjustVolumeManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex]);
+    }
+}
+
+void Gui::StartTest()
+{
+    // Save the old one if it's still in the middle of working. Otherwise, make a new one.
+    if (testManager != nullptr && testManager->IsFinished)
+    {
+        delete testManager;
+        testManager = nullptr;
+    }
+    if (testManager == nullptr)
+    {
+        std::vector<AudioFormat*> selectedFormats;
+        for (AudioFormat& format : outputAudioEndpoints[outputDeviceIndex].SupportedFormats)
+        {
+            if (format.UserSelected)
+            {
+                selectedFormats.push_back(&format);
+            }
+        }
+
+        testManager = new TestManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex], selectedFormats);
     }
 }

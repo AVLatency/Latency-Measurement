@@ -6,6 +6,7 @@
 #include <AudioEndpoint.h>
 #include "AdjustVolumeManager.h"
 #include "imgui.h"
+#include "TestManager.h"
 
 class Gui
 {
@@ -29,6 +30,7 @@ private:
 	int outputOffsetProfileIndex = 0;
 
 	AdjustVolumeManager* adjustVolumeManager = nullptr;
+	TestManager* testManager = nullptr;
 
 	void HelpMarker(const char* desc);
 	void OtherCombo(const char* comboName, const char* inputTextName, int* index, const char** options, int optionsLength, char* otherText, int otherTextLength);
@@ -39,4 +41,5 @@ private:
 	void RefreshAudioEndpoints();
 
 	void StartAjdustVolumeAudio();
+	void StartTest();
 };

@@ -1,7 +1,5 @@
 #include "TestConfiguration.h"
 
-
-
 bool TestConfiguration::SaveIndividualRecordingResults = false;
 bool TestConfiguration::SaveIndividualWavFiles = false;
 int TestConfiguration::NumMeasurements = 10;

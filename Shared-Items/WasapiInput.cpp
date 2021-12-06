@@ -50,6 +50,9 @@ void WasapiInput::StartRecording()
     DWORD flags;
     bool pastInitialDiscontinuity = false;
 
+    hr = CoInitialize(NULL);
+    EXIT_ON_ERROR(hr)
+
         hr = endpoint.Device->Activate(
             IID_IAudioClient, CLSCTX_ALL,
             NULL, (void**)&pAudioClient);
@@ -142,6 +145,8 @@ void WasapiInput::StartRecording()
         SAFE_RELEASE(pAudioClient)
         SAFE_RELEASE(pCaptureClient)
 
+    CoUninitialize();
+    
     recordingInProgress = false;
 }
 
