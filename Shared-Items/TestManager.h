@@ -6,6 +6,7 @@
 #include <thread>
 #include "AudioFormat.h"
 #include "AudioEndpoint.h"
+#include <string>
 
 class TestManager
 {
@@ -19,11 +20,14 @@ public:
 
 	std::vector<AudioFormat*> SelectedFormats;
 	std::vector<AudioFormat*> FailedFormats;
+
+	std::string GUID;
+	std::string TestString;
 	
 	/// <summary>
 	/// Will start the test on a new thread
 	/// </summary>
-	TestManager(const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, std::vector<AudioFormat*> selectedFormats);
+	TestManager(AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, std::vector<AudioFormat*> selectedFormats, std::string fileString);
 	~TestManager();
 	/// <summary>
 	/// Should be called from the originating thread when IsFinished == true. This will join and delete the test thread.
@@ -31,11 +35,15 @@ public:
 	void CleanUp();
 
 private:
+	std::string timeString;
+
 	std::thread* managerThread = NULL;
-	const AudioEndpoint& outputEndpoint;
+	AudioEndpoint& outputEndpoint;
 	const AudioEndpoint& inputEndpoint;
 
 	void StartTest();
 	bool PerformRecording(AudioFormat* audioFormat);
+	bool PlayFormatSwitch(AudioFormat* lastPlayedFormat);
+	WAVEFORMATEX* FindFormatSwitchFormat(std::vector<AudioFormat*> formats, AudioFormat* lastPlayedFormat);
 };
 

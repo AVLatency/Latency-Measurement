@@ -21,9 +21,12 @@ public:
 	void PopulateSupportedFormats();
 	void SelectDefaultFormats();
 
+	std::vector<AudioFormat*> GetFormats(int numChannels, int samplesPerSec, int bitsPerSample);
+	std::vector<AudioFormat*> GetFormats(int numChannels, int samplesPerSec);
+	std::vector<AudioFormat*> GetFormats(int numChannels);
+
 private:
 	bool SupportsFormat(int numChannels, int samplesPerSec, int bitsPerSample);
 	bool SupportsFormat(int numChannels, int samplesPerSec);
 
-	std::vector<AudioFormat*> GetFormats(int numChannels, int samplesPerSec, int bitsPerSample);
 };

@@ -810,6 +810,8 @@ void Gui::StartTest()
             }
         }
 
-        testManager = new TestManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex], selectedFormats);
+        std::string fileString = std::format("{} {}", TestNotes::Notes.DutModel,
+            TestNotes::Notes.DutOutputTypeIndex == IM_ARRAYSIZE(TestNotes::Notes.DutOutputTypeOptions) - 1 ? TestNotes::Notes.DutOutputTypeOther : TestNotes::Notes.DutOutputTypeOptions[TestNotes::Notes.DutOutputTypeIndex]);
+        testManager = new TestManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex], selectedFormats, fileString);
     }
 }

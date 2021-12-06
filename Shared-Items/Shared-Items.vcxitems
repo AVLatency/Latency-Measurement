@@ -20,6 +20,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)AudioFormat.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)FontHelper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)GeneratedSamples.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)GuidHelper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)HdmiWaveFormats.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)RecordingAnalyzer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)RecordingResult.h" />
@@ -38,6 +39,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)AudioFormat.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)FontHelper.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)GeneratedSamples.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)GuidHelper.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)HdmiWaveFormats.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)RecordingAnalyzer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)stb_image_dx11.cpp" />

@@ -243,3 +243,30 @@ std::vector<AudioFormat*> AudioEndpoint::GetFormats(int numChannels, int samples
 	}
 	return result;
 }
+
+std::vector<AudioFormat*> AudioEndpoint::GetFormats(int numChannels, int samplesPerSec)
+{
+	std::vector<AudioFormat*> result;
+	for (AudioFormat& audioFormat : SupportedFormats)
+	{
+		if (audioFormat.WaveFormat->nChannels == numChannels
+			&& audioFormat.WaveFormat->nSamplesPerSec == samplesPerSec)
+		{
+			result.push_back(&audioFormat);
+		}
+	}
+	return result;
+}
+
+std::vector<AudioFormat*> AudioEndpoint::GetFormats(int numChannels)
+{
+	std::vector<AudioFormat*> result;
+	for (AudioFormat& audioFormat : SupportedFormats)
+	{
+		if (audioFormat.WaveFormat->nChannels == numChannels)
+		{
+			result.push_back(&audioFormat);
+		}
+	}
+	return result;
+}
