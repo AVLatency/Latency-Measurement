@@ -7,6 +7,7 @@
 #include "AudioFormat.h"
 #include "AudioEndpoint.h"
 #include <string>
+#include "IResultsWriter.h"
 
 class TestManager
 {
@@ -22,12 +23,13 @@ public:
 	std::vector<AudioFormat*> FailedFormats;
 
 	std::string GUID;
-	std::string TestString;
+	time_t Time;
+	std::string TestFileString;
 	
 	/// <summary>
 	/// Will start the test on a new thread
 	/// </summary>
-	TestManager(AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, std::vector<AudioFormat*> selectedFormats, std::string fileString);
+	TestManager(AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, std::vector<AudioFormat*> selectedFormats, std::string fileString, IResultsWriter& resultsWriter);
 	~TestManager();
 	/// <summary>
 	/// Should be called from the originating thread when IsFinished == true. This will join and delete the test thread.
@@ -40,6 +42,8 @@ private:
 	std::thread* managerThread = NULL;
 	AudioEndpoint& outputEndpoint;
 	const AudioEndpoint& inputEndpoint;
+
+	IResultsWriter& resultsWriter;
 
 	void StartTest();
 	bool PerformRecording(AudioFormat* audioFormat);

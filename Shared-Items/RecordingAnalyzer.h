@@ -6,33 +6,32 @@
 #include "RecordingSingleChannelResult.h"
 #include "RecordingResult.h"
 #include <string>
+#include "IResultsWriter.h"
 
-struct TickPosition
-{
-	int index;
-	bool tickInverted;
-};
 class RecordingAnalyzer
 {
 public:
-
 	/// <summary>
 	/// Analyzes recording and writes results to files.
 	/// </summary>
-	static RecordingResult AnalyzeRecording(const GeneratedSamples& config, const WasapiOutput& output, const WasapiInput& input, float detectionThresholdMultiplier);
+	static RecordingResult AnalyzeRecording(IResultsWriter& writer, const GeneratedSamples& generatedSamples, const WasapiOutput& output, const WasapiInput& input, AudioFormat* audioFormat, std::string testFileString);
 
 private:
-	static const std::string validResultsFilename;
-	static const std::string invalidResultsFilename;
+	struct TickPosition
+	{
+		int index;
+		bool tickInverted;
+	};
 
-	static std::string GetTestRootPath();
-	static std::string GetGuidString();
+	static const std::string validRecordingsFilename;
+	static const std::string invalidRecordingsFilename;
+
 	static WORD GetFormatID(WAVEFORMATEX* waveFormat);
 	static std::string GetAudioDataFormatString(WAVEFORMATEX* waveFormat);
 	static std::string GetChannelMaskString(WAVEFORMATEX* waveFormat);
-	static void SaveRecording(const WasapiInput& input, std::string guid);
-	static RecordingSingleChannelResult AnalyzeSingleChannel(const GeneratedSamples& config, float* recordedSamples, int recordedSamplesLength, int inputSampleRate, float detectionThresholdMultiplier);
-	static void SaveResult(const GeneratedSamples& config, int inputSampleRate, RecordingResult result, std::string testRootPath, std::string recordingRootPath, std::string outputDeviceName, std::string inputDeviceName);
+	static void SaveRecording(const WasapiInput& input, std::string path);
+	static RecordingSingleChannelResult AnalyzeSingleChannel(const GeneratedSamples& config, float* recordedSamples, int recordedSamplesLength, int inputSampleRate);
+	static void SaveResult(IResultsWriter& writer, const GeneratedSamples& config, AudioFormat* audioFormat, int inputSampleRate, RecordingResult& result, std::string testRootPath);
 	static int CountLinesInFile(std::string filePath);
 	static void GetMinMaxOffset(std::string filePath, float& min, float& max);
 };

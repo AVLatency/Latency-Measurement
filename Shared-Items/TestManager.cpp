@@ -5,15 +5,12 @@
 #include "WasapiInput.h"
 #include "GeneratedSamples.h"
 #include "RecordingAnalyzer.h"
-#include "GuidHelper.h"
-#include <ctime>
+#include "StringHelper.h"
 
-TestManager::TestManager(AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, std::vector<AudioFormat*> selectedFormats, std::string fileString)
-	: outputEndpoint(outputEndpoint), inputEndpoint(inputEndpoint), SelectedFormats(selectedFormats), GUID(GuidHelper::GetGuidString())
+TestManager::TestManager(AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, std::vector<AudioFormat*> selectedFormats, std::string fileString, IResultsWriter& resultsWriter)
+	: outputEndpoint(outputEndpoint), inputEndpoint(inputEndpoint), SelectedFormats(selectedFormats), GUID(StringHelper::GetGuidString()), resultsWriter(resultsWriter), Time(time(0))
 {
-	timeString = std::format("{}", "todo time");
-
-	TestString = std::format("{} {} {}", timeString, fileString, GUID);
+	TestFileString = std::format("{} {} {}", StringHelper::GetTimeString(Time, true), fileString, GUID);
 
 	managerThread = new std::thread([this] { this->StartTest(); });
 }
@@ -99,7 +96,7 @@ bool TestManager::PerformRecording(AudioFormat* audioFormat)
 		outputThread.join();
 		inputThread.join();
 
-		RecordingResult result = RecordingAnalyzer::AnalyzeRecording(*generatedSamples, *output, *input, TestConfiguration::DetectionThresholdMultiplier);
+		RecordingResult result = RecordingAnalyzer::AnalyzeRecording(resultsWriter, *generatedSamples, *output, *input, audioFormat, TestFileString);
 		validResult = result.Channel1.ValidResult && result.Channel2.ValidResult;
 
 		delete output;

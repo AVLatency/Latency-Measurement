@@ -9,28 +9,22 @@
 #include <format>
 #include <filesystem>
 #include <iomanip>
+#include "TestConfiguration.h"
 using namespace std;
 
-const std::string RecordingAnalyzer::validResultsFilename{ "Valid-Results.csv" };
-const std::string RecordingAnalyzer::invalidResultsFilename{ "Invalid-Results.csv" };
+const std::string RecordingAnalyzer::validRecordingsFilename{ "Valid-Individual-Recordings.csv" };
+const std::string RecordingAnalyzer::invalidRecordingsFilename{ "Invalid-Individual-Recordings.csv" };
 
-RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& config, const WasapiOutput& output, const WasapiInput& input, float detectionThresholdMultiplier)
+RecordingResult RecordingAnalyzer::AnalyzeRecording(IResultsWriter& writer, const GeneratedSamples& generatedSamples, const WasapiOutput& output, const WasapiInput& input, AudioFormat* audioFormat, std::string testFileString)
 {
-    std::string testRootPath = GetTestRootPath();
-    std::string recordingRootPath = testRootPath + format("{}ch-{}Hz-{}bit-{}-{}/",
-        config.WaveFormat->nChannels,
-        config.WaveFormat->nSamplesPerSec,
-        config.WaveFormat->wBitsPerSample,
-        GetAudioDataFormatString(config.WaveFormat),
-        GetChannelMaskString(config.WaveFormat));
-
-    filesystem::create_directories(filesystem::path(recordingRootPath));
-
-    std::string guidStdString = GetGuidString();
-    SaveRecording(input, recordingRootPath + guidStdString + ".wav");
-
     RecordingResult result;
-    result.GUID = guidStdString;
+
+    if (TestConfiguration::SaveIndividualWavFiles)
+    {
+        std::string recordingFolder = format("{}/{}/{}", StringHelper::GetRootPath(), testFileString, audioFormat->FormatString);
+        filesystem::create_directories(filesystem::path(recordingFolder));
+        SaveRecording(input, format("{}/{}.wav", recordingFolder, result.GUID));
+    }
 
     // Extract individual channels for analysis
     int inputSampleRate = input.waveFormat.Format.nSamplesPerSec;
@@ -45,32 +39,17 @@ RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& conf
         channelSampleIndex++;
     }
 
-    result.Channel1 = AnalyzeSingleChannel(config, ch1RecordedSamples, channelSamplesLength, inputSampleRate, detectionThresholdMultiplier);
-    result.Channel2 = AnalyzeSingleChannel(config, ch2RecordedSamples, channelSamplesLength, inputSampleRate, detectionThresholdMultiplier);
+    result.Channel1 = AnalyzeSingleChannel(generatedSamples, ch1RecordedSamples, channelSamplesLength, inputSampleRate);
+    result.Channel2 = AnalyzeSingleChannel(generatedSamples, ch2RecordedSamples, channelSamplesLength, inputSampleRate);
 
-    // TODO: SaveResult(config, sysInfo, inputSampleRate, result, testRootPath, recordingRootPath, output.DeviceName, input.DeviceName);
+    if (TestConfiguration::SaveIndividualRecordingResults)
+    {
+        SaveResult(writer, generatedSamples, audioFormat, input.waveFormat.Format.nSamplesPerSec, result, std::format("{}/{}", StringHelper::GetRootPath(), testFileString));
+    }
 
     delete[] ch1RecordedSamples;
     delete[] ch2RecordedSamples;
     return result;
-}
-
-std::string RecordingAnalyzer::GetTestRootPath()
-{
-    return "";
-    // TODO return format("Results/{}/{}/", sysInfo.Extractor, sysInfo.DAC);
-}
-
-std::string RecordingAnalyzer::GetGuidString()
-{
-    GUID guid;
-    HRESULT h = CoCreateGuid(&guid);
-    OLECHAR* tempStr;
-    h = StringFromCLSID(guid, &tempStr);
-    USES_CONVERSION;
-    std::string guidStdString = OLE2CA(tempStr);
-    CoTaskMemFree(tempStr);
-    return guidStdString;
 }
 
 WORD RecordingAnalyzer::GetFormatID(WAVEFORMATEX* waveFormat)
@@ -115,7 +94,7 @@ std::string RecordingAnalyzer::GetChannelMaskString(WAVEFORMATEX* waveFormat)
     }
 }
 
-RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const GeneratedSamples& config, float* recordedSamples, int recordedSamplesLength, int inputSampleRate, float detectionThresholdMultiplier)
+RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const GeneratedSamples& config, float* recordedSamples, int recordedSamplesLength, int inputSampleRate)
 {
     RecordingSingleChannelResult result;
     result.RecordingSampleRate = inputSampleRate;
@@ -243,7 +222,7 @@ RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const Gener
 
     for (TickPosition position : possibleTickPositions)
     {
-        float detectionThreshold = 0.05f * detectionThresholdMultiplier;
+        float detectionThreshold = 0.05f * TestConfiguration::DetectionThreshold();
         if (!position.tickInverted && recordedSamples[position.index] < detectionThreshold
             || position.tickInverted && recordedSamples[position.index] > -1.0f * detectionThreshold)
         {
@@ -281,7 +260,7 @@ RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const Gener
     }
     else
     {
-        // TODO: With these positions now known, check to make sure that the rest of the wave is smooth.
+        // TODO: (Maybe this could be improved?) With these positions now known, check to make sure that the rest of the wave is smooth.
         // If it isn't, audio migtht be glitching.
         result.ValidResult = true;
     }
@@ -301,13 +280,13 @@ namespace little_endian_io
 }
 using namespace little_endian_io;
 
-void RecordingAnalyzer::SaveRecording(const WasapiInput& input, std::string guid)
+void RecordingAnalyzer::SaveRecording(const WasapiInput& input, std::string path)
 {
     // http://www.topherlee.com/software/pcm-tut-wavformat.html
     // https://www.cplusplus.com/forum/beginner/166954/
     // https://gist.github.com/csukuangfj/c1d1d769606260d436f8674c30662450
 
-    ofstream f(guid, ios::binary);
+    ofstream f(path, ios::binary);
 
     unsigned short bitsPerSample = 16;
 
@@ -342,116 +321,22 @@ void RecordingAnalyzer::SaveRecording(const WasapiInput& input, std::string guid
     f.seekp(data_chunk_pos + (unsigned long long)4); // first four are the "data" characters
     write_word(f, file_length - data_chunk_pos + 8, 4); // size of all the actual audio data in bytes. (Adding 8 to account for the "data----" characters)
 }
-void RecordingAnalyzer::SaveResult(const GeneratedSamples& config, int inputSampleRate, RecordingResult result, std::string testRootPath, std::string recordingRootPath, std::string outputDeviceName, std::string inputDeviceName)
+
+void RecordingAnalyzer::SaveResult(IResultsWriter& writer, const GeneratedSamples& generatedSamples, AudioFormat* audioFormat, int inputSampleRate, RecordingResult& result, std::string testRootPath)
 {
+    filesystem::create_directories(filesystem::path(testRootPath));
+
     bool isValid = result.Channel1.ValidResult && result.Channel2.ValidResult;
-    std::string detailedResultsCsvPath = recordingRootPath + (isValid ? validResultsFilename : invalidResultsFilename);
+    std::string detailedResultsCsvPath = format("{}/{}", testRootPath, (isValid ? validRecordingsFilename : invalidRecordingsFilename));
 
     bool writeHeader = false;
     if (!filesystem::exists(detailedResultsCsvPath))
     {
         writeHeader = true;
     }
-    std::fstream detailedResultsStream { detailedResultsCsvPath, std::ios_base::app };
-    if (writeHeader)
-    {
-        detailedResultsStream << "Recording ID,";
-        detailedResultsStream << "Time,";
-        detailedResultsStream << ",";
-        detailedResultsStream << "Offset,";
-        detailedResultsStream << ",";
-        detailedResultsStream << "Display,";
-        detailedResultsStream << "Computer Name,";
-        detailedResultsStream << "Additional Notes,";
-        detailedResultsStream << ",";
-        detailedResultsStream << "Audio output device,";
-        detailedResultsStream << "Audio output drivers,";
-        detailedResultsStream << "video output drivers,";
-        detailedResultsStream << "Windows version,";
-        detailedResultsStream << ",";
-        detailedResultsStream << "Audio input device,";
-        detailedResultsStream << "Audio input sample rate,";
-        detailedResultsStream << ",";
-        detailedResultsStream << "Extractor,";
-        detailedResultsStream << "DAC,";
-        detailedResultsStream << ",";
-        detailedResultsStream << "Channels,";
-        detailedResultsStream << "SampleRate,";
-        detailedResultsStream << "BitDepth,";
-        detailedResultsStream << "AudioFormat,";
-        detailedResultsStream << "ChannelMask,";
-        detailedResultsStream << "VideoRes,";
-        detailedResultsStream << "VideoRefresh,";
-        detailedResultsStream << "VideoBitDepth,";
-        detailedResultsStream << "VideoFormat,";
-        detailedResultsStream << "VideoRange,";
-        detailedResultsStream << ",";
-        detailedResultsStream << "Ch 1 Milliseconds to Tick 1,";
-        detailedResultsStream << "Ch 2 Milliseconds to Tick 1,";
-        detailedResultsStream << "Ch 1 Rel Milliseconds to Tick 2,";
-        detailedResultsStream << "Ch 2 Rel Milliseconds to Tick 2,";
-        detailedResultsStream << "Ch 1 Rel Milliseconds to Tick 3,";
-        detailedResultsStream << "Ch 2 Rel Milliseconds to Tick 3,";
-        detailedResultsStream << "Ch 1 Phase Inverted,";
-        detailedResultsStream << "Ch 1 Samples to Tick 1,";
-        detailedResultsStream << "Ch 1 Samples to Tick 2,";
-        detailedResultsStream << "Ch 1 Samples to Tick 3,";
-        detailedResultsStream << "Ch 2 Phase Inverted,";
-        detailedResultsStream << "Ch 2 Samples to Tick 1,";
-        detailedResultsStream << "Ch 2 Samples to Tick 2,";
-        detailedResultsStream << "Ch 2 Samples to Tick 3,";
-        detailedResultsStream << "Ch 1 Invalid Reason,";
-        detailedResultsStream << "Ch 2 Invalid Reason" << endl;
-    }
+    std::fstream detailedResultsStream{ detailedResultsCsvPath, std::ios_base::app };
 
-    // TODO
-    //detailedResultsStream << "\"" << result.GUID << "\","; //"Recording ID,";
-    //detailedResultsStream << "\"" << std::put_time(std::localtime(&result.Time), "%c") << "\","; //"Time,";
-    //detailedResultsStream << "\"" << "\",";
-    //detailedResultsStream << "\"" << result.Offset() << "\","; //"Offset,";
-    //detailedResultsStream << "\"" << "\",";
-    //detailedResultsStream << "\"" << sysInfo.Display << "\","; //"Display,";
-    //detailedResultsStream << "\"" << sysInfo.ComputerName << "\","; //"Computer Name,";
-    //detailedResultsStream << "\"" << sysInfo.AdditionalNotes << "\","; //"Additional Notes,";
-    //detailedResultsStream << "\"" << "\",";
-    //detailedResultsStream << "\"" << outputDeviceName << "\","; //"Audio output device,";
-    //detailedResultsStream << "\"" << sysInfo.AudioOutputDrivers << "\","; //"Audio output drivers,";
-    //detailedResultsStream << "\"" << sysInfo.VideoOutputDrivers << "\","; //"video output drivers,";
-    //detailedResultsStream << "\"" << sysInfo.WindowsVersion << "\","; //"Windows version,";
-    //detailedResultsStream << "\"" << "\",";
-    //detailedResultsStream << "\"" << inputDeviceName << "\","; //"Audio input device,";
-    //detailedResultsStream << "\"" << inputSampleRate << "\","; //"Audio input sample rate,";
-    //detailedResultsStream << "\"" << "\",";
-    //detailedResultsStream << "\"" << sysInfo.Extractor << "\","; //"Extractor,";
-    //detailedResultsStream << "\"" << sysInfo.DAC << "\","; //"DAC,";
-    //detailedResultsStream << "\"" << "\",";
-    //detailedResultsStream << "\"" << config.WaveFormat->nChannels << "\","; //"Channels,";
-    //detailedResultsStream << "\"" << config.WaveFormat->nSamplesPerSec << "\","; //"SampleRate,";
-    //detailedResultsStream << "\"" << config.WaveFormat->wBitsPerSample << "\","; //"BitDepth,";
-    //detailedResultsStream << "\"" << GetAudioDataFormatString(config.WaveFormat) << "\","; //"AudioFormat,";
-    //detailedResultsStream << "\"" << GetChannelMaskString(config.WaveFormat) << "\","; //"ChannelMask,";
-    //detailedResultsStream << "\"" << sysInfo.VideoRes << "\","; //"VideoRes,";
-    //detailedResultsStream << "\"" << sysInfo.VideoRefresh << "\","; //"VideoRefresh,";
-    //detailedResultsStream << "\"" << sysInfo.VideoBitDepth << "\","; //"VideoBitDepth,";
-    //detailedResultsStream << "\"" << sysInfo.VideoFormat << "\","; //"VideoFormat,";
-    //detailedResultsStream << "\"" << sysInfo.VideoRange << "\","; //"VideoRange,";
-    //detailedResultsStream << "\"" << "\",";
-    //detailedResultsStream << "\"" << result.Channel1.MillisecondsToTick1() << "\","; //"Ch 1 Milliseconds to Tick 1,";
-    //detailedResultsStream << "\"" << result.Channel2.MillisecondsToTick1() << "\","; //"Ch 2 Milliseconds to Tick 1,";
-    //detailedResultsStream << "\"" << result.Channel1.RelMillisecondsToTick2() << "\","; //"Ch 1 Rel Milliseconds to Tick 2,";
-    //detailedResultsStream << "\"" << result.Channel2.RelMillisecondsToTick2() << "\","; //"Ch 2 Rel Milliseconds to Tick 2,";
-    //detailedResultsStream << "\"" << result.Channel1.RelMillisecondsToTick3() << "\","; //"Ch 1 Rel Milliseconds to Tick 3,";
-    //detailedResultsStream << "\"" << result.Channel2.RelMillisecondsToTick3() << "\","; //"Ch 2 Rel Milliseconds to Tick 3,";
-    //detailedResultsStream << "\"" << (result.Channel1.PhaseInverted ? "true" : "false") << "\","; //"Ch 1 Phase Inverted,";
-    //detailedResultsStream << "\"" << result.Channel1.SamplesToTick1 << "\","; //"Ch 1 Samples to Tick 1,";
-    //detailedResultsStream << "\"" << result.Channel1.SamplesToTick2 << "\","; //"Ch 1 Samples to Tick 2,";
-    //detailedResultsStream << "\"" << result.Channel1.SamplesToTick3 << "\","; //"Ch 1 Samples to Tick 3,";
-    //detailedResultsStream << "\"" << (result.Channel2.PhaseInverted ? "true" : "false") << "\","; //"Ch 2 Phase Inverted,";
-    //detailedResultsStream << "\"" << result.Channel2.SamplesToTick1 << "\","; //"Ch 2 Samples to Tick 1,";
-    //detailedResultsStream << "\"" << result.Channel2.SamplesToTick2 << "\","; //"Ch 2 Samples to Tick 2,";
-    //detailedResultsStream << "\"" << result.Channel2.SamplesToTick3 << "\","; //"Ch 2 Samples to Tick 3,";
-    //detailedResultsStream << "\"" << result.Channel1.InvalidReason << "\","; //"Ch 1 Invalid Reason,";
-    //detailedResultsStream << "\"" << result.Channel2.InvalidReason << "\"" << endl; //"Ch 2 Invalid Reason";
+    writer.WriteIndividualRecordingResults(writeHeader, detailedResultsStream, generatedSamples, audioFormat, inputSampleRate, result);
 
     detailedResultsStream.close();
 }

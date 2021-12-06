@@ -5,6 +5,7 @@
 #include "FontHelper.h"
 #include "TestNotes.h"
 #include "TestConfiguration.h"
+#include "HdmiResultsWriter.h"
 
 float Gui::DpiScale = 1.0f;
 bool Gui::DpiScaleChanged = false;
@@ -812,6 +813,6 @@ void Gui::StartTest()
 
         std::string fileString = std::format("{} {}", TestNotes::Notes.DutModel,
             TestNotes::Notes.DutOutputTypeIndex == IM_ARRAYSIZE(TestNotes::Notes.DutOutputTypeOptions) - 1 ? TestNotes::Notes.DutOutputTypeOther : TestNotes::Notes.DutOutputTypeOptions[TestNotes::Notes.DutOutputTypeIndex]);
-        testManager = new TestManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex], selectedFormats, fileString);
+        testManager = new TestManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex], selectedFormats, fileString, (IResultsWriter&)HdmiResultsWriter::Writer);
     }
 }
