@@ -271,7 +271,7 @@ bool Gui::DoGui()
                         ImGui::Text("");
                         PeakLevel(adjustVolumeManager->rightChannelGrade, "Adjust the output volume of your Device Under Test (DUT) to give a consistent normalized recording.\n\n"
                             "When the DUT is muted, this peak level should be \"Quiet\". If it is not, this likely means you are getting cable crosstalk and your mesaurements will incorrectly be 0 ms audio latency!\n\n"
-                            "To solve the problem of cable crosstalk, try turning down the output volume in the advanced settings or using a physical, inline volume control on your HDMI Audio Device output.");
+                            "To solve the problem of cable crosstalk, try turning down the output volume in the Advanced Configuration or using a physical, inline volume control on your HDMI Audio Device output.");
 
                         ImGui::EndTable();
                     }
@@ -491,7 +491,7 @@ bool Gui::DoGui()
 
                 ImGui::PushItemWidth(150 * DpiScale);
                 ImGui::DragInt("Number of Measurements", &TestConfiguration::NumMeasurements, .05f, 1, 100);
-                ImGui::SameLine(); HelpMarker("The number of measurements for each of the selected audio formats. A higher number of measurements will give a more accurate average audio latency result.");
+                ImGui::SameLine(); HelpMarker("The number of measurements for each of the selected audio formats. A higher number of measurements will give a more accurate average audio latency result, but will take longer to complete.");
                 if (ImGui::TreeNode("Advanced Configuration"))
                 {
                     ImGui::DragInt("Attempts Before Skipping a Format", &TestConfiguration::AttemptsBeforeFail, .05f, 1, 10);
