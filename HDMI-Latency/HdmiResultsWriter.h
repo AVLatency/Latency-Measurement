@@ -6,6 +6,7 @@ class HdmiResultsWriter : IResultsWriter
 public:
 	static HdmiResultsWriter Writer;
 
-	virtual void WriteIndividualRecordingResults(bool writeHeader, std::fstream& detailedResultsStream, AudioFormat* audioFormat, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result) override;
+	virtual void WriteIndividualRecordingResults(bool writeHeader, std::fstream& detailedResultsStream, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result) override;
+	virtual void WriteFinalResultsLine(bool writeHeader, std::fstream& resultsStream, const AveragedResult& result) override;
 };
 

@@ -8,6 +8,8 @@
 #include "AudioEndpoint.h"
 #include <string>
 #include "IResultsWriter.h"
+#include "AveragedResult.h"
+#include <map>
 
 class TestManager
 {
@@ -21,6 +23,9 @@ public:
 
 	std::vector<AudioFormat*> SelectedFormats;
 	std::vector<AudioFormat*> FailedFormats;
+
+	std::vector<RecordingResult> Results;
+	std::map<const AudioFormat*, AveragedResult> AveragedResults;
 
 	std::string GUID;
 	time_t Time;

@@ -333,6 +333,7 @@ bool Gui::DoGui()
                 {
                     state = GuiState::MeasurementConfig;
                     outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats();
+                    strcpy_s(TestNotes::Notes.DutModel, outputAudioEndpoints[outputDeviceIndex].Name.c_str());
                 }
             }
         }
@@ -613,7 +614,7 @@ bool Gui::DoGui()
                 {
                     ImGui::Text("Measurement in progres...");
                     ImGui::ProgressBar(testManager->PassCount / (float)testManager->TotalPasses);
-                    ImGui::Text("TODO: Currently measuring 2ch-48000Hz-16bit-PCM-0x0...");
+                    // TODO: maybe this is safely possible? ImGui::Text("TODO: Currently measuring 2ch-48000Hz-16bit-PCM-0x0...");
                     ImGui::ProgressBar(testManager->RecordingCount / (float)testManager->TotalRecordingsPerPass);
 
                     if (state != GuiState::CancellingMeasuring)
@@ -811,7 +812,7 @@ void Gui::StartTest()
             }
         }
 
-        std::string fileString = std::format("{} {}", TestNotes::Notes.DutModel, TestNotes::Notes.DutOutputType());
+        std::string fileString = "";// std::format("{} {}", TestNotes::Notes.DutModel, TestNotes::Notes.DutOutputType()); // TODO: This breaks when it's not windows file sytem safe!
         testManager = new TestManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex], selectedFormats, fileString, (IResultsWriter&)HdmiResultsWriter::Writer);
     }
 }

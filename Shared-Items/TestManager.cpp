@@ -73,7 +73,9 @@ void TestManager::StartTest()
 		}
 	}
 
-	//RecordingAnalyzer::UpdateSummary(systemInfo);
+	AveragedResults = RecordingAnalyzer::AnalyzeResults(Results, GUID, Time, outputEndpoint);
+
+	RecordingAnalyzer::SaveFinalResults(resultsWriter, AveragedResults, StringHelper::GetRootPath(), std::format("{}.csv", TestFileString));
 
 	SetThreadExecutionState(0); // Reset prevent display from turning off while running this tool.
 
@@ -96,7 +98,8 @@ bool TestManager::PerformRecording(AudioFormat* audioFormat)
 		outputThread.join();
 		inputThread.join();
 
-		RecordingResult result = RecordingAnalyzer::AnalyzeRecording(*generatedSamples, *input);
+		RecordingResult result = RecordingAnalyzer::AnalyzeRecording(*generatedSamples, *input, *audioFormat);
+		Results.push_back(result);
 		
 		if (TestConfiguration::SaveIndividualWavFiles)
 		{
@@ -105,7 +108,7 @@ bool TestManager::PerformRecording(AudioFormat* audioFormat)
 		}
 		if (TestConfiguration::SaveIndividualRecordingResults)
 		{
-			RecordingAnalyzer::SaveIndividualResult(resultsWriter, audioFormat, outputEndpoint, inputEndpoint, result, std::format("{}/{}", StringHelper::GetRootPath(), TestFileString));
+			RecordingAnalyzer::SaveIndividualResult(resultsWriter, outputEndpoint, inputEndpoint, result, std::format("{}/{}", StringHelper::GetRootPath(), TestFileString));
 		}
 
 		validResult = result.Channel1.ValidResult && result.Channel2.ValidResult;

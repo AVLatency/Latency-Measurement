@@ -10,11 +10,11 @@ public:
     int RecordingSampleRate = 0;
 
     int SamplesToTick1 = 0;
-    float MillisecondsToTick1() { return SamplesToTick1 / (float)RecordingSampleRate * 1000.0f; };
+    float MillisecondsToTick1() const { return SamplesToTick1 / (float)RecordingSampleRate * 1000.0f; };
     int SamplesToTick2 = 0;
-    float RelMillisecondsToTick2() { return (SamplesToTick2 - SamplesToTick1) / (float)RecordingSampleRate * 1000.0f; };
+    float RelMillisecondsToTick2() const { return (SamplesToTick2 - SamplesToTick1) / (float)RecordingSampleRate * 1000.0f; };
     int SamplesToTick3 = 0;
-    float RelMillisecondsToTick3() { return (SamplesToTick3 - SamplesToTick1) / (float)RecordingSampleRate * 1000.0f; };
+    float RelMillisecondsToTick3() const { return (SamplesToTick3 - SamplesToTick1) / (float)RecordingSampleRate * 1000.0f; };
 
     bool PhaseInverted = false;
 };

@@ -10,14 +10,15 @@
 #include <filesystem>
 #include <iomanip>
 #include "TestConfiguration.h"
+#include <ctime>
 using namespace std;
 
 const std::string RecordingAnalyzer::validRecordingsFilename{ "Valid-Individual-Recordings.csv" };
 const std::string RecordingAnalyzer::invalidRecordingsFilename{ "Invalid-Individual-Recordings.csv" };
 
-RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& generatedSamples, const WasapiInput& input)
+RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& generatedSamples, const WasapiInput& input, const AudioFormat& format)
 {
-    RecordingResult result;
+    RecordingResult result(format);
 
     // Extract individual channels for analysis
     int inputSampleRate = input.waveFormat.Format.nSamplesPerSec;
@@ -38,48 +39,6 @@ RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& gene
     delete[] ch1RecordedSamples;
     delete[] ch2RecordedSamples;
     return result;
-}
-
-WORD RecordingAnalyzer::GetFormatID(WAVEFORMATEX* waveFormat)
-{
-    if (waveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
-    {
-        return EXTRACT_WAVEFORMATEX_ID(&(reinterpret_cast<WAVEFORMATEXTENSIBLE*>(waveFormat)->SubFormat));
-    }
-    else
-    {
-        return waveFormat->wFormatTag;
-    }
-}
-
-std::string RecordingAnalyzer::GetAudioDataFormatString(WAVEFORMATEX* waveFormat)
-{
-    WORD formatID = GetFormatID(waveFormat);
-
-    if (formatID == WAVE_FORMAT_IEEE_FLOAT)
-    {
-        return "IEEE_FLOAT";
-    }
-    else if (formatID == WAVE_FORMAT_PCM)
-    {
-        return "PCM";
-    }
-    else
-    {
-        return format("UnknownFormat0x{:X}", formatID);
-    }
-}
-
-std::string RecordingAnalyzer::GetChannelMaskString(WAVEFORMATEX* waveFormat)
-{
-    if (waveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
-    {
-        return format("0x{:X}", reinterpret_cast<WAVEFORMATEXTENSIBLE*>(waveFormat)->dwChannelMask);
-    }
-    else
-    {
-        return "(NoChMask)";
-    }
 }
 
 RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const GeneratedSamples& config, float* recordedSamples, int recordedSamplesLength, int inputSampleRate)
@@ -256,6 +215,26 @@ RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const Gener
     return result;
 }
 
+std::map<const AudioFormat*, AveragedResult> RecordingAnalyzer::AnalyzeResults(std::vector<RecordingResult> results, std::string testGuid, time_t tTime, const AudioEndpoint& outputEndpoint)
+{
+    std::map<const AudioFormat*, AveragedResult> averagedResults;
+
+    for (const RecordingResult& recordingResult : results)
+    {
+        if (recordingResult.Channel1.ValidResult && recordingResult.Channel2.ValidResult)
+        {
+            if (!averagedResults.contains(&recordingResult.Format))
+            {
+                averagedResults.insert({ &recordingResult.Format, AveragedResult(testGuid, tTime, &recordingResult.Format, outputEndpoint) });
+            }
+            const auto& pair = averagedResults.find(&recordingResult.Format);
+            pair->second.Offsets.push_back(recordingResult.Offset());
+        }
+    }
+
+    return averagedResults;
+}
+
 namespace little_endian_io
 {
     template <typename Word>
@@ -312,7 +291,7 @@ void RecordingAnalyzer::SaveRecording(const WasapiInput& input, std::string path
     write_word(f, file_length - data_chunk_pos + 8, 4); // size of all the actual audio data in bytes. (Adding 8 to account for the "data----" characters)
 }
 
-void RecordingAnalyzer::SaveIndividualResult(IResultsWriter& writer, AudioFormat* audioFormat, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result, std::string testRootPath)
+void RecordingAnalyzer::SaveIndividualResult(IResultsWriter& writer, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result, std::string testRootPath)
 {
     filesystem::create_directories(filesystem::path(testRootPath));
 
@@ -326,9 +305,31 @@ void RecordingAnalyzer::SaveIndividualResult(IResultsWriter& writer, AudioFormat
     }
     std::fstream detailedResultsStream{ detailedResultsCsvPath, std::ios_base::app };
 
-    writer.WriteIndividualRecordingResults(writeHeader, detailedResultsStream, audioFormat, outputEndpoint, inputEndpoint, result);
+    writer.WriteIndividualRecordingResults(writeHeader, detailedResultsStream, outputEndpoint, inputEndpoint, result);
 
     detailedResultsStream.close();
+}
+
+void RecordingAnalyzer::SaveFinalResults(IResultsWriter& writer, std::map<const AudioFormat*, AveragedResult> results, std::string testRootPath, std::string csvFilename)
+{
+    filesystem::create_directories(filesystem::path(testRootPath));
+
+    std::string csvPath = format("{}/{}", testRootPath, csvFilename);
+
+    bool writeHeader = false;
+    if (!filesystem::exists(csvPath))
+    {
+        writeHeader = true;
+    }
+    std::fstream resultsStream{ csvPath, std::ios_base::app };
+
+    for (auto pair : results)
+    {
+        writer.WriteFinalResultsLine(writeHeader, resultsStream, pair.second);
+        writeHeader = false;
+    }
+
+    resultsStream.close();
 }
 
 //void RecordingAnalyzer::UpdateSummary()
@@ -410,67 +411,3 @@ void RecordingAnalyzer::SaveIndividualResult(IResultsWriter& writer, AudioFormat
     //    }
     //}
 //}
-
-int RecordingAnalyzer::CountLinesInFile(std::string filePath)
-{
-    int result = 0;
-    // Count valid
-    ifstream ifs(filePath);
-    if (ifs.is_open())
-    {
-        string line;
-        while (getline(ifs, line))
-        {
-            result++;
-        }
-    }
-    else
-    {
-        //TODO: error handling
-    }
-    return result;
-}
-
-void RecordingAnalyzer::GetMinMaxOffset(std::string filePath, float& min, float& max)
-{
-    // Count valid
-    ifstream ifs(filePath);
-    if (ifs.is_open())
-    {
-        string line;
-        getline(ifs, line); // skip first line
-        while (getline(ifs, line))
-        {
-            stringstream ss(line);
-            string word;
-            for (int i = 0; i < 4; i++) // The fourth word is the offset
-            {
-                getline(ss, word, ',');
-            }
-            if (word.length() > 0)
-            {
-                word.erase(remove(word.begin(), word.end(), '"'), word.end());
-                try
-                {
-                    float offset = stof(word);
-                    if (offset > max)
-                    {
-                        max = offset;
-                    }
-                    if (offset < min)
-                    {
-                        min = offset;
-                    }
-                }
-                catch (...)
-                {
-
-                }
-            }
-        }
-    }
-    else
-    {
-        //TODO: error handling
-    }
-}

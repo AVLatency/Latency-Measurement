@@ -75,3 +75,33 @@ std::string AudioFormat::GetChannelInfoString(WAVEFORMATEX* waveFormat)
     }
     return result;
 }
+
+WORD AudioFormat::GetFormatID(WAVEFORMATEX* waveFormat)
+{
+    if (waveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
+    {
+        return EXTRACT_WAVEFORMATEX_ID(&(reinterpret_cast<WAVEFORMATEXTENSIBLE*>(waveFormat)->SubFormat));
+    }
+    else
+    {
+        return waveFormat->wFormatTag;
+    }
+}
+
+std::string AudioFormat::GetAudioDataFormatString(WAVEFORMATEX* waveFormat)
+{
+    WORD formatID = GetFormatID(waveFormat);
+
+    if (formatID == WAVE_FORMAT_IEEE_FLOAT)
+    {
+        return "IEEE_FLOAT";
+    }
+    else if (formatID == WAVE_FORMAT_PCM)
+    {
+        return "LPCM";
+    }
+    else
+    {
+        return std::format("UnknownFormat0x{:X}", formatID);
+    }
+}

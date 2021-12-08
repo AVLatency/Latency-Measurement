@@ -4,7 +4,7 @@
 
 HdmiResultsWriter HdmiResultsWriter::Writer;
 
-void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstream& detailedResultsStream, AudioFormat* audioFormat, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result)
+void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstream& detailedResultsStream, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result)
 {
     if (writeHeader)
     {
@@ -68,7 +68,7 @@ void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::f
     }
 
     detailedResultsStream << "\"" << StringHelper::GetTimeString(result.Time, false) << "\","; //"Time,";
-    detailedResultsStream << "\"" << audioFormat->FormatString << "\","; //"Audio Format,";
+    detailedResultsStream << "\"" << result.Format.FormatString << "\","; //"Audio Format,";
     detailedResultsStream << "\"" << result.GUID << ".wav\","; //"Recording,";
     detailedResultsStream << "\"" << "\",";
     detailedResultsStream << "\"" << "TODO" << "\","; //"Audio Latency (ms),"; // TODO
@@ -85,11 +85,11 @@ void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::f
     detailedResultsStream << "\"" << TestNotes::Notes.DutAudioSettings << "\",";
     detailedResultsStream << "\"" << TestNotes::Notes.DutOtherSettings << "\",";
     detailedResultsStream << "\"" << "\",";
-    detailedResultsStream << "\"" << "LPCM" << "\","; //"Audio Format,";
-    detailedResultsStream << "\"" << audioFormat->WaveFormat->nChannels << "\",";
-    detailedResultsStream << "\"" << audioFormat->WaveFormat->nSamplesPerSec << "\",";
-    detailedResultsStream << "\"" << audioFormat->WaveFormat->wBitsPerSample << "\",";
-    detailedResultsStream << "\"" << AudioFormat::GetChannelInfoString(audioFormat->WaveFormat) << "\",";
+    detailedResultsStream << "\"" << AudioFormat::GetAudioDataFormatString(result.Format.WaveFormat) << "\","; //"Audio Format,";
+    detailedResultsStream << "\"" << result.Format.WaveFormat->nChannels << "\",";
+    detailedResultsStream << "\"" << result.Format.WaveFormat->nSamplesPerSec << "\",";
+    detailedResultsStream << "\"" << result.Format.WaveFormat->wBitsPerSample << "\",";
+    detailedResultsStream << "\"" << AudioFormat::GetChannelInfoString(result.Format.WaveFormat) << "\",";
     detailedResultsStream << "\"" << "\",";
     detailedResultsStream << "\"" << TestNotes::Notes.VideoRes() << "\",";
     detailedResultsStream << "\"" << TestNotes::Notes.VideoRefreshRate << "\",";
@@ -124,4 +124,86 @@ void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::f
     detailedResultsStream << "\"" << result.Channel2.SamplesToTick3 << "\","; //"Ch 2 Samples to Tick 3,";
     detailedResultsStream << "\"" << result.Channel1.InvalidReason << "\","; //"Ch 1 Invalid Reason,";
     detailedResultsStream << "\"" << result.Channel2.InvalidReason << "\"" << std::endl; //"Ch 2 Invalid Reason";
+}
+
+void HdmiResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& resultsStream, const AveragedResult& result)
+{
+    if (writeHeader)
+    {
+        resultsStream << "Time,";
+        resultsStream << "Audio Format,";
+        resultsStream << ",";
+        resultsStream << "Avg. Audio Latency (ms),";
+        resultsStream << "Min Audio Latency (ms),";
+        resultsStream << "Max Audio Latency (ms),";
+        resultsStream << "Verified,";
+        resultsStream << "Valid Measurements,";
+        resultsStream << ",";
+        resultsStream << "Output Offset Profile,";
+        resultsStream << "Output Offset Profile Value (ms),";
+        resultsStream << ",";
+        resultsStream << "DUT Model,";
+        resultsStream << "DUT Firmware Version,";
+        resultsStream << "DUT Output Type,";
+        resultsStream << "DUT Video Mode,";
+        resultsStream << "DUT Audio Settings,";
+        resultsStream << "DUT Other Settings,";
+        resultsStream << ",";
+        resultsStream << "Audio Format,";
+        resultsStream << "Audio Channels,";
+        resultsStream << "Audio Sample Rate,";
+        resultsStream << "Audio Bit Depth,";
+        resultsStream << "Audio Channel Description,";
+        resultsStream << ",";
+        resultsStream << "Video Resolution,";
+        resultsStream << "Video Refresh Rate,";
+        resultsStream << "Video Bit Depth,";
+        resultsStream << "Video Color Format,";
+        resultsStream << "Video Color Space,";
+        resultsStream << ",";
+        resultsStream << "Notes 1,";
+        resultsStream << "Notes 2,";
+        resultsStream << "Notes 3,";
+        resultsStream << "Notes 4,";
+        resultsStream << ",";
+        resultsStream << "Audio Output Device" << std::endl;
+    }
+
+    resultsStream << "\"" << StringHelper::GetTimeString(result.Time, false) << "\","; //"Time,";
+    resultsStream << "\"" << result.Format->FormatString << "\","; //"Audio Format,";
+    resultsStream << "\"" << "\",";
+    resultsStream << "\"" << result.AverageLatency() << "\",";
+    resultsStream << "\"" << result.MinLatency() << "\",";
+    resultsStream << "\"" << result.MaxLatency() << "\",";
+    resultsStream << "\"" << "No" << "\","; //"Verified,"; // TODO
+    resultsStream << "\"" << result.Offsets.size() << "\",";
+    resultsStream << "\"" << "\",";
+    resultsStream << "\"" << "TODO" << "\","; //"Output Offset Profile,"; // TODO
+    resultsStream << "\"" << "TODO" << "\","; //"Output Offset Profile Value (ms),"; // TODO
+    resultsStream << "\"" << "\",";
+    resultsStream << "\"" << TestNotes::Notes.DutModel << "\","; //"DUT Model,";
+    resultsStream << "\"" << TestNotes::Notes.DutFirmwareVersion << "\","; //"DUT Firmware Version,";
+    resultsStream << "\"" << TestNotes::Notes.DutOutputType() << "\","; //"DUT,";
+    resultsStream << "\"" << TestNotes::Notes.DutVideoMode << "\","; //"DUT Video Mode,";
+    resultsStream << "\"" << TestNotes::Notes.DutAudioSettings << "\",";
+    resultsStream << "\"" << TestNotes::Notes.DutOtherSettings << "\",";
+    resultsStream << "\"" << "\",";
+    resultsStream << "\"" << AudioFormat::GetAudioDataFormatString(result.Format->WaveFormat) << "\","; //"Audio Format,";
+    resultsStream << "\"" << result.Format->WaveFormat->nChannels << "\",";
+    resultsStream << "\"" << result.Format->WaveFormat->nSamplesPerSec << "\",";
+    resultsStream << "\"" << result.Format->WaveFormat->wBitsPerSample << "\",";
+    resultsStream << "\"" << AudioFormat::GetChannelInfoString(result.Format->WaveFormat) << "\",";
+    resultsStream << "\"" << "\",";
+    resultsStream << "\"" << TestNotes::Notes.VideoRes() << "\",";
+    resultsStream << "\"" << TestNotes::Notes.VideoRefreshRate << "\",";
+    resultsStream << "\"" << TestNotes::Notes.VideoBitDepth << "\",";
+    resultsStream << "\"" << TestNotes::Notes.VideoColorFormat << "\",";
+    resultsStream << "\"" << TestNotes::Notes.VideoColorSpace() << "\",";
+    resultsStream << "\"" << "\",";
+    resultsStream << "\"" << TestNotes::Notes.Notes1 << "\",";
+    resultsStream << "\"" << TestNotes::Notes.Notes2 << "\",";
+    resultsStream << "\"" << TestNotes::Notes.Notes3 << "\",";
+    resultsStream << "\"" << TestNotes::Notes.Notes4 << "\",";
+    resultsStream << "\"" << "\",";
+    resultsStream << "\"" << result.OutputEndpoint.Name << " (" << result.OutputEndpoint.ID << ")" << "\"" << std::endl; //"Audio output device,";
 }
