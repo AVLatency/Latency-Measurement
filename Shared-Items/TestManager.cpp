@@ -96,7 +96,18 @@ bool TestManager::PerformRecording(AudioFormat* audioFormat)
 		outputThread.join();
 		inputThread.join();
 
-		RecordingResult result = RecordingAnalyzer::AnalyzeRecording(resultsWriter, *generatedSamples, *output, *input, outputEndpoint, inputEndpoint, audioFormat, TestFileString);
+		RecordingResult result = RecordingAnalyzer::AnalyzeRecording(*generatedSamples, *input);
+		
+		if (TestConfiguration::SaveIndividualWavFiles)
+		{
+			std::string recordingFolder = format("{}/{}/{}", StringHelper::GetRootPath(), TestFileString, audioFormat->FormatString);
+			RecordingAnalyzer::SaveRecording(*input, format("{}/{}.wav", recordingFolder, result.GUID));
+		}
+		if (TestConfiguration::SaveIndividualRecordingResults)
+		{
+			RecordingAnalyzer::SaveIndividualResult(resultsWriter, audioFormat, outputEndpoint, inputEndpoint, result, std::format("{}/{}", StringHelper::GetRootPath(), TestFileString));
+		}
+
 		validResult = result.Channel1.ValidResult && result.Channel2.ValidResult;
 
 		delete output;

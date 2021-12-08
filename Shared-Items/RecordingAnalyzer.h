@@ -11,10 +11,10 @@
 class RecordingAnalyzer
 {
 public:
-	/// <summary>
-	/// Analyzes recording and writes results to files.
-	/// </summary>
-	static RecordingResult AnalyzeRecording(IResultsWriter& writer, const GeneratedSamples& generatedSamples, const WasapiOutput& output, const WasapiInput& input, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, AudioFormat* audioFormat, std::string testFileString);
+	static RecordingResult AnalyzeRecording(const GeneratedSamples& generatedSamples, const WasapiInput& input);
+
+	static void SaveRecording(const WasapiInput& input, std::string path);
+	static void SaveIndividualResult(IResultsWriter& writer, AudioFormat* audioFormat, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result, std::string testRootPath);
 
 private:
 	struct TickPosition
@@ -29,9 +29,7 @@ private:
 	static WORD GetFormatID(WAVEFORMATEX* waveFormat);
 	static std::string GetAudioDataFormatString(WAVEFORMATEX* waveFormat);
 	static std::string GetChannelMaskString(WAVEFORMATEX* waveFormat);
-	static void SaveRecording(const WasapiInput& input, std::string path);
 	static RecordingSingleChannelResult AnalyzeSingleChannel(const GeneratedSamples& config, float* recordedSamples, int recordedSamplesLength, int inputSampleRate);
-	static void SaveResult(IResultsWriter& writer, const GeneratedSamples& config, AudioFormat* audioFormat, int inputSampleRate, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result, std::string testRootPath);
 	static int CountLinesInFile(std::string filePath);
 	static void GetMinMaxOffset(std::string filePath, float& min, float& max);
 };

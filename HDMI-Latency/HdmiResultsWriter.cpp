@@ -4,7 +4,7 @@
 
 HdmiResultsWriter HdmiResultsWriter::Writer;
 
-void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstream& detailedResultsStream, const GeneratedSamples& generatedSamples, AudioFormat* audioFormat, int inputSampleRate, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result)
+void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstream& detailedResultsStream, AudioFormat* audioFormat, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result)
 {
     if (writeHeader)
     {
@@ -67,12 +67,11 @@ void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::f
         detailedResultsStream << "Ch 2 Invalid Reason" << std::endl;
     }
 
-    // TODO
     detailedResultsStream << "\"" << StringHelper::GetTimeString(result.Time, false) << "\","; //"Time,";
     detailedResultsStream << "\"" << audioFormat->FormatString << "\","; //"Audio Format,";
     detailedResultsStream << "\"" << result.GUID << ".wav\","; //"Recording,";
     detailedResultsStream << "\"" << "\",";
-    detailedResultsStream << "\"" << result.Offset() << "\","; //"Audio Latency (ms),"; // TODO
+    detailedResultsStream << "\"" << "TODO" << "\","; //"Audio Latency (ms),"; // TODO
     detailedResultsStream << "\"" << "No" << "\","; //"Verified,"; // TODO
     detailedResultsStream << "\"" << "\",";
     detailedResultsStream << "\"" << result.Offset() << "\","; //"Raw Offset (ms),";
@@ -105,9 +104,9 @@ void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::f
     detailedResultsStream << "\"" << "\",";
     detailedResultsStream << "\"" << outputEndpoint.Name << " (" << outputEndpoint.ID << ")" << "\","; //"Audio output device,";
     detailedResultsStream << "\"" << inputEndpoint.Name << " (" << inputEndpoint.ID << ")" << "\","; //"Audio input device,";
-    detailedResultsStream << "\"" << inputSampleRate << "\","; //"Audio input sample rate,";
+    detailedResultsStream << "\"" << result.Channel1.RecordingSampleRate << "\","; //"Audio input sample rate,";
     detailedResultsStream << "\"" << "\",";
-    detailedResultsStream << "\"" << "\",";
+    detailedResultsStream << "\"" << "DEBUG INFO FOLLOWS -->" << "\",";
     detailedResultsStream << "\"" << "\",";
     detailedResultsStream << "\"" << result.Channel1.MillisecondsToTick1() << "\","; //"Ch 1 Milliseconds to Tick 1,";
     detailedResultsStream << "\"" << result.Channel2.MillisecondsToTick1() << "\","; //"Ch 2 Milliseconds to Tick 1,";

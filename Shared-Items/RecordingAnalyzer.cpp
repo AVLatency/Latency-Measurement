@@ -15,16 +15,9 @@ using namespace std;
 const std::string RecordingAnalyzer::validRecordingsFilename{ "Valid-Individual-Recordings.csv" };
 const std::string RecordingAnalyzer::invalidRecordingsFilename{ "Invalid-Individual-Recordings.csv" };
 
-RecordingResult RecordingAnalyzer::AnalyzeRecording(IResultsWriter& writer, const GeneratedSamples& generatedSamples, const WasapiOutput& output, const WasapiInput& input, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, AudioFormat* audioFormat, std::string testFileString)
+RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& generatedSamples, const WasapiInput& input)
 {
     RecordingResult result;
-
-    if (TestConfiguration::SaveIndividualWavFiles)
-    {
-        std::string recordingFolder = format("{}/{}/{}", StringHelper::GetRootPath(), testFileString, audioFormat->FormatString);
-        filesystem::create_directories(filesystem::path(recordingFolder));
-        SaveRecording(input, format("{}/{}.wav", recordingFolder, result.GUID));
-    }
 
     // Extract individual channels for analysis
     int inputSampleRate = input.waveFormat.Format.nSamplesPerSec;
@@ -41,11 +34,6 @@ RecordingResult RecordingAnalyzer::AnalyzeRecording(IResultsWriter& writer, cons
 
     result.Channel1 = AnalyzeSingleChannel(generatedSamples, ch1RecordedSamples, channelSamplesLength, inputSampleRate);
     result.Channel2 = AnalyzeSingleChannel(generatedSamples, ch2RecordedSamples, channelSamplesLength, inputSampleRate);
-
-    if (TestConfiguration::SaveIndividualRecordingResults)
-    {
-        SaveResult(writer, generatedSamples, audioFormat, input.waveFormat.Format.nSamplesPerSec, outputEndpoint, inputEndpoint, result, std::format("{}/{}", StringHelper::GetRootPath(), testFileString));
-    }
 
     delete[] ch1RecordedSamples;
     delete[] ch2RecordedSamples;
@@ -282,6 +270,8 @@ using namespace little_endian_io;
 
 void RecordingAnalyzer::SaveRecording(const WasapiInput& input, std::string path)
 {
+    filesystem::create_directories(filesystem::path(path));
+
     // http://www.topherlee.com/software/pcm-tut-wavformat.html
     // https://www.cplusplus.com/forum/beginner/166954/
     // https://gist.github.com/csukuangfj/c1d1d769606260d436f8674c30662450
@@ -322,7 +312,7 @@ void RecordingAnalyzer::SaveRecording(const WasapiInput& input, std::string path
     write_word(f, file_length - data_chunk_pos + 8, 4); // size of all the actual audio data in bytes. (Adding 8 to account for the "data----" characters)
 }
 
-void RecordingAnalyzer::SaveResult(IResultsWriter& writer, const GeneratedSamples& generatedSamples, AudioFormat* audioFormat, int inputSampleRate, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result, std::string testRootPath)
+void RecordingAnalyzer::SaveIndividualResult(IResultsWriter& writer, AudioFormat* audioFormat, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result, std::string testRootPath)
 {
     filesystem::create_directories(filesystem::path(testRootPath));
 
@@ -336,7 +326,7 @@ void RecordingAnalyzer::SaveResult(IResultsWriter& writer, const GeneratedSample
     }
     std::fstream detailedResultsStream{ detailedResultsCsvPath, std::ios_base::app };
 
-    writer.WriteIndividualRecordingResults(writeHeader, detailedResultsStream, generatedSamples, audioFormat, inputSampleRate, outputEndpoint, inputEndpoint, result);
+    writer.WriteIndividualRecordingResults(writeHeader, detailedResultsStream, audioFormat, outputEndpoint, inputEndpoint, result);
 
     detailedResultsStream.close();
 }
