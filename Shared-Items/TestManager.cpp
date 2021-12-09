@@ -7,8 +7,8 @@
 #include "RecordingAnalyzer.h"
 #include "StringHelper.h"
 
-TestManager::TestManager(AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, std::vector<AudioFormat*> selectedFormats, std::string fileString, std::string appDirectory, IResultsWriter& resultsWriter)
-	: outputEndpoint(outputEndpoint), inputEndpoint(inputEndpoint), SelectedFormats(selectedFormats), AppDirectory(appDirectory), resultsWriter(resultsWriter), Time(time(0))
+TestManager::TestManager(AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, std::vector<AudioFormat*> selectedFormats, std::string fileString, std::string appDirectory, IResultsWriter& resultsWriter, OutputOffsetProfile* currentProfile)
+	: outputEndpoint(outputEndpoint), inputEndpoint(inputEndpoint), SelectedFormats(selectedFormats), AppDirectory(appDirectory), resultsWriter(resultsWriter), Time(time(0)), outputOffsetProfile(currentProfile)
 {
 	TestFileString = std::format("{} {}", StringHelper::GetTimeString(Time, true), fileString);
 
@@ -84,7 +84,7 @@ void TestManager::StartTest()
 		}
 	}
 
-	AveragedResults = RecordingAnalyzer::AnalyzeResults(Results, Time, outputEndpoint);
+	AveragedResults = RecordingAnalyzer::AnalyzeResults(Results, Time, outputEndpoint, outputOffsetProfile);
 
 	RecordingAnalyzer::SaveFinalResults(resultsWriter, AveragedResults, StringHelper::GetRootPath(AppDirectory), std::format("{}.csv", TestFileString));
 
@@ -109,7 +109,7 @@ bool TestManager::PerformRecording(AudioFormat* audioFormat)
 		outputThread.join();
 		inputThread.join();
 
-		RecordingResult result = RecordingAnalyzer::AnalyzeRecording(*generatedSamples, *input, *audioFormat);
+		RecordingResult result = RecordingAnalyzer::AnalyzeRecording(*generatedSamples, *input, *audioFormat, outputOffsetProfile);
 		Results.push_back(result);
 		
 		if (TestConfiguration::SaveIndividualWavFiles)

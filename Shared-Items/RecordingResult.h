@@ -13,9 +13,16 @@ public:
     RecordingSingleChannelResult Channel1;
     RecordingSingleChannelResult Channel2;
 
-    RecordingResult(const AudioFormat& format) : GUID(StringHelper::GetGuidString()), Time(time(0)), Format(format) {}
+    std::string OutputOffsetProfileName;
+    float OutputOffsetFromProfile;
+    bool Verified;
+
+    RecordingResult(const AudioFormat& format, std::string outputOffsetProfileName, float outputOffsetFromProfile, bool verified)
+        : GUID(StringHelper::GetGuidString()), Time(time(0)), Format(format), OutputOffsetProfileName(outputOffsetProfileName), OutputOffsetFromProfile(outputOffsetFromProfile), Verified(verified) {}
 
     void SetRecordingSampleRate(int value) { Channel1.RecordingSampleRate = value; Channel2.RecordingSampleRate = value; }
     float Offset() const { return Channel2.MillisecondsToTick1() - Channel1.MillisecondsToTick1(); }
+
+    float AudioLatency() const { return Offset() - OutputOffsetFromProfile; }
 };
 

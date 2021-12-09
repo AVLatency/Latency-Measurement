@@ -159,6 +159,7 @@
     <ClInclude Include="..\imgui\backends\imgui_impl_win32.h" />
     <ClInclude Include="Gui.h" />
     <ClInclude Include="GuiState.h" />
+    <ClInclude Include="HdmiOutputOffsetProfiles.h" />
     <ClInclude Include="HdmiResultsWriter.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Resources.h" />
@@ -173,6 +174,7 @@
     <ClCompile Include="..\imgui\backends\imgui_impl_dx11.cpp" />
     <ClCompile Include="..\imgui\backends\imgui_impl_win32.cpp" />
     <ClCompile Include="Gui.cpp" />
+    <ClCompile Include="HdmiOutputOffsetProfiles.cpp" />
     <ClCompile Include="HdmiResultsWriter.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Resources.cpp" />

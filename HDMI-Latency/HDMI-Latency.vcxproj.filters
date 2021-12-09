@@ -30,6 +30,7 @@
     <ClInclude Include="Resources.h" />
     <ClInclude Include="TestNotes.h" />
     <ClInclude Include="HdmiResultsWriter.h" />
+    <ClInclude Include="HdmiOutputOffsetProfiles.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\imgui\imgui.cpp">
@@ -60,6 +61,7 @@
     <ClCompile Include="Resources.cpp" />
     <ClCompile Include="TestNotes.cpp" />
     <ClCompile Include="HdmiResultsWriter.cpp" />
+    <ClCompile Include="HdmiOutputOffsetProfiles.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />

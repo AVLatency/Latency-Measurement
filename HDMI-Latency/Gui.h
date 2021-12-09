@@ -27,8 +27,6 @@ private:
 	std::vector<AudioEndpoint> outputAudioEndpoints;
 	std::vector<AudioEndpoint> inputAudioEndpoints;
 
-	int outputOffsetProfileIndex = 0;
-
 	int resultFormatIndex;
 
 	AdjustVolumeManager* adjustVolumeManager = nullptr;

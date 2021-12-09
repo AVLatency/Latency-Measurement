@@ -71,12 +71,12 @@ void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::f
     detailedResultsStream << "\"" << result.Format.FormatString << "\","; //"Audio Format,";
     detailedResultsStream << "\"" << result.GUID << ".wav\","; //"Recording,";
     detailedResultsStream << "\"" << "\",";
-    detailedResultsStream << "\"" << "TODO" << "\","; //"Audio Latency (ms),"; // TODO
-    detailedResultsStream << "\"" << "No" << "\","; //"Verified,"; // TODO
+    detailedResultsStream << "\"" << result.AudioLatency() << "\","; //"Audio Latency (ms),";
+    detailedResultsStream << "\"" << (result.Verified ? "Yes" : "No") << "\","; //"Verified,";
     detailedResultsStream << "\"" << "\",";
     detailedResultsStream << "\"" << result.Offset() << "\","; //"Raw Offset (ms),";
-    detailedResultsStream << "\"" << "TODO" << "\","; //"Output Offset Profile,"; // TODO
-    detailedResultsStream << "\"" << "TODO" << "\","; //"Output Offset Profile Value (ms),"; // TODO
+    detailedResultsStream << "\"" << result.OutputOffsetProfileName << "\","; //"Output Offset Profile,";
+    detailedResultsStream << "\"" << result.OutputOffsetFromProfile << "\","; //"Output Offset Profile Value (ms),";
     detailedResultsStream << "\"" << "\",";
     detailedResultsStream << "\"" << TestNotes::Notes.DutModel << "\","; //"DUT Model,";
     detailedResultsStream << "\"" << TestNotes::Notes.DutFirmwareVersion << "\","; //"DUT Firmware Version,";
@@ -175,11 +175,11 @@ void HdmiResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& re
     resultsStream << "\"" << result.AverageLatency() << "\",";
     resultsStream << "\"" << result.MinLatency() << "\",";
     resultsStream << "\"" << result.MaxLatency() << "\",";
-    resultsStream << "\"" << "No" << "\","; //"Verified,"; // TODO
+    resultsStream << "\"" << (result.Verified ? "Yes" : "No") << "\","; //"Verified,";
     resultsStream << "\"" << result.Offsets.size() << "\",";
     resultsStream << "\"" << "\",";
-    resultsStream << "\"" << "TODO" << "\","; //"Output Offset Profile,"; // TODO
-    resultsStream << "\"" << "TODO" << "\","; //"Output Offset Profile Value (ms),"; // TODO
+    resultsStream << "\"" << result.OutputOffsetProfileName << "\","; //"Output Offset Profile,";
+    resultsStream << "\"" << result.OutputOffsetFromProfile << "\","; //"Output Offset Profile Value (ms),";
     resultsStream << "\"" << "\",";
     resultsStream << "\"" << TestNotes::Notes.DutModel << "\","; //"DUT Model,";
     resultsStream << "\"" << TestNotes::Notes.DutFirmwareVersion << "\","; //"DUT Firmware Version,";

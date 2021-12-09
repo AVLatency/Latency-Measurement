@@ -16,9 +16,18 @@ using namespace std;
 const std::string RecordingAnalyzer::validRecordingsFilename{ "Valid-Individual-Recordings.csv" };
 const std::string RecordingAnalyzer::invalidRecordingsFilename{ "Invalid-Individual-Recordings.csv" };
 
-RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& generatedSamples, const WasapiInput& input, const AudioFormat& format)
+RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& generatedSamples, const WasapiInput& input, const AudioFormat& format, OutputOffsetProfile* currentProfile)
 {
-    RecordingResult result(format);
+    std::string formatStr = OutputOffsetProfile::FormatStr(format.WaveFormat);
+    float offsetFromProfile = 0;
+    bool verified = false;
+    if (currentProfile->OutputOffsets.contains(formatStr))
+    {
+        offsetFromProfile = currentProfile->OutputOffsets[formatStr].value;
+        verified = currentProfile->OutputOffsets[formatStr].verified;
+    }
+
+    RecordingResult result(format, currentProfile->Name, offsetFromProfile, verified);
 
     // Extract individual channels for analysis
     int inputSampleRate = input.waveFormat.Format.nSamplesPerSec;
@@ -215,7 +224,7 @@ RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const Gener
     return result;
 }
 
-std::map<const AudioFormat*, AveragedResult> RecordingAnalyzer::AnalyzeResults(std::vector<RecordingResult> results, time_t tTime, const AudioEndpoint& outputEndpoint)
+std::map<const AudioFormat*, AveragedResult> RecordingAnalyzer::AnalyzeResults(std::vector<RecordingResult> results, time_t tTime, const AudioEndpoint& outputEndpoint, OutputOffsetProfile* currentProfile)
 {
     std::map<const AudioFormat*, AveragedResult> averagedResults;
 
@@ -225,7 +234,15 @@ std::map<const AudioFormat*, AveragedResult> RecordingAnalyzer::AnalyzeResults(s
         {
             if (!averagedResults.contains(&recordingResult.Format))
             {
-                averagedResults.insert({ &recordingResult.Format, AveragedResult(tTime, &recordingResult.Format, outputEndpoint) });
+                std::string formatStr = OutputOffsetProfile::FormatStr(recordingResult.Format.WaveFormat);
+                float offsetFromProfile = 0;
+                bool verified = false;
+                if (currentProfile->OutputOffsets.contains(formatStr))
+                {
+                    offsetFromProfile = currentProfile->OutputOffsets[formatStr].value;
+                    verified = currentProfile->OutputOffsets[formatStr].verified;
+                }
+                averagedResults.insert({ &recordingResult.Format, AveragedResult(tTime, &recordingResult.Format, outputEndpoint, currentProfile->Name, offsetFromProfile, verified) });
             }
             const auto& pair = averagedResults.find(&recordingResult.Format);
             pair->second.Offsets.push_back(recordingResult.Offset());

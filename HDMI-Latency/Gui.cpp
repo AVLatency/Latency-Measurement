@@ -7,6 +7,7 @@
 #include "TestConfiguration.h"
 #include "HdmiResultsWriter.h"
 #include "shellapi.h"
+#include "HdmiOutputOffsetProfiles.h"
 
 #define APP_FOLDER "HDMI Audio"
 
@@ -366,19 +367,15 @@ bool Gui::DoGui()
                 ImGui::PopFont();
                 ImGui::Spacing();
 
-                // TODO: Actually load and list the output offset profiles
-                std::vector<const char*> outputOffsetProfiles;
-                outputOffsetProfiles.push_back("HDV-MB01");
-                outputOffsetProfiles.push_back("None");
 
                 if (ImGui::BeginListBox("", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing())))
                 {
-                    for (int n = 0; n < outputOffsetProfiles.size(); n++)
+                    for (int n = 0; n < HdmiOutputOffsetProfiles::Profiles.size(); n++)
                     {
-                        const bool is_selected = (outputOffsetProfileIndex == n);
-                        if (ImGui::Selectable(outputOffsetProfiles[n], is_selected))
+                        const bool is_selected = (HdmiOutputOffsetProfiles::SelectedProfileIndex == n);
+                        if (ImGui::Selectable(HdmiOutputOffsetProfiles::Profiles[n]->Name.c_str(), is_selected))
                         {
-                            outputOffsetProfileIndex = n;
+                            HdmiOutputOffsetProfiles::SelectedProfileIndex = n;
                         }
                         // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
                         if (is_selected)
@@ -390,7 +387,7 @@ bool Gui::DoGui()
                 }
                 ImGui::Spacing();
 
-                if (outputOffsetProfiles[outputOffsetProfileIndex] == "HDV-MB01")
+                if (HdmiOutputOffsetProfiles::Profiles[HdmiOutputOffsetProfiles::SelectedProfileIndex] == &HdmiOutputOffsetProfiles::HDV_MB01)
                 {
                     float imageScale = 0.45 * Gui::DpiScale;
                     ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
@@ -400,9 +397,12 @@ bool Gui::DoGui()
                         "- Monoprice Blackbird 24278\n"
                         "- OREI HDA - 912\n");
                 }
-                else if (outputOffsetProfiles[outputOffsetProfileIndex] == "None")
+                else if (HdmiOutputOffsetProfiles::Profiles[HdmiOutputOffsetProfiles::SelectedProfileIndex] == &HdmiOutputOffsetProfiles::None)
                 {
                     ImGui::TextWrapped("WARNING: using an HDMI Audio Device that does not have an output offset profile may result in inaccurate measurements!");
+                    ImGui::Spacing();
+                    ImGui::TextWrapped("If you have another HDMI Audio Device that is suitable for use with this tool, "
+                        "please let me know at allen"/* spam bot protection */"@"/* spam bot protection */"avlatency.com and I might be able to add an output offset profile for you.");
                 }
 
                 ImGui::TableNextColumn();
@@ -442,7 +442,10 @@ bool Gui::DoGui()
                 {
                     for (AudioFormat& format : supportedFormats)
                     {
-                        VerifiedMarker(false); // TODO: base this on the output offset profile
+                        OutputOffsetProfile* currentProfile = HdmiOutputOffsetProfiles::CurrentProfile();
+                        std::string formatStr = OutputOffsetProfile::FormatStr(format.WaveFormat);
+                        bool verified = currentProfile->OutputOffsets.contains(formatStr) && currentProfile->OutputOffsets[formatStr].verified;
+                        VerifiedMarker(verified);
                         ImGui::Checkbox(format.FormatString.c_str(), &format.UserSelected);
                         LeoBodnarNote(&format);
                     }
@@ -485,12 +488,12 @@ bool Gui::DoGui()
                 ImGui::PopFont();
                 ImGui::Spacing();
 
-                TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile = outputOffsetProfileIndex != outputOffsetProfiles.size() - 1;
+                TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile = HdmiOutputOffsetProfiles::CurrentProfile() != &HdmiOutputOffsetProfiles::None;
                 if (TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile)
                 {
                     ImGui::BeginDisabled();
                     char tempStr[128];
-                    strcpy_s(tempStr, outputOffsetProfiles[outputOffsetProfileIndex]);
+                    strcpy_s(tempStr, HdmiOutputOffsetProfiles::CurrentProfile()->Name.c_str());
                     ImGui::InputText("HDMI Audio Device", tempStr, IM_ARRAYSIZE(tempStr));
                     ImGui::EndDisabled();
                 }
@@ -617,7 +620,10 @@ bool Gui::DoGui()
                 int n = 0;
                 for (auto pair : testManager->AveragedResults)
                 {
-                    VerifiedMarker(false); // TODO: base this on the output offset profile.
+                    OutputOffsetProfile* currentProfile = HdmiOutputOffsetProfiles::CurrentProfile();
+                    std::string formatStr = OutputOffsetProfile::FormatStr(pair.second.Format->WaveFormat);
+                    bool verified = currentProfile->OutputOffsets.contains(formatStr) && currentProfile->OutputOffsets[formatStr].verified;
+                    VerifiedMarker(verified);
 
                     const bool is_selected = (resultFormatIndex == n);
                     if (ImGui::Selectable(pair.first->FormatString.c_str(), is_selected))
@@ -653,7 +659,6 @@ bool Gui::DoGui()
                 if (pair.first == selectedFormat)
                 {
                     const AveragedResult& selectedResult = pair.second;
-                    // TODO: make this a second column
                     ImGui::PushFont(FontHelper::BoldFont);
                     ImGui::Text(std::format("Average Audio Latency: {} ms", round(selectedResult.AverageLatency())).c_str());
                     ImGui::PopFont();
@@ -661,11 +666,11 @@ bool Gui::DoGui()
                     ImGui::Spacing();
                     ImGui::Text(std::format("Min Audio Latency: {} ms", selectedResult.MinLatency()).c_str());
                     ImGui::Text(std::format("Max Audio Latency: {} ms", selectedResult.MaxLatency()).c_str());
-                    ImGui::Text(std::format("Verified: {}", "No").c_str()); // TODO
+                    ImGui::Text(std::format("Verified: {}", selectedResult.Verified ? "Yes" : "No").c_str());
                     ImGui::Text(std::format("Valid Measurements: {}", selectedResult.Offsets.size()).c_str());
                     ImGui::Spacing();
-                    ImGui::Text(std::format("Output Offset Profile: {}", "TODO").c_str()); // TODO
-                    ImGui::Text(std::format("Output Offset Profile Value: {} ms", "TODO").c_str()); // TDOO
+                    ImGui::Text(std::format("Output Offset Profile: {}", selectedResult.OutputOffsetProfileName).c_str());
+                    ImGui::Text(std::format("Output Offset Profile Value: {} ms", selectedResult.OutputOffsetFromProfile).c_str());
 
                     break;
                 }
@@ -740,8 +745,6 @@ bool Gui::DoGui()
 
         ImGui::Text("For HDMI audio extractors, set the switch to \"TV\" or \"Passthrough\".");
         ImGui::Spacing();
-
-        // TODO: Image of switch set to the TV position
 
         ImGui::SetItemDefaultFocus();
         if (ImGui::Button("OK", ImVec2(120, 0)))
@@ -933,6 +936,6 @@ void Gui::StartTest()
         std::string fileString = StringHelper::GetFilenameSafeString(std::format("{} {}", TestNotes::Notes.DutModel, TestNotes::Notes.DutOutputType()));
         fileString = fileString.substr(0, 80); // 80 is a magic number that will keep path lengths reasonable without needing to do a lot of Windows API programming.
 
-        testManager = new TestManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex], selectedFormats, fileString, APP_FOLDER, (IResultsWriter&)HdmiResultsWriter::Writer);
+        testManager = new TestManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex], selectedFormats, fileString, APP_FOLDER, (IResultsWriter&)HdmiResultsWriter::Writer, HdmiOutputOffsetProfiles::CurrentProfile());
     }
 }

@@ -10,6 +10,7 @@
 #include "IResultsWriter.h"
 #include "AveragedResult.h"
 #include <map>
+#include "OutputOffsetProfile.h"
 
 class TestManager
 {
@@ -34,7 +35,7 @@ public:
 	/// <summary>
 	/// Will start the test on a new thread
 	/// </summary>
-	TestManager(AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, std::vector<AudioFormat*> selectedFormats, std::string fileString, std::string appDirectory, IResultsWriter& resultsWriter);
+	TestManager(AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, std::vector<AudioFormat*> selectedFormats, std::string fileString, std::string appDirectory, IResultsWriter& resultsWriter, OutputOffsetProfile* currentProfile);
 	~TestManager();
 	/// <summary>
 	/// Should be called from the originating thread when IsFinished == true. This will join and delete the test thread.
@@ -49,6 +50,8 @@ private:
 	const AudioEndpoint& inputEndpoint;
 
 	IResultsWriter& resultsWriter;
+
+	OutputOffsetProfile* outputOffsetProfile;
 
 	void StartTest();
 	bool PerformRecording(AudioFormat* audioFormat);
