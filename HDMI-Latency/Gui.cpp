@@ -438,56 +438,19 @@ bool Gui::DoGui()
                     }
                 }
 
-                if (ImGui::BeginChild("formatsChildWindow", ImVec2(0, 0), true, ImGuiWindowFlags_HorizontalScrollbar))
+                if (ImGui::BeginChild("formatsChildWindow", ImVec2(0, 15 * ImGui::GetTextLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar))
                 {
                     for (AudioFormat& format : supportedFormats)
                     {
-                        if (false) // TODO: base this on the output offset profile
-                        {
-                            ImGui::Text("[V]"); ImGui::SameLine();
-                        }
-                        else
-                        {
-                            ImGui::Text("[U]"); ImGui::SameLine();
-                        }
-                        ImGui::SetCursorPosX(DpiScale * 35);
+                        VerifiedMarker(false); // TODO: base this on the output offset profile
                         ImGui::Checkbox(format.FormatString.c_str(), &format.UserSelected);
-                        if (format.WaveFormat->nChannels == 2 && format.WaveFormat->nSamplesPerSec == 48000 && format.WaveFormat->wBitsPerSample == 16)
-                        {
-                            ImGui::SameLine();
-                            ImGui::PushFont(FontHelper::BoldFont);
-                            ImGui::Text("[Leo Bodnar]");
-                            ImGui::PopFont();
-                            ImGui::SameLine(); HelpMarker("This audio format is used by the Leo Bodnar Input Lag Tester. "
-                                "For instructions on how to measure and calculate video latency with the Leo Bodnar tool and how to calculate lip sync error with the results from this software, visit avlatency.com.\n\n"
-                                "Please note that some TVs will switch to \"PC\" video mode when connected to a computer and will not switch to \"PC\" video mode when using the Leo Bodnar tester. "
-                                "Please ensure both tests are using the same video mode to accurately calculate lip sync error.");
-                        }
+                        LeoBodnarNote(&format);
                     }
                     ImGui::EndChild();
                 }
 
-                ImGui::Text("[V] Verified");
-                ImGui::SameLine(); HelpMarker("The output offset for this audio format has been verified using a tool such as the Murideo SEVEN Generator.");
-                ImGui::Text("[U] Unverified");
-                ImGui::SameLine(); HelpMarker("The output offset for this audio format has not been verified using tools such as the Murideo SEVEN Generator.\n\n"
-                    "Measurement results may not be accurate, depending on whether the HDMI Audio Device has a different output offset for different formats. This does not affect the consistency of results.");
+                FormatDescriptions();
 
-                if (ImGui::TreeNode("Channel descriptions"))
-                {
-                    ImGui::Text("FL: Front Left\n"
-                        "FR: Front Right\n"
-                        "FC: Front Center\n"
-                        "RC: Rear Center\n"
-                        "RL: Rear Left (a.k.a. Side Left or Surround Left)\n"
-                        "RR: Rear Right (a.k.a. Side Right or Surround Right)\n"
-                        "RLC: Rear Left of Center\n"
-                        "RRC: Rear Right of Center\n"
-                        "FLC: Front Left of Center\n"
-                        "FRC: Front Right of Center\n"
-                        "LFE: Low Frequency Effect (subwoofer)\n");
-                    ImGui::TreePop();
-                }
                 ImGui::Spacing();
                 ImGui::Text("");
                 ImGui::PushFont(FontHelper::BoldFont);
@@ -647,12 +610,15 @@ bool Gui::DoGui()
 
             ImGui::Text("Successful Formats:");
             ImGui::BeginGroup();
+
             const AudioFormat* selectedFormat = nullptr;
-            if (ImGui::BeginListBox("", ImVec2(350 * DpiScale, 10 * ImGui::GetTextLineHeightWithSpacing())))
+            if (ImGui::BeginChild("", ImVec2(350 * DpiScale, 15 * ImGui::GetTextLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar))
             {
                 int n = 0;
                 for (auto pair : testManager->AveragedResults)
                 {
+                    VerifiedMarker(false); // TODO: base this on the output offset profile.
+
                     const bool is_selected = (resultFormatIndex == n);
                     if (ImGui::Selectable(pair.first->FormatString.c_str(), is_selected))
                     {
@@ -664,6 +630,9 @@ bool Gui::DoGui()
                         ImGui::SetItemDefaultFocus();
                     }
 
+                    const AudioFormat* format = pair.first;
+                    LeoBodnarNote(format);
+
                     if (resultFormatIndex == n)
                     {
                         selectedFormat = pair.first;
@@ -671,8 +640,11 @@ bool Gui::DoGui()
 
                     n++;
                 }
-                ImGui::EndListBox();
+                ImGui::EndChild();
             }
+
+            FormatDescriptions();
+
             ImGui::EndGroup();
             ImGui::SameLine();
             ImGui::BeginGroup();
@@ -686,6 +658,7 @@ bool Gui::DoGui()
                     ImGui::Text(std::format("Average Audio Latency: {} ms", round(selectedResult.AverageLatency())).c_str());
                     ImGui::PopFont();
                     ImGui::Text(std::format("(rounded from: {} ms)", selectedResult.AverageLatency()).c_str());
+                    ImGui::Spacing();
                     ImGui::Text(std::format("Min Audio Latency: {} ms", selectedResult.MinLatency()).c_str());
                     ImGui::Text(std::format("Max Audio Latency: {} ms", selectedResult.MaxLatency()).c_str());
                     ImGui::Text(std::format("Verified: {}", "No").c_str()); // TODO
@@ -845,6 +818,60 @@ void Gui::PeakLevel(AdjustVolumeManager::PeakLevelGrade grade, const char* helpT
         break;
     }
     ImGui::PopFont();
+}
+
+void Gui::VerifiedMarker(bool verified)
+{
+    if (verified)
+    {
+        ImGui::Text("[V]"); ImGui::SameLine();
+    }
+    else
+    {
+        ImGui::Text("[U]");
+    }
+    ImGui::SameLine();
+    ImGui::SetCursorPosX(DpiScale * 35);
+}
+
+void Gui::LeoBodnarNote(const AudioFormat* format)
+{
+    if (format->WaveFormat->nChannels == 2 && format->WaveFormat->nSamplesPerSec == 48000 && format->WaveFormat->wBitsPerSample == 16)
+    {
+        ImGui::SameLine();
+        ImGui::PushFont(FontHelper::BoldFont);
+        ImGui::Text("[Leo Bodnar]");
+        ImGui::PopFont();
+        ImGui::SameLine(); HelpMarker("This audio format is used by the Leo Bodnar Input Lag Tester. "
+            "For instructions on how to measure and calculate video latency with the Leo Bodnar tool and how to calculate lip sync error with the results from this software, visit avlatency.com.\n\n"
+            "Please note that some TVs will switch to \"PC\" video mode when connected to a computer and will not switch to \"PC\" video mode when using the Leo Bodnar tester. "
+            "Please ensure both tests are using the same video mode to accurately calculate lip sync error.");
+    }
+}
+
+void Gui::FormatDescriptions()
+{
+    ImGui::Text("[V] Verified");
+    ImGui::SameLine(); HelpMarker("The output offset for this audio format has been verified using a tool such as the Murideo SEVEN Generator.");
+    ImGui::Text("[U] Unverified");
+    ImGui::SameLine(); HelpMarker("The output offset for this audio format has not been verified using tools such as the Murideo SEVEN Generator.\n\n"
+        "Measurement results may not be accurate, depending on whether the HDMI Audio Device has a different output offset for different formats. This does not affect the consistency of results.");
+
+    if (ImGui::TreeNode("Channel descriptions"))
+    {
+        ImGui::Text("FL: Front Left\n"
+            "FR: Front Right\n"
+            "FC: Front Center\n"
+            "RC: Rear Center\n"
+            "RL: Rear Left (a.k.a. Side Left or Surround Left)\n"
+            "RR: Rear Right (a.k.a. Side Right or Surround Right)\n"
+            "RLC: Rear Left of Center\n"
+            "RRC: Rear Right of Center\n"
+            "FLC: Front Left of Center\n"
+            "FRC: Front Right of Center\n"
+            "LFE: Low Frequency Effect (subwoofer)\n");
+        ImGui::TreePop();
+    }
 }
 
 int Gui::CsvInputFilter(ImGuiInputTextCallbackData* data)
