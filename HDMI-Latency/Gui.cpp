@@ -6,6 +6,9 @@
 #include "TestNotes.h"
 #include "TestConfiguration.h"
 #include "HdmiResultsWriter.h"
+#include "shellapi.h"
+
+#define APP_FOLDER "HDMI Audio"
 
 float Gui::DpiScale = 1.0f;
 bool Gui::DpiScaleChanged = false;
@@ -606,8 +609,6 @@ bool Gui::DoGui()
             {
                 if (testManager->IsFinished)
                 {
-                    delete(testManager);
-                    testManager = nullptr;
                     state = GuiState::Results;
                 }
                 else
@@ -632,6 +633,45 @@ bool Gui::DoGui()
         }
             break;
         case GuiState::Results:
+        {
+            ImGui::PushFont(FontHelper::BoldFont);
+            ImGui::Text("Measurement Results");
+            ImGui::PopFont();
+            ImGui::Text(testManager->TestFileString.c_str());
+            if (ImGui::Button("Open Results Folder"))
+            {
+                ShellExecuteA(NULL, "explore", StringHelper::GetRootPath(APP_FOLDER).c_str(), NULL, NULL, SW_SHOWDEFAULT);
+            }
+            ImGui::Spacing();
+
+            //if (ImGui::BeginListBox("", ImVec2(-FLT_MIN, 10 * ImGui::GetTextLineHeightWithSpacing())))
+            //{
+            //    for (int n = 0; n < outputOffsetProfiles.size(); n++)
+            //    {
+            //        const bool is_selected = (outputOffsetProfileIndex == n);
+            //        if (ImGui::Selectable(outputOffsetProfiles[n], is_selected))
+            //        {
+            //            outputOffsetProfileIndex = n;
+            //        }
+            //        // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+            //        if (is_selected)
+            //        {
+            //            ImGui::SetItemDefaultFocus();
+            //        }
+            //    }
+            //    ImGui::EndListBox();
+            //}
+            //ImGui::Spacing();
+            //testManager->AveragedResults
+
+            if (ImGui::Button("Back"))
+            {
+                delete(testManager);
+                testManager = nullptr;
+                state = GuiState::MeasurementConfig;
+            }
+        }
+
             break;
         }
 
@@ -815,6 +855,6 @@ void Gui::StartTest()
         std::string fileString = StringHelper::GetFilenameSafeString(std::format("{} {}", TestNotes::Notes.DutModel, TestNotes::Notes.DutOutputType()));
         fileString = fileString.substr(0, 80); // 80 is a magic number that will keep path lengths reasonable without needing to do a lot of Windows API programming.
 
-        testManager = new TestManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex], selectedFormats, fileString, "HDMI Audio", (IResultsWriter&)HdmiResultsWriter::Writer);
+        testManager = new TestManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex], selectedFormats, fileString, APP_FOLDER, (IResultsWriter&)HdmiResultsWriter::Writer);
     }
 }

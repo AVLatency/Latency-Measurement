@@ -24,7 +24,7 @@ std::string StringHelper::GetTimeString(time_t ttime, bool filenameSafe)
 
 std::string StringHelper::GetRootPath(std::string appSubDirectory)
 {
-    return std::format("Results/{}", appSubDirectory);
+    return std::format(".\\Results\\{}", appSubDirectory);
 }
 
 std::string StringHelper::GetFilenameSafeString(std::string filename)
