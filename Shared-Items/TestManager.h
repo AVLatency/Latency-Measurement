@@ -27,14 +27,14 @@ public:
 	std::vector<RecordingResult> Results;
 	std::map<const AudioFormat*, AveragedResult> AveragedResults;
 
-	std::string GUID;
 	time_t Time;
 	std::string TestFileString;
+	std::string AppDirectory;
 	
 	/// <summary>
 	/// Will start the test on a new thread
 	/// </summary>
-	TestManager(AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, std::vector<AudioFormat*> selectedFormats, std::string fileString, IResultsWriter& resultsWriter);
+	TestManager(AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, std::vector<AudioFormat*> selectedFormats, std::string fileString, std::string appDirectory, IResultsWriter& resultsWriter);
 	~TestManager();
 	/// <summary>
 	/// Should be called from the originating thread when IsFinished == true. This will join and delete the test thread.

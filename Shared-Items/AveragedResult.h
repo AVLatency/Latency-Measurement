@@ -7,7 +7,6 @@
 struct AveragedResult
 {
 public:
-	std::string GUID;
     time_t Time;
     const AudioFormat* Format;
     const AudioEndpoint& OutputEndpoint;
@@ -24,7 +23,7 @@ public:
 
     std::vector<float> Offsets;
 
-    AveragedResult(std::string guid, time_t time, const AudioFormat* format, const AudioEndpoint& outputEndpoint)
-        : GUID(guid), Time(time), Format(format), OutputEndpoint(outputEndpoint) {};
+    AveragedResult(time_t time, const AudioFormat* format, const AudioEndpoint& outputEndpoint)
+        : Time(time), Format(format), OutputEndpoint(outputEndpoint) {};
 };
 

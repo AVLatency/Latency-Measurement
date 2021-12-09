@@ -7,10 +7,21 @@
 #include "RecordingAnalyzer.h"
 #include "StringHelper.h"
 
-TestManager::TestManager(AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, std::vector<AudioFormat*> selectedFormats, std::string fileString, IResultsWriter& resultsWriter)
-	: outputEndpoint(outputEndpoint), inputEndpoint(inputEndpoint), SelectedFormats(selectedFormats), GUID(StringHelper::GetGuidString()), resultsWriter(resultsWriter), Time(time(0))
+TestManager::TestManager(AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, std::vector<AudioFormat*> selectedFormats, std::string fileString, std::string appDirectory, IResultsWriter& resultsWriter)
+	: outputEndpoint(outputEndpoint), inputEndpoint(inputEndpoint), SelectedFormats(selectedFormats), AppDirectory(appDirectory), resultsWriter(resultsWriter), Time(time(0))
 {
-	TestFileString = std::format("{} {} {}", StringHelper::GetTimeString(Time, true), fileString, GUID);
+	TestFileString = std::format("{} {}", StringHelper::GetTimeString(Time, true), fileString);
+
+	// Removes all spaces from the beginning of the string
+	while (TestFileString.size() > 0 && isspace(TestFileString.front()))
+	{
+		TestFileString.erase(TestFileString.begin());
+	}
+	// Remove all spaces from the end of the string.
+	while (TestFileString.size() > 0 && isspace(TestFileString.back()))
+	{
+		TestFileString.pop_back();
+	}
 
 	managerThread = new std::thread([this] { this->StartTest(); });
 }
@@ -73,9 +84,9 @@ void TestManager::StartTest()
 		}
 	}
 
-	AveragedResults = RecordingAnalyzer::AnalyzeResults(Results, GUID, Time, outputEndpoint);
+	AveragedResults = RecordingAnalyzer::AnalyzeResults(Results, Time, outputEndpoint);
 
-	RecordingAnalyzer::SaveFinalResults(resultsWriter, AveragedResults, StringHelper::GetRootPath(), std::format("{}.csv", TestFileString));
+	RecordingAnalyzer::SaveFinalResults(resultsWriter, AveragedResults, StringHelper::GetRootPath(AppDirectory), std::format("{}.csv", TestFileString));
 
 	SetThreadExecutionState(0); // Reset prevent display from turning off while running this tool.
 
@@ -103,12 +114,12 @@ bool TestManager::PerformRecording(AudioFormat* audioFormat)
 		
 		if (TestConfiguration::SaveIndividualWavFiles)
 		{
-			std::string recordingFolder = format("{}/{}/{}", StringHelper::GetRootPath(), TestFileString, audioFormat->FormatString);
-			RecordingAnalyzer::SaveRecording(*input, format("{}/{}.wav", recordingFolder, result.GUID));
+			std::string recordingFolder = format("{}/{}/{}", StringHelper::GetRootPath(AppDirectory), TestFileString, audioFormat->FormatString);
+			RecordingAnalyzer::SaveRecording(*input, recordingFolder, std::format("{}.wav", result.GUID));
 		}
 		if (TestConfiguration::SaveIndividualRecordingResults)
 		{
-			RecordingAnalyzer::SaveIndividualResult(resultsWriter, outputEndpoint, inputEndpoint, result, std::format("{}/{}", StringHelper::GetRootPath(), TestFileString));
+			RecordingAnalyzer::SaveIndividualResult(resultsWriter, outputEndpoint, inputEndpoint, result, std::format("{}/{}", StringHelper::GetRootPath(AppDirectory), TestFileString));
 		}
 
 		validResult = result.Channel1.ValidResult && result.Channel2.ValidResult;

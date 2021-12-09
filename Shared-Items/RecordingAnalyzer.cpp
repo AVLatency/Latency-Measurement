@@ -215,7 +215,7 @@ RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const Gener
     return result;
 }
 
-std::map<const AudioFormat*, AveragedResult> RecordingAnalyzer::AnalyzeResults(std::vector<RecordingResult> results, std::string testGuid, time_t tTime, const AudioEndpoint& outputEndpoint)
+std::map<const AudioFormat*, AveragedResult> RecordingAnalyzer::AnalyzeResults(std::vector<RecordingResult> results, time_t tTime, const AudioEndpoint& outputEndpoint)
 {
     std::map<const AudioFormat*, AveragedResult> averagedResults;
 
@@ -225,7 +225,7 @@ std::map<const AudioFormat*, AveragedResult> RecordingAnalyzer::AnalyzeResults(s
         {
             if (!averagedResults.contains(&recordingResult.Format))
             {
-                averagedResults.insert({ &recordingResult.Format, AveragedResult(testGuid, tTime, &recordingResult.Format, outputEndpoint) });
+                averagedResults.insert({ &recordingResult.Format, AveragedResult(tTime, &recordingResult.Format, outputEndpoint) });
             }
             const auto& pair = averagedResults.find(&recordingResult.Format);
             pair->second.Offsets.push_back(recordingResult.Offset());
@@ -247,7 +247,7 @@ namespace little_endian_io
 }
 using namespace little_endian_io;
 
-void RecordingAnalyzer::SaveRecording(const WasapiInput& input, std::string path)
+void RecordingAnalyzer::SaveRecording(const WasapiInput& input, std::string path, std::string filename)
 {
     filesystem::create_directories(filesystem::path(path));
 
@@ -255,7 +255,7 @@ void RecordingAnalyzer::SaveRecording(const WasapiInput& input, std::string path
     // https://www.cplusplus.com/forum/beginner/166954/
     // https://gist.github.com/csukuangfj/c1d1d769606260d436f8674c30662450
 
-    ofstream f(path, ios::binary);
+    ofstream f(std::format("{}/{}", path, filename), ios::binary);
 
     unsigned short bitsPerSample = 16;
 
