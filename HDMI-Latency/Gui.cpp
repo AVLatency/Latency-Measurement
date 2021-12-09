@@ -356,7 +356,7 @@ bool Gui::DoGui()
             if (ImGui::BeginTable("MeasurementConfig", 3))
             {
                 ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, 200 * DpiScale);
-                ImGui::TableSetupColumn("column2", ImGuiTableColumnFlags_WidthFixed, 400 * DpiScale);
+                ImGui::TableSetupColumn("column2", ImGuiTableColumnFlags_WidthFixed, 350 * DpiScale);
 
                 ImGui::TableNextRow();
 
@@ -438,7 +438,7 @@ bool Gui::DoGui()
                     }
                 }
 
-                if (ImGui::BeginChild("formatsChildWindow", ImVec2(0, 300), true, ImGuiWindowFlags_HorizontalScrollbar))
+                if (ImGui::BeginChild("formatsChildWindow", ImVec2(0, 0), true, ImGuiWindowFlags_HorizontalScrollbar))
                 {
                     for (AudioFormat& format : supportedFormats)
                     {
@@ -494,7 +494,7 @@ bool Gui::DoGui()
                 ImGui::Text("Test Configuration");
                 ImGui::PopFont();
 
-                ImGui::PushItemWidth(150 * DpiScale);
+                ImGui::PushItemWidth(75 * DpiScale);
                 ImGui::DragInt("Number of Measurements", &TestConfiguration::NumMeasurements, .05f, 1, 100);
                 ImGui::SameLine(); HelpMarker("The number of measurements for each of the selected audio formats. A higher number of measurements will give a more accurate average audio latency result, but will take longer to complete.");
                 if (ImGui::TreeNode("Advanced Configuration"))
@@ -609,6 +609,7 @@ bool Gui::DoGui()
             {
                 if (testManager->IsFinished)
                 {
+                    resultFormatIndex = 0;
                     state = GuiState::Results;
                 }
                 else
@@ -644,25 +645,75 @@ bool Gui::DoGui()
             }
             ImGui::Spacing();
 
-            //if (ImGui::BeginListBox("", ImVec2(-FLT_MIN, 10 * ImGui::GetTextLineHeightWithSpacing())))
-            //{
-            //    for (int n = 0; n < outputOffsetProfiles.size(); n++)
-            //    {
-            //        const bool is_selected = (outputOffsetProfileIndex == n);
-            //        if (ImGui::Selectable(outputOffsetProfiles[n], is_selected))
-            //        {
-            //            outputOffsetProfileIndex = n;
-            //        }
-            //        // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-            //        if (is_selected)
-            //        {
-            //            ImGui::SetItemDefaultFocus();
-            //        }
-            //    }
-            //    ImGui::EndListBox();
-            //}
-            //ImGui::Spacing();
-            //testManager->AveragedResults
+            ImGui::Text("Successful Formats:");
+            ImGui::BeginGroup();
+            const AudioFormat* selectedFormat = nullptr;
+            if (ImGui::BeginListBox("", ImVec2(350 * DpiScale, 10 * ImGui::GetTextLineHeightWithSpacing())))
+            {
+                int n = 0;
+                for (auto pair : testManager->AveragedResults)
+                {
+                    const bool is_selected = (resultFormatIndex == n);
+                    if (ImGui::Selectable(pair.first->FormatString.c_str(), is_selected))
+                    {
+                        resultFormatIndex = n;
+                    }
+                    // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                    if (is_selected)
+                    {
+                        ImGui::SetItemDefaultFocus();
+                    }
+
+                    if (resultFormatIndex == n)
+                    {
+                        selectedFormat = pair.first;
+                    }
+
+                    n++;
+                }
+                ImGui::EndListBox();
+            }
+            ImGui::EndGroup();
+            ImGui::SameLine();
+            ImGui::BeginGroup();
+            for (auto pair : testManager->AveragedResults)
+            {
+                if (pair.first == selectedFormat)
+                {
+                    const AveragedResult& selectedResult = pair.second;
+                    // TODO: make this a second column
+                    ImGui::PushFont(FontHelper::BoldFont);
+                    ImGui::Text(std::format("Average Audio Latency: {} ms", round(selectedResult.AverageLatency())).c_str());
+                    ImGui::PopFont();
+                    ImGui::Text(std::format("(rounded from: {} ms)", selectedResult.AverageLatency()).c_str());
+                    ImGui::Text(std::format("Min Audio Latency: {} ms", selectedResult.MinLatency()).c_str());
+                    ImGui::Text(std::format("Max Audio Latency: {} ms", selectedResult.MaxLatency()).c_str());
+                    ImGui::Text(std::format("Verified: {}", "No").c_str()); // TODO
+                    ImGui::Text(std::format("Valid Measurements: {}", selectedResult.Offsets.size()).c_str());
+                    ImGui::Spacing();
+                    ImGui::Text(std::format("Output Offset Profile: {}", "TODO").c_str()); // TODO
+                    ImGui::Text(std::format("Output Offset Profile Value: {} ms", "TODO").c_str()); // TDOO
+
+                    break;
+                }
+            }
+            ImGui::EndGroup();
+
+            ImGui::Spacing();
+
+            if (ImGui::TreeNode("Failed Formats"))
+            {
+                if (ImGui::BeginListBox("", ImVec2(ImVec2(350 * DpiScale, 10 * ImGui::GetTextLineHeightWithSpacing()))))
+                {
+                    for (AudioFormat* format : testManager->FailedFormats)
+                    {
+                        ImGui::Text(format->FormatString.c_str());
+                    }
+                    ImGui::EndListBox();
+                }
+                ImGui::TreePop();
+            }
+            ImGui::Spacing();
 
             if (ImGui::Button("Back"))
             {

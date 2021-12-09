@@ -29,6 +29,8 @@ private:
 
 	int outputOffsetProfileIndex = 0;
 
+	int resultFormatIndex;
+
 	AdjustVolumeManager* adjustVolumeManager = nullptr;
 	TestManager* testManager = nullptr;
 
