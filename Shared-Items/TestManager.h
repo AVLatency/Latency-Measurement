@@ -22,6 +22,9 @@ public:
 	int PassCount = 0;
 	int RecordingCount = 0;
 
+	bool ShouldShowFilesystemError = false;
+	bool HasShownFilesystemError = false;
+
 	std::vector<AudioFormat*> SelectedFormats;
 	std::vector<AudioFormat*> FailedFormats;
 

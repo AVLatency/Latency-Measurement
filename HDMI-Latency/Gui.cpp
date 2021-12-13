@@ -37,6 +37,13 @@ bool Gui::DoGui()
 
     bool openAboutDialog = false;
     bool openEdidReminderDialog = false;
+    bool openMidTestFilesystemErrorDialog = false;
+    if (testManager != nullptr && testManager->ShouldShowFilesystemError && !testManager->HasShownFilesystemError)
+    {
+        openMidTestFilesystemErrorDialog = true;
+        fileSystemErrorType = FileSystemErrorType::MidTest;
+        testManager->HasShownFilesystemError = true;
+    }
 
     // Menu Bar
     if (ImGui::BeginMenuBar())
@@ -712,12 +719,44 @@ bool Gui::DoGui()
     // Menu modal dialogs:
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
 
+    if (ShowInitialFilesystemError || openMidTestFilesystemErrorDialog)
+    {
+        ImGui::OpenPopup("File System Error");
+    }
+    ShowInitialFilesystemError = false;
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+    if (ImGui::BeginPopupModal("File System Error", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("Could not write to file system!");
+        ImGui::Spacing();
+        ImGui::Text("Measurement results are recorded in the folder that this app is launched from.\n"
+            "Please re-launch this app from a location where it can write files, such as Documents, Desktop, a USB drive, etc.");
+
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+        switch (fileSystemErrorType)
+        {
+        case Gui::FileSystemErrorType::Initial:
+            if (ImGui::Button("Ignore", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+            ImGui::SameLine();
+            ImGui::SetItemDefaultFocus();
+            if (ImGui::Button("Exit", ImVec2(120, 0))) { done = true; }
+            break;
+        case Gui::FileSystemErrorType::MidTest:
+        default:
+            ImGui::SetItemDefaultFocus();
+            if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+            break;
+        }
+        ImGui::EndPopup();
+    }
+
     if (openAboutDialog)
     {
         ImGui::OpenPopup("About");
     }
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-
     if (ImGui::BeginPopupModal("About", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
         ImGui::Text("AV Latency.com HDMI Latency Measurement Tool\n\nFind out more about audio/video latency, input lag, and lip sync error at avlatency.com\nFind out more about this tool at github.com/AVLatency/Latency-Measurement");
@@ -734,7 +773,6 @@ bool Gui::DoGui()
         ImGui::OpenPopup("Reminder: EDID Mode");
     }
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-
     if (ImGui::BeginPopupModal("Reminder: EDID Mode", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
         ImGui::Text("Set the EDID mode of your HDMI Audio Device to match the EDID of your DUT.");

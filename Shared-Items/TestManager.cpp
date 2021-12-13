@@ -86,7 +86,14 @@ void TestManager::StartTest()
 
 	AveragedResults = RecordingAnalyzer::AnalyzeResults(Results, Time, outputEndpoint, outputOffsetProfile);
 
-	RecordingAnalyzer::SaveFinalResults(resultsWriter, AveragedResults, StringHelper::GetRootPath(AppDirectory), std::format("{}.csv", TestFileString));
+	try
+	{
+		RecordingAnalyzer::SaveFinalResults(resultsWriter, AveragedResults, StringHelper::GetRootPath(AppDirectory), std::format("{}.csv", TestFileString));
+	}
+	catch (...)
+	{
+		ShouldShowFilesystemError = true;
+	}
 
 	SetThreadExecutionState(0); // Reset prevent display from turning off while running this tool.
 
@@ -115,11 +122,25 @@ bool TestManager::PerformRecording(AudioFormat* audioFormat)
 		if (TestConfiguration::SaveIndividualWavFiles)
 		{
 			std::string recordingFolder = format("{}/{}/{}", StringHelper::GetRootPath(AppDirectory), TestFileString, audioFormat->FormatString);
-			RecordingAnalyzer::SaveRecording(*input, recordingFolder, std::format("{}.wav", result.GUID));
+			try
+			{
+				RecordingAnalyzer::SaveRecording(*input, recordingFolder, std::format("{}.wav", result.GUID));
+			}
+			catch (...)
+			{
+				ShouldShowFilesystemError = true;
+			}
 		}
 		if (TestConfiguration::SaveIndividualRecordingResults)
 		{
-			RecordingAnalyzer::SaveIndividualResult(resultsWriter, outputEndpoint, inputEndpoint, result, std::format("{}/{}", StringHelper::GetRootPath(AppDirectory), TestFileString));
+			try
+			{
+				RecordingAnalyzer::SaveIndividualResult(resultsWriter, outputEndpoint, inputEndpoint, result, std::format("{}/{}", StringHelper::GetRootPath(AppDirectory), TestFileString));
+			}
+			catch (...)
+			{
+				ShouldShowFilesystemError = true;
+			}
 		}
 
 		validResult = result.Channel1.ValidResult && result.Channel2.ValidResult;

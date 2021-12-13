@@ -15,11 +15,16 @@ public:
 	static bool DpiScaleChanged;
 	static float PreviousDpiScale;
 
+	bool ShowInitialFilesystemError = true; // TODO
+
 	Gui(Resources& loadedResources) : resources(loadedResources) {};
 	~Gui();
 	bool DoGui();
 
 private:
+	enum struct FileSystemErrorType { Initial, MidTest };
+	FileSystemErrorType fileSystemErrorType = FileSystemErrorType::Initial;
+
 	Resources& resources;
 	GuiState state = GuiState::GettingStarted;
 	int outputDeviceIndex = 0;
