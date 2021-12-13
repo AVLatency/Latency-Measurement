@@ -306,6 +306,7 @@ HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flag
                     int channelOffset = c * bytesPerSampleWithPadding;
                     if (c == 0)
                     {
+                        // Left channel (write audio data)
                         pData[i + channelOffset + 0] = 0; // padding
                         pData[i + channelOffset + 1] = thirtyTwoBit; // little endian, least significant first
                         pData[i + channelOffset + 2] = thirtyTwoBit >> 8;
@@ -314,6 +315,7 @@ HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flag
                     }
                     else
                     {
+                        // Other channels (write zero audio data)
                         pData[i + channelOffset + 0] = 0; // padding
                         pData[i + channelOffset + 1] = 0; // little endian, least significant first
                         pData[i + channelOffset + 2] = 0;

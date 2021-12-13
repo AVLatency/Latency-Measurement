@@ -277,30 +277,40 @@ HRESULT WasapiInput::CopyData(BYTE* pData, UINT32 bufferFrameCount, BOOL* bDone)
     }
     else if (GetFormatID() == WAVE_FORMAT_PCM && waveFormat.Format.wBitsPerSample == 24)
     {
-        //// nBlockAlign and bufferFrameCount are only used for the buffer size!
-        //int dataLength = bufferFrameCount * waveFormat.Format.nBlockAlign;
-        //// Actual frame size is 32 bits for 24 bit audio:
-        //int bytesPerSampleWithPadding = 32 / 8;
-        //int bytesPerFrame = bytesPerSampleWithPadding * waveFormat.Format.nChannels;
+        // nBlockAlign and bufferFrameCount are only used for the buffer size!
+        int dataLength = bufferFrameCount * waveFormat.Format.nBlockAlign;
+        // Actual frame size is 32 bits for 24 bit audio:
+        int bytesPerSampleWithPadding = 32 / 8;
+        int bytesPerFrame = bytesPerSampleWithPadding * waveFormat.Format.nChannels;
 
-        //for (int i = 0; i < dataLength; i += bytesPerFrame)
-        //{
-        //	int thirtyTwoBit = (int)round(sin(1) * INT24_MAX);
+        unsigned int* castData = (unsigned int*)pData;
 
-        //	for (int c = 0; c < numChannels; c++)
-        //	{
-        //		int channelOffset = c * bytesPerSampleWithPadding;
+        for (int i = 0; i < dataLength; i += bytesPerFrame)
+        {
+            for (int c = 0; c < recordedAudioNumChannels; c++)
+            {
+                float thisSample = 0;
+                if (pData != NULL)
+                {
+                    // TODO: Test this!
+                    // Turn this padded 24 bit value into a 32 bit value
+                    unsigned int uintValue = castData[i + c]; 
+                    uintValue &= ~(unsigned int(1) << 31); // clear the negative bit
+                    uintValue <<= 8; // trash the padding
+                    uintValue |= (castData[i + c] & (unsigned int(1) << 31)); // bring back the negative bit
 
-        //		pData[i + channelOffset + 0] = 0; // padding
-        //		pData[i + channelOffset + 1] = thirtyTwoBit; // little endian, least significant first
-        //		pData[i + channelOffset + 2] = thirtyTwoBit >> 8;
-        //		pData[i + channelOffset + 3] = thirtyTwoBit >> 16;
-        //		pData[i + channelOffset + 3] |= (thirtyTwoBit >> 31) << 7; // negative bit
-        //	}
-        //}
-
-        //return S_OK;
-        return -1; // TODO: write this when I'm making something public facing.
+                    thisSample = (int)uintValue / (float)INT_MIN * -1.0f;
+                }
+                CurrentBuffer()[recordedAudioIndex] = thisSample;
+                recordedAudioIndex++;
+                if (FinishedRecording(loop))
+                {
+                    *bDone = true;
+                    return S_OK;
+                }
+            }
+        }
+        return S_OK;
     }
     else if (GetFormatID() == WAVE_FORMAT_PCM && waveFormat.Format.wBitsPerSample == 32)
     {
