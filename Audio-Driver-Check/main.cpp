@@ -10,9 +10,6 @@
 #include "FontHelper.h"
 #include "resource.h"
 #include <shellscalingapi.h>
-#include "HdmiOutputOffsetProfiles.h"
-#include "FilesystemCheck.h"
-#include "Defines.h"
 
 // Data
 static ID3D11Device*            g_pd3dDevice = NULL;
@@ -45,7 +42,7 @@ int main(int, char**)
 
     WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, _T("AV Latency.com HDMI Latency"), NULL };
     ::RegisterClassEx(&wc);
-    HWND hwnd = ::CreateWindow(wc.lpszClassName, _T("AV Latency.com HDMI Latency"), WS_OVERLAPPEDWINDOW, r.left, r.top, windowWidth * Gui::DpiScale, windowHeight * Gui::DpiScale, NULL, NULL, wc.hInstance, NULL);
+    HWND hwnd = ::CreateWindow(wc.lpszClassName, _T("AV Latency.com Audio Driver Check"), WS_OVERLAPPEDWINDOW, r.left, r.top, windowWidth * Gui::DpiScale, windowHeight * Gui::DpiScale, NULL, NULL, wc.hInstance, NULL);
 
     // Initialize Direct3D
     if (!CreateDeviceD3D(hwnd))
@@ -97,12 +94,8 @@ int main(int, char**)
     FontHelper::LoadFonts(wc.hInstance, io, FONT_REGULAR, FONT_BOLD, Gui::DpiScale);
     style.ScaleAllSizes(Gui::DpiScale);
 
-    HdmiOutputOffsetProfiles::InitializeProfiles();
     Resources resources(wc.hInstance, g_pd3dDevice);
     Gui gui(resources);
-
-    bool canWriteFiles = FilesystemCheck::IsFilesystemWritable(std::filesystem::path(std::format("{}\\{}", StringHelper::GetRootPath(APP_FOLDER), "Temporary Filesystem Write Test.tmp")));
-    gui.ShowInitialFilesystemError = !canWriteFiles;
 
     // Main loop
     bool done = false;
