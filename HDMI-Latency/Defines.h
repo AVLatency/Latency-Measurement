@@ -1,3 +1,3 @@
 #pragma once
 
-#define APP_FOLDER "HDMI Audio"
+#define APP_FOLDER "HDMI Audio Latency"

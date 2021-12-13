@@ -60,5 +60,4 @@ packages/
 
 # Resource cache files
 *.aps
-
-HDMI-Latency/Results
+/HDMI-Latency/HDMI Audio Latency Results

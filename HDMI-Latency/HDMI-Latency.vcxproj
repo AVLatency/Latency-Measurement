@@ -72,18 +72,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(ProjectDir)$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
+    <TargetName>HDMI Audio Latency</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(ProjectDir)$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
+    <TargetName>HDMI Audio Latency</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(ProjectDir)$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
+    <TargetName>HDMI Audio Latency</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(ProjectDir)$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
+    <TargetName>HDMI Audio Latency</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
