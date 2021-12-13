@@ -13,14 +13,14 @@ public:
 	static bool DpiScaleChanged;
 	static float PreviousDpiScale;
 
-	Gui(Resources& loadedResources) : resources(loadedResources) {};
+	Gui(Resources& loadedResources);
 	~Gui();
 	bool DoGui();
 	void Finish();
 
 private:
 	Resources& resources;
-	GuiState state = GuiState::GettingStarted;
+	GuiState state = GuiState::SelectAudioDevice;
 	int outputDeviceIndex = 0;
 	std::vector<AudioEndpoint> outputAudioEndpoints;
 
@@ -29,4 +29,5 @@ private:
 	void FormatDescriptions();
 
 	void RefreshAudioEndpoints();
+	void ClearFormatSelection();
 };

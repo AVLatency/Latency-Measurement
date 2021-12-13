@@ -9,6 +9,11 @@ float Gui::DpiScale = 1.0f;
 bool Gui::DpiScaleChanged = false;
 float Gui::PreviousDpiScale = 1.0f;
 
+Gui::Gui(Resources& loadedResources) : resources(loadedResources)
+{
+    RefreshAudioEndpoints();
+}
+
 Gui::~Gui()
 {
 }
@@ -45,7 +50,90 @@ bool Gui::DoGui()
         ImGui::EndMenuBar();
     }
 
-    ImGui::Text("Hello, world!");
+
+    bool disabled = state > GuiState::SelectAudioDevice;
+    if (disabled)
+    {
+        ImGui::BeginDisabled();
+    }
+
+    if (ImGui::Button("Refresh Audio Devices"))
+    {
+        RefreshAudioEndpoints();
+    }
+
+    if (outputAudioEndpoints.size() < 1)
+    {
+        ImGui::Text("Error: cannot find an output audio device.");
+    }
+    else
+    {
+        if (ImGui::BeginCombo("Output Device", outputAudioEndpoints[outputDeviceIndex].Name.c_str()))
+        {
+            for (int i = 0; i < outputAudioEndpoints.size(); i++)
+            {
+                const bool is_selected = (outputDeviceIndex == i);
+                if (ImGui::Selectable(outputAudioEndpoints[i].Name.c_str(), is_selected))
+                {
+                    outputDeviceIndex = i;
+                }
+                // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
+
+        std::vector<AudioFormat>& supportedFormats = outputAudioEndpoints[outputDeviceIndex].SupportedFormats;
+        std::vector<AudioFormat>& duplicateFormats = outputAudioEndpoints[outputDeviceIndex].DuplicateSupportedFormats;
+        if (ImGui::BeginChild("formatsChildWindow", ImVec2(0, 35 * ImGui::GetTextLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar))
+        {
+            for (AudioFormat& format : supportedFormats)
+            {
+                if (ImGui::Selectable(format.FormatString.c_str(), &format.UserSelected))
+                {
+                    ClearFormatSelection();
+                    format.UserSelected = true;
+                }
+            }
+
+            ImGui::Spacing();
+            ImGui::PushFont(FontHelper::BoldFont);
+            ImGui::Text("Duplicate/Additional Formats:");
+            ImGui::PopFont();
+            ImGui::Spacing();
+
+            for (AudioFormat& format : duplicateFormats)
+            {
+                if (ImGui::Selectable(format.FormatString.c_str(), &format.UserSelected))
+                {
+                    ClearFormatSelection();
+                    format.UserSelected = true;
+                }
+            }
+
+            ImGui::EndChild();
+        }
+
+        FormatDescriptions();
+
+        if (ImGui::Button("Start Output"))
+        {
+            state = GuiState::PlayingAudio;
+        }
+    }
+    if (disabled)
+    {
+        ImGui::EndDisabled();
+    }
+
+    if (state == GuiState::PlayingAudio)
+    {
+        if (ImGui::Button("Stop"))
+        {
+
+        }
+    }
 
     ImGui::End();
 
@@ -140,4 +228,23 @@ void Gui::RefreshAudioEndpoints()
 {
     outputAudioEndpoints = AudioEndpointHelper::GetAudioEndPoints(eRender);
     outputDeviceIndex = 0;
+    if (outputAudioEndpoints.size() > 0)
+    {
+        for (int i = 0; i < outputAudioEndpoints.size(); i++)
+        {
+            outputAudioEndpoints[i].PopulateSupportedFormats(true, false);
+        }
+    }
+}
+
+void Gui::ClearFormatSelection()
+{
+    for (AudioFormat& format : outputAudioEndpoints[outputDeviceIndex].SupportedFormats)
+    {
+        format.UserSelected = false;
+    }
+    for (AudioFormat& format : outputAudioEndpoints[outputDeviceIndex].DuplicateSupportedFormats)
+    {
+        format.UserSelected = false;
+    }
 }

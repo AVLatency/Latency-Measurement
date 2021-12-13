@@ -32,7 +32,7 @@ AudioEndpoint::~AudioEndpoint()
 	SAFE_RELEASE(Device);
 }
 
-void AudioEndpoint::PopulateSupportedFormats()
+void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool selectDefaults)
 {
 	if (SupportedFormats.size() > 0)
 	{
@@ -63,40 +63,49 @@ void AudioEndpoint::PopulateSupportedFormats()
 		{
 			if (waveFormat->dwChannelMask == 0)
 			{
-				// Only add formats with no channel masks if there are no supported formats with channel masks
-				if (!SupportsFormat(waveFormat->Format.nChannels, waveFormat->Format.nSamplesPerSec, waveFormat->Format.wBitsPerSample))
+				hr = pAudioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, (WAVEFORMATEX*)waveFormat, NULL);
+				if (hr == S_OK)
 				{
-					hr = pAudioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, (WAVEFORMATEX*)waveFormat, NULL);
-					if (hr == S_OK)
+					// this format is supported!
+
+					// Only add formats with no channel masks if there are no supported formats with channel masks
+					if (!SupportsFormat(waveFormat->Format.nChannels, waveFormat->Format.nSamplesPerSec, waveFormat->Format.wBitsPerSample))
 					{
-						// this format is supported!
 						SupportedFormats.push_back((WAVEFORMATEX*)waveFormat);
+					}
+					else if (includeDuplicateFormats)
+					{
+						DuplicateSupportedFormats.push_back((WAVEFORMATEX*)waveFormat);
 					}
 				}
 			}
 		}
 		for (WAVEFORMATEX* waveFormat : HdmiWaveFormats::Formats.AllHDMIExFormats)
 		{
-			// WAVEFORMATEX are legacy formats that are typically duplicates of the WAVEFORMATEXTENSIBLE ones.
-			// Furthermore, WAVEFORMATEX formats' bit depth property are not respected on NVIDIA drivers
-			// (24 bit WAVEFORMATEX actually produce a 16 bit HDMI signal)
-			// For these reasons, ignore any WAVEFORMATEX formats that are duplicates of WAVEFORMATEXTENSIBLE ones.
-
-			// TODO: Verify using an HDMI analyzer that this bit about bit depths is true for NVIDA, AMD, and Intel audio drivers.
-			
-			if (!SupportsFormat(waveFormat->nChannels, waveFormat->nSamplesPerSec))
+			hr = pAudioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, waveFormat, NULL);
+			if (hr == S_OK)
 			{
-				hr = pAudioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, waveFormat, NULL);
-				if (hr == S_OK)
+				// this format is supported!
+
+				// WAVEFORMATEX are legacy formats that are typically duplicates of the WAVEFORMATEXTENSIBLE ones.
+				// Furthermore, WAVEFORMATEX formats' bit depth property are not respected on NVIDIA drivers
+				// (24 bit WAVEFORMATEX actually produce a 16 bit HDMI signal)
+				// For these reasons, ignore any WAVEFORMATEX formats that are duplicates of WAVEFORMATEXTENSIBLE ones.
+
+				// TODO: Verify using an HDMI analyzer that this bit about bit depths is true for NVIDA, AMD, and Intel audio drivers.
+				if (!SupportsFormat(waveFormat->nChannels, waveFormat->nSamplesPerSec))
 				{
-					// this format is supported!
 					SupportedFormats.push_back(waveFormat);
+				}
+				else if (includeDuplicateFormats)
+				{
+					DuplicateSupportedFormats.push_back(waveFormat);
 				}
 			}
 		}
 
 		// Sort supported formats
-		std::sort(SupportedFormats.begin(), SupportedFormats.end(), [](const AudioFormat& a, const AudioFormat& b) {
+		auto sortFunc = [](const AudioFormat& a, const AudioFormat& b) {
 			if (a.WaveFormat->nChannels != b.WaveFormat->nChannels)
 			{
 				return a.WaveFormat->nChannels < b.WaveFormat->nChannels;
@@ -113,9 +122,15 @@ void AudioEndpoint::PopulateSupportedFormats()
 			{
 				return a.FormatString < b.FormatString;
 			}
-		});
+		};
 
-		SelectDefaultFormats();
+		std::sort(SupportedFormats.begin(), SupportedFormats.end(), sortFunc);
+		std::sort(DuplicateSupportedFormats.begin(), DuplicateSupportedFormats.end(), sortFunc);
+
+		if (selectDefaults)
+		{
+			SelectDefaultFormats();
+		}
 	}
 
 	SAFE_RELEASE(pAudioClient);

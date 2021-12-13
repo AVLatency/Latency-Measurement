@@ -30,8 +30,8 @@ int main(int, char**)
     // Create application window
     ImGui_ImplWin32_EnableDpiAwareness();
 
-    int windowWidth = 1280;
-    int windowHeight = 720;
+    int windowWidth = 720;
+    int windowHeight = 900;
     RECT r;
     r.left = 100;
     r.top = 100;
