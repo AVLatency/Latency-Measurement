@@ -371,6 +371,7 @@ bool Gui::DoGui()
                 ImGui::PushFont(FontHelper::BoldFont);
                 ImGui::Text("Output Offset Profile");
                 ImGui::PopFont();
+                ImGui::SameLine(); HelpMarker("This profile describes the time offset between the analog output and the HDMI output of the HDMI Audio Device for different audio formats.");
                 ImGui::Spacing();
 
 
@@ -492,6 +493,7 @@ bool Gui::DoGui()
                 ImGui::PushFont(FontHelper::BoldFont);
                 ImGui::Text("Test Notes");
                 ImGui::PopFont();
+                ImGui::SameLine(); HelpMarker("These notes will be included in the .csv spreadsheet result files that are saved in the folder that this app was launched from.");
                 ImGui::Spacing();
 
                 TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile = HdmiOutputOffsetProfiles::CurrentProfile() != &HdmiOutputOffsetProfiles::None;
@@ -588,7 +590,6 @@ bool Gui::DoGui()
                 {
                     ImGui::Text("Measurement in progres...");
                     ImGui::ProgressBar(testManager->PassCount / (float)testManager->TotalPasses);
-                    // TODO: maybe this is safely possible? ImGui::Text("TODO: Currently measuring 2ch-48000Hz-16bit-PCM-0x0...");
                     ImGui::ProgressBar(testManager->RecordingCount / (float)testManager->TotalRecordingsPerPass);
 
                     if (state != GuiState::CancellingMeasuring)
