@@ -233,6 +233,7 @@ HRESULT WasapiInput::SetFormat(WAVEFORMATEX* wfex)
         INIT_WAVEFORMATEX_GUID(&waveFormat.SubFormat, wfex->wFormatTag);
     }
 
+#ifdef _DEBUG
     printf("TestRecordingSink::SetFormat\nFormat type: 0x%.4x\nChannels: %u\nSamples Per Sec: %u\nAvg Bytes Per Sec: %u\nBlock Align: %u\nBits Per Sample: %u\ncbSize: %u\nValid Bits Per Sample: %u\nSamples Per Block: %u\nChannel Mask: 0x%.8x\n",
         GetFormatID(),
         waveFormat.Format.nChannels,
@@ -244,6 +245,7 @@ HRESULT WasapiInput::SetFormat(WAVEFORMATEX* wfex)
         waveFormat.Samples.wValidBitsPerSample,
         waveFormat.Samples.wSamplesPerBlock,
         waveFormat.dwChannelMask);
+#endif
 
     if (waveFormat.Samples.wValidBitsPerSample != waveFormat.Format.wBitsPerSample)
     {
