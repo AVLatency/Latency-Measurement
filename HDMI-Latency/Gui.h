@@ -15,7 +15,7 @@ public:
 	static bool DpiScaleChanged;
 	static float PreviousDpiScale;
 
-	bool ShowInitialFilesystemError = true; // TODO
+	bool ShowInitialFilesystemError = false;
 
 	Gui(Resources& loadedResources) : resources(loadedResources) {};
 	~Gui();

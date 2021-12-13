@@ -11,6 +11,8 @@
 #include "resource.h"
 #include <shellscalingapi.h>
 #include "HdmiOutputOffsetProfiles.h"
+#include "FilesystemCheck.h"
+#include "Defines.h"
 
 // Data
 static ID3D11Device*            g_pd3dDevice = NULL;
@@ -98,6 +100,9 @@ int main(int, char**)
     HdmiOutputOffsetProfiles::InitializeProfiles();
     Resources resources(wc.hInstance, g_pd3dDevice);
     Gui gui(resources);
+
+    bool canWriteFiles = FilesystemCheck::IsFilesystemWritable(std::filesystem::path(std::format("{}\\{}", StringHelper::GetRootPath(APP_FOLDER), "Temporary Filesystem Write Test.tmp")));
+    gui.ShowInitialFilesystemError = !canWriteFiles;
 
     // Main loop
     bool done = false;

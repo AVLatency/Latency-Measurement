@@ -157,6 +157,7 @@
     <ClInclude Include="..\imgui\imgui_internal.h" />
     <ClInclude Include="..\imgui\backends\imgui_impl_dx11.h" />
     <ClInclude Include="..\imgui\backends\imgui_impl_win32.h" />
+    <ClInclude Include="Defines.h" />
     <ClInclude Include="Gui.h" />
     <ClInclude Include="GuiState.h" />
     <ClInclude Include="HdmiOutputOffsetProfiles.h" />

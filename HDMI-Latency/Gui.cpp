@@ -8,8 +8,7 @@
 #include "HdmiResultsWriter.h"
 #include "shellapi.h"
 #include "HdmiOutputOffsetProfiles.h"
-
-#define APP_FOLDER "HDMI Audio"
+#include "Defines.h"
 
 float Gui::DpiScale = 1.0f;
 bool Gui::DpiScaleChanged = false;

@@ -19,6 +19,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)AudioEndpointHelper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)AudioFormat.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)AveragedResult.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)FilesystemCheck.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)FontHelper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)GeneratedSamples.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)IResultsWriter.h" />
@@ -41,6 +42,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)AudioEndpointHelper.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)AudioFormat.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)AveragedResult.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)FilesystemCheck.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)FontHelper.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)GeneratedSamples.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)IResultsWriter.cpp" />
