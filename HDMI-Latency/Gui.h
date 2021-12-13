@@ -20,6 +20,7 @@ public:
 	Gui(Resources& loadedResources) : resources(loadedResources) {};
 	~Gui();
 	bool DoGui();
+	void Finish();
 
 private:
 	enum struct FileSystemErrorType { Initial, MidTest };

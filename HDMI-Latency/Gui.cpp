@@ -797,7 +797,33 @@ bool Gui::DoGui()
 
     ImGui::PopFont();
 
+    if (done)
+    {
+        Finish();
+    }
+
     return done;
+}
+
+void Gui::Finish()
+{
+    if (adjustVolumeManager != nullptr)
+    {
+        adjustVolumeManager->Stop();
+        while (adjustVolumeManager->working)
+        {
+            adjustVolumeManager->Tick();
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+    }
+    if (testManager != nullptr)
+    {
+        testManager->StopRequested = true;
+        while (!testManager->IsFinished)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+    }
 }
 
 // Helper to display a little (?) mark which shows a tooltip when hovered.

@@ -122,7 +122,10 @@ int main(int, char**)
                 done = true;
         }
         if (done)
+        {
+            gui.Finish();
             break;
+        }
 
         if (Gui::DpiScaleChanged)
         {
