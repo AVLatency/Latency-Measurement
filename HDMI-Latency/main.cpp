@@ -45,7 +45,7 @@ int main(int, char**)
 
     WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, _T("AV Latency.com HDMI Latency"), NULL };
     ::RegisterClassEx(&wc);
-    HWND hwnd = ::CreateWindow(wc.lpszClassName, _T("AV Latency.com HDMI Latency"), WS_OVERLAPPEDWINDOW, r.left, r.top, windowWidth * Gui::DpiScale, windowHeight * Gui::DpiScale, NULL, NULL, wc.hInstance, NULL);
+    HWND hwnd = ::CreateWindow(wc.lpszClassName, _T("AV Latency.com HDMI Audio Latency"), WS_OVERLAPPEDWINDOW, r.left, r.top, windowWidth * Gui::DpiScale, windowHeight * Gui::DpiScale, NULL, NULL, wc.hInstance, NULL);
 
     // Initialize Direct3D
     if (!CreateDeviceD3D(hwnd))
