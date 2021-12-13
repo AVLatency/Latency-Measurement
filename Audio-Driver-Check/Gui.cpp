@@ -59,9 +59,14 @@ bool Gui::DoGui()
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     if (ImGui::BeginPopupModal("About", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("AV Latency.com HDMI Latency Measurement Tool\n\nFind out more about audio/video latency, input lag, and lip sync error at avlatency.com\nFind out more about this tool at github.com/AVLatency/Latency-Measurement");
-        ImGui::Separator();
+        ImGui::Text("AV Latency.com Audio Latency Check\n\n"
+            "This tool will output audio of different formats that are supported by your audio driver.\n"
+            "It can be used to verify that your audio driver is correctly switching audio formats.\n\n"
+            "Find out more about audio/video latency, input lag, and lip sync error at avlatency.com\nFind out more about this tool at github.com/AVLatency/Latency-Measurement");
 
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
         ImGui::SetItemDefaultFocus();
         if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
 
