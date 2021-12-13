@@ -235,7 +235,7 @@ RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const Recor
     // take only the loudest 3 ticks:
     if (possibleTickPositions.size() > 3)
     {
-        possibleTickPositions.erase(possibleTickPositions.begin() + 3, possibleTickPositions.begin() + possibleTickPositions.size() - 1); // TODO: make sure I wrote this right.
+        possibleTickPositions.erase(possibleTickPositions.begin() + 3, possibleTickPositions.end());
     }
 
     if (possibleTickPositions.size() < 3)
