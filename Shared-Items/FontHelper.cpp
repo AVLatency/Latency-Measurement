@@ -63,5 +63,8 @@ ImFont* FontHelper::LoadFont(HINSTANCE hInstance, ImGuiIO& io, int fontResourceI
     res_data = (unsigned char*)LockResource(res_handle);
     res_size = SizeofResource(NULL, res);
 
-    return io.Fonts->AddFontFromMemoryTTF(res_data, res_size, fontSize);
+    ImFontConfig font_cfg;
+    font_cfg.FontDataOwnedByAtlas = false; // This prevents a crash/hang when closing the app. In reality, it's causing memory leaks every time the font is reloaded, but this is good enough for this tool.
+
+    return io.Fonts->AddFontFromMemoryTTF(res_data, res_size, fontSize, &font_cfg);
 }
