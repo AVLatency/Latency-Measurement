@@ -4,7 +4,7 @@
 struct GeneratedSamples
 {
 public:
-	enum struct WaveType { LatencyMeasurement, VolumeAdjustment };
+	enum struct WaveType { LatencyMeasurement, VolumeAdjustment, TestPattern_TonePlusHighFreq, TestPattern_Tone, TestPattern_ToneHighFreqOnOff };
 
 	WAVEFORMATEX* WaveFormat;
 	WaveType Type;
@@ -54,5 +54,7 @@ public:
 private:
 	void GenerateLatencyMeasurementSamples();
 	void GenerateVolumeAdjustmentSamples();
+	void GenerateTestPattern_ToneSamples();
+	void GenerateTestPattern_TonePlusHighFreqSamples();
+	void GenerateTestPattern_ToneHighFreqOnOffSamples();
 };
-

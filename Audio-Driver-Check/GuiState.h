@@ -3,5 +3,6 @@
 enum struct GuiState
 {
 	SelectAudioDevice = 0,
-	PlayingAudio
+	PlayingAudio,
+	RequestedStop
 };

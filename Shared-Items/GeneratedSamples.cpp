@@ -13,6 +13,15 @@ GeneratedSamples::GeneratedSamples(WAVEFORMATEX* waveFormat, WaveType type)
     case GeneratedSamples::WaveType::VolumeAdjustment:
         GenerateVolumeAdjustmentSamples();
         break;
+    case GeneratedSamples::WaveType::TestPattern_TonePlusHighFreq:
+        GenerateTestPattern_TonePlusHighFreqSamples();
+        break;
+    case GeneratedSamples::WaveType::TestPattern_Tone:
+        GenerateTestPattern_ToneSamples();
+        break;
+    case GeneratedSamples::WaveType::TestPattern_ToneHighFreqOnOff:
+        GenerateTestPattern_ToneHighFreqOnOffSamples();
+        break;
     case GeneratedSamples::WaveType::LatencyMeasurement:
     default:
         GenerateLatencyMeasurementSamples();
@@ -128,5 +137,94 @@ void GeneratedSamples::GenerateVolumeAdjustmentSamples()
         {
             samples[i] = 0;
         }
+    }
+}
+
+void GeneratedSamples::GenerateTestPattern_ToneSamples()
+{
+    int sampleRate = WaveFormat->nSamplesPerSec;
+
+    samplesLength = sampleRate; // 1 second
+    samples = new float[samplesLength];
+
+    for (int i = 0; i < samplesLength; i++)
+    {
+        double time = (double)i / sampleRate;
+        samples[i] = (float)sin(M_PI * 2 * constantToneFreq * time);
+    }
+}
+
+void GeneratedSamples::GenerateTestPattern_TonePlusHighFreqSamples()
+{
+    enum struct WaveProgression { Zero = 0, High, Middle, Low };
+
+    GenerateTestPattern_ToneSamples();
+
+    WaveProgression currentWavePoint = WaveProgression::Zero;
+    for (int i = 0; i < samplesLength; i++)
+    {
+        float currentSample = 0;
+        switch (currentWavePoint)
+        {
+        case WaveProgression::Zero:
+            currentSample = 0;
+            currentWavePoint = WaveProgression::High;
+            break;
+        case WaveProgression::High:
+            currentSample = 1;
+            currentWavePoint = WaveProgression::Middle;
+            break;
+        case WaveProgression::Middle:
+            currentSample = 0;
+            currentWavePoint = WaveProgression::Low;
+            break;
+        case WaveProgression::Low:
+            currentSample = -1;
+            currentWavePoint = WaveProgression::Zero;
+            break;
+        }
+
+        samples[i] = samples[i] * 0.3 + currentSample * 0.5;
+    }
+}
+
+void GeneratedSamples::GenerateTestPattern_ToneHighFreqOnOffSamples()
+{
+    enum struct WaveProgression { Zero = 0, High, Middle, Low };
+    
+    int sampleRate = WaveFormat->nSamplesPerSec;
+    samplesLength = sampleRate; // 1 second
+    samples = new float[samplesLength];
+
+    WaveProgression currentWavePoint = WaveProgression::Zero;
+    for (int i = 0; i < samplesLength; i++)
+    {
+        float currentSample = 0;
+
+        // First half presents the high frequency tone, second half presents nothing.
+        if (i < sampleRate / 2)
+        {
+            switch (currentWavePoint)
+            {
+            case WaveProgression::Zero:
+                currentSample = 0;
+                currentWavePoint = WaveProgression::High;
+                break;
+            case WaveProgression::High:
+                currentSample = 1;
+                currentWavePoint = WaveProgression::Middle;
+                break;
+            case WaveProgression::Middle:
+                currentSample = 0;
+                currentWavePoint = WaveProgression::Low;
+                break;
+            case WaveProgression::Low:
+                currentSample = -1;
+                currentWavePoint = WaveProgression::Zero;
+                break;
+            }
+        }
+
+        samples[i] = currentSample;
     }
 }
