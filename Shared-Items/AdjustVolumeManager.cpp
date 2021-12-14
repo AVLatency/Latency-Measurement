@@ -21,7 +21,7 @@ AdjustVolumeManager::AdjustVolumeManager(const AudioEndpoint& outputEndpoint, co
 	{
 		generatedSamples = new GeneratedSamples(waveFormat, GeneratedSamples::WaveType::VolumeAdjustment);
 
-		output = new WasapiOutput(outputEndpoint, true, generatedSamples->samples, generatedSamples->samplesLength, waveFormat);
+		output = new WasapiOutput(outputEndpoint, true, true, generatedSamples->samples, generatedSamples->samplesLength, waveFormat);
 		outputThread = new std::thread([this] { output->StartPlayback(); });
 
 		input = new WasapiInput(inputEndpoint, true, recordBufferDurationInSeconds);

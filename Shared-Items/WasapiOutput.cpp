@@ -17,8 +17,8 @@ const int INT24_MAX = (1 << 23) - 1;
               if ((punk) != NULL)  \
                 { (punk)->Release(); (punk) = NULL; }
 
-WasapiOutput::WasapiOutput(const AudioEndpoint& endpoint, bool loop, float* audioSamples, int audioSamplesLength, WAVEFORMATEX* waveFormat)
-	: endpoint(endpoint), loop(loop), audioSamples(audioSamples), audioSamplesLength(audioSamplesLength), waveFormat(waveFormat)
+WasapiOutput::WasapiOutput(const AudioEndpoint& endpoint, bool loop, bool firstChannelOnly, float* audioSamples, int audioSamplesLength, WAVEFORMATEX* waveFormat)
+	: endpoint(endpoint), loop(loop), firstChannelOnly(firstChannelOnly), audioSamples(audioSamples), audioSamplesLength(audioSamplesLength), waveFormat(waveFormat)
 {
 	
 }
@@ -208,7 +208,7 @@ HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flag
             {
                 for (int c = 0; c < numChannels; c++)
                 {
-                    if (c == 0)
+                    if (!firstChannelOnly || c == 0)
                     {
                         castData[i + c] = audioSamples[sampleIndex] * volume;
                     }
@@ -241,7 +241,7 @@ HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flag
             {
                 for (int c = 0; c < numChannels; c++)
                 {
-                    if (c == 0)
+                    if (!firstChannelOnly || c == 0)
                     {
                         castData[i + c] = (INT16)(round(audioSamples[sampleIndex] * volume * SHRT_MAX));
                     }
@@ -278,7 +278,7 @@ HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flag
                 for (int c = 0; c < numChannels; c++)
                 {
                     int channelOffset = c * bytesPerSampleWithPadding;
-                    if (c == 0)
+                    if (!firstChannelOnly || c == 0)
                     {
                         pData[i + channelOffset + 0] = 0; // padding
                         pData[i + channelOffset + 1] = thirtyTwoBit; // little endian, least significant first
@@ -319,7 +319,7 @@ HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flag
             {
                 for (int c = 0; c < numChannels; c++)
                 {
-                    if (c == 0)
+                    if (!firstChannelOnly || c == 0)
                     {
                         castData[i + c] = (INT32)(round(audioSamples[sampleIndex] * volume * INT_MAX));
                     }
