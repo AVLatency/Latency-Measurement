@@ -5,10 +5,11 @@
 #include "RecordingResult.h"
 #include "AudioEndpoint.h"
 #include "AveragedResult.h"
+#include <string>
 
 class IResultsWriter
 {
 public:
-	virtual void WriteIndividualRecordingResults(bool writeHeader, std::fstream& detailedResultsStream, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result) = 0;
+	virtual void WriteIndividualRecordingResults(bool writeHeader, std::fstream& detailedResultsStream, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result, std::string inputFormat) = 0;
 	virtual void WriteFinalResultsLine(bool writeHeader, std::fstream& resultsStream, const AveragedResult& result) = 0;
 };

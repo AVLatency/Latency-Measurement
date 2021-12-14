@@ -308,7 +308,7 @@ void RecordingAnalyzer::SaveRecording(const WasapiInput& input, std::string path
     write_word(f, file_length - data_chunk_pos + 8, 4); // size of all the actual audio data in bytes. (Adding 8 to account for the "data----" characters)
 }
 
-void RecordingAnalyzer::SaveIndividualResult(IResultsWriter& writer, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result, std::string testRootPath)
+void RecordingAnalyzer::SaveIndividualResult(IResultsWriter& writer, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result, std::string testRootPath, std::string inputFormat)
 {
     filesystem::create_directories(filesystem::path(testRootPath));
 
@@ -322,7 +322,7 @@ void RecordingAnalyzer::SaveIndividualResult(IResultsWriter& writer, const Audio
     }
     std::fstream detailedResultsStream{ detailedResultsCsvPath, std::ios_base::app };
 
-    writer.WriteIndividualRecordingResults(writeHeader, detailedResultsStream, outputEndpoint, inputEndpoint, result);
+    writer.WriteIndividualRecordingResults(writeHeader, detailedResultsStream, outputEndpoint, inputEndpoint, result, inputFormat);
 
     detailedResultsStream.close();
 }

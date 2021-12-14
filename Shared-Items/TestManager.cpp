@@ -135,7 +135,8 @@ bool TestManager::PerformRecording(AudioFormat* audioFormat)
 		{
 			try
 			{
-				RecordingAnalyzer::SaveIndividualResult(resultsWriter, outputEndpoint, inputEndpoint, result, std::format("{}/{}", StringHelper::GetRootPath(AppDirectory), TestFileString));
+				std::string inputFormat = AudioFormat((WAVEFORMATEX*)&input->waveFormat).FormatString;
+				RecordingAnalyzer::SaveIndividualResult(resultsWriter, outputEndpoint, inputEndpoint, result, std::format("{}/{}", StringHelper::GetRootPath(AppDirectory), TestFileString), inputFormat);
 			}
 			catch (...)
 			{

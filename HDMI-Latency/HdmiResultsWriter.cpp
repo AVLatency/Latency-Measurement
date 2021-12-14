@@ -4,7 +4,7 @@
 
 HdmiResultsWriter HdmiResultsWriter::Writer;
 
-void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstream& detailedResultsStream, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result)
+void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstream& detailedResultsStream, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result, std::string inputFormat)
 {
     if (writeHeader)
     {
@@ -45,7 +45,7 @@ void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::f
         detailedResultsStream << ",";
         detailedResultsStream << "Audio Output Device,";
         detailedResultsStream << "Audio Input Device,";
-        detailedResultsStream << "Audio Input Sample Rate,";
+        detailedResultsStream << "Audio Input Format,";
         detailedResultsStream << ",";
         detailedResultsStream << "DEBUG INFO FOLLOWS -->,";
         detailedResultsStream << ",";
@@ -104,7 +104,7 @@ void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::f
     detailedResultsStream << "\"" << "\",";
     detailedResultsStream << "\"" << outputEndpoint.Name << " (" << outputEndpoint.ID << ")" << "\","; //"Audio output device,";
     detailedResultsStream << "\"" << inputEndpoint.Name << " (" << inputEndpoint.ID << ")" << "\","; //"Audio input device,";
-    detailedResultsStream << "\"" << result.Channel1.RecordingSampleRate << "\","; //"Audio input sample rate,";
+    detailedResultsStream << "\"" << inputFormat << "\","; //"Audio input format,";
     detailedResultsStream << "\"" << "\",";
     detailedResultsStream << "\"" << "DEBUG INFO FOLLOWS -->" << "\",";
     detailedResultsStream << "\"" << "\",";

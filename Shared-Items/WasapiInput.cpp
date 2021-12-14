@@ -234,6 +234,9 @@ HRESULT WasapiInput::CopyData(BYTE* pData, UINT32 bufferFrameCount, BOOL* bDone)
         return S_OK;
     }
 
+    // TODO: Test this! I've only been able to test the 32-bit IEEE_FLOAT format because that's all Windows 10
+    // seems to want to give me in non-exclusive mode, no matter what the device settings are.
+
     WORD numChannels = waveFormat.Format.nChannels;
     if (GetFormatID() == WAVE_FORMAT_IEEE_FLOAT && waveFormat.Format.wBitsPerSample == 32)
     {
@@ -294,7 +297,6 @@ HRESULT WasapiInput::CopyData(BYTE* pData, UINT32 bufferFrameCount, BOOL* bDone)
                 float thisSample = 0;
                 if (pData != NULL)
                 {
-                    // TODO: Test this!
                     // Turn this padded 24 bit value into a 32 bit value
                     unsigned int uintValue = castData[i + c]; 
                     uintValue &= ~(unsigned int(1) << 31); // clear the negative bit

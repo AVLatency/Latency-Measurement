@@ -19,7 +19,7 @@ public:
 	static std::map<const AudioFormat*, AveragedResult> AnalyzeResults(std::vector<RecordingResult> results, time_t tTime, const AudioEndpoint& outputEndpoint, OutputOffsetProfile* currentProfile);
 
 	static void SaveRecording(const WasapiInput& input, std::string path, std::string filename);
-	static void SaveIndividualResult(IResultsWriter& writer, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result, std::string testRootPath);
+	static void SaveIndividualResult(IResultsWriter& writer, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result, std::string testRootPath, std::string inputFormat);
 	static void SaveFinalResults(IResultsWriter& writer, std::map<const AudioFormat*, AveragedResult>, std::string testRootPath, std::string csvFilename);
 
 private:
