@@ -50,6 +50,10 @@ bool Gui::DoGui()
         ImGui::EndMenuBar();
     }
 
+    ImGui::PushTextWrapPos(ImGui::GetContentRegionAvail().x);
+    AppDescriptionText();
+    ImGui::PopTextWrapPos();
+    ImGui::Spacing();
 
     bool disabled = state > GuiState::SelectAudioDevice;
     if (disabled)
@@ -123,7 +127,7 @@ bool Gui::DoGui()
             "Tone", // 1
             "High Frequency Tone On/Off", // 2
             "Latency Measurement Pattern", // 3
-            "Latency Measurement Volume Adjustment Pattern"}; // 4
+            "Latency Measurement Volume Adjustment Pattern" }; // 4
         int waveTypeComboCurrentItem = 0;
 
         switch (waveType)
@@ -221,18 +225,7 @@ bool Gui::DoGui()
     {
         if (!output->playbackInProgress)
         {
-            outputThread->join();
-            delete outputThread;
-            outputThread = nullptr;
-
-            delete output;
-            output = nullptr;
-
-            delete currentSamples;
-            currentSamples = nullptr;
-
-            SetThreadExecutionState(0); // Reset prevent display from turning off while running this tool.
-
+            Finish(false);
             state = GuiState::SelectAudioDevice;
         }
     }
@@ -249,10 +242,11 @@ bool Gui::DoGui()
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     if (ImGui::BeginPopupModal("About", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("AV Latency.com Audio Latency Check\n\n"
-            "This tool will output audio of different formats that are supported by your audio driver.\n"
-            "It can be used to verify that your audio driver is correctly switching audio formats.\n\n"
-            "Find out more about audio/video latency, input lag, and lip sync error at avlatency.com\nFind out more about this tool at github.com/AVLatency/Latency-Measurement");
+        ImGui::Text("AV Latency.com Audio Latency Check");
+        ImGui::Spacing();
+        AppDescriptionText();
+        ImGui::Spacing();
+        ImGui::Text("Find out more about audio/video latency, input lag, and lip sync error at avlatency.com\nFind out more about this tool at github.com/AVLatency/Latency-Measurement");
 
         ImGui::Spacing();
         ImGui::Separator();
@@ -267,14 +261,42 @@ bool Gui::DoGui()
 
     if (done)
     {
-        Finish();
+        Finish(true);
     }
 
     return done;
 }
 
-void Gui::Finish()
+void Gui::Finish(bool requestStop)
 {
+    if (output != nullptr)
+    {
+        if (requestStop)
+        {
+            output->StopPlayback();
+        }
+        if (!output->playbackInProgress)
+        {
+            outputThread->join();
+            delete outputThread;
+            outputThread = nullptr;
+
+            delete output;
+            output = nullptr;
+
+            delete currentSamples;
+            currentSamples = nullptr;
+
+            SetThreadExecutionState(0); // Reset prevent display from turning off while running this tool.
+        }
+    }
+}
+
+void Gui::AppDescriptionText()
+{
+    ImGui::TextWrapped("This tool outputs audio test patterns using the same method as other AV Latency.com tools."
+        " To accurately measure audio latency, is critically important that your audio driver correctly switches the output signal format."
+        " This tool can be used to verify your audio driver's behavior.");
 }
 
 // Helper to display a little (?) mark which shows a tooltip when hovered.

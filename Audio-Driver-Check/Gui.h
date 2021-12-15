@@ -19,7 +19,7 @@ public:
 	Gui(Resources& loadedResources);
 	~Gui();
 	bool DoGui();
-	void Finish();
+	void Finish(bool requestStop);
 
 private:
 	Resources& resources;
@@ -33,6 +33,7 @@ private:
 	bool firstChannelOnly = false;
 	GeneratedSamples::WaveType waveType = GeneratedSamples::WaveType::TestPattern_TonePlusHighFreq;
 
+	void AppDescriptionText();
 	void HelpMarker(const char* desc);
 	void OptionallyBoldText(const char* text, bool bold);
 	void FormatDescriptions();

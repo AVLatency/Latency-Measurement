@@ -30,8 +30,8 @@ int main(int, char**)
     // Create application window
     ImGui_ImplWin32_EnableDpiAwareness();
 
-    int windowWidth = 720;
-    int windowHeight = 900;
+    int windowWidth = 700;
+    int windowHeight = 950;
     RECT r;
     r.left = 100;
     r.top = 100;
@@ -116,7 +116,7 @@ int main(int, char**)
         }
         if (done)
         {
-            gui.Finish();
+            gui.Finish(true);
             break;
         }
 
