@@ -164,7 +164,7 @@ void GeneratedSamples::GenerateTestPattern_TonePlusHighFreqSamples()
         float currentSample = high ? 1 : -1;
         high = !high;
 
-        samples[i] = samples[i] * 0.3 + currentSample * 0.5;
+        samples[i] = samples[i] * 0.3 + currentSample * 0.7;
     }
 }
 

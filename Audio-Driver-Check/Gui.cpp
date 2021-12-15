@@ -4,6 +4,7 @@
 #include "AudioEndpointHelper.h"
 #include "FontHelper.h"
 #include "shellapi.h"
+#include "TestConfiguration.h"
 
 float Gui::DpiScale = 1.0f;
 bool Gui::DpiScaleChanged = false;
@@ -223,6 +224,10 @@ bool Gui::DoGui()
 
     if (state == GuiState::PlayingAudio)
     {
+        ImGui::Spacing();
+        ImGui::SliderFloat("Output Volume", &TestConfiguration::OutputVolume, .001f, 1);
+        ImGui::Spacing();
+
         if (ImGui::Button("Stop"))
         {
             output->StopPlayback();
