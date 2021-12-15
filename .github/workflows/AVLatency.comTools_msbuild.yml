@@ -42,7 +42,7 @@ jobs:
 
     - name: Copying executables
       run: |
-        Copy-Item "HDMI-Latency/Release/HDMI-Latency/HDMI-Latency.exe" -Destination "AVLatencyTools"
+        Copy-Item "HDMI-Latency/Release/HDMI-Latency/HDMI Audio Latency.exe" -Destination "AVLatencyTools"
         Copy-Item "Audio-Driver-Check/Release/Audio-Driver-Check/Audio Driver Check.exe" -Destination "AVLatencyTools"
       shell: powershell
     
