@@ -44,11 +44,11 @@ jobs:
       if: ${{ !startsWith(github.ref, 'refs/tags/AVLatency.com-Tools-v') }}
       with:
         name: AV Latency.com Tools
-        path: "AVLatencyTools"
+        path: "/AVLatencyTools"
     
     - name: Creating tag artifact
       uses: actions/upload-artifact@v2
       if: startsWith(github.ref, 'refs/tags/AVLatency.com-Tools-v')
       with:
         name: ${{github.ref_name}}
-        path: "AVLatencyTools"
+        path: "/AVLatencyTools"
