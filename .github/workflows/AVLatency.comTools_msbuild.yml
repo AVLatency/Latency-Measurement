@@ -36,7 +36,7 @@ jobs:
 
     - name: Copying executables
       run: |
-        Copy-Item "HDMI-Latency/Release/HDMI-Latency/HDMI Audio Latency.exe" -Destination "/AVLatencyTools/HDMI Audio Latency.exe"
+        Copy-Item "HDMI-Latency/Release/HDMI-Latency/HDMI Audio Latency.exe" -Destination "AVLatencyTools/HDMI Audio Latency.exe"
       shell: powershell
     
     - name: Creating non tag artifact
