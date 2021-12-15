@@ -202,7 +202,8 @@ bool Gui::DoGui()
                 break;
             }
 
-            ImGui::Checkbox("First Channel Only", &firstChannelOnly);
+            ImGui::Checkbox("Left Channel Only", &firstChannelOnly);
+            ImGui::SameLine(); HelpMarker("Outputs audio only to the left channel. In the case of a mono audio format, this will output audio to the left or center speaker.");
 
             ImGui::Spacing();
             if (ImGui::Button("Start Output"))
