@@ -122,60 +122,6 @@ bool Gui::DoGui()
         FormatDescriptions();
         ImGui::Spacing();
 
-        const char* waveTypeComboItems[] = {
-            "Tone + High Frequency" , // 0
-            "Tone", // 1
-            "High Frequency Tone On/Off", // 2
-            "Latency Measurement Pattern", // 3
-            "Latency Measurement Volume Adjustment Pattern" }; // 4
-        int waveTypeComboCurrentItem = 0;
-
-        switch (waveType)
-        {
-        case GeneratedSamples::WaveType::LatencyMeasurement:
-            waveTypeComboCurrentItem = 3;
-            break;
-        case GeneratedSamples::WaveType::VolumeAdjustment:
-            waveTypeComboCurrentItem = 4;
-            break;
-        case GeneratedSamples::WaveType::TestPattern_Tone:
-            waveTypeComboCurrentItem = 1;
-            break;
-        case GeneratedSamples::WaveType::TestPattern_ToneHighFreqOnOff:
-            waveTypeComboCurrentItem = 2;
-            break;
-        case GeneratedSamples::WaveType::TestPattern_TonePlusHighFreq:
-        default:
-            waveTypeComboCurrentItem = 0;
-            break;
-        }
-
-        ImGui::Combo("Wave Type", &waveTypeComboCurrentItem, waveTypeComboItems, IM_ARRAYSIZE(waveTypeComboItems));
-
-        switch (waveTypeComboCurrentItem)
-        {
-        case 3:
-            waveType = GeneratedSamples::WaveType::LatencyMeasurement;
-            break;
-        case 4:
-            waveType = GeneratedSamples::WaveType::VolumeAdjustment;
-            break;
-        case 1:
-            waveType = GeneratedSamples::WaveType::TestPattern_Tone;
-            break;
-        case 2:
-            waveType = GeneratedSamples::WaveType::TestPattern_ToneHighFreqOnOff;
-            break;
-        case 0:
-        default:
-            waveType = GeneratedSamples::WaveType::TestPattern_TonePlusHighFreq;
-            break;
-        }
-
-        ImGui::Checkbox("First Channel Only", &firstChannelOnly);
-
-        ImGui::Spacing();
-
         WAVEFORMATEX* waveFormat = nullptr;
         for (AudioFormat& format : supportedFormats)
         {
@@ -198,6 +144,62 @@ bool Gui::DoGui()
         }
         if (waveFormat != nullptr)
         {
+            std::string combinedTonesStr = std::format("300 Hz Tone + {} Hz Tone", waveFormat->nSamplesPerSec / 2);
+            std::string OnOffToneStr = std::format("{} Hz Tone On/Off", waveFormat->nSamplesPerSec / 2);
+            // 300 Hz is in GeneratedSamples
+            const char* waveTypeComboItems[] = {
+                combinedTonesStr.c_str(), // 0
+                "300 Hz Tone", // 1
+                OnOffToneStr.c_str(), // 2
+                "Latency Measurement Pattern", // 3
+                "Latency Measurement Volume Adjustment Pattern" }; // 4
+            int waveTypeComboCurrentItem = 0;
+
+            switch (waveType)
+            {
+            case GeneratedSamples::WaveType::LatencyMeasurement:
+                waveTypeComboCurrentItem = 3;
+                break;
+            case GeneratedSamples::WaveType::VolumeAdjustment:
+                waveTypeComboCurrentItem = 4;
+                break;
+            case GeneratedSamples::WaveType::TestPattern_Tone:
+                waveTypeComboCurrentItem = 1;
+                break;
+            case GeneratedSamples::WaveType::TestPattern_ToneHighFreqOnOff:
+                waveTypeComboCurrentItem = 2;
+                break;
+            case GeneratedSamples::WaveType::TestPattern_TonePlusHighFreq:
+            default:
+                waveTypeComboCurrentItem = 0;
+                break;
+            }
+
+            ImGui::Combo("Wave Type", &waveTypeComboCurrentItem, waveTypeComboItems, IM_ARRAYSIZE(waveTypeComboItems));
+
+            switch (waveTypeComboCurrentItem)
+            {
+            case 3:
+                waveType = GeneratedSamples::WaveType::LatencyMeasurement;
+                break;
+            case 4:
+                waveType = GeneratedSamples::WaveType::VolumeAdjustment;
+                break;
+            case 1:
+                waveType = GeneratedSamples::WaveType::TestPattern_Tone;
+                break;
+            case 2:
+                waveType = GeneratedSamples::WaveType::TestPattern_ToneHighFreqOnOff;
+                break;
+            case 0:
+            default:
+                waveType = GeneratedSamples::WaveType::TestPattern_TonePlusHighFreq;
+                break;
+            }
+
+            ImGui::Checkbox("First Channel Only", &firstChannelOnly);
+
+            ImGui::Spacing();
             if (ImGui::Button("Start Output"))
             {
                 state = GuiState::PlayingAudio;
