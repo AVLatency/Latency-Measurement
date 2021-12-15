@@ -31,7 +31,7 @@ int main(int, char**)
     ImGui_ImplWin32_EnableDpiAwareness();
 
     int windowWidth = 700;
-    int windowHeight = 950;
+    int windowHeight = 1000;
     RECT r;
     r.left = 100;
     r.top = 100;
