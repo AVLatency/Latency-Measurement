@@ -1,6 +1,6 @@
 name: TwoDacConsistencyLogger MSBuild
 
-on: # disabling temporarily as I do trial and error on a different action [push]
+on: [push]
 
 env:
   # Path to the solution file relative to the root of the project.
