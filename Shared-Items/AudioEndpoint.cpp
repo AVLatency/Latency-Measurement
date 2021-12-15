@@ -90,7 +90,7 @@ void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool 
 				// WAVEFORMATEX are legacy formats that are typically duplicates of the WAVEFORMATEXTENSIBLE ones.
 				// Furthermore, WAVEFORMATEX formats' bit depth property are not respected on NVIDIA drivers
 				// (24 bit WAVEFORMATEX actually produce a 16 bit HDMI signal)
-				// For these reasons, ignore any WAVEFORMATEX formats that are duplicates of WAVEFORMATEXTENSIBLE ones.
+				// For these reasons, ignore any WAVEFORMATEX formats that are different from WAVEFORMATEXTENSIBLE only by bit depth.
 
 				// TODO: Verify using an HDMI analyzer that this bit about bit depths is true for NVIDA, AMD, and Intel audio drivers.
 				if (!SupportsFormat(waveFormat->nChannels, waveFormat->nSamplesPerSec))

@@ -92,6 +92,11 @@ bool Gui::DoGui()
         std::vector<AudioFormat>& duplicateFormats = outputAudioEndpoints[outputDeviceIndex].DuplicateSupportedFormats;
         if (ImGui::BeginChild("formatsChildWindow", ImVec2(0, 35 * ImGui::GetTextLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar))
         {
+            ImGui::PushFont(FontHelper::BoldFont);
+            ImGui::Text("Formats Used in AV Latency.com Tools:");
+            ImGui::PopFont();
+            ImGui::Spacing();
+
             for (AudioFormat& format : supportedFormats)
             {
                 if (ImGui::Selectable(format.FormatString.c_str(), &format.UserSelected))
@@ -296,8 +301,9 @@ void Gui::Finish(bool requestStop)
 
 void Gui::AppDescriptionText()
 {
-    ImGui::TextWrapped("This tool outputs audio test patterns using the same method as other AV Latency.com tools."
-        " To accurately measure audio latency, is critically important that your audio driver correctly switches the output signal format."
+    ImGui::TextWrapped("This tool outputs audio test patterns using the same method as other AV Latency.com tools.");
+    ImGui::Spacing();
+    ImGui::TextWrapped("To accurately measure audio latency, is critically important that your audio driver correctly switches the output signal format."
         " This tool can be used to verify your audio driver's behavior.");
 }
 
