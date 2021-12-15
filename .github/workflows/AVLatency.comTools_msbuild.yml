@@ -40,25 +40,22 @@ jobs:
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.AUDIO-DRIVER-CHECK_SOLUTION_FILE_PATH}}
 
-    - name: Removing all but executable files from build
+    - name: Copying executables
       run: |
-        Remove-Item -Recurse -Force HDMI-Latency/Release/*.tlog
-        Remove-Item HDMI-Latency/Release/*.*
-        Remove-Item HDMI-Latency/Release/HDMI-Latency/*.exp
-        Remove-Item HDMI-Latency/Release/HDMI-Latency/*.lib
-        Remove-Item HDMI-Latency/Release/HDMI-Latency/*.pdb
+        Copy-Item "HDMI-Latency/Release/HDMI-Latency/HDMI-Latency.exe" -Destination "AVLatencyTools"
+        Copy-Item "Audio-Driver-Check/Release/Audio-Driver-Check/Audio Driver Check.exe" -Destination "AVLatencyTools"
       shell: powershell
     
     - name: Creating non tag artifact
       uses: actions/upload-artifact@v2
       if: ${{ !startsWith(github.ref, 'refs/tags/AVLatency.com-Tools-v') }}
       with:
-        name: HDMI-Latency
-        path: HDMI-Latency/Release
+        name: AV Latency.com Tools
+        path: "AVLatencyTools"
     
     - name: Creating tag artifact
       uses: actions/upload-artifact@v2
       if: startsWith(github.ref, 'refs/tags/AVLatency.com-Tools-v')
       with:
         name: ${{github.ref_name}}
-        path: HDMI-Latency/Release
+        path: "AVLatencyTools"
