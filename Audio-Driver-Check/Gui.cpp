@@ -175,7 +175,7 @@ bool Gui::DoGui()
                 break;
             }
 
-            ImGui::Combo("Wave Type", &waveTypeComboCurrentItem, waveTypeComboItems, IM_ARRAYSIZE(waveTypeComboItems));
+            ImGui::Combo("Audio Pattern", &waveTypeComboCurrentItem, waveTypeComboItems, IM_ARRAYSIZE(waveTypeComboItems));
 
             switch (waveTypeComboCurrentItem)
             {
