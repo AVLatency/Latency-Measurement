@@ -33,17 +33,10 @@ jobs:
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.HDMI-LATENCY_SOLUTION_FILE_PATH}}
-      
-    - name: Build Audio-Driver-Check
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      # Add additional options to the MSBuild command line here (like platform or verbosity level).
-      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.AUDIO-DRIVER-CHECK_SOLUTION_FILE_PATH}}
 
     - name: Copying executables
       run: |
-        Copy-Item "HDMI-Latency/Release/HDMI-Latency/HDMI Audio Latency.exe" -Destination "AVLatencyTools"
-        Copy-Item "Audio-Driver-Check/Release/Audio-Driver-Check/Audio Driver Check.exe" -Destination "AVLatencyTools"
+        Copy-Item "HDMI-Latency/Release/HDMI-Latency/HDMI Audio Latency.exe" -Destination "/AVLatencyTools"
       shell: powershell
     
     - name: Creating non tag artifact
