@@ -52,7 +52,7 @@ jobs:
       uses: actions/upload-artifact@v2
       if: ${{ !startsWith(github.ref, 'refs/tags/AVLatency.com-Tools-v') }}
       with:
-        name: AV Latency.com Tools
+        name: AVLatency.com-Tools
         path: "FinalFiles"
     
     - name: Creating tag artifact
