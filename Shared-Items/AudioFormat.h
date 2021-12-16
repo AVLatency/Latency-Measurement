@@ -8,6 +8,7 @@ public:
 	WAVEFORMATEX* WaveFormat;
 	std::string FormatString;
 	bool UserSelected = false;
+	bool DefaultSelection = false;
 
 	static std::string GetChannelInfoString(WAVEFORMATEX* waveFormat);
 	static WORD GetFormatID(WAVEFORMATEX* waveFormat);

@@ -9,7 +9,6 @@
 #include <string>
 #include "IResultsWriter.h"
 #include "AveragedResult.h"
-#include <map>
 #include "OutputOffsetProfile.h"
 
 class TestManager
@@ -29,7 +28,8 @@ public:
 	std::vector<AudioFormat*> FailedFormats;
 
 	std::vector<RecordingResult> Results;
-	std::map<const AudioFormat*, AveragedResult> AveragedResults;
+	std::vector<AveragedResult> AveragedResults;
+	std::vector<AveragedResult> SummaryResults;
 
 	time_t Time;
 	std::string TestFileString;
@@ -60,5 +60,6 @@ private:
 	bool PerformRecording(AudioFormat* audioFormat);
 	bool PlayFormatSwitch(AudioFormat* lastPlayedFormat);
 	WAVEFORMATEX* FindFormatSwitchFormat(std::vector<AudioFormat*> formats, AudioFormat* lastPlayedFormat);
+	void PopulateSummaryResults();
 };
 

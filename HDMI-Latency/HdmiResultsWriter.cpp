@@ -68,7 +68,7 @@ void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::f
     }
 
     detailedResultsStream << "\"" << StringHelper::GetTimeString(result.Time, false) << "\","; //"Time,";
-    detailedResultsStream << "\"" << result.Format.FormatString << "\","; //"Audio Format,";
+    detailedResultsStream << "\"" << result.Format->FormatString << "\","; //"Audio Format,";
     detailedResultsStream << "\"" << result.GUID << ".wav\","; //"Recording,";
     detailedResultsStream << "\"" << "\",";
     detailedResultsStream << "\"" << result.AudioLatency() << "\","; //"Audio Latency (ms),";
@@ -85,11 +85,11 @@ void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::f
     detailedResultsStream << "\"" << TestNotes::Notes.DutAudioSettings << "\",";
     detailedResultsStream << "\"" << TestNotes::Notes.DutOtherSettings << "\",";
     detailedResultsStream << "\"" << "\",";
-    detailedResultsStream << "\"" << AudioFormat::GetAudioDataFormatString(result.Format.WaveFormat) << "\","; //"Audio Format,";
-    detailedResultsStream << "\"" << result.Format.WaveFormat->nChannels << "\",";
-    detailedResultsStream << "\"" << result.Format.WaveFormat->nSamplesPerSec << "\",";
-    detailedResultsStream << "\"" << result.Format.WaveFormat->wBitsPerSample << "\",";
-    detailedResultsStream << "\"" << AudioFormat::GetChannelInfoString(result.Format.WaveFormat) << "\",";
+    detailedResultsStream << "\"" << AudioFormat::GetAudioDataFormatString(result.Format->WaveFormat) << "\","; //"Audio Format,";
+    detailedResultsStream << "\"" << result.Format->WaveFormat->nChannels << "\",";
+    detailedResultsStream << "\"" << result.Format->WaveFormat->nSamplesPerSec << "\",";
+    detailedResultsStream << "\"" << result.Format->WaveFormat->wBitsPerSample << "\",";
+    detailedResultsStream << "\"" << AudioFormat::GetChannelInfoString(result.Format->WaveFormat) << "\",";
     detailedResultsStream << "\"" << "\",";
     detailedResultsStream << "\"" << TestNotes::Notes.VideoRes() << "\",";
     detailedResultsStream << "\"" << TestNotes::Notes.VideoRefreshRate << "\",";

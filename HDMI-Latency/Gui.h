@@ -30,8 +30,8 @@ private:
 	GuiState state = GuiState::GettingStarted;
 	int outputDeviceIndex = 0;
 	int inputDeviceIndex = 0;
-	std::vector<AudioEndpoint> outputAudioEndpoints;
-	std::vector<AudioEndpoint> inputAudioEndpoints;
+	std::vector<AudioEndpoint> outputAudioEndpoints; // TODO: refs and pointers to these are used here and there, which isn't safe.
+	std::vector<AudioEndpoint> inputAudioEndpoints; // TODO: refs and pointers to these are used here and there, which isn't safe.
 
 	int resultFormatIndex;
 

@@ -16,9 +16,9 @@ using namespace std;
 const std::string RecordingAnalyzer::validRecordingsFilename{ "Valid-Individual-Recordings.csv" };
 const std::string RecordingAnalyzer::invalidRecordingsFilename{ "Invalid-Individual-Recordings.csv" };
 
-RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& generatedSamples, const WasapiInput& input, const AudioFormat& format, OutputOffsetProfile* currentProfile)
+RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& generatedSamples, const WasapiInput& input, AudioFormat* format, OutputOffsetProfile* currentProfile)
 {
-    std::string formatStr = OutputOffsetProfile::FormatStr(format.WaveFormat);
+    std::string formatStr = OutputOffsetProfile::FormatStr(format->WaveFormat);
     float offsetFromProfile = 0;
     bool verified = false;
     if (currentProfile->OutputOffsets.contains(formatStr))
@@ -224,17 +224,28 @@ RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const Gener
     return result;
 }
 
-std::map<const AudioFormat*, AveragedResult> RecordingAnalyzer::AnalyzeResults(std::vector<RecordingResult> results, time_t tTime, const AudioEndpoint& outputEndpoint, OutputOffsetProfile* currentProfile)
+std::vector<AveragedResult> RecordingAnalyzer::AnalyzeResults(std::vector<RecordingResult> results, time_t tTime, const AudioEndpoint& outputEndpoint, OutputOffsetProfile* currentProfile)
 {
-    std::map<const AudioFormat*, AveragedResult> averagedResults;
+    std::vector<AveragedResult> averagedResults;
 
     for (const RecordingResult& recordingResult : results)
     {
         if (recordingResult.Channel1.ValidResult && recordingResult.Channel2.ValidResult)
         {
-            if (!averagedResults.contains(&recordingResult.Format))
+            bool alreadyHasAvgResult = false;
+            for (AveragedResult& result : averagedResults)
             {
-                std::string formatStr = OutputOffsetProfile::FormatStr(recordingResult.Format.WaveFormat);
+                if (result.Format == recordingResult.Format)
+                {
+                    result.Offsets.push_back(recordingResult.Offset());
+                    alreadyHasAvgResult = true;
+                    break;
+                }
+            }
+
+            if (!alreadyHasAvgResult)
+            {
+                std::string formatStr = OutputOffsetProfile::FormatStr(recordingResult.Format->WaveFormat);
                 float offsetFromProfile = 0;
                 bool verified = false;
                 if (currentProfile->OutputOffsets.contains(formatStr))
@@ -242,10 +253,10 @@ std::map<const AudioFormat*, AveragedResult> RecordingAnalyzer::AnalyzeResults(s
                     offsetFromProfile = currentProfile->OutputOffsets[formatStr].value;
                     verified = currentProfile->OutputOffsets[formatStr].verified;
                 }
-                averagedResults.insert({ &recordingResult.Format, AveragedResult(tTime, &recordingResult.Format, outputEndpoint, currentProfile->Name, offsetFromProfile, verified) });
+                AveragedResult avgResult(tTime, recordingResult.Format, outputEndpoint, currentProfile->Name, offsetFromProfile, verified);
+                avgResult.Offsets.push_back(recordingResult.Offset());
+                averagedResults.push_back(avgResult);
             }
-            const auto& pair = averagedResults.find(&recordingResult.Format);
-            pair->second.Offsets.push_back(recordingResult.Offset());
         }
     }
 
@@ -327,7 +338,7 @@ void RecordingAnalyzer::SaveIndividualResult(IResultsWriter& writer, const Audio
     detailedResultsStream.close();
 }
 
-void RecordingAnalyzer::SaveFinalResults(IResultsWriter& writer, std::map<const AudioFormat*, AveragedResult> results, std::string testRootPath, std::string csvFilename)
+void RecordingAnalyzer::SaveFinalResults(IResultsWriter& writer, std::vector<AveragedResult> results, std::string testRootPath, std::string csvFilename)
 {
     filesystem::create_directories(filesystem::path(testRootPath));
 
@@ -340,9 +351,9 @@ void RecordingAnalyzer::SaveFinalResults(IResultsWriter& writer, std::map<const 
     }
     std::fstream resultsStream{ csvPath, std::ios_base::app };
 
-    for (auto pair : results)
+    for (auto avgResult : results)
     {
-        writer.WriteFinalResultsLine(writeHeader, resultsStream, pair.second);
+        writer.WriteFinalResultsLine(writeHeader, resultsStream, avgResult);
         writeHeader = false;
     }
 

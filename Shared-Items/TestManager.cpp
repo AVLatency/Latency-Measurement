@@ -85,6 +85,7 @@ void TestManager::StartTest()
 	}
 
 	AveragedResults = RecordingAnalyzer::AnalyzeResults(Results, Time, outputEndpoint, outputOffsetProfile);
+	PopulateSummaryResults();
 
 	try
 	{
@@ -116,7 +117,7 @@ bool TestManager::PerformRecording(AudioFormat* audioFormat)
 		outputThread.join();
 		inputThread.join();
 
-		RecordingResult result = RecordingAnalyzer::AnalyzeRecording(*generatedSamples, *input, *audioFormat, outputOffsetProfile);
+		RecordingResult result = RecordingAnalyzer::AnalyzeRecording(*generatedSamples, *input, audioFormat, outputOffsetProfile);
 		Results.push_back(result);
 		
 		if (TestConfiguration::SaveIndividualWavFiles)
@@ -238,4 +239,12 @@ WAVEFORMATEX* TestManager::FindFormatSwitchFormat(std::vector<AudioFormat*> form
 		}
 	}
 	return nullptr;
+}
+
+void TestManager::PopulateSummaryResults()
+{
+	// TODO: Find the three default formats and see if they were measured.
+	// If they were, add them to the SummaryResults vector
+	// If they weren't measured, look through all the AveragedResults and see if there are any that are the same format,
+	// but without the same channel masks -- if any are found, add them to the SummaryResults vector
 }

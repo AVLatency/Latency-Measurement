@@ -426,7 +426,7 @@ bool Gui::DoGui()
                     {
                         format.UserSelected = false;
                     }
-                    outputAudioEndpoints[outputDeviceIndex].SelectDefaultFormats();
+                    outputAudioEndpoints[outputDeviceIndex].SetDefaultFormats(true);
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("Select All"))
@@ -618,85 +618,137 @@ bool Gui::DoGui()
             }
             ImGui::Spacing();
 
-            ImGui::Text("Successful Formats:");
-            ImGui::BeginGroup();
-
-            const AudioFormat* selectedFormat = nullptr;
-            if (ImGui::BeginChild("", ImVec2(350 * DpiScale, 15 * ImGui::GetTextLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar))
+            if (ImGui::BeginTabBar("ResultsTabs", ImGuiTabBarFlags_None))
             {
-                int n = 0;
-                for (auto pair : testManager->AveragedResults)
+                if (ImGui::BeginTabItem("Summary"))
                 {
-                    OutputOffsetProfile* currentProfile = HdmiOutputOffsetProfiles::CurrentProfile();
-                    std::string formatStr = OutputOffsetProfile::FormatStr(pair.second.Format->WaveFormat);
-                    bool verified = currentProfile->OutputOffsets.contains(formatStr) && currentProfile->OutputOffsets[formatStr].verified;
-                    VerifiedMarker(verified);
+                    std::string stereoLatency = "Not measured";
+                    std::string stereoFormat = "";
+                    std::string fiveOneLatency = "Not measured";
+                    std::string fiveOneFormat = "";
+                    std::string sevenOneLatency = "Not measured";
+                    std::string sevenOneFormat = "";
 
-                    const bool is_selected = (resultFormatIndex == n);
-                    if (ImGui::Selectable(pair.first->FormatString.c_str(), is_selected))
+                    for (AveragedResult& result : testManager->SummaryResults)
                     {
-                        resultFormatIndex = n;
+                        if (result.Format->WaveFormat->nChannels == 2)
+                        {
+                            stereoLatency = std::format("{} ms", result.AverageLatency());
+                            stereoFormat = std::format("({})", result.Format->FormatString);
+                        }
+                        if (result.Format->WaveFormat->nChannels == 6)
+                        {
+                            fiveOneLatency = std::format("{} ms", result.AverageLatency());
+                            fiveOneFormat = std::format("({})", result.Format->FormatString);
+                        }
+                        if (result.Format->WaveFormat->nChannels == 8)
+                        {
+                            sevenOneLatency = std::format("{} ms", result.AverageLatency());
+                            sevenOneFormat = std::format("({})", result.Format->FormatString);
+                        }
                     }
-                    // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-                    if (is_selected)
-                    {
-                        ImGui::SetItemDefaultFocus();
-                    }
 
-                    const AudioFormat* format = pair.first;
-                    LeoBodnarNote(format);
-
-                    if (resultFormatIndex == n)
-                    {
-                        selectedFormat = pair.first;
-                    }
-
-                    n++;
-                }
-                ImGui::EndChild();
-            }
-
-            FormatDescriptions();
-
-            ImGui::EndGroup();
-            ImGui::SameLine();
-            ImGui::BeginGroup();
-            for (auto pair : testManager->AveragedResults)
-            {
-                if (pair.first == selectedFormat)
-                {
-                    const AveragedResult& selectedResult = pair.second;
-                    ImGui::PushFont(FontHelper::BoldFont);
-                    ImGui::Text(std::format("Average Audio Latency: {} ms", round(selectedResult.AverageLatency())).c_str());
+                    ImGui::PushFont(FontHelper::HeaderFont);
+                    ImGui::Text(std::format("LPCM Stereo Audio Latency: {}", stereoLatency).c_str());
                     ImGui::PopFont();
-                    ImGui::Text(std::format("(rounded from: {} ms)", selectedResult.AverageLatency()).c_str());
+                    ImGui::Text(stereoFormat.c_str());
                     ImGui::Spacing();
-                    ImGui::Text(std::format("Min Audio Latency: {} ms", selectedResult.MinLatency()).c_str());
-                    ImGui::Text(std::format("Max Audio Latency: {} ms", selectedResult.MaxLatency()).c_str());
-                    ImGui::Text(std::format("Verified: {}", selectedResult.Verified ? "Yes" : "No").c_str());
-                    ImGui::Text(std::format("Valid Measurements: {}", selectedResult.Offsets.size()).c_str());
+                    ImGui::PushFont(FontHelper::HeaderFont);
+                    ImGui::Text(std::format("LPCM 5.1 Audio Latency: {}", fiveOneLatency).c_str());
+                    ImGui::PopFont();
+                    ImGui::Text(fiveOneFormat.c_str());
                     ImGui::Spacing();
-                    ImGui::Text(std::format("Output Offset Profile: {}", selectedResult.OutputOffsetProfileName).c_str());
-                    ImGui::Text(std::format("Output Offset Profile Value: {} ms", selectedResult.OutputOffsetFromProfile).c_str());
+                    ImGui::PushFont(FontHelper::HeaderFont);
+                    ImGui::Text(std::format("LPCM 7.1 Audio Latency: {}", sevenOneLatency).c_str());
+                    ImGui::PopFont();
+                    ImGui::Text(sevenOneFormat.c_str());
 
-                    break;
+                    ImGui::EndTabItem();
                 }
-            }
-            ImGui::EndGroup();
-
-            ImGui::Spacing();
-
-            if (ImGui::TreeNode("Failed Formats"))
-            {
-                if (ImGui::BeginListBox("", ImVec2(ImVec2(350 * DpiScale, 10 * ImGui::GetTextLineHeightWithSpacing()))))
+                if (ImGui::BeginTabItem("Detailed Results"))
                 {
-                    for (AudioFormat* format : testManager->FailedFormats)
+                    ImGui::Text("Successful Formats:");
+                    ImGui::BeginGroup();
+
+                    const AudioFormat* selectedFormat = nullptr;
+                    if (ImGui::BeginChild("", ImVec2(350 * DpiScale, 15 * ImGui::GetTextLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar))
                     {
-                        ImGui::Text(format->FormatString.c_str());
+                        int n = 0;
+                        for (auto avgResult : testManager->AveragedResults)
+                        {
+                            OutputOffsetProfile* currentProfile = HdmiOutputOffsetProfiles::CurrentProfile();
+                            std::string formatStr = OutputOffsetProfile::FormatStr(avgResult.Format->WaveFormat);
+                            bool verified = currentProfile->OutputOffsets.contains(formatStr) && currentProfile->OutputOffsets[formatStr].verified;
+                            VerifiedMarker(verified);
+
+                            const bool is_selected = (resultFormatIndex == n);
+                            if (ImGui::Selectable(avgResult.Format->FormatString.c_str(), is_selected))
+                            {
+                                resultFormatIndex = n;
+                            }
+                            // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                            if (is_selected)
+                            {
+                                ImGui::SetItemDefaultFocus();
+                            }
+
+                            const AudioFormat* format = avgResult.Format;
+                            LeoBodnarNote(format);
+
+                            if (resultFormatIndex == n)
+                            {
+                                selectedFormat = avgResult.Format;
+                            }
+
+                            n++;
+                        }
+                        ImGui::EndChild();
                     }
-                    ImGui::EndListBox();
+
+                    FormatDescriptions();
+
+                    ImGui::EndGroup();
+                    ImGui::SameLine();
+                    ImGui::BeginGroup();
+                    for (auto avgResult : testManager->AveragedResults)
+                    {
+                        if (avgResult.Format == selectedFormat)
+                        {
+                            ImGui::PushFont(FontHelper::BoldFont);
+                            ImGui::Text(std::format("Average Audio Latency: {} ms", round(avgResult.AverageLatency())).c_str());
+                            ImGui::PopFont();
+                            ImGui::Text(std::format("(rounded from: {} ms)", avgResult.AverageLatency()).c_str());
+                            ImGui::Spacing();
+                            ImGui::Text(std::format("Min Audio Latency: {} ms", avgResult.MinLatency()).c_str());
+                            ImGui::Text(std::format("Max Audio Latency: {} ms", avgResult.MaxLatency()).c_str());
+                            ImGui::Text(std::format("Verified: {}", avgResult.Verified ? "Yes" : "No").c_str());
+                            ImGui::Text(std::format("Valid Measurements: {}", avgResult.Offsets.size()).c_str());
+                            ImGui::Spacing();
+                            ImGui::Text(std::format("Output Offset Profile: {}", avgResult.OutputOffsetProfileName).c_str());
+                            ImGui::Text(std::format("Output Offset Profile Value: {} ms", avgResult.OutputOffsetFromProfile).c_str());
+
+                            break;
+                        }
+                    }
+                    ImGui::EndGroup();
+
+                    ImGui::Spacing();
+
+                    if (ImGui::TreeNode("Failed Formats"))
+                    {
+                        if (ImGui::BeginListBox("", ImVec2(ImVec2(350 * DpiScale, 10 * ImGui::GetTextLineHeightWithSpacing()))))
+                        {
+                            for (AudioFormat* format : testManager->FailedFormats)
+                            {
+                                ImGui::Text(format->FormatString.c_str());
+                            }
+                            ImGui::EndListBox();
+                        }
+                        ImGui::TreePop();
+                    }
+                    ImGui::EndTabItem();
                 }
-                ImGui::TreePop();
+                ImGui::EndTabBar();
             }
             ImGui::Spacing();
 

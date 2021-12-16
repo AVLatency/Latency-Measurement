@@ -9,7 +9,7 @@ struct RecordingResult
 public:
     std::string GUID;
     time_t Time;
-    const AudioFormat& Format;
+    AudioFormat* Format;
     RecordingSingleChannelResult Channel1;
     RecordingSingleChannelResult Channel2;
 
@@ -17,7 +17,7 @@ public:
     float OutputOffsetFromProfile;
     bool Verified;
 
-    RecordingResult(const AudioFormat& format, std::string outputOffsetProfileName, float outputOffsetFromProfile, bool verified)
+    RecordingResult(AudioFormat* format, std::string outputOffsetProfileName, float outputOffsetFromProfile, bool verified)
         : GUID(StringHelper::GetGuidString()), Time(time(0)), Format(format), OutputOffsetProfileName(outputOffsetProfileName), OutputOffsetFromProfile(outputOffsetFromProfile), Verified(verified) {}
 
     void SetRecordingSampleRate(int value) { Channel1.RecordingSampleRate = value; Channel2.RecordingSampleRate = value; }

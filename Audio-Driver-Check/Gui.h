@@ -25,7 +25,7 @@ private:
 	Resources& resources;
 	GuiState state = GuiState::SelectAudioDevice;
 	int outputDeviceIndex = 0;
-	std::vector<AudioEndpoint> outputAudioEndpoints;
+	std::vector<AudioEndpoint> outputAudioEndpoints; // TODO: refs and pointers to these are used here and there, which isn't safe.
 
 	WasapiOutput* output = nullptr;
 	std::thread* outputThread = nullptr;

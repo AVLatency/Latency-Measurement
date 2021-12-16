@@ -127,16 +127,13 @@ void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool 
 		std::sort(SupportedFormats.begin(), SupportedFormats.end(), sortFunc);
 		std::sort(DuplicateSupportedFormats.begin(), DuplicateSupportedFormats.end(), sortFunc);
 
-		if (selectDefaults)
-		{
-			SelectDefaultFormats();
-		}
+		SetDefaultFormats(selectDefaults);
 	}
 
 	SAFE_RELEASE(pAudioClient);
 }
 
-void AudioEndpoint::SelectDefaultFormats()
+void AudioEndpoint::SetDefaultFormats(bool selectDefaults)
 {
 	std::vector<AudioFormat*> stereoFormats = GetFormats(2, 48000, 16);
 	if (stereoFormats.size() > 1)
@@ -148,14 +145,22 @@ void AudioEndpoint::SelectDefaultFormats()
 			{
 				if (reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->WaveFormat)->dwChannelMask == (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT))
 				{
-					format->UserSelected = true;
+					format->DefaultSelection = true;
+					if (selectDefaults)
+					{
+						format->UserSelected = true;
+					}
 				}
 			}
 		}
 	}
 	else if (stereoFormats.size() > 0)
 	{
-		stereoFormats[0]->UserSelected = true;
+		stereoFormats[0]->DefaultSelection = true;
+		if (selectDefaults)
+		{
+			stereoFormats[0]->UserSelected = true;
+		}
 	}
 
 	std::vector<AudioFormat*> fivePointOneFormats = GetFormats(6, 48000, 16);
@@ -170,7 +175,11 @@ void AudioEndpoint::SelectDefaultFormats()
 				// KSAUDIO_SPEAKER_5POINT1_SURROUND (using side/surround speakers)
 				if (reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->WaveFormat)->dwChannelMask == (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_SIDE_LEFT | SPEAKER_SIDE_RIGHT))
 				{
-					format->UserSelected = true;
+					format->DefaultSelection = true;
+					if (selectDefaults)
+					{
+						format->UserSelected = true;
+					}
 					foundIt = true;
 				}
 			}
@@ -184,7 +193,11 @@ void AudioEndpoint::SelectDefaultFormats()
 					// KSAUDIO_SPEAKER_5POINT1 (using rear left/right of center speakers)
 					if (reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->WaveFormat)->dwChannelMask == (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT))
 					{
-						format->UserSelected = true;
+						format->DefaultSelection = true;
+						if (selectDefaults)
+						{
+							format->UserSelected = true;
+						}
 					}
 				}
 			}
@@ -192,7 +205,11 @@ void AudioEndpoint::SelectDefaultFormats()
 	}
 	else if (fivePointOneFormats.size() > 0)
 	{
-		fivePointOneFormats[0]->UserSelected = true;
+		fivePointOneFormats[0]->DefaultSelection = true;
+		if (selectDefaults)
+		{
+			fivePointOneFormats[0]->UserSelected = true;
+		}
 	}
 
 	std::vector<AudioFormat*> sevenPointOneFormats = GetFormats(8, 48000, 16);
@@ -206,14 +223,22 @@ void AudioEndpoint::SelectDefaultFormats()
 				// KSAUDIO_SPEAKER_7POINT1_SURROUND
 				if (reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->WaveFormat)->dwChannelMask == (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT | SPEAKER_SIDE_LEFT | SPEAKER_SIDE_RIGHT))
 				{
-					format->UserSelected = true;
+					format->DefaultSelection = true;
+					if (selectDefaults)
+					{
+						format->UserSelected = true;
+					}
 				}
 			}
 		}
 	}
 	else if (sevenPointOneFormats.size() > 0)
 	{
-		sevenPointOneFormats[0]->UserSelected = true;
+		sevenPointOneFormats[0]->DefaultSelection = true;
+		if (selectDefaults)
+		{
+			sevenPointOneFormats[0]->UserSelected = true;
+		}
 	}
 }
 
