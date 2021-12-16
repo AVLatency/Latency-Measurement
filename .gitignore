@@ -60,4 +60,6 @@ packages/
 
 # Resource cache files
 *.aps
+
 /HDMI-Latency/HDMI Audio Latency Results
+imgui.ini
