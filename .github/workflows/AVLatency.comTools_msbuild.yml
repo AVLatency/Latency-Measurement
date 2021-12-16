@@ -1,4 +1,4 @@
-name: AV Latency.com Tools - MSBuild
+name: AV Latency.com Toolkit - MSBuild
 
 on: [push]
 
@@ -43,21 +43,21 @@ jobs:
     - name: Copying executables
       run: |
         New-Item "FinalFiles" -Type Directory
-        New-Item "FinalFiles/AV Latency.com Tools" -Type Directory
-        Copy-Item "HDMI-Latency/Release/HDMI-Latency/HDMI Audio Latency.exe" -Destination "FinalFiles/AV Latency.com Tools/HDMI Audio Latency.exe"
-        Copy-Item "Audio-Driver-Check/Release/Audio-Driver-Check/Audio Driver Check.exe" -Destination "FinalFiles/AV Latency.com Tools/Audio Driver Check.exe"
+        New-Item "FinalFiles/AV Latency.com Toolkit" -Type Directory
+        Copy-Item "HDMI-Latency/Release/HDMI-Latency/HDMI Audio Latency.exe" -Destination "FinalFiles/AV Latency.com Toolkit/HDMI Audio Latency.exe"
+        Copy-Item "Audio-Driver-Check/Release/Audio-Driver-Check/Audio Driver Check.exe" -Destination "FinalFiles/AV Latency.com Toolkit/Audio Driver Check.exe"
       shell: powershell
     
     - name: Creating non tag artifact
       uses: actions/upload-artifact@v2
-      if: ${{ !startsWith(github.ref, 'refs/tags/AVLatency.com-Tools-v') }}
+      if: ${{ !startsWith(github.ref, 'refs/tags/AVLatency.com-Toolkit-v') }}
       with:
-        name: AVLatency.com-Tools
+        name: AVLatency.com-Toolkit
         path: "FinalFiles"
     
     - name: Creating tag artifact
       uses: actions/upload-artifact@v2
-      if: startsWith(github.ref, 'refs/tags/AVLatency.com-Tools-v')
+      if: startsWith(github.ref, 'refs/tags/AVLatency.com-Toolkit-v')
       with:
         name: ${{github.ref_name}}
         path: "FinalFiles"
