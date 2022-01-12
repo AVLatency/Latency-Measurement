@@ -15,7 +15,7 @@ std::string AudioFormat::GetChannelInfoString(WAVEFORMATEX* waveFormat)
     std::string result;
     if (waveFormat->wFormatTag != WAVE_FORMAT_EXTENSIBLE)
     {
-        result = "NoChInfo.WindowsLegacy";
+        result = "NoChInfo.BasicDriverFormat";
     }
     else
     {

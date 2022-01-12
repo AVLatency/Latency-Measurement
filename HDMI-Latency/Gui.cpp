@@ -363,7 +363,7 @@ bool Gui::DoGui()
             if (ImGui::BeginTable("MeasurementConfig", 3))
             {
                 ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, 200 * DpiScale);
-                ImGui::TableSetupColumn("column2", ImGuiTableColumnFlags_WidthFixed, 350 * DpiScale);
+                ImGui::TableSetupColumn("column2", ImGuiTableColumnFlags_WidthFixed, 370 * DpiScale);
 
                 ImGui::TableNextRow();
 

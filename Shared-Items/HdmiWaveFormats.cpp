@@ -37,7 +37,8 @@ void HdmiWaveFormats::RecordExtensibleSubFormat(WAVEFORMATEXTENSIBLE* extensible
 
 void HdmiWaveFormats::RecordExtensibleChannels(WAVEFORMATEXTENSIBLE* extensibleFormat)
 {
-	for (int i = 1; i < 9; i++)
+	// Skip mono formats because these don't seem to work (or aren't really supported by any devices)
+	for (int i = 2; i < 9; i++)
 	{
 		extensibleFormat->Format.nChannels = (WORD)i;
 		RecordExtensibleChannelMask(extensibleFormat);
@@ -269,24 +270,28 @@ void HdmiWaveFormats::RecordExFormatTag(WAVEFORMATEX* exFormat)
 
 void HdmiWaveFormats::RecordExChannels(WAVEFORMATEX* exFormat)
 {
-	// For exclusive-mode formats, the method queries the device driver.
+	// "For exclusive-mode formats, the method queries the device driver.
 	// Some device drivers will report that they support a 1-channel or 2-channel
 	// PCM format if the format is specified by a stand-alone WAVEFORMATEX structure, 
 	// but will reject the same format if it is specified by a WAVEFORMATEXTENSIBLE structure.
 	// To obtain reliable results from these drivers, exclusive-mode applications
 	// should call IsFormatSupported twice for each 1-channel or 2-channel PCM format—one
 	// call should use a stand-alone WAVEFORMATEX structure to specify the format, and the
-	// other call should use a WAVEFORMATEXTENSIBLE structure to specify the same format.
+	// other call should use a WAVEFORMATEXTENSIBLE structure to specify the same format."
 	// Source: https://docs.microsoft.com/en-us/windows/win32/coreaudio/device-formats
 	//
 	// tl;dr: WAVEFORMATEX only needs to be populated with 1 or 2 channel PCM formats.
 	// The rest of the formats can be handled by the WAVEFORMATEXTENSIBLE formats.
 
-	exFormat->nChannels = 1;
-	RecordExSamplesPerSec(exFormat);
+	// Buuuuuut... Microsoft documentation isn't the most trustworthly, so we'll look for
+	// any number of channels anyway:
 
-	exFormat->nChannels = 2;
-	RecordExSamplesPerSec(exFormat);
+	// Skip mono formats because these don't seem to work (or aren't really supported by any devices)
+	for (int i = 2; i < 9; i++)
+	{
+		exFormat->nChannels = (WORD)i;
+		RecordExSamplesPerSec(exFormat);
+	}
 }
 
 void HdmiWaveFormats::RecordExSamplesPerSec(WAVEFORMATEX* exFormat)
