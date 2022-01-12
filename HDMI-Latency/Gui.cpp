@@ -623,43 +623,43 @@ bool Gui::DoGui()
                 if (ImGui::BeginTabItem("Summary"))
                 {
                     std::string stereoLatency = "Not measured";
-                    std::string stereoFormat = "";
+                    std::string stereoFormat = "- LPCM 2ch-48kHz-16bit";
                     std::string fiveOneLatency = "Not measured";
-                    std::string fiveOneFormat = "";
+                    std::string fiveOneFormat = "- LPCM 6ch-48kHz-16bit";
                     std::string sevenOneLatency = "Not measured";
-                    std::string sevenOneFormat = "";
+                    std::string sevenOneFormat = "- LPCM 8ch-48kHz-16bit";
 
                     for (AveragedResult& result : testManager->SummaryResults)
                     {
                         if (result.Format->WaveFormat->nChannels == 2)
                         {
-                            stereoLatency = std::format("{} ms", result.AverageLatency());
-                            stereoFormat = std::format("({})", result.Format->FormatString);
+                            stereoLatency = std::format("{} ms", round(result.AverageLatency()));
+                            stereoFormat = std::format("- LPCM {}", result.Format->FormatString);
                         }
                         if (result.Format->WaveFormat->nChannels == 6)
                         {
-                            fiveOneLatency = std::format("{} ms", result.AverageLatency());
-                            fiveOneFormat = std::format("({})", result.Format->FormatString);
+                            fiveOneLatency = std::format("{} ms", round(result.AverageLatency()));
+                            fiveOneFormat = std::format("- LPCM {}", result.Format->FormatString);
                         }
                         if (result.Format->WaveFormat->nChannels == 8)
                         {
-                            sevenOneLatency = std::format("{} ms", result.AverageLatency());
-                            sevenOneFormat = std::format("({})", result.Format->FormatString);
+                            sevenOneLatency = std::format("{} ms", round(result.AverageLatency()));
+                            sevenOneFormat = std::format("- LPCM {}", result.Format->FormatString);
                         }
                     }
 
                     ImGui::PushFont(FontHelper::HeaderFont);
-                    ImGui::Text(std::format("LPCM Stereo Audio Latency: {}", stereoLatency).c_str());
+                    ImGui::Text(std::format("Stereo Audio Latency: {}", stereoLatency).c_str());
                     ImGui::PopFont();
                     ImGui::Text(stereoFormat.c_str());
                     ImGui::Spacing();
                     ImGui::PushFont(FontHelper::HeaderFont);
-                    ImGui::Text(std::format("LPCM 5.1 Audio Latency: {}", fiveOneLatency).c_str());
+                    ImGui::Text(std::format("5.1 Audio Latency: {}", fiveOneLatency).c_str());
                     ImGui::PopFont();
                     ImGui::Text(fiveOneFormat.c_str());
                     ImGui::Spacing();
                     ImGui::PushFont(FontHelper::HeaderFont);
-                    ImGui::Text(std::format("LPCM 7.1 Audio Latency: {}", sevenOneLatency).c_str());
+                    ImGui::Text(std::format("7.1 Audio Latency: {}", sevenOneLatency).c_str());
                     ImGui::PopFont();
                     ImGui::Text(sevenOneFormat.c_str());
 

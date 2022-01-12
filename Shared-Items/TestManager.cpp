@@ -243,8 +243,58 @@ WAVEFORMATEX* TestManager::FindFormatSwitchFormat(std::vector<AudioFormat*> form
 
 void TestManager::PopulateSummaryResults()
 {
-	// TODO: Find the three default formats and see if they were measured.
+	// Find the three default formats and see if they were measured.
 	// If they were, add them to the SummaryResults vector
 	// If they weren't measured, look through all the AveragedResults and see if there are any that are the same format,
 	// but without the same channel masks -- if any are found, add them to the SummaryResults vector
+	bool foundStereo = false;
+	bool foundFiveOne = false;
+	bool foundSevenOne = false;
+	for (AveragedResult avgResult : AveragedResults)
+	{
+		if (avgResult.Format->DefaultSelection)
+		{
+			SummaryResults.push_back(avgResult);
+			if (avgResult.Format->WaveFormat->nChannels == 2)
+			{
+				foundStereo = true;
+			}
+			else if (avgResult.Format->WaveFormat->nChannels == 6)
+			{
+				foundFiveOne = true;
+			}
+			else if (avgResult.Format->WaveFormat->nChannels == 8)
+			{
+				foundSevenOne = true;
+			}
+		}
+	}
+
+	for (AveragedResult avgResult : AveragedResults)
+	{
+		if (!foundStereo
+			&& avgResult.Format->WaveFormat->nChannels == 2
+			&& avgResult.Format->WaveFormat->nSamplesPerSec == 48000
+			&& avgResult.Format->WaveFormat->wBitsPerSample == 16)
+		{
+			SummaryResults.push_back(avgResult);
+			foundStereo = true;
+		}
+		if (!foundFiveOne
+			&& avgResult.Format->WaveFormat->nChannels == 6
+			&& avgResult.Format->WaveFormat->nSamplesPerSec == 48000
+			&& avgResult.Format->WaveFormat->wBitsPerSample == 16)
+		{
+			SummaryResults.push_back(avgResult);
+			foundFiveOne = true;
+		}
+		if (!foundSevenOne
+			&& avgResult.Format->WaveFormat->nChannels == 8
+			&& avgResult.Format->WaveFormat->nSamplesPerSec == 48000
+			&& avgResult.Format->WaveFormat->wBitsPerSample == 16)
+		{
+			SummaryResults.push_back(avgResult);
+			foundSevenOne = true;
+		}
+	}
 }
