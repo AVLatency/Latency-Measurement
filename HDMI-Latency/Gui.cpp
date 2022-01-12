@@ -409,7 +409,7 @@ bool Gui::DoGui()
                     ImGui::TextWrapped("WARNING: using an HDMI Audio Device that does not have an output offset profile may result in inaccurate measurements!");
                     ImGui::Spacing();
                     ImGui::TextWrapped("If you have another HDMI Audio Device that is suitable for use with this tool, "
-                        "please let me know at allen"/* spam bot protection */"@"/* spam bot protection */"avlatency.com and I might be able to add an output offset profile for you.");
+                        "please let me know by email to allen"/* spam bot protection */"@"/* spam bot protection */"avlatency.com and I might be able to add an output offset profile for you.");
                 }
 
                 ImGui::TableNextColumn();
@@ -721,11 +721,11 @@ bool Gui::DoGui()
                             ImGui::Spacing();
                             ImGui::Text(std::format("Min Audio Latency: {} ms", avgResult.MinLatency()).c_str());
                             ImGui::Text(std::format("Max Audio Latency: {} ms", avgResult.MaxLatency()).c_str());
-                            ImGui::Text(std::format("Verified: {}", avgResult.Verified ? "Yes" : "No").c_str());
                             ImGui::Text(std::format("Valid Measurements: {}", avgResult.Offsets.size()).c_str());
                             ImGui::Spacing();
                             ImGui::Text(std::format("Output Offset Profile: {}", avgResult.OutputOffsetProfileName).c_str());
-                            ImGui::Text(std::format("Output Offset Profile Value: {} ms", avgResult.OutputOffsetFromProfile).c_str());
+                            ImGui::Text(std::format("Output Offset Value: {} ms", avgResult.OutputOffsetFromProfile).c_str());
+                            ImGui::Text(std::format("Verified Output Offset: {}", avgResult.Verified ? "Yes" : "No").c_str());
 
                             break;
                         }
@@ -945,11 +945,6 @@ void Gui::VerifiedMarker(bool verified)
     {
         ImGui::Text("[V]"); ImGui::SameLine();
     }
-    else
-    {
-        ImGui::Text("[U]");
-    }
-    ImGui::SameLine();
     ImGui::SetCursorPosX(DpiScale * 35);
 }
 
@@ -962,7 +957,7 @@ void Gui::LeoBodnarNote(const AudioFormat* format)
         ImGui::Text("[Leo Bodnar]");
         ImGui::PopFont();
         ImGui::SameLine(); HelpMarker("This audio format is used by the Leo Bodnar Input Lag Tester. "
-            "For instructions on how to measure and calculate video latency with the Leo Bodnar tool and how to calculate lip sync error with the results from this software, visit avlatency.com.\n\n"
+            "Visit avlatency.com for instructions on how to measure and calculate video latency with the Leo Bodnar tool and how to calculate lip sync error with the results from this software.\n\n"
             "Please note that some TVs will switch to \"PC\" video mode when connected to a computer and will not switch to \"PC\" video mode when using the Leo Bodnar tester. "
             "Please ensure both tests are using the same video mode to accurately calculate lip sync error.");
     }
@@ -971,10 +966,8 @@ void Gui::LeoBodnarNote(const AudioFormat* format)
 void Gui::FormatDescriptions()
 {
     ImGui::Text("[V] Verified");
-    ImGui::SameLine(); HelpMarker("The output offset for this audio format has been verified using a tool such as the Murideo SEVEN Generator.");
-    ImGui::Text("[U] Unverified");
-    ImGui::SameLine(); HelpMarker("The output offset for this audio format has not been verified using tools such as the Murideo SEVEN Generator.\n\n"
-        "Measurement results may not be accurate, depending on whether the HDMI Audio Device has a different output offset for different formats. This does not affect the consistency of results.");
+    ImGui::SameLine(); HelpMarker("The output offset for this audio format has been verified using a tool such as the Murideo SEVEN Generator.\n\n"
+        "Audio formats that do not have the [V] verified marker have not been verified with a tool that directly measures audio latency, likely because no such tool exists. In this case, the accuracy of measurements for this format will depend on the HDMI Audio Device having the same audio output offset for all audio formats. This does not affect the consistency of results for this format.");
 
     if (ImGui::TreeNode("Channel descriptions"))
     {
