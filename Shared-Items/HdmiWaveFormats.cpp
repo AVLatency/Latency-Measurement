@@ -37,8 +37,7 @@ void HdmiWaveFormats::RecordExtensibleSubFormat(WAVEFORMATEXTENSIBLE* extensible
 
 void HdmiWaveFormats::RecordExtensibleChannels(WAVEFORMATEXTENSIBLE* extensibleFormat)
 {
-	// Skip mono formats because these don't seem to work (or aren't really supported by any devices)
-	for (int i = 2; i < 9; i++)
+	for (int i = 1; i < 9; i++)
 	{
 		extensibleFormat->Format.nChannels = (WORD)i;
 		RecordExtensibleChannelMask(extensibleFormat);
@@ -286,8 +285,7 @@ void HdmiWaveFormats::RecordExChannels(WAVEFORMATEX* exFormat)
 	// Buuuuuut... Microsoft documentation isn't the most trustworthly, so we'll look for
 	// any number of channels anyway:
 
-	// Skip mono formats because these don't seem to work (or aren't really supported by any devices)
-	for (int i = 2; i < 9; i++)
+	for (int i = 1; i < 9; i++)
 	{
 		exFormat->nChannels = (WORD)i;
 		RecordExSamplesPerSec(exFormat);

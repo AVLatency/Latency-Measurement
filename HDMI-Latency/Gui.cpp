@@ -342,7 +342,9 @@ bool Gui::DoGui()
                 else if (state == GuiState::FinishingAdjustVolume)
                 {
                     state = GuiState::MeasurementConfig;
-                    outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, true);
+                    // Exclude mono because my HDMI signal analyzer gets all types of confused with a "mono" signal
+                    // which suggests that it's not a valid HDMI format, at least when prepared by NVIDIA HDMI audio drivers.
+                    outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, true, false);
                     strcpy_s(TestNotes::Notes.DutModel, outputAudioEndpoints[outputDeviceIndex].Name.c_str());
                 }
             }

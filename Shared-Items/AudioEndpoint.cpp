@@ -32,7 +32,7 @@ AudioEndpoint::~AudioEndpoint()
 	SAFE_RELEASE(Device);
 }
 
-void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool selectDefaults)
+void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool selectDefaults, bool includeMono)
 {
 	if (SupportedFormats.size() > 0)
 	{
@@ -48,55 +48,64 @@ void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool 
 		// Favour formats that have channel masks
 		for (WAVEFORMATEXTENSIBLE* waveFormat : HdmiWaveFormats::Formats.AllHDMIExtensibleFormats)
 		{
-			if (waveFormat->dwChannelMask != 0)
+			if (includeMono || waveFormat->Format.nChannels > 1)
 			{
-				hr = pAudioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, (WAVEFORMATEX*)waveFormat, NULL);
-				if (hr == S_OK)
+				if (waveFormat->dwChannelMask != 0)
 				{
-					// this format is supported!
-					SupportedFormats.push_back((WAVEFORMATEX*)waveFormat);
+					hr = pAudioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, (WAVEFORMATEX*)waveFormat, NULL);
+					if (hr == S_OK)
+					{
+						// this format is supported!
+						SupportedFormats.push_back((WAVEFORMATEX*)waveFormat);
+					}
 				}
 			}
 		}
 		// Next, look at formats that don't have channel masks
 		for (WAVEFORMATEXTENSIBLE* waveFormat : HdmiWaveFormats::Formats.AllHDMIExtensibleFormats)
 		{
-			if (waveFormat->dwChannelMask == 0)
+			if (includeMono || waveFormat->Format.nChannels > 1)
 			{
-				hr = pAudioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, (WAVEFORMATEX*)waveFormat, NULL);
-				if (hr == S_OK)
+				if (waveFormat->dwChannelMask == 0)
 				{
-					// this format is supported!
+					hr = pAudioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, (WAVEFORMATEX*)waveFormat, NULL);
+					if (hr == S_OK)
+					{
+						// this format is supported!
 
-					// Only add formats with no channel masks if there are no supported formats with channel masks
-					if (!SupportsFormat(waveFormat->Format.nChannels, waveFormat->Format.nSamplesPerSec, waveFormat->Format.wBitsPerSample))
-					{
-						SupportedFormats.push_back((WAVEFORMATEX*)waveFormat);
-					}
-					else if (includeDuplicateFormats)
-					{
-						DuplicateSupportedFormats.push_back((WAVEFORMATEX*)waveFormat);
+						// Only add formats with no channel masks if there are no supported formats with channel masks
+						if (!SupportsFormat(waveFormat->Format.nChannels, waveFormat->Format.nSamplesPerSec, waveFormat->Format.wBitsPerSample))
+						{
+							SupportedFormats.push_back((WAVEFORMATEX*)waveFormat);
+						}
+						else if (includeDuplicateFormats)
+						{
+							DuplicateSupportedFormats.push_back((WAVEFORMATEX*)waveFormat);
+						}
 					}
 				}
 			}
 		}
 		for (WAVEFORMATEX* waveFormat : HdmiWaveFormats::Formats.AllHDMIExFormats)
 		{
-			hr = pAudioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, waveFormat, NULL);
-			if (hr == S_OK)
+			if (includeMono || waveFormat->nChannels > 1)
 			{
-				// this format is supported!
+				hr = pAudioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, waveFormat, NULL);
+				if (hr == S_OK)
+				{
+					// this format is supported!
 
-				// WAVEFORMATEX are legacy formats that are typically duplicates of the WAVEFORMATEXTENSIBLE ones
-				// But they are still important because NVIDIA (and possibly other) drivers only support 24 bit HDMI
-				// audio output through these legacy formats.
-				if (!SupportsFormat(waveFormat->nChannels, waveFormat->nSamplesPerSec, waveFormat->wBitsPerSample))
-				{
-					SupportedFormats.push_back(waveFormat);
-				}
-				else if (includeDuplicateFormats)
-				{
-					DuplicateSupportedFormats.push_back(waveFormat);
+					// WAVEFORMATEX are legacy formats that are typically duplicates of the WAVEFORMATEXTENSIBLE ones
+					// But they are still important because NVIDIA (and possibly other) drivers only support 24 bit HDMI
+					// audio output through these legacy formats.
+					if (!SupportsFormat(waveFormat->nChannels, waveFormat->nSamplesPerSec, waveFormat->wBitsPerSample))
+					{
+						SupportedFormats.push_back(waveFormat);
+					}
+					else if (includeDuplicateFormats)
+					{
+						DuplicateSupportedFormats.push_back(waveFormat);
+					}
 				}
 			}
 		}
