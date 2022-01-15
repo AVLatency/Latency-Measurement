@@ -19,8 +19,14 @@ GeneratedSamples::GeneratedSamples(WAVEFORMATEX* waveFormat, WaveType type)
     case GeneratedSamples::WaveType::TestPattern_Tone:
         GenerateTestPattern_ToneSamples();
         break;
+    case GeneratedSamples::WaveType::TestPattern_ToneHighFreqBlip:
+        GenerateTestPattern_ToneHighFreqBlip();
+        break;
     case GeneratedSamples::WaveType::TestPattern_ToneHighFreqOnOff:
-        GenerateTestPattern_ToneHighFreqOnOffSamples();
+        GenerateTestPattern_ToneHighFreqOnOffSamples(1);
+        break;
+    case GeneratedSamples::WaveType::TestPattern_ToneHighFreqOnOff400Hz:
+        GenerateTestPattern_ToneHighFreqOnOffSamples(400);
         break;
     case GeneratedSamples::WaveType::LatencyMeasurement:
     default:
@@ -168,10 +174,10 @@ void GeneratedSamples::GenerateTestPattern_TonePlusHighFreqSamples()
     }
 }
 
-void GeneratedSamples::GenerateTestPattern_ToneHighFreqOnOffSamples()
+void GeneratedSamples::GenerateTestPattern_ToneHighFreqOnOffSamples(int frequency)
 {
     int sampleRate = WaveFormat->nSamplesPerSec;
-    samplesLength = sampleRate; // 1 second
+    samplesLength = sampleRate / frequency; // high frequency on/off
     samples = new float[samplesLength];
 
     bool high = true;
@@ -180,7 +186,29 @@ void GeneratedSamples::GenerateTestPattern_ToneHighFreqOnOffSamples()
         float currentSample = 0;
 
         // First half presents the high frequency tone, second half presents nothing.
-        if (i < sampleRate / 2)
+        if (i < samplesLength / 2) // sampleRate / 24 is the maximum amount of silence that will not trigger a fade-in on the HDV-MB01 HDMI audio extractor
+        {
+            currentSample = high ? 1 : -1;
+            high = !high;
+        }
+
+        samples[i] = currentSample;
+    }
+}
+
+void GeneratedSamples::GenerateTestPattern_ToneHighFreqBlip()
+{
+    int sampleRate = WaveFormat->nSamplesPerSec;
+    samplesLength = sampleRate; // high frequency on/off
+    samples = new float[samplesLength];
+
+    bool high = true;
+    for (int i = 0; i < samplesLength; i++)
+    {
+        float currentSample = 0;
+
+        // Blip is 0.5 ms
+        if (i < samplesLength / 2000)
         {
             currentSample = high ? 1 : -1;
             high = !high;

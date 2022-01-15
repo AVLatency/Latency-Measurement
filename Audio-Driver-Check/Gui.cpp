@@ -151,29 +151,39 @@ bool Gui::DoGui()
         if (waveFormat != nullptr)
         {
             std::string combinedTonesStr = std::format("300 Hz Tone + {} Hz Tone", waveFormat->nSamplesPerSec / 2);
-            std::string OnOffToneStr = std::format("{} Hz Tone On/Off", waveFormat->nSamplesPerSec / 2);
+            std::string blipStr = std::format("0.5 ms {} Hz Blip every 1 Sec", waveFormat->nSamplesPerSec / 2);
+            std::string OnOffToneStr = std::format("{} Hz Tone On/Off at 1 Hz", waveFormat->nSamplesPerSec / 2);
+            std::string OnOff400HzToneStr = std::format("{} Hz Tone On/Off at 400 Hz", waveFormat->nSamplesPerSec / 2);
             // 300 Hz is in GeneratedSamples
             const char* waveTypeComboItems[] = {
                 combinedTonesStr.c_str(), // 0
                 "300 Hz Tone", // 1
-                OnOffToneStr.c_str(), // 2
-                "Latency Measurement Pattern", // 3
-                "Latency Measurement Volume Adjustment Pattern" }; // 4
+                "Latency Measurement Pattern", // 2
+                "Latency Measurement Volume Adjustment Pattern", // 3
+                blipStr.c_str(), // 4
+                OnOffToneStr.c_str(), // 5
+                OnOff400HzToneStr.c_str() }; // 6
             int waveTypeComboCurrentItem = 0;
 
             switch (waveType)
             {
             case GeneratedSamples::WaveType::LatencyMeasurement:
-                waveTypeComboCurrentItem = 3;
+                waveTypeComboCurrentItem = 2;
                 break;
             case GeneratedSamples::WaveType::VolumeAdjustment:
-                waveTypeComboCurrentItem = 4;
+                waveTypeComboCurrentItem = 3;
                 break;
             case GeneratedSamples::WaveType::TestPattern_Tone:
                 waveTypeComboCurrentItem = 1;
                 break;
+            case GeneratedSamples::WaveType::TestPattern_ToneHighFreqBlip:
+                waveTypeComboCurrentItem = 4;
+                break;
             case GeneratedSamples::WaveType::TestPattern_ToneHighFreqOnOff:
-                waveTypeComboCurrentItem = 2;
+                waveTypeComboCurrentItem = 5;
+                break;
+            case GeneratedSamples::WaveType::TestPattern_ToneHighFreqOnOff400Hz:
+                waveTypeComboCurrentItem = 6;
                 break;
             case GeneratedSamples::WaveType::TestPattern_TonePlusHighFreq:
             default:
@@ -185,17 +195,23 @@ bool Gui::DoGui()
 
             switch (waveTypeComboCurrentItem)
             {
-            case 3:
+            case 2:
                 waveType = GeneratedSamples::WaveType::LatencyMeasurement;
                 break;
-            case 4:
+            case 3:
                 waveType = GeneratedSamples::WaveType::VolumeAdjustment;
                 break;
             case 1:
                 waveType = GeneratedSamples::WaveType::TestPattern_Tone;
                 break;
-            case 2:
+            case 4:
+                waveType = GeneratedSamples::WaveType::TestPattern_ToneHighFreqBlip;
+                break;
+            case 5:
                 waveType = GeneratedSamples::WaveType::TestPattern_ToneHighFreqOnOff;
+                break;
+            case 6:
+                waveType = GeneratedSamples::WaveType::TestPattern_ToneHighFreqOnOff400Hz;
                 break;
             case 0:
             default:
