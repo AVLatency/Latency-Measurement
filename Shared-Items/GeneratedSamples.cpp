@@ -20,7 +20,7 @@ GeneratedSamples::GeneratedSamples(WAVEFORMATEX* waveFormat, WaveType type)
         GenerateTestPattern_ToneSamples();
         break;
     case GeneratedSamples::WaveType::TestPattern_ToneHighFreqBlip:
-        GenerateTestPattern_ToneHighFreqBlip();
+        GenerateTestPattern_ToneHighFreqBlip(24, 1); // NTSC trigger: (2, 60/1.001);
         break;
     case GeneratedSamples::WaveType::TestPattern_ToneHighFreqOnOff:
         GenerateTestPattern_ToneHighFreqOnOffSamples(1);
@@ -196,10 +196,10 @@ void GeneratedSamples::GenerateTestPattern_ToneHighFreqOnOffSamples(int frequenc
     }
 }
 
-void GeneratedSamples::GenerateTestPattern_ToneHighFreqBlip()
+void GeneratedSamples::GenerateTestPattern_ToneHighFreqBlip(int blipSampleLength, double frequency)
 {
     int sampleRate = WaveFormat->nSamplesPerSec;
-    samplesLength = sampleRate; // high frequency on/off
+    samplesLength = round(sampleRate / frequency); // high frequency on/off
     samples = new float[samplesLength];
 
     bool high = true;
@@ -207,8 +207,7 @@ void GeneratedSamples::GenerateTestPattern_ToneHighFreqBlip()
     {
         float currentSample = 0;
 
-        // Blip is 0.5 ms
-        if (i < samplesLength / 2000)
+        if (i < blipSampleLength)
         {
             currentSample = high ? 1 : -1;
             high = !high;

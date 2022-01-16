@@ -57,5 +57,5 @@ private:
 	void GenerateTestPattern_ToneSamples();
 	void GenerateTestPattern_TonePlusHighFreqSamples();
 	void GenerateTestPattern_ToneHighFreqOnOffSamples(int frequency);
-	void GenerateTestPattern_ToneHighFreqBlip();
+	void GenerateTestPattern_ToneHighFreqBlip(int blipSampleLength, double frequency);
 };

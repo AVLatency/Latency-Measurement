@@ -151,7 +151,7 @@ bool Gui::DoGui()
         if (waveFormat != nullptr)
         {
             std::string combinedTonesStr = std::format("300 Hz Tone + {} Hz Tone", waveFormat->nSamplesPerSec / 2);
-            std::string blipStr = std::format("0.5 ms {} Hz Blip every 1 Sec", waveFormat->nSamplesPerSec / 2);
+            std::string blipStr = std::format("{} Hz Blip at 1 Hz", waveFormat->nSamplesPerSec / 2);
             std::string OnOffToneStr = std::format("{} Hz Tone On/Off at 1 Hz", waveFormat->nSamplesPerSec / 2);
             std::string OnOff400HzToneStr = std::format("{} Hz Tone On/Off at 400 Hz", waveFormat->nSamplesPerSec / 2);
             // 300 Hz is in GeneratedSamples
