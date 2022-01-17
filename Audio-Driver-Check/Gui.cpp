@@ -271,7 +271,7 @@ bool Gui::DoGui()
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     if (ImGui::BeginPopupModal("About", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("AV Latency.com Audio Latency Check");
+        ImGui::Text("AV Latency.com Audio Generator and Driver Check");
         ImGui::Spacing();
         AppDescriptionText();
         ImGui::Spacing();
