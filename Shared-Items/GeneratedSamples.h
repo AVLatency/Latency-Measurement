@@ -4,7 +4,16 @@
 struct GeneratedSamples
 {
 public:
-	enum struct WaveType { LatencyMeasurement, VolumeAdjustment, TestPattern_TonePlusHighFreq, TestPattern_Tone, TestPattern_ToneHighFreqBlip, TestPattern_ToneHighFreqOnOff, TestPattern_ToneHighFreqOnOff400Hz };
+	enum struct WaveType { LatencyMeasurement, VolumeAdjustment, TestPattern_TonePlusHighFreq, TestPattern_Tone, TestPattern_ToneHighFreqBlip, TestPattern_ToneHighFreqOnOff };
+
+	struct Config
+	{
+		WaveType waveType;
+		double blipFrequency;
+		int blipSampleLength;
+		double onOffFrequency; // sampleRate / 24 is the maximum amount of silence that will not trigger a fade-in on the HDV-MB01 HDMI audio extractor
+		Config(WaveType type) : waveType(type), blipFrequency(1), blipSampleLength(24), onOffFrequency(1) {};
+	};
 
 	WAVEFORMATEX* WaveFormat;
 	WaveType Type;
@@ -45,6 +54,7 @@ public:
 	double constantToneFreq = 300;
 
 	GeneratedSamples(WAVEFORMATEX* waveFormat, WaveType type);
+	GeneratedSamples(WAVEFORMATEX* waveFormat, Config config);
 	~GeneratedSamples();
 
 	double TestWaveDurationInSeconds() const;
@@ -56,6 +66,6 @@ private:
 	void GenerateVolumeAdjustmentSamples();
 	void GenerateTestPattern_ToneSamples();
 	void GenerateTestPattern_TonePlusHighFreqSamples();
-	void GenerateTestPattern_ToneHighFreqOnOffSamples(int frequency);
+	void GenerateTestPattern_ToneHighFreqOnOffSamples(double frequency);
 	void GenerateTestPattern_ToneHighFreqBlip(int blipSampleLength, double frequency);
 };

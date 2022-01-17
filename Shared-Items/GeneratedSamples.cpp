@@ -6,7 +6,10 @@
 #include "TestConfiguration.h"
 
 GeneratedSamples::GeneratedSamples(WAVEFORMATEX* waveFormat, WaveType type)
-    : WaveFormat(waveFormat), Type(type)
+    : GeneratedSamples(waveFormat, Config(type) ) { }
+
+    GeneratedSamples::GeneratedSamples(WAVEFORMATEX* waveFormat, Config config)
+    : WaveFormat(waveFormat), Type(config.waveType)
 {
     switch (Type)
     {
@@ -20,13 +23,10 @@ GeneratedSamples::GeneratedSamples(WAVEFORMATEX* waveFormat, WaveType type)
         GenerateTestPattern_ToneSamples();
         break;
     case GeneratedSamples::WaveType::TestPattern_ToneHighFreqBlip:
-        GenerateTestPattern_ToneHighFreqBlip(24, 1); // NTSC trigger: (2, 60/1.001);
+        GenerateTestPattern_ToneHighFreqBlip(config.blipSampleLength, config.blipFrequency); // NTSC trigger: (2, 60/1.001);
         break;
     case GeneratedSamples::WaveType::TestPattern_ToneHighFreqOnOff:
-        GenerateTestPattern_ToneHighFreqOnOffSamples(1);
-        break;
-    case GeneratedSamples::WaveType::TestPattern_ToneHighFreqOnOff400Hz:
-        GenerateTestPattern_ToneHighFreqOnOffSamples(400);
+        GenerateTestPattern_ToneHighFreqOnOffSamples(config.onOffFrequency);
         break;
     case GeneratedSamples::WaveType::LatencyMeasurement:
     default:
@@ -174,10 +174,14 @@ void GeneratedSamples::GenerateTestPattern_TonePlusHighFreqSamples()
     }
 }
 
-void GeneratedSamples::GenerateTestPattern_ToneHighFreqOnOffSamples(int frequency)
+void GeneratedSamples::GenerateTestPattern_ToneHighFreqOnOffSamples(double frequency)
 {
     int sampleRate = WaveFormat->nSamplesPerSec;
     samplesLength = sampleRate / frequency; // high frequency on/off
+    if (samplesLength < 2)
+    {
+        samplesLength = 2;
+    }
     samples = new float[samplesLength];
 
     bool high = true;
@@ -186,7 +190,7 @@ void GeneratedSamples::GenerateTestPattern_ToneHighFreqOnOffSamples(int frequenc
         float currentSample = 0;
 
         // First half presents the high frequency tone, second half presents nothing.
-        if (i < samplesLength / 2) // sampleRate / 24 is the maximum amount of silence that will not trigger a fade-in on the HDV-MB01 HDMI audio extractor
+        if (i < samplesLength / 2)
         {
             currentSample = high ? 1 : -1;
             high = !high;
@@ -200,6 +204,10 @@ void GeneratedSamples::GenerateTestPattern_ToneHighFreqBlip(int blipSampleLength
 {
     int sampleRate = WaveFormat->nSamplesPerSec;
     samplesLength = round(sampleRate / frequency); // high frequency on/off
+    if (samplesLength < 2)
+    {
+        samplesLength = 2;
+    }
     samples = new float[samplesLength];
 
     bool high = true;

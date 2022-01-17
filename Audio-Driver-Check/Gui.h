@@ -31,6 +31,9 @@ private:
 	std::thread* outputThread = nullptr;
 	GeneratedSamples* currentSamples = nullptr;
 	bool firstChannelOnly = false;
+	float blipFrequency = 1;
+	int blipSampleLength = 24;
+	float onOffFrequency = 1;
 	GeneratedSamples::WaveType waveType = GeneratedSamples::WaveType::TestPattern_TonePlusHighFreq;
 
 	void AppDescriptionText();

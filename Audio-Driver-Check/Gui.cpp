@@ -91,7 +91,7 @@ bool Gui::DoGui()
 
         std::vector<AudioFormat>& supportedFormats = outputAudioEndpoints[outputDeviceIndex].SupportedFormats;
         std::vector<AudioFormat>& duplicateFormats = outputAudioEndpoints[outputDeviceIndex].DuplicateSupportedFormats;
-        if (ImGui::BeginChild("formatsChildWindow", ImVec2(0, 35 * ImGui::GetTextLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar))
+        if (ImGui::BeginChild("formatsChildWindow", ImVec2(0, 30 * ImGui::GetTextLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar))
         {
             ImGui::PushFont(FontHelper::BoldFont);
             ImGui::Text("Formats Used in AV Latency.com Tools:");
@@ -151,9 +151,8 @@ bool Gui::DoGui()
         if (waveFormat != nullptr)
         {
             std::string combinedTonesStr = std::format("300 Hz Tone + {} Hz Tone", waveFormat->nSamplesPerSec / 2);
-            std::string blipStr = std::format("{} Hz Blip at 1 Hz", waveFormat->nSamplesPerSec / 2);
-            std::string OnOffToneStr = std::format("{} Hz Tone On/Off at 1 Hz", waveFormat->nSamplesPerSec / 2);
-            std::string OnOff400HzToneStr = std::format("{} Hz Tone On/Off at 400 Hz", waveFormat->nSamplesPerSec / 2);
+            std::string blipStr = std::format("{} Hz Blip", waveFormat->nSamplesPerSec / 2);
+            std::string OnOffToneStr = std::format("{} Hz Tone On/Off", waveFormat->nSamplesPerSec / 2);
             // 300 Hz is in GeneratedSamples
             const char* waveTypeComboItems[] = {
                 combinedTonesStr.c_str(), // 0
@@ -161,8 +160,7 @@ bool Gui::DoGui()
                 "Latency Measurement Pattern", // 2
                 "Latency Measurement Volume Adjustment Pattern", // 3
                 blipStr.c_str(), // 4
-                OnOffToneStr.c_str(), // 5
-                OnOff400HzToneStr.c_str() }; // 6
+                OnOffToneStr.c_str() }; // 5
             int waveTypeComboCurrentItem = 0;
 
             switch (waveType)
@@ -182,9 +180,6 @@ bool Gui::DoGui()
             case GeneratedSamples::WaveType::TestPattern_ToneHighFreqOnOff:
                 waveTypeComboCurrentItem = 5;
                 break;
-            case GeneratedSamples::WaveType::TestPattern_ToneHighFreqOnOff400Hz:
-                waveTypeComboCurrentItem = 6;
-                break;
             case GeneratedSamples::WaveType::TestPattern_TonePlusHighFreq:
             default:
                 waveTypeComboCurrentItem = 0;
@@ -192,6 +187,9 @@ bool Gui::DoGui()
             }
 
             ImGui::Combo("Audio Pattern", &waveTypeComboCurrentItem, waveTypeComboItems, IM_ARRAYSIZE(waveTypeComboItems));
+
+            ImGui::Checkbox("Left Channel Only", &firstChannelOnly);
+            ImGui::SameLine(); HelpMarker("Outputs audio only to the left channel. In the case of a mono audio format, this will output audio to the left or center speaker.");
 
             switch (waveTypeComboCurrentItem)
             {
@@ -206,12 +204,14 @@ bool Gui::DoGui()
                 break;
             case 4:
                 waveType = GeneratedSamples::WaveType::TestPattern_ToneHighFreqBlip;
+                ImGui::DragFloat("Frequency (Hz)", &blipFrequency, 1, 0.01, 1000000);
+                ImGui::SameLine(); HelpMarker("How often the blip will occur, not the frequency of the audio tone.");
+                ImGui::InputInt("Sample Length", &blipSampleLength);
+                ImGui::SameLine(); HelpMarker("The time duration of this blip will depend on sample rate.");
                 break;
             case 5:
                 waveType = GeneratedSamples::WaveType::TestPattern_ToneHighFreqOnOff;
-                break;
-            case 6:
-                waveType = GeneratedSamples::WaveType::TestPattern_ToneHighFreqOnOff400Hz;
+                ImGui::DragFloat("On/Off Frequency (Hz)", &onOffFrequency, 1, 0.01, 1000000);
                 break;
             case 0:
             default:
@@ -219,14 +219,21 @@ bool Gui::DoGui()
                 break;
             }
 
-            ImGui::Checkbox("Left Channel Only", &firstChannelOnly);
-            ImGui::SameLine(); HelpMarker("Outputs audio only to the left channel. In the case of a mono audio format, this will output audio to the left or center speaker.");
-
             ImGui::Spacing();
             if (ImGui::Button("Start Output"))
             {
                 state = GuiState::PlayingAudio;
-                currentSamples = new GeneratedSamples(waveFormat, waveType);
+                GeneratedSamples::Config config(waveType);
+                if (waveType == GeneratedSamples::WaveType::TestPattern_ToneHighFreqBlip)
+                {
+                    config.blipFrequency = blipFrequency;
+                    config.blipSampleLength = blipSampleLength;
+                }
+                else if (waveType == GeneratedSamples::WaveType::TestPattern_ToneHighFreqOnOff)
+                {
+                    config.onOffFrequency = onOffFrequency;
+                }
+                currentSamples = new GeneratedSamples(waveFormat, config);
                 output = new WasapiOutput(outputAudioEndpoints[outputDeviceIndex], true, firstChannelOnly, currentSamples->samples, currentSamples->samplesLength, waveFormat);
                 SetThreadExecutionState(ES_DISPLAY_REQUIRED); // Prevent display from turning off while running this tool.
                 outputThread = new std::thread([this] { output->StartPlayback(); });
