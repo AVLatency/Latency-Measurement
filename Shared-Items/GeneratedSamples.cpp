@@ -28,6 +28,9 @@ GeneratedSamples::GeneratedSamples(WAVEFORMATEX* waveFormat, WaveType type)
     case GeneratedSamples::WaveType::TestPattern_ToneHighFreqOnOff:
         GenerateTestPattern_ToneHighFreqOnOffSamples(config.onOffFrequency);
         break;
+    case GeneratedSamples::WaveType::TestPattern_VisuallyIdentifiable:
+        GenerateTestPattern_VisuallyIdentifiableSamples();
+        break;
     case GeneratedSamples::WaveType::LatencyMeasurement:
     default:
         GenerateLatencyMeasurementSamples();
@@ -219,6 +222,78 @@ void GeneratedSamples::GenerateTestPattern_ToneHighFreqBlip(int blipSampleLength
         {
             currentSample = high ? 1 : -1;
             high = !high;
+        }
+
+        samples[i] = currentSample;
+    }
+}
+
+void GeneratedSamples::GenerateTestPattern_VisuallyIdentifiableSamples()
+{
+    int sampleRate = WaveFormat->nSamplesPerSec;
+    samplesLength = sampleRate / 10; // 0.1 second pattern: enough to easily visualize 100 ms latency
+    if (samplesLength < 2)
+    {
+        samplesLength = 2;
+    }
+    samples = new float[samplesLength];
+
+    bool high = true;
+    for (int i = 0; i < samplesLength; i++)
+    {
+        // start by bouncing between high and low
+        float currentSample = 0;
+        currentSample = high ? 1 : -1;
+        high = !high;
+
+        // remove some samples to make an interesting pattern
+        if (i > 100 && i < 200)
+        {
+            currentSample = 0;
+        }
+        if (i > 300 && i < 500)
+        {
+            currentSample = 0;
+        }
+        if (i > 700 && i < 1500)
+        {
+            currentSample = 0;
+        }
+        if (i > 1700 && i < 1705)
+        {
+            currentSample = 0;
+        }
+        if (i > 1710 && i < 1715)
+        {
+            currentSample = 0;
+        }
+        if (i > 1720 && i < 1725)
+        {
+            currentSample = 0;
+        }
+        if (i > 1730 && i < 1735)
+        {
+            currentSample = 0;
+        }
+        if (i > 2000 && i < 3000)
+        {
+            currentSample = 0;
+        }
+        if (i > 4000 && i < 5500)
+        {
+            currentSample = 0;
+        }
+        if (i > 7000 && i < 9000)
+        {
+            currentSample = 0;
+        }
+        if (i > 12000 && i < 14500)
+        {
+            currentSample = 0;
+        }
+        if (i > 17500 && i <19000)
+        {
+            currentSample = 0;
         }
 
         samples[i] = currentSample;

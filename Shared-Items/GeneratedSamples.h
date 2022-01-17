@@ -4,7 +4,7 @@
 struct GeneratedSamples
 {
 public:
-	enum struct WaveType { LatencyMeasurement, VolumeAdjustment, TestPattern_TonePlusHighFreq, TestPattern_Tone, TestPattern_ToneHighFreqBlip, TestPattern_ToneHighFreqOnOff };
+	enum struct WaveType { LatencyMeasurement, VolumeAdjustment, TestPattern_TonePlusHighFreq, TestPattern_Tone, TestPattern_ToneHighFreqBlip, TestPattern_ToneHighFreqOnOff, TestPattern_VisuallyIdentifiable };
 
 	struct Config
 	{
@@ -68,4 +68,5 @@ private:
 	void GenerateTestPattern_TonePlusHighFreqSamples();
 	void GenerateTestPattern_ToneHighFreqOnOffSamples(double frequency);
 	void GenerateTestPattern_ToneHighFreqBlip(int blipSampleLength, double frequency);
+	void GenerateTestPattern_VisuallyIdentifiableSamples();
 };

@@ -160,7 +160,8 @@ bool Gui::DoGui()
                 "Latency Measurement Pattern", // 2
                 "Latency Measurement Volume Adjustment Pattern", // 3
                 blipStr.c_str(), // 4
-                OnOffToneStr.c_str() }; // 5
+                OnOffToneStr.c_str(), // 5
+                "Visually Identifiable Pattern"}; // 6
             int waveTypeComboCurrentItem = 0;
 
             switch (waveType)
@@ -179,6 +180,9 @@ bool Gui::DoGui()
                 break;
             case GeneratedSamples::WaveType::TestPattern_ToneHighFreqOnOff:
                 waveTypeComboCurrentItem = 5;
+                break;
+            case GeneratedSamples::WaveType::TestPattern_VisuallyIdentifiable:
+                waveTypeComboCurrentItem = 6;
                 break;
             case GeneratedSamples::WaveType::TestPattern_TonePlusHighFreq:
             default:
@@ -212,6 +216,9 @@ bool Gui::DoGui()
             case 5:
                 waveType = GeneratedSamples::WaveType::TestPattern_ToneHighFreqOnOff;
                 ImGui::DragFloat("On/Off Frequency (Hz)", &onOffFrequency, 1, 0.01, 1000000);
+                break;
+            case 6:
+                waveType = GeneratedSamples::WaveType::TestPattern_VisuallyIdentifiable;
                 break;
             case 0:
             default:
