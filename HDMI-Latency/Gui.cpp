@@ -727,7 +727,7 @@ bool Gui::DoGui()
                             ImGui::Spacing();
                             ImGui::Text(std::format("Output Offset Profile: {}", avgResult.OutputOffsetProfileName).c_str());
                             ImGui::Text(std::format("Output Offset Value: {} ms", avgResult.OutputOffsetFromProfile).c_str());
-                            ImGui::Text(std::format("Verified Output Offset: {}", avgResult.Verified ? "Yes" : "No").c_str());
+                            ImGui::Text(std::format("Verified Accuracy: {}", avgResult.Verified ? "Yes" : "No").c_str());
 
                             break;
                         }
@@ -967,9 +967,10 @@ void Gui::LeoBodnarNote(const AudioFormat* format)
 
 void Gui::FormatDescriptions()
 {
-    ImGui::Text("[V] Verified");
-    ImGui::SameLine(); HelpMarker("The output offset for this audio format has been verified using a tool such as the Murideo SEVEN Generator.\n\n"
-        "Audio formats that do not have the [V] verified marker have not been verified with a tool that directly measures audio latency, likely because no such tool exists. In this case, the accuracy of measurements for this format will depend on the HDMI Audio Device having the same audio output offset for all audio formats. This does not affect the consistency of results for this format.");
+    ImGui::Text("[V] Verified Accuracy");
+    ImGui::SameLine(); HelpMarker("The accuracy of measurements for this audio format have been verified using electronics measurement equipment, such as an oscilloscope.\n\n"
+        "Audio formats that do not have the [V] verified accuracy marker may or may not be accurate, depending on whether the HDMI Audio Device is operating with the same audio output offset as it does for verified formats.\n\n"
+        "This is not related to the consistency of measurement results.");
 
     if (ImGui::TreeNode("Channel descriptions"))
     {

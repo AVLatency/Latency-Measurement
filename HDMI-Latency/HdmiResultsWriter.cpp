@@ -136,7 +136,7 @@ void HdmiResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& re
         resultsStream << "Avg. Audio Latency (ms),";
         resultsStream << "Min Audio Latency (ms),";
         resultsStream << "Max Audio Latency (ms),";
-        resultsStream << "Verified,";
+        resultsStream << "Verified Accuracy,";
         resultsStream << "Valid Measurements,";
         resultsStream << ",";
         resultsStream << "Output Offset Profile,";
