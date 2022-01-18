@@ -22,6 +22,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)FilesystemCheck.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)FontHelper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)GeneratedSamples.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)GuiHelper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)MeasurementToolGuiState.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)IResultsWriter.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)OutputOffsetProfile.h" />
@@ -48,6 +49,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)FontHelper.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)GeneratedSamples.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)IResultsWriter.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)GuiHelper.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)OutputOffsetProfile.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ResourceLoader.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)StringHelper.cpp" />

@@ -5,6 +5,7 @@
 #include "FontHelper.h"
 #include "shellapi.h"
 #include "TestConfiguration.h"
+#include "GuiHelper.h"
 
 float Gui::DpiScale = 1.0f;
 bool Gui::DpiScaleChanged = false;
@@ -124,7 +125,7 @@ bool Gui::DoGui()
             ImGui::EndChild();
         }
 
-        FormatDescriptions();
+        GuiHelper::ChannelDescriptions();
         ImGui::Spacing();
 
         if (ImGui::Button("Copy format list to clipboard"))
@@ -374,25 +375,6 @@ void Gui::OptionallyBoldText(const char* text, bool bold)
     if (bold)
     {
         ImGui::PopFont();
-    }
-}
-
-void Gui::FormatDescriptions()
-{
-    if (ImGui::TreeNode("Channel descriptions"))
-    {
-        ImGui::Text("FL: Front Left\n"
-            "FR: Front Right\n"
-            "FC: Front Center\n"
-            "RC: Rear Center\n"
-            "RL: Rear Left (a.k.a. Side Left or Surround Left)\n"
-            "RR: Rear Right (a.k.a. Side Right or Surround Right)\n"
-            "RLC: Rear Left of Center\n"
-            "RRC: Rear Right of Center\n"
-            "FLC: Front Left of Center\n"
-            "FRC: Front Right of Center\n"
-            "LFE: Low Frequency Effect (subwoofer)\n");
-        ImGui::TreePop();
     }
 }
 

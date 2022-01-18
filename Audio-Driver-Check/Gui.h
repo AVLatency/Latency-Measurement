@@ -39,7 +39,6 @@ private:
 	void AppDescriptionText();
 	void HelpMarker(const char* desc);
 	void OptionallyBoldText(const char* text, bool bold);
-	void FormatDescriptions();
 
 	void RefreshAudioEndpoints();
 	void ClearFormatSelection();
