@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GuiState.h"
+#include "MeasurementToolGuiState.h"
 #include "Resources.h"
 #include <vector>
 #include <AudioEndpoint.h>
@@ -27,7 +27,7 @@ private:
 	FileSystemErrorType fileSystemErrorType = FileSystemErrorType::Initial;
 
 	Resources& resources;
-	GuiState state = GuiState::GettingStarted;
+	MeasurementToolGuiState state = MeasurementToolGuiState::GettingStarted;
 	int outputDeviceIndex = 0;
 	int inputDeviceIndex = 0;
 	std::vector<AudioEndpoint> outputAudioEndpoints; // TODO: refs and pointers to these are used here and there, which isn't safe.

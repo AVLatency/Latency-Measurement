@@ -81,24 +81,24 @@ bool Gui::DoGui()
 
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
-        OptionallyBoldText("1) Getting Started", state == GuiState::GettingStarted);
+        OptionallyBoldText("1) Getting Started", state == MeasurementToolGuiState::GettingStarted);
         ImGui::Spacing();
-        OptionallyBoldText("2) Input/Output Devices", state == GuiState::SelectAudioDevices);
+        OptionallyBoldText("2) Input/Output Devices", state == MeasurementToolGuiState::SelectAudioDevices);
         ImGui::Spacing();
-        OptionallyBoldText("3) Adjust Volumes", state == GuiState::AdjustVolume || state == GuiState::CancellingAdjustVolume || state == GuiState::FinishingAdjustVolume);
+        OptionallyBoldText("3) Adjust Volumes", state == MeasurementToolGuiState::AdjustVolume || state == MeasurementToolGuiState::CancellingAdjustVolume || state == MeasurementToolGuiState::FinishingAdjustVolume);
         ImGui::Spacing();
-        OptionallyBoldText("4) Measurement Config", state == GuiState::MeasurementConfig);
+        OptionallyBoldText("4) Measurement Config", state == MeasurementToolGuiState::MeasurementConfig);
         ImGui::Spacing();
-        OptionallyBoldText("5) Measurement", state == GuiState::Measuring || state == GuiState::CancellingMeasuring);
+        OptionallyBoldText("5) Measurement", state == MeasurementToolGuiState::Measuring || state == MeasurementToolGuiState::CancellingMeasuring);
         ImGui::Spacing();
-        OptionallyBoldText("6) Results", state == GuiState::Results);
+        OptionallyBoldText("6) Results", state == MeasurementToolGuiState::Results);
         ImGui::Spacing();
 
         ImGui::TableNextColumn();
 
         switch (state)
         {
-        case GuiState::GettingStarted:
+        case MeasurementToolGuiState::GettingStarted:
         {
 
             ImGui::Text("Welcome to the AV Latency.com HDMI latency measurement tool!");
@@ -115,17 +115,17 @@ bool Gui::DoGui()
             }
         }
             break;
-        case GuiState::SelectAudioDevices:
-        case GuiState::AdjustVolume:
-        case GuiState::CancellingAdjustVolume:
-        case GuiState::FinishingAdjustVolume:
+        case MeasurementToolGuiState::SelectAudioDevices:
+        case MeasurementToolGuiState::AdjustVolume:
+        case MeasurementToolGuiState::CancellingAdjustVolume:
+        case MeasurementToolGuiState::FinishingAdjustVolume:
         {
             if (adjustVolumeManager != nullptr)
             {
                 adjustVolumeManager->Tick();
             }
 
-            bool disabled = state > GuiState::SelectAudioDevices;
+            bool disabled = state > MeasurementToolGuiState::SelectAudioDevices;
             if (disabled)
             {
                 ImGui::BeginDisabled();
@@ -179,12 +179,12 @@ bool Gui::DoGui()
                 ImGui::Spacing();
                 if (ImGui::Button("Back"))
                 {
-                    state = GuiState::GettingStarted;
+                    state = MeasurementToolGuiState::GettingStarted;
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("Adjust Volumes"))
                 {
-                    state = GuiState::AdjustVolume;
+                    state = MeasurementToolGuiState::AdjustVolume;
                     StartAjdustVolumeAudio();
                 }
             }
@@ -195,7 +195,7 @@ bool Gui::DoGui()
                 disabled = false;
             }
 
-            if (state >= GuiState::AdjustVolume)
+            if (state >= MeasurementToolGuiState::AdjustVolume)
             {
                 ImGui::Spacing();
                 ImGui::PushFont(FontHelper::BoldFont);
@@ -298,12 +298,12 @@ bool Gui::DoGui()
                     ImGui::TreePop();
                 }
 
-                if (state == GuiState::AdjustVolume)
+                if (state == MeasurementToolGuiState::AdjustVolume)
                 {
                     ImGui::Spacing();
                     if (ImGui::Button("Cancel"))
                     {
-                        state = GuiState::CancellingAdjustVolume;
+                        state = MeasurementToolGuiState::CancellingAdjustVolume;
                         if (adjustVolumeManager != nullptr)
                         {
                             adjustVolumeManager->Stop();
@@ -318,7 +318,7 @@ bool Gui::DoGui()
                     }
                     if (ImGui::Button("Finish"))
                     {
-                        state = GuiState::FinishingAdjustVolume;
+                        state = MeasurementToolGuiState::FinishingAdjustVolume;
                         if (adjustVolumeManager != nullptr)
                         {
                             adjustVolumeManager->Stop();
@@ -335,13 +335,13 @@ bool Gui::DoGui()
             if (adjustVolumeManager == nullptr ||
                 (adjustVolumeManager != nullptr && !adjustVolumeManager->working))
             {
-                if (state == GuiState::CancellingAdjustVolume)
+                if (state == MeasurementToolGuiState::CancellingAdjustVolume)
                 {
-                    state = GuiState::SelectAudioDevices;
+                    state = MeasurementToolGuiState::SelectAudioDevices;
                 }
-                else if (state == GuiState::FinishingAdjustVolume)
+                else if (state == MeasurementToolGuiState::FinishingAdjustVolume)
                 {
-                    state = GuiState::MeasurementConfig;
+                    state = MeasurementToolGuiState::MeasurementConfig;
                     // Exclude mono because my HDMI signal analyzer gets all types of confused with a "mono" signal
                     // which suggests that it's not a valid HDMI format, at least when prepared by NVIDIA HDMI audio drivers.
                     outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, true, false);
@@ -350,11 +350,11 @@ bool Gui::DoGui()
             }
         }
             break;
-        case GuiState::MeasurementConfig:
-        case GuiState::Measuring:
-        case GuiState::CancellingMeasuring:
+        case MeasurementToolGuiState::MeasurementConfig:
+        case MeasurementToolGuiState::Measuring:
+        case MeasurementToolGuiState::CancellingMeasuring:
         {
-            bool disabled = state > GuiState::MeasurementConfig;
+            bool disabled = state > MeasurementToolGuiState::MeasurementConfig;
             if (disabled)
             {
                 ImGui::BeginDisabled();
@@ -567,18 +567,18 @@ bool Gui::DoGui()
             }
 
             ImGui::Spacing();
-            if (state == GuiState::MeasurementConfig)
+            if (state == MeasurementToolGuiState::MeasurementConfig)
             {
                 ImGui::SetCursorPosX(lastColumnCursorPosition);
                 if (ImGui::Button("Back"))
                 {
-                    state = GuiState::SelectAudioDevices;
+                    state = MeasurementToolGuiState::SelectAudioDevices;
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("Start Measurement"))
                 {
                     StartTest();
-                    state = GuiState::Measuring;
+                    state = MeasurementToolGuiState::Measuring;
                 }
             }
             else
@@ -586,7 +586,7 @@ bool Gui::DoGui()
                 if (testManager->IsFinished)
                 {
                     resultFormatIndex = 0;
-                    state = GuiState::Results;
+                    state = MeasurementToolGuiState::Results;
                 }
                 else
                 {
@@ -594,13 +594,13 @@ bool Gui::DoGui()
                     ImGui::ProgressBar(testManager->PassCount / (float)testManager->TotalPasses);
                     ImGui::ProgressBar(testManager->RecordingCount / (float)testManager->TotalRecordingsPerPass);
 
-                    if (state != GuiState::CancellingMeasuring)
+                    if (state != MeasurementToolGuiState::CancellingMeasuring)
                     {
                         ImGui::Spacing();
                         if(ImGui::Button("Stop"))
                         {
                             testManager->StopRequested = true;
-                            state = GuiState::CancellingMeasuring;
+                            state = MeasurementToolGuiState::CancellingMeasuring;
                         }
                     }
                 }
@@ -608,7 +608,7 @@ bool Gui::DoGui()
             ImGui::Spacing();
         }
             break;
-        case GuiState::Results:
+        case MeasurementToolGuiState::Results:
         {
             ImGui::PushFont(FontHelper::BoldFont);
             ImGui::Text("Measurement Results");
@@ -758,7 +758,7 @@ bool Gui::DoGui()
             {
                 delete(testManager);
                 testManager = nullptr;
-                state = GuiState::MeasurementConfig;
+                state = MeasurementToolGuiState::MeasurementConfig;
             }
         }
 
@@ -842,7 +842,7 @@ bool Gui::DoGui()
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {
             RefreshAudioEndpoints();
-            state = GuiState::SelectAudioDevices;
+            state = MeasurementToolGuiState::SelectAudioDevices;
             ImGui::CloseCurrentPopup();
         }
 

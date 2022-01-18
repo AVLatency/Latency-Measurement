@@ -25,7 +25,6 @@
       <Filter>sources</Filter>
     </ClInclude>
     <ClInclude Include="resource.h" />
-    <ClInclude Include="GuiState.h" />
     <ClInclude Include="Gui.h" />
     <ClInclude Include="Resources.h" />
     <ClInclude Include="TestNotes.h" />
@@ -65,7 +64,6 @@
     <ClCompile Include="HdmiOutputOffsetProfiles.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\README.txt" />
     <None Include="..\imgui\misc\debuggers\imgui.natvis">
       <Filter>sources</Filter>
     </None>

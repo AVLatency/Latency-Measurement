@@ -1,6 +1,6 @@
 #pragma once
 
-enum struct GuiState
+enum struct MeasurementToolGuiState
 {
 	GettingStarted = 0,
 	SelectAudioDevices,

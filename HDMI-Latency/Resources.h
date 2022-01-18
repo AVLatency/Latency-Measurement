@@ -22,8 +22,5 @@ public:
 	ID3D11ShaderResourceView* WindowsDisplaySettingsTexture = NULL;
 	int WindowsDisplaySettingsTextureWidth = 0;
 	int WindowsDisplaySettingsTextureHeight = 0;
-
-private:
-	void LoadImage(HINSTANCE hInstance, ID3D11Device* g_pd3dDevice, int resourceID, ID3D11ShaderResourceView** outTexture, int* outWidth, int* outHeight);
 };
 
