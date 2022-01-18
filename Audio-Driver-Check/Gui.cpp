@@ -344,7 +344,7 @@ void Gui::AppDescriptionText()
     ImGui::TextWrapped("This tool outputs audio test patterns using the same method as other AV Latency.com tools.");
     ImGui::Spacing();
     ImGui::TextWrapped("To accurately measure audio latency, is critically important that your audio driver correctly switches the output signal format."
-        " This tool can be used to verify your audio driver's behavior.");
+        " This tool can be used to verify your audio driver's behavior and has been used during development of AV Latency.com tools to ensure that common NVIDIA, AMD, and Intel HDMI audio drivers behave correctly.");
 }
 
 // Helper to display a little (?) mark which shows a tooltip when hovered.
