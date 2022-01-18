@@ -20,7 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{1362B23C-8D81-4F0F-9EEC-7553EF8BC7C7}</ProjectGuid>
-    <RootNamespace>HDMI-Latency</RootNamespace>
+    <RootNamespace>HDMI-ARCeARC-Receiver-Latency</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -72,22 +72,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(ProjectDir)$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
-    <TargetName>HDMI Audio Latency</TargetName>
+    <TargetName>HDMI ARC eARC Receiver Latency</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(ProjectDir)$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
-    <TargetName>HDMI Audio Latency</TargetName>
+    <TargetName>HDMI ARC eARC Receiver Latency</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(ProjectDir)$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
-    <TargetName>HDMI Audio Latency</TargetName>
+    <TargetName>HDMI ARC eARC Receiver Latency</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(ProjectDir)$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
-    <TargetName>HDMI Audio Latency</TargetName>
+    <TargetName>HDMI ARC eARC Receiver Latency</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -188,7 +188,7 @@
     <None Include="..\imgui\misc\debuggers\imgui.natvis" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="HDMI-Latency.rc" />
+    <ResourceCompile Include="HDMI-ARCeARC-Receiver-Latency.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
