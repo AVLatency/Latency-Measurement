@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{1362B23C-8D81-4F0F-9EEC-7553EF8BC7C7}</ProjectGuid>
+    <ProjectGuid>{BB21389D-D94D-49F0-879E-43AAECB8183E}</ProjectGuid>
     <RootNamespace>HDMI-ARCeARC-Generator-Latency</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>

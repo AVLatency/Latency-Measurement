@@ -9,13 +9,22 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TwoDacConsistencyLogger", "
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Shared-Items", "Shared-Items\Shared-Items.vcxitems", "{A764D106-357F-410C-B0BC-B42AB75A37BC}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Audio-Driver-Check", "Audio-Driver-Check\Audio-Driver-Check.vcxproj", "{B9A75E69-1F38-4704-B45D-B485D6683BBC}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Audio-Generator-Driver-Check", "Audio-Driver-Check\Audio-Driver-Check.vcxproj", "{B9A75E69-1F38-4704-B45D-B485D6683BBC}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HDMI-ARCeARC-Generator-Latency", "HDMI-ARCeARC-Generator-Latency\HDMI-ARCeARC-Generator-Latency.vcxproj", "{BB21389D-D94D-49F0-879E-43AAECB8183E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HDMI-ARCeARC-Receiver-Latency", "HDMI-ARCeARC-Receiver-Latency\HDMI-ARCeARC-Receiver-Latency.vcxproj", "{4A26DF7F-640F-444B-A33F-C6CC95928F98}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SPDIF-Latency", "SPDIF-Latency\SPDIF-Latency.vcxproj", "{47298BB1-38E3-48A9-A840-EA34098800DC}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Shared-Items\Shared-Items.vcxitems*{1362b23c-8d81-4f0f-9eec-7553ef8bc7c7}*SharedItemsImports = 4
+		Shared-Items\Shared-Items.vcxitems*{47298bb1-38e3-48a9-a840-ea34098800dc}*SharedItemsImports = 4
+		Shared-Items\Shared-Items.vcxitems*{4a26df7f-640f-444b-a33f-c6cc95928f98}*SharedItemsImports = 4
 		Shared-Items\Shared-Items.vcxitems*{a764d106-357f-410c-b0bc-b42ab75a37bc}*SharedItemsImports = 9
 		Shared-Items\Shared-Items.vcxitems*{b9a75e69-1f38-4704-b45d-b485d6683bbc}*SharedItemsImports = 4
+		Shared-Items\Shared-Items.vcxitems*{bb21389d-d94d-49f0-879e-43aaecb8183e}*SharedItemsImports = 4
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +71,36 @@ Global
 		{B9A75E69-1F38-4704-B45D-B485D6683BBC}.Release|x64.Build.0 = Release|x64
 		{B9A75E69-1F38-4704-B45D-B485D6683BBC}.Release|x86.ActiveCfg = Release|Win32
 		{B9A75E69-1F38-4704-B45D-B485D6683BBC}.Release|x86.Build.0 = Release|Win32
+		{BB21389D-D94D-49F0-879E-43AAECB8183E}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{BB21389D-D94D-49F0-879E-43AAECB8183E}.Debug|x64.ActiveCfg = Debug|x64
+		{BB21389D-D94D-49F0-879E-43AAECB8183E}.Debug|x64.Build.0 = Debug|x64
+		{BB21389D-D94D-49F0-879E-43AAECB8183E}.Debug|x86.ActiveCfg = Debug|Win32
+		{BB21389D-D94D-49F0-879E-43AAECB8183E}.Debug|x86.Build.0 = Debug|Win32
+		{BB21389D-D94D-49F0-879E-43AAECB8183E}.Release|Any CPU.ActiveCfg = Release|Win32
+		{BB21389D-D94D-49F0-879E-43AAECB8183E}.Release|x64.ActiveCfg = Release|x64
+		{BB21389D-D94D-49F0-879E-43AAECB8183E}.Release|x64.Build.0 = Release|x64
+		{BB21389D-D94D-49F0-879E-43AAECB8183E}.Release|x86.ActiveCfg = Release|Win32
+		{BB21389D-D94D-49F0-879E-43AAECB8183E}.Release|x86.Build.0 = Release|Win32
+		{4A26DF7F-640F-444B-A33F-C6CC95928F98}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{4A26DF7F-640F-444B-A33F-C6CC95928F98}.Debug|x64.ActiveCfg = Debug|x64
+		{4A26DF7F-640F-444B-A33F-C6CC95928F98}.Debug|x64.Build.0 = Debug|x64
+		{4A26DF7F-640F-444B-A33F-C6CC95928F98}.Debug|x86.ActiveCfg = Debug|Win32
+		{4A26DF7F-640F-444B-A33F-C6CC95928F98}.Debug|x86.Build.0 = Debug|Win32
+		{4A26DF7F-640F-444B-A33F-C6CC95928F98}.Release|Any CPU.ActiveCfg = Release|Win32
+		{4A26DF7F-640F-444B-A33F-C6CC95928F98}.Release|x64.ActiveCfg = Release|x64
+		{4A26DF7F-640F-444B-A33F-C6CC95928F98}.Release|x64.Build.0 = Release|x64
+		{4A26DF7F-640F-444B-A33F-C6CC95928F98}.Release|x86.ActiveCfg = Release|Win32
+		{4A26DF7F-640F-444B-A33F-C6CC95928F98}.Release|x86.Build.0 = Release|Win32
+		{47298BB1-38E3-48A9-A840-EA34098800DC}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{47298BB1-38E3-48A9-A840-EA34098800DC}.Debug|x64.ActiveCfg = Debug|x64
+		{47298BB1-38E3-48A9-A840-EA34098800DC}.Debug|x64.Build.0 = Debug|x64
+		{47298BB1-38E3-48A9-A840-EA34098800DC}.Debug|x86.ActiveCfg = Debug|Win32
+		{47298BB1-38E3-48A9-A840-EA34098800DC}.Debug|x86.Build.0 = Debug|Win32
+		{47298BB1-38E3-48A9-A840-EA34098800DC}.Release|Any CPU.ActiveCfg = Release|Win32
+		{47298BB1-38E3-48A9-A840-EA34098800DC}.Release|x64.ActiveCfg = Release|x64
+		{47298BB1-38E3-48A9-A840-EA34098800DC}.Release|x64.Build.0 = Release|x64
+		{47298BB1-38E3-48A9-A840-EA34098800DC}.Release|x86.ActiveCfg = Release|Win32
+		{47298BB1-38E3-48A9-A840-EA34098800DC}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
