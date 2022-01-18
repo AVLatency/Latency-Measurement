@@ -89,15 +89,11 @@ bool Gui::DoGui()
             ImGui::EndCombo();
         }
 
+        std::stringstream copyableFormatList;
         std::vector<AudioFormat>& supportedFormats = outputAudioEndpoints[outputDeviceIndex].SupportedFormats;
         std::vector<AudioFormat>& duplicateFormats = outputAudioEndpoints[outputDeviceIndex].DuplicateSupportedFormats;
         if (ImGui::BeginChild("formatsChildWindow", ImVec2(0, 30 * ImGui::GetTextLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar))
         {
-            ImGui::PushFont(FontHelper::BoldFont);
-            ImGui::Text("Formats Used in AV Latency.com Tools:");
-            ImGui::PopFont();
-            ImGui::Spacing();
-
             for (AudioFormat& format : supportedFormats)
             {
                 if (ImGui::Selectable(format.FormatString.c_str(), &format.UserSelected))
@@ -105,11 +101,13 @@ bool Gui::DoGui()
                     ClearFormatSelection();
                     format.UserSelected = true;
                 }
+                copyableFormatList << format.FormatString << std::endl;
             }
 
             ImGui::Spacing();
             ImGui::PushFont(FontHelper::BoldFont);
             ImGui::Text("Duplicate/Additional Formats:");
+            copyableFormatList << "Duplicate/Additional Formats:" << std::endl;
             ImGui::PopFont();
             ImGui::Spacing();
 
@@ -120,6 +118,7 @@ bool Gui::DoGui()
                     ClearFormatSelection();
                     format.UserSelected = true;
                 }
+                copyableFormatList << format.FormatString << std::endl;
             }
 
             ImGui::EndChild();
@@ -127,6 +126,11 @@ bool Gui::DoGui()
 
         FormatDescriptions();
         ImGui::Spacing();
+
+        if (ImGui::Button("Copy format list to clipboard"))
+        {
+            ImGui::SetClipboardText(copyableFormatList.str().c_str());
+        }
 
         WAVEFORMATEX* waveFormat = nullptr;
         for (AudioFormat& format : supportedFormats)
