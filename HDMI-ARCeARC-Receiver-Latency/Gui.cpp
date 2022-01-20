@@ -66,7 +66,7 @@ bool Gui::DoGui()
 
     ImGui::Text("Cable Diagram:");
     ImGui::SameLine(); GuiHelper::HelpMarker(
-        "Before starting you must connect your HDMI and audio cables as described in this diagram.\n\n"
+        "Before starting you must connect your audio device and cables as described in this diagram.\n\n"
         "To record audio output from the Device Under Test (DUT) you can use a microphone or directly connect to the headphone or speaker output of the DUT.\n\n"
         "- Microphone: Make sure to position the mic as close as possible to the speaker because sound travels measurably slow. Position the mic close to the tweeter if there are separate speaker components.\n"
         "- DUT headphone output: Note that speaker and headphone output can sometimes have different latency.\n"
@@ -107,7 +107,7 @@ bool Gui::DoGui()
             ImGui::Text("Before starting, please connect your cables as described in the diagram above.");
             ImGui::Spacing();
             ImGui::Text("You can find help text by hovering your mouse over these:");
-            ImGui::SameLine(); GuiHelper::HelpMarker("Click \"Next\" once you've connected all your HDMI and audio cables to get started!");
+            ImGui::SameLine(); GuiHelper::HelpMarker("Click \"Next\" once you've connected all of the cables to get started!");
             ImGui::Spacing();
 
             if (ImGui::Button("Next"))

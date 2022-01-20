@@ -66,12 +66,12 @@ bool Gui::DoGui()
 
     ImGui::Text("Cable Diagram:");
     ImGui::SameLine(); GuiHelper::HelpMarker(
-        "Before starting you must connect your HDMI and audio cables as described in this diagram.\n\n"
+        "Before starting you must connect your audio device and cables as described in this diagram.\n\n"
         "To record audio output from the Device Under Test (DUT) you can use a microphone or directly connect to the headphone or speaker output of the DUT.\n\n"
         "- Microphone: Make sure to position the mic as close as possible to the speaker because sound travels measurably slow. Position the mic close to the tweeter if there are separate speaker components.\n"
         "- DUT headphone output: Note that speaker and headphone output can sometimes have different latency.\n"
         "- Directly connect to DUT speaker output: Start the volume low as some amplifiers may be capable of high voltage outputs that could damage your audio input device.\n\n"
-        "Your \"HDMI Audio Device\" must be capabile of analog audio output AND HDMI audio output at the same time. The time offset between analog audio output and HDMI audio output must be known. A list of capable devices can be found on the GitHub wiki.\n\n"
+        "Your \"Audio Device\" must be capabile of analog audio output AND S/PDIF audio output at the same time. The time offset between analog audio output and S/PDIF audio output (the \"output offset\") must be known. A list of capable devices can be found on the GitHub wiki.\n\n"
         "GitHub Wiki: github.com/AVLatency/Latency-Measurement/wiki");
     float cableMapScale = 0.55 * Gui::DpiScale;
     ImGui::Image((void*)resources.CableMapTexture, ImVec2(resources.CableMapTextureWidth * cableMapScale, resources.CableMapTextureHeight * cableMapScale));
@@ -102,17 +102,18 @@ bool Gui::DoGui()
         case MeasurementToolGuiState::GettingStarted:
         {
 
-            ImGui::Text("Welcome to the AV Latency.com HDMI latency measurement tool!");
+            ImGui::Text("Welcome to the AV Latency.com S/PDIF latency measurement tool!");
             ImGui::Spacing();
             ImGui::Text("Before starting, please connect your cables as described in the diagram above.");
             ImGui::Spacing();
             ImGui::Text("You can find help text by hovering your mouse over these:");
-            ImGui::SameLine(); GuiHelper::HelpMarker("Click \"Next\" once you've connected all your HDMI and audio cables to get started!");
+            ImGui::SameLine(); GuiHelper::HelpMarker("Click \"Next\" once you've connected all of the cables to get started!");
             ImGui::Spacing();
 
             if (ImGui::Button("Next"))
             {
-                openEdidReminderDialog = true;
+                RefreshAudioEndpoints();
+                state = MeasurementToolGuiState::SelectAudioDevices;
             }
         }
             break;
@@ -158,7 +159,7 @@ bool Gui::DoGui()
                     }
                     ImGui::EndCombo();
                 }
-                ImGui::SameLine(); GuiHelper::HelpMarker("Select your HDMI audio output.");
+                ImGui::SameLine(); GuiHelper::HelpMarker("Select your audio output.");
                 if (ImGui::BeginCombo("Input Device", inputAudioEndpoints[inputDeviceIndex].Name.c_str()))
                 {
                     for (int i = 0; i < inputAudioEndpoints.size(); i++)
@@ -200,7 +201,7 @@ bool Gui::DoGui()
             {
                 ImGui::Spacing();
                 ImGui::PushFont(FontHelper::BoldFont);
-                ImGui::Text("Input: Left Channel (HDMI Audio Device)");
+                ImGui::Text("Input: Left Channel (Audio Device)");
                 ImGui::PopFont();
 
                 float columnWidth = 110 * DpiScale;
@@ -813,38 +814,11 @@ bool Gui::DoGui()
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     if (ImGui::BeginPopupModal("About", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("AV Latency.com HDMI Latency Measurement Tool\n\nFind out more about audio/video latency, input lag, and lip sync error at avlatency.com\nFind out more about this tool at github.com/AVLatency/Latency-Measurement");
+        ImGui::Text("AV Latency.com S/PDIF Latency Measurement Tool\n\nFind out more about audio/video latency, input lag, and lip sync error at avlatency.com\nFind out more about this tool at github.com/AVLatency/Latency-Measurement");
         ImGui::Separator();
 
         ImGui::SetItemDefaultFocus();
         if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
-
-        ImGui::EndPopup();
-    }
-
-    if (openEdidReminderDialog)
-    {
-        ImGui::OpenPopup("Reminder: EDID Mode");
-    }
-    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    if (ImGui::BeginPopupModal("Reminder: EDID Mode", NULL, ImGuiWindowFlags_AlwaysAutoResize))
-    {
-        ImGui::Text("Set the EDID mode of your HDMI Audio Device to match the EDID of your DUT.");
-        ImGui::Spacing();
-
-        float imageScale = 0.6 * Gui::DpiScale;
-        ImGui::Image((void*)resources.EDIDModeTexture, ImVec2(resources.EDIDModeTextureWidth * imageScale, resources.EDIDModeTextureHeight * imageScale));
-
-        ImGui::Text("For HDMI audio extractors, set the switch to \"TV\" or \"Passthrough\".");
-        ImGui::Spacing();
-
-        ImGui::SetItemDefaultFocus();
-        if (ImGui::Button("OK", ImVec2(120, 0)))
-        {
-            RefreshAudioEndpoints();
-            state = MeasurementToolGuiState::SelectAudioDevices;
-            ImGui::CloseCurrentPopup();
-        }
 
         ImGui::EndPopup();
     }
