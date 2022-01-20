@@ -36,7 +36,7 @@ public:
 	/// </summary>
 	static bool AllFormatsFilter(WAVEFORMATEX* waveFormat);
 	/// <summary>
-	/// Filters non-HDMI formats
+	/// Filters out non-HDMI formats
 	/// </summary>
 	static bool HdmiFormatsFilter(WAVEFORMATEX* waveFormat);
 

@@ -62,4 +62,5 @@ packages/
 *.aps
 
 /HDMI-Latency/HDMI Audio Latency Results
+/SPDIF-Latency/SPDIF Latency Results
 imgui.ini

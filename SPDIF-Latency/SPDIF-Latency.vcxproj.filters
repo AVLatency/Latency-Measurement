@@ -29,7 +29,7 @@
     <ClInclude Include="Resources.h" />
     <ClInclude Include="TestNotes.h" />
     <ClInclude Include="HdmiResultsWriter.h" />
-    <ClInclude Include="HdmiOutputOffsetProfiles.h" />
+    <ClInclude Include="SpdifOutputOffsetProfiles.h" />
     <ClInclude Include="Defines.h" />
   </ItemGroup>
   <ItemGroup>
@@ -61,7 +61,7 @@
     <ClCompile Include="Resources.cpp" />
     <ClCompile Include="TestNotes.cpp" />
     <ClCompile Include="HdmiResultsWriter.cpp" />
-    <ClCompile Include="HdmiOutputOffsetProfiles.cpp" />
+    <ClCompile Include="SpdifOutputOffsetProfiles.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\imgui\misc\debuggers\imgui.natvis">

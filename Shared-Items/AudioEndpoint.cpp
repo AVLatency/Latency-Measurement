@@ -36,7 +36,7 @@ void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool 
 {
 	if (SupportedFormats.size() > 0)
 	{
-		return;
+		SupportedFormats.clear();
 	}
 
 	const IID IID_IAudioClient = __uuidof(IAudioClient);

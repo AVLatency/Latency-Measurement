@@ -10,7 +10,7 @@
 #include "FontHelper.h"
 #include "resource.h"
 #include <shellscalingapi.h>
-#include "HdmiOutputOffsetProfiles.h"
+#include "SpdifOutputOffsetProfiles.h"
 #include "FilesystemCheck.h"
 #include "Defines.h"
 
@@ -97,7 +97,7 @@ int main(int, char**)
     FontHelper::LoadFonts(wc.hInstance, io, FONT_REGULAR, FONT_BOLD, Gui::DpiScale);
     style.ScaleAllSizes(Gui::DpiScale);
 
-    HdmiOutputOffsetProfiles::InitializeProfiles();
+    SpdifOutputOffsetProfiles::InitializeProfiles();
     Resources resources(wc.hInstance, g_pd3dDevice);
     Gui gui(resources);
 

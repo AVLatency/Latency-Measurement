@@ -2,6 +2,7 @@
 #include <string>
 #include <map>
 #include <Audioclient.h>
+#include "AudioEndpoint.h"
 
 class OutputOffsetProfile
 {
@@ -21,5 +22,6 @@ public:
 
 	std::string Name;
 	std::map<std::string, OutputOffset> OutputOffsets;
+	bool (*FormatFilter)(WAVEFORMATEX*) = AudioEndpoint::AllFormatsFilter;
 };
 

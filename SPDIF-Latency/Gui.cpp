@@ -7,7 +7,7 @@
 #include "TestConfiguration.h"
 #include "HdmiResultsWriter.h"
 #include "shellapi.h"
-#include "HdmiOutputOffsetProfiles.h"
+#include "SpdifOutputOffsetProfiles.h"
 #include "Defines.h"
 #include "GuiHelper.h"
 
@@ -344,8 +344,7 @@ bool Gui::DoGui()
                 else if (state == MeasurementToolGuiState::FinishingAdjustVolume)
                 {
                     state = MeasurementToolGuiState::MeasurementConfig;
-                    // TODO: make a custom filter based on audio device
-                    outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, true, AudioEndpoint::AllFormatsFilter);
+                    outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, true, SpdifOutputOffsetProfiles::Profiles[SpdifOutputOffsetProfiles::SelectedProfileIndex]->FormatFilter);
                     strcpy_s(TestNotes::Notes.DutModel, outputAudioEndpoints[outputDeviceIndex].Name.c_str());
                 }
             }
@@ -378,14 +377,15 @@ bool Gui::DoGui()
                 ImGui::Spacing();
 
 
-                if (ImGui::BeginListBox("", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing())))
+                if (ImGui::BeginListBox("", ImVec2(-FLT_MIN, 4 * ImGui::GetTextLineHeightWithSpacing())))
                 {
-                    for (int n = 0; n < HdmiOutputOffsetProfiles::Profiles.size(); n++)
+                    for (int n = 0; n < SpdifOutputOffsetProfiles::Profiles.size(); n++)
                     {
-                        const bool is_selected = (HdmiOutputOffsetProfiles::SelectedProfileIndex == n);
-                        if (ImGui::Selectable(HdmiOutputOffsetProfiles::Profiles[n]->Name.c_str(), is_selected))
+                        const bool is_selected = (SpdifOutputOffsetProfiles::SelectedProfileIndex == n);
+                        if (ImGui::Selectable(SpdifOutputOffsetProfiles::Profiles[n]->Name.c_str(), is_selected))
                         {
-                            HdmiOutputOffsetProfiles::SelectedProfileIndex = n;
+                            SpdifOutputOffsetProfiles::SelectedProfileIndex = n;
+                            outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, true, SpdifOutputOffsetProfiles::Profiles[SpdifOutputOffsetProfiles::SelectedProfileIndex]->FormatFilter);
                         }
                         // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
                         if (is_selected)
@@ -397,7 +397,7 @@ bool Gui::DoGui()
                 }
                 ImGui::Spacing();
 
-                if (HdmiOutputOffsetProfiles::Profiles[HdmiOutputOffsetProfiles::SelectedProfileIndex] == &HdmiOutputOffsetProfiles::HDV_MB01)
+                if (SpdifOutputOffsetProfiles::Profiles[SpdifOutputOffsetProfiles::SelectedProfileIndex] == &SpdifOutputOffsetProfiles::HDV_MB01)
                 {
                     float imageScale = 0.45 * Gui::DpiScale;
                     ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
@@ -406,8 +406,23 @@ bool Gui::DoGui()
                     ImGui::TextWrapped("- J-Tech Digital JTD18G - H5CH\n"
                         "- Monoprice Blackbird 24278\n"
                         "- OREI HDA - 912\n");
+
+                    if (ImGui::TreeNode("Supported Formats"))
+                    {
+                        ImGui::TextWrapped("With the right HDMI audio drivers and the right EDID information provided by the HDMI device connected to the HDV-MB01, the following formats are supported by this device:\n\n"
+                            "2ch-44.1kHz-16bit\n"
+                            "2ch-44.1kHz-24bit\n"
+                            "2ch-48kHz-16bit\n"
+                            "2ch-48kHz-24bit\n"
+                            "2ch-96kHz-16bit\n"
+                            "2ch-96kHz-24bit\n"
+                            "2ch-192kHz-16bit\n"
+                            "2ch-192kHz-24bit\n");
+                        
+                        ImGui::TreePop();
+                    }
                 }
-                else if (HdmiOutputOffsetProfiles::Profiles[HdmiOutputOffsetProfiles::SelectedProfileIndex] == &HdmiOutputOffsetProfiles::None)
+                else if (SpdifOutputOffsetProfiles::Profiles[SpdifOutputOffsetProfiles::SelectedProfileIndex] == &SpdifOutputOffsetProfiles::None)
                 {
                     ImGui::TextWrapped("WARNING: using an HDMI Audio Device that does not have an output offset profile may result in inaccurate measurements!");
                     ImGui::Spacing();
@@ -452,7 +467,7 @@ bool Gui::DoGui()
                 {
                     for (AudioFormat& format : supportedFormats)
                     {
-                        OutputOffsetProfile* currentProfile = HdmiOutputOffsetProfiles::CurrentProfile();
+                        OutputOffsetProfile* currentProfile = SpdifOutputOffsetProfiles::CurrentProfile();
                         std::string formatStr = OutputOffsetProfile::FormatStr(format.WaveFormat);
                         bool verified = currentProfile->OutputOffsets.contains(formatStr) && currentProfile->OutputOffsets[formatStr].verified;
                         GuiHelper::VerifiedMarker(verified, DpiScale);
@@ -499,12 +514,12 @@ bool Gui::DoGui()
                 ImGui::SameLine(); GuiHelper::HelpMarker("These notes will be included in the .csv spreadsheet result files that are saved in the folder that this app was launched from.");
                 ImGui::Spacing();
 
-                TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile = HdmiOutputOffsetProfiles::CurrentProfile() != &HdmiOutputOffsetProfiles::None;
+                TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile = SpdifOutputOffsetProfiles::CurrentProfile() != &SpdifOutputOffsetProfiles::None;
                 if (TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile)
                 {
                     ImGui::BeginDisabled();
                     char tempStr[128];
-                    strcpy_s(tempStr, HdmiOutputOffsetProfiles::CurrentProfile()->Name.c_str());
+                    strcpy_s(tempStr, SpdifOutputOffsetProfiles::CurrentProfile()->Name.c_str());
                     ImGui::InputText("HDMI Audio Device", tempStr, IM_ARRAYSIZE(tempStr));
                     ImGui::EndDisabled();
                 }
@@ -679,7 +694,7 @@ bool Gui::DoGui()
                         int n = 0;
                         for (auto avgResult : testManager->AveragedResults)
                         {
-                            OutputOffsetProfile* currentProfile = HdmiOutputOffsetProfiles::CurrentProfile();
+                            OutputOffsetProfile* currentProfile = SpdifOutputOffsetProfiles::CurrentProfile();
                             std::string formatStr = OutputOffsetProfile::FormatStr(avgResult.Format->WaveFormat);
                             bool verified = currentProfile->OutputOffsets.contains(formatStr) && currentProfile->OutputOffsets[formatStr].verified;
                             GuiHelper::VerifiedMarker(verified, DpiScale);
@@ -898,6 +913,6 @@ void Gui::StartTest()
         std::string fileString = StringHelper::GetFilenameSafeString(std::format("{} {}", TestNotes::Notes.DutModel, TestNotes::Notes.DutOutputType()));
         fileString = fileString.substr(0, 80); // 80 is a magic number that will keep path lengths reasonable without needing to do a lot of Windows API programming.
 
-        testManager = new TestManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex], selectedFormats, fileString, APP_FOLDER, (IResultsWriter&)HdmiResultsWriter::Writer, HdmiOutputOffsetProfiles::CurrentProfile());
+        testManager = new TestManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex], selectedFormats, fileString, APP_FOLDER, (IResultsWriter&)HdmiResultsWriter::Writer, SpdifOutputOffsetProfiles::CurrentProfile());
     }
 }
