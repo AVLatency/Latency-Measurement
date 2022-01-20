@@ -247,6 +247,7 @@ void GeneratedSamples::GenerateTestPattern_VisuallyIdentifiableSamples()
         high = !high;
 
         // remove some samples to make an interesting pattern
+        // The remaining audio segments always start and end on a high value, with the exception of the small two-sample ticks
         if (i > 100 && i < 200)
         {
             currentSample = 0;
@@ -259,19 +260,38 @@ void GeneratedSamples::GenerateTestPattern_VisuallyIdentifiableSamples()
         {
             currentSample = 0;
         }
-        if (i > 1700 && i < 1705)
+
+        // Between  700 and 1500: add in a couple of two sample long ticks
+        if (i == 1000)
+        {
+            currentSample = 1;
+        }
+        if (i == 1001)
+        {
+            currentSample = -1;
+        }
+        if (i == 1200)
+        {
+            currentSample = 1;
+        }
+        if (i == 1201)
+        {
+            currentSample = -1;
+        }
+
+        if (i > 1700 && i < 1706)
         {
             currentSample = 0;
         }
-        if (i > 1710 && i < 1715)
+        if (i > 1710 && i < 1716)
         {
             currentSample = 0;
         }
-        if (i > 1720 && i < 1725)
+        if (i > 1720 && i < 1726)
         {
             currentSample = 0;
         }
-        if (i > 1730 && i < 1735)
+        if (i > 1730 && i < 1736)
         {
             currentSample = 0;
         }
