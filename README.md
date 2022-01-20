@@ -4,10 +4,10 @@ Welcome to the GitHub repository for [AV Latency.com](https://avlatency.com)! He
 
 ## About Audio & Video Latency, Input Lag, and Lip Sync Error
 
-Visit [AV Latency.com](https://avlatency.com) if you want to learn more about how to measure audio & video latency, input lag, and lip sync error of consumer electronics.
+Visit [AV Latency.com](https://avlatency.com) if you want to learn more about audio & video latency, input lag, and lip sync error of consumer electronics.
 
 ## Research
-Visit the [Wiki of this GitHub repository](https://github.com/AVLatency/Latency-Measurement/wiki) to view research results, such as measurements of HDMI audio extractors and audio devices.
+Visit the [Wiki of this GitHub repository](https://github.com/AVLatency/Latency-Measurement/wiki) to view research results, such as reference measurements of HDMI audio extractors and audio devices.
 
 ## License
 
