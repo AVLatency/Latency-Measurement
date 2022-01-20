@@ -2,15 +2,15 @@
 #include <vector>
 #include <audioclient.h>
 
-class HdmiWaveFormats
+class WindowsWaveFormats
 {
 public:
-	static HdmiWaveFormats Formats;
+	static WindowsWaveFormats Formats;
 
 	std::vector<WAVEFORMATEXTENSIBLE*> AllHDMIExtensibleFormats;
 	std::vector<WAVEFORMATEX*> AllHDMIExFormats;
 
-	HdmiWaveFormats();
+	WindowsWaveFormats();
 
 private:
 	void PopulateExtensibleFormats();

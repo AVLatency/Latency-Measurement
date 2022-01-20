@@ -28,7 +28,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)OutputOffsetProfile.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ResourceLoader.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)StringHelper.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)HdmiWaveFormats.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)RecordingAnalyzer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)RecordingResult.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)RecordingSingleChannelResult.h" />
@@ -38,6 +37,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)TestManager.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)WasapiInput.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)WasapiOutput.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)WindowsWaveFormats.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)AdjustVolumeManager.cpp" />
@@ -53,12 +53,12 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)OutputOffsetProfile.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ResourceLoader.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)StringHelper.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)HdmiWaveFormats.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)RecordingAnalyzer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)stb_image_dx11.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)TestConfiguration.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)TestManager.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)WasapiInput.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)WasapiOutput.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)WindowsWaveFormats.cpp" />
   </ItemGroup>
 </Project>

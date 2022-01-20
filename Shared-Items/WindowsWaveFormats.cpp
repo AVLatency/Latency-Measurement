@@ -1,15 +1,15 @@
-#include "HdmiWaveFormats.h"
+#include "WindowsWaveFormats.h"
 
+// TODO: rename to "WindowsWaveFormats"
+WindowsWaveFormats WindowsWaveFormats::Formats;
 
-HdmiWaveFormats HdmiWaveFormats::Formats;
-
-HdmiWaveFormats::HdmiWaveFormats()
+WindowsWaveFormats::WindowsWaveFormats()
 {
 	PopulateExtensibleFormats();
 	PopulateExFormats();
 }
 
-void HdmiWaveFormats::PopulateExtensibleFormats()
+void WindowsWaveFormats::PopulateExtensibleFormats()
 {
 	WAVEFORMATEXTENSIBLE extensibleFormat;
 	memset(&extensibleFormat, 0, sizeof(WAVEFORMATEXTENSIBLE));
@@ -25,7 +25,7 @@ void HdmiWaveFormats::PopulateExtensibleFormats()
 	RecordExtensibleSubFormat(&extensibleFormat);
 }
 
-void HdmiWaveFormats::RecordExtensibleSubFormat(WAVEFORMATEXTENSIBLE* extensibleFormat)
+void WindowsWaveFormats::RecordExtensibleSubFormat(WAVEFORMATEXTENSIBLE* extensibleFormat)
 {
 	extensibleFormat->SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
 	RecordExtensibleChannels(extensibleFormat);
@@ -35,7 +35,7 @@ void HdmiWaveFormats::RecordExtensibleSubFormat(WAVEFORMATEXTENSIBLE* extensible
 	//RecordExtensibleChannels(extensibleFormat);
 }
 
-void HdmiWaveFormats::RecordExtensibleChannels(WAVEFORMATEXTENSIBLE* extensibleFormat)
+void WindowsWaveFormats::RecordExtensibleChannels(WAVEFORMATEXTENSIBLE* extensibleFormat)
 {
 	for (int i = 1; i < 9; i++)
 	{
@@ -44,7 +44,7 @@ void HdmiWaveFormats::RecordExtensibleChannels(WAVEFORMATEXTENSIBLE* extensibleF
 	}
 }
 
-void HdmiWaveFormats::RecordExtensibleChannelMask(WAVEFORMATEXTENSIBLE* extensibleFormat)
+void WindowsWaveFormats::RecordExtensibleChannelMask(WAVEFORMATEXTENSIBLE* extensibleFormat)
 {
 	// This list is based off of the configurations that are possible with the Murideo SEVEN Generator
 	// (8K SEVEN Generator User Manual page 38 "AUDIO CHANNEL /SPEAKER CONFIGURATION")
@@ -214,7 +214,7 @@ void HdmiWaveFormats::RecordExtensibleChannelMask(WAVEFORMATEXTENSIBLE* extensib
 	}
 }
 
-void HdmiWaveFormats::RecordExtensibleSamplesPerSec(WAVEFORMATEXTENSIBLE* extensibleFormat)
+void WindowsWaveFormats::RecordExtensibleSamplesPerSec(WAVEFORMATEXTENSIBLE* extensibleFormat)
 {
 	extensibleFormat->Format.nSamplesPerSec = 44100;
 	RecordExtensibleBitsPerSample(extensibleFormat);
@@ -229,7 +229,7 @@ void HdmiWaveFormats::RecordExtensibleSamplesPerSec(WAVEFORMATEXTENSIBLE* extens
 	RecordExtensibleBitsPerSample(extensibleFormat);
 }
 
-void HdmiWaveFormats::RecordExtensibleBitsPerSample(WAVEFORMATEXTENSIBLE* extensibleFormat)
+void WindowsWaveFormats::RecordExtensibleBitsPerSample(WAVEFORMATEXTENSIBLE* extensibleFormat)
 {
 	SetBitsPerSample(&extensibleFormat->Format, 16);
 	extensibleFormat->Samples.wValidBitsPerSample = extensibleFormat->Format.wBitsPerSample;
@@ -244,14 +244,14 @@ void HdmiWaveFormats::RecordExtensibleBitsPerSample(WAVEFORMATEXTENSIBLE* extens
 	RecordExtensibleFormat(extensibleFormat);
 }
 
-void HdmiWaveFormats::RecordExtensibleFormat(WAVEFORMATEXTENSIBLE* extensibleFormat)
+void WindowsWaveFormats::RecordExtensibleFormat(WAVEFORMATEXTENSIBLE* extensibleFormat)
 {
 	WAVEFORMATEXTENSIBLE* pWfx = new WAVEFORMATEXTENSIBLE();
 	*pWfx = *extensibleFormat;
 	AllHDMIExtensibleFormats.push_back(pWfx);
 }
 
-void HdmiWaveFormats::PopulateExFormats()
+void WindowsWaveFormats::PopulateExFormats()
 {
 	WAVEFORMATEX exFormat;
 	memset(&exFormat, 0, sizeof(WAVEFORMATEX));
@@ -264,7 +264,7 @@ void HdmiWaveFormats::PopulateExFormats()
 	RecordExFormatTag(&exFormat);
 }
 
-void HdmiWaveFormats::RecordExFormatTag(WAVEFORMATEX* exFormat)
+void WindowsWaveFormats::RecordExFormatTag(WAVEFORMATEX* exFormat)
 {
 	exFormat->wFormatTag = WAVE_FORMAT_PCM;
 	RecordExChannels(exFormat);
@@ -273,7 +273,7 @@ void HdmiWaveFormats::RecordExFormatTag(WAVEFORMATEX* exFormat)
 	RecordExChannels(exFormat);
 }
 
-void HdmiWaveFormats::RecordExChannels(WAVEFORMATEX* exFormat)
+void WindowsWaveFormats::RecordExChannels(WAVEFORMATEX* exFormat)
 {
 	// "For exclusive-mode formats, the method queries the device driver.
 	// Some device drivers will report that they support a 1-channel or 2-channel
@@ -298,7 +298,7 @@ void HdmiWaveFormats::RecordExChannels(WAVEFORMATEX* exFormat)
 	}
 }
 
-void HdmiWaveFormats::RecordExSamplesPerSec(WAVEFORMATEX* exFormat)
+void WindowsWaveFormats::RecordExSamplesPerSec(WAVEFORMATEX* exFormat)
 {
 	exFormat->nSamplesPerSec = 44100;
 	RecordExBitsPerSample(exFormat);
@@ -313,7 +313,7 @@ void HdmiWaveFormats::RecordExSamplesPerSec(WAVEFORMATEX* exFormat)
 	RecordExBitsPerSample(exFormat);
 }
 
-void HdmiWaveFormats::RecordExBitsPerSample(WAVEFORMATEX* exFormat)
+void WindowsWaveFormats::RecordExBitsPerSample(WAVEFORMATEX* exFormat)
 {
 	SetBitsPerSample(exFormat, 16);
 	RecordExFormat(exFormat);
@@ -325,14 +325,14 @@ void HdmiWaveFormats::RecordExBitsPerSample(WAVEFORMATEX* exFormat)
 	RecordExFormat(exFormat);
 }
 
-void HdmiWaveFormats::RecordExFormat(WAVEFORMATEX* exFormat)
+void WindowsWaveFormats::RecordExFormat(WAVEFORMATEX* exFormat)
 {
 	WAVEFORMATEX* pWfx = new WAVEFORMATEX();
 	*pWfx = *exFormat;
 	AllHDMIExFormats.push_back(pWfx);
 }
 
-void HdmiWaveFormats::SetBitsPerSample(WAVEFORMATEX* wfx, WORD bitsPerSample)
+void WindowsWaveFormats::SetBitsPerSample(WAVEFORMATEX* wfx, WORD bitsPerSample)
 {
 	wfx->wBitsPerSample = bitsPerSample;
 	wfx->nBlockAlign = wfx->wBitsPerSample / 8 * wfx->nChannels;

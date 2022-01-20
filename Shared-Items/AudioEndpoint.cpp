@@ -1,6 +1,6 @@
 #include "AudioEndpoint.h"
 #include <Audioclient.h>
-#include "HdmiWaveFormats.h"
+#include "WindowsWaveFormats.h"
 #include <algorithm>
 #define SAFE_RELEASE(punk)  \
               if ((punk) != NULL)  \
@@ -46,7 +46,7 @@ void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool 
 	if (!FAILED(hr))
 	{
 		// Favour formats that have channel masks
-		for (WAVEFORMATEXTENSIBLE* waveFormat : HdmiWaveFormats::Formats.AllHDMIExtensibleFormats)
+		for (WAVEFORMATEXTENSIBLE* waveFormat : WindowsWaveFormats::Formats.AllHDMIExtensibleFormats)
 		{
 			if (formatFilter((WAVEFORMATEX*)waveFormat))
 			{
@@ -62,7 +62,7 @@ void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool 
 			}
 		}
 		// Next, look at formats that don't have channel masks
-		for (WAVEFORMATEXTENSIBLE* waveFormat : HdmiWaveFormats::Formats.AllHDMIExtensibleFormats)
+		for (WAVEFORMATEXTENSIBLE* waveFormat : WindowsWaveFormats::Formats.AllHDMIExtensibleFormats)
 		{
 			if (formatFilter((WAVEFORMATEX*)waveFormat))
 			{
@@ -86,7 +86,7 @@ void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool 
 				}
 			}
 		}
-		for (WAVEFORMATEX* waveFormat : HdmiWaveFormats::Formats.AllHDMIExFormats)
+		for (WAVEFORMATEX* waveFormat : WindowsWaveFormats::Formats.AllHDMIExFormats)
 		{
 			if (formatFilter((WAVEFORMATEX*)waveFormat))
 			{
@@ -139,7 +139,6 @@ void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool 
 	SAFE_RELEASE(pAudioClient);
 }
 
-// TODO:
 void AudioEndpoint::SetDefaultFormats(bool selectDefaults)
 {
 	std::vector<AudioFormat*> stereoFormats = GetFormats(2, 48000, 16);
@@ -198,6 +197,7 @@ void AudioEndpoint::SetDefaultFormats(bool selectDefaults)
 				if (format->WaveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
 				{
 					// KSAUDIO_SPEAKER_5POINT1 (using rear left/right of center speakers)
+					// Note: This format is excluded for HDMI, so this will never happen for HDMI formats.
 					if (reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->WaveFormat)->dwChannelMask == (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT))
 					{
 						format->DefaultSelection = true;
