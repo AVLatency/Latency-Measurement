@@ -24,12 +24,21 @@ public:
 	AudioEndpoint(const AudioEndpoint&& other);
 	~AudioEndpoint();
 
-	void PopulateSupportedFormats(bool includeDuplicateFormats, bool selectDefaults, bool includeMono);
+	void PopulateSupportedFormats(bool includeDuplicateFormats, bool selectDefaults, bool (*formatFilter)(WAVEFORMATEX*));
 	void SetDefaultFormats(bool selectDefaults);
 
 	std::vector<AudioFormat*> GetFormats(int numChannels, int samplesPerSec, int bitsPerSample);
 	std::vector<AudioFormat*> GetFormats(int numChannels, int samplesPerSec);
 	std::vector<AudioFormat*> GetFormats(int numChannels);
+
+	/// <summary>
+	/// Does not filter any formats
+	/// </summary>
+	static bool AllFormatsFilter(WAVEFORMATEX* waveFormat);
+	/// <summary>
+	/// Filters non-HDMI formats
+	/// </summary>
+	static bool HdmiFormatsFilter(WAVEFORMATEX* waveFormat);
 
 private:
 	bool SupportsFormat(int numChannels, int samplesPerSec, int bitsPerSample);

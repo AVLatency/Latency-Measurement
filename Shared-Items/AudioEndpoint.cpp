@@ -32,7 +32,7 @@ AudioEndpoint::~AudioEndpoint()
 	SAFE_RELEASE(Device);
 }
 
-void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool selectDefaults, bool includeMono)
+void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool selectDefaults, bool (*formatFilter)(WAVEFORMATEX*))
 {
 	if (SupportedFormats.size() > 0)
 	{
@@ -48,7 +48,7 @@ void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool 
 		// Favour formats that have channel masks
 		for (WAVEFORMATEXTENSIBLE* waveFormat : HdmiWaveFormats::Formats.AllHDMIExtensibleFormats)
 		{
-			if (includeMono || waveFormat->Format.nChannels > 1)
+			if (formatFilter((WAVEFORMATEX*)waveFormat))
 			{
 				if (waveFormat->dwChannelMask != 0)
 				{
@@ -64,7 +64,7 @@ void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool 
 		// Next, look at formats that don't have channel masks
 		for (WAVEFORMATEXTENSIBLE* waveFormat : HdmiWaveFormats::Formats.AllHDMIExtensibleFormats)
 		{
-			if (includeMono || waveFormat->Format.nChannels > 1)
+			if (formatFilter((WAVEFORMATEX*)waveFormat))
 			{
 				if (waveFormat->dwChannelMask == 0)
 				{
@@ -88,7 +88,7 @@ void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool 
 		}
 		for (WAVEFORMATEX* waveFormat : HdmiWaveFormats::Formats.AllHDMIExFormats)
 		{
-			if (includeMono || waveFormat->nChannels > 1)
+			if (formatFilter((WAVEFORMATEX*)waveFormat))
 			{
 				hr = pAudioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, waveFormat, NULL);
 				if (hr == S_OK)
@@ -139,6 +139,7 @@ void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool 
 	SAFE_RELEASE(pAudioClient);
 }
 
+// TODO:
 void AudioEndpoint::SetDefaultFormats(bool selectDefaults)
 {
 	std::vector<AudioFormat*> stereoFormats = GetFormats(2, 48000, 16);
@@ -314,5 +315,45 @@ std::vector<AudioFormat*> AudioEndpoint::GetFormats(int numChannels)
 			result.push_back(&audioFormat);
 		}
 	}
+	return result;
+}
+
+bool AudioEndpoint::AllFormatsFilter(WAVEFORMATEX* waveFormat)
+{
+	return true;
+}
+
+bool AudioEndpoint::HdmiFormatsFilter(WAVEFORMATEX* waveFormat)
+{
+	bool result = true;
+
+	// Exclude mono because my HDMI signal analyzer gets all types of confused with a "mono" signal
+	// which suggests that it's not a valid HDMI format, at least when prepared by NVIDIA HDMI audio drivers.
+	if (waveFormat->nChannels < 2)
+	{
+		result = false;
+	}
+
+	if (waveFormat->wBitsPerSample != 16
+		&& waveFormat->wBitsPerSample != 20 // This hasn't been tested because the wave formats list doesn't include 20 bit samples yet.
+		&& waveFormat->wBitsPerSample != 24)
+	{
+		result = false;
+	}
+
+	if (waveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
+	{
+		auto waveFormatExtensible = reinterpret_cast<WAVEFORMATEXTENSIBLE*>(waveFormat);
+
+		// For these two channel masks, Windows HDMI drivers (NVIDIA and Intel at least) replace SPEAKER_BACK (RLC and RRC)
+		// with SPEAKER_SIDE (RL and RR), which is a format that is already included in the wave formats list, so this would
+		// end up just being an incorrectly displayed duplicate.
+		if (waveFormatExtensible->dwChannelMask == KSAUDIO_SPEAKER_QUAD
+			|| waveFormatExtensible->dwChannelMask == KSAUDIO_SPEAKER_5POINT1)
+		{
+			result = false;
+		}
+	}
+
 	return result;
 }

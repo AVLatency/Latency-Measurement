@@ -87,11 +87,11 @@ void HdmiWaveFormats::RecordExtensibleChannelMask(WAVEFORMATEXTENSIBLE* extensib
 
 		break;
 	case 4:
-		//// 4.0 Windows Quadrophonic
-		// This format is skipped because Windows HDMI drivers (NVIDIA and Intel at least) replace SPEAKER_BACK (RLC and RRC) with SPEAKER_SIDE (RL and RR), which
+		// 4.0 Windows Quadrophonic
+		// Note: Windows HDMI drivers (NVIDIA and Intel at least) replace SPEAKER_BACK (RLC and RRC) with SPEAKER_SIDE (RL and RR), which
 		// is a format that already exists later in this list.
-		//extensibleFormat->dwChannelMask = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT; // KSAUDIO_SPEAKER_QUAD
-		//RecordExtensibleSamplesPerSec(extensibleFormat);
+		extensibleFormat->dwChannelMask = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT; // KSAUDIO_SPEAKER_QUAD
+		RecordExtensibleSamplesPerSec(extensibleFormat);
 		
 		// 4.0 RR_RL_FR_FL
 		extensibleFormat->dwChannelMask = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_SIDE_LEFT | SPEAKER_SIDE_RIGHT;
@@ -142,10 +142,10 @@ void HdmiWaveFormats::RecordExtensibleChannelMask(WAVEFORMATEXTENSIBLE* extensib
 		break;
 	case 6:
 		// 5.1 Windows DVD
-		// This format is skipped because Windows HDMI drivers (NVIDIA and Intel at least) replace SPEAKER_BACK (RLC and RRC) with SPEAKER_SIDE (RL and RR), which
+		// Note: Windows HDMI drivers (NVIDIA and Intel at least) replace SPEAKER_BACK (RLC and RRC) with SPEAKER_SIDE (RL and RR), which
 		// is a format that already exists later in this list.
-		//extensibleFormat->dwChannelMask = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT; // KSAUDIO_SPEAKER_5POINT1
-		//RecordExtensibleSamplesPerSec(extensibleFormat);
+		extensibleFormat->dwChannelMask = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT; // KSAUDIO_SPEAKER_5POINT1
+		RecordExtensibleSamplesPerSec(extensibleFormat);
 
 		// 5.1 RR_RL_FC_LFE_FR_FL
 		extensibleFormat->dwChannelMask = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_SIDE_LEFT | SPEAKER_SIDE_RIGHT; // KSAUDIO_SPEAKER_5POINT1_SURROUND
