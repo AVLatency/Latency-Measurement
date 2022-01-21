@@ -30,7 +30,7 @@ void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::f
         detailedResultsStream << "Audio Channels,";
         detailedResultsStream << "Audio Sample Rate,";
         detailedResultsStream << "Audio Bit Depth,";
-        detailedResultsStream << "Audio Channel Description,";
+        detailedResultsStream << "Audio Speakers Description,";
         detailedResultsStream << ",";
         detailedResultsStream << "Video Resolution,";
         detailedResultsStream << "Video Refresh Rate,";
@@ -153,7 +153,7 @@ void HdmiResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& re
         resultsStream << "Audio Channels,";
         resultsStream << "Audio Sample Rate,";
         resultsStream << "Audio Bit Depth,";
-        resultsStream << "Audio Channel Description,";
+        resultsStream << "Audio Speakers Description,";
         resultsStream << ",";
         resultsStream << "Video Resolution,";
         resultsStream << "Video Refresh Rate,";

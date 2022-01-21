@@ -31,7 +31,7 @@ void GuiHelper::FormatDescriptions()
 
 void GuiHelper::ChannelDescriptions()
 {
-    if (ImGui::TreeNode("Channel descriptions"))
+    if (ImGui::TreeNode("Speaker descriptions"))
     {
         ImGui::Text("FL: Front Left\n"
             "FR: Front Right\n"
@@ -43,7 +43,8 @@ void GuiHelper::ChannelDescriptions()
             "RRC: Rear Right of Center\n"
             "FLC: Front Left of Center\n"
             "FRC: Front Right of Center\n"
-            "LFE: Low Frequency Effect (subwoofer)\n");
+            "LFE: Low Frequency Effect (subwoofer)\n"
+            "Default.Speakers: Speakers are chosen by the audio driver\n");
         ImGui::TreePop();
     }
 }

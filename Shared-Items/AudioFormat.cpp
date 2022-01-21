@@ -15,14 +15,14 @@ std::string AudioFormat::GetChannelInfoString(WAVEFORMATEX* waveFormat)
     std::string result;
     if (waveFormat->wFormatTag != WAVE_FORMAT_EXTENSIBLE)
     {
-        result = "NoChInfo.BasicDriverFormat";
+        result = "Default.Speakers";
     }
     else
     {
         WAVEFORMATEXTENSIBLE* extensibleFormat = reinterpret_cast<WAVEFORMATEXTENSIBLE*>(waveFormat);
         if (extensibleFormat->dwChannelMask == 0)
         {
-            result = "NoChInfo";
+            result = "Empty.Channel.Mask";
         }
         else
         {
