@@ -70,27 +70,29 @@ void GeneratedSamples::GenerateLatencyMeasurementSamples()
     int tickFreq = GetTickFrequency(sampleRate);
 
     // Amplitudes
-    double constantToneAmp = 0.1;
+    double wakeupToneAmp = 0.1;
+    double constantToneAmp = 0.001;
     double tickAmp = 0.6;
 
     // Wave generation:
-    int totalSamples = (int)(tickTimesInSamples[tickTimesInSamplesLength - 1] + endPadding * sampleRate);
-    samples = new float[totalSamples];
-    samplesLength = totalSamples;
+    samplesLength = (int)(tickTimesInSamples[tickTimesInSamplesLength - 1] + endPadding * sampleRate);
+    samples = new float[samplesLength];
 
     // Wake-up Constant tone generation
-    for (int i = 0; i < totalSamples; i++)
+    for (int i = 0; i < samplesLength; i++)
     {
         // Wake up tone is the entire startPadding, minus two cycles of the wake up tone's frequency:
         if (i < (startPadding * sampleRate) - ((sampleRate / constantToneFreq) * 2))
         {
             double time = (double)i / sampleRate;
-            samples[i] = (float)(sin(M_PI * 2 * constantToneFreq * time) * constantToneAmp);
+            samples[i] = (float)(sin(M_PI * 2 * constantToneFreq * time) * wakeupToneAmp);
         }
         else
         {
-            // Fill in the rest with no sound
-            samples[i] = 0;
+            // The rest is very quiet, just to keep the audio device awake through the ticks
+            // (HDV-MB01 goes to sleep after two ticks at 192 kHz)
+            double time = (double)i / sampleRate;
+            samples[i] = (float)(sin(M_PI * 2 * constantToneFreq * time) * constantToneAmp);
         }
     }
 
