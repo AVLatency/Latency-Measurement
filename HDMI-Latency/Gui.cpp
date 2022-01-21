@@ -370,7 +370,7 @@ bool Gui::DoGui()
 
                 ImGui::TableNextColumn();
                 ImGui::PushFont(FontHelper::BoldFont);
-                ImGui::Text("Output Offset Profile");
+                ImGui::Text("HDMI Audio Device");
                 ImGui::PopFont();
                 ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the time offset between the analog output and the HDMI output of the HDMI Audio Device for different audio formats.");
                 ImGui::Spacing();

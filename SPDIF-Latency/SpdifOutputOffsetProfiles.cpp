@@ -39,7 +39,7 @@ void SpdifOutputOffsetProfiles::InitializeProfiles()
 	LiNKFOR_USB_DAC.OutputOffsets[OutputOffsetProfile::FormatStr(2, 48000, 16)] = OutputOffsetProfile::OutputOffset(0, true);
 	Profiles.push_back(&LiNKFOR_USB_DAC);
 
-	None.Name = "None";
+	None.Name = "Other";
 	Profiles.push_back(&None);
 }
 

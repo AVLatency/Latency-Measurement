@@ -10,7 +10,7 @@ void HdmiOutputOffsetProfiles::InitializeProfiles()
 	HDV_MB01.Name = "HDV-MB01";
 	Profiles.push_back(&HDV_MB01);
 
-	None.Name = "None";
+	None.Name = "Other";
 	Profiles.push_back(&None);
 }
 

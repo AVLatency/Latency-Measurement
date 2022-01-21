@@ -371,7 +371,7 @@ bool Gui::DoGui()
 
                 ImGui::TableNextColumn();
                 ImGui::PushFont(FontHelper::BoldFont);
-                ImGui::Text("Output Offset Profile");
+                ImGui::Text("Audio Device");
                 ImGui::PopFont();
                 ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the time offset between the analog output and the S/PDIF output of the Audio Device for different audio formats. It also filters out Windows audio formats that are not supported by the device.");
                 ImGui::Spacing();

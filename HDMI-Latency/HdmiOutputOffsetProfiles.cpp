@@ -11,7 +11,7 @@ void HdmiOutputOffsetProfiles::InitializeProfiles()
 	// TODO, something like this: HDV_MB01.OutputOffsets[OutputOffsetProfile::FormatStr(2, 48000, 16)] = OutputOffsetProfile::OutputOffset(0, false);
 	Profiles.push_back(&HDV_MB01);
 
-	None.Name = "None";
+	None.Name = "Other";
 	Profiles.push_back(&None);
 }
 
