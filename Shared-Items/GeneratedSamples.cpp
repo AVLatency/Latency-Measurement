@@ -127,24 +127,27 @@ void GeneratedSamples::GenerateVolumeAdjustmentSamples()
 
     // Amplitudes
     double tickAmp = 0.6;
+    double constantToneAmp = 0.001;
 
     // Wave generation:
-    int totalSamples = (int)(durationSeconds * sampleRate);
-    samples = new float[totalSamples];
-    samplesLength = totalSamples;
+    samplesLength = (int)(durationSeconds * sampleRate);
+    samples = new float[samplesLength];
 
-    // Tick followed by silence
+    // Constant tone is needed to wake up some audio devices, for example my Sony reciever
+    for (int i = 0; i < samplesLength; i++)
+    {
+        double time = (double)i / sampleRate;
+        samples[i] = (float)sin(M_PI * 2 * constantToneFreq * time) * constantToneAmp;
+    }
+
+    // Tick once per durationInSeconds
     int tickSamplesLength = sampleRate / tickFreq;
-    for (int i = 0; i < totalSamples; i++)
+    for (int i = 0; i < samplesLength; i++)
     {
         if (i < tickSamplesLength)
         {
             double time = (double)i / sampleRate;
             samples[i] = (float)sin(M_PI * 2 * tickFreq * time) * tickAmp;
-        }
-        else
-        {
-            samples[i] = 0;
         }
     }
 }
