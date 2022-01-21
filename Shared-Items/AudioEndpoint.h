@@ -24,8 +24,8 @@ public:
 	AudioEndpoint(const AudioEndpoint&& other);
 	~AudioEndpoint();
 
-	void PopulateSupportedFormats(bool includeDuplicateFormats, bool selectDefaults, bool (*formatFilter)(WAVEFORMATEX*));
-	void SetDefaultFormats(bool selectDefaults);
+	void PopulateSupportedFormats(bool includeDuplicateFormats, bool includeSurroundAsDefault, bool selectDefaults, bool (*formatFilter)(WAVEFORMATEX*));
+	void SetDefaultFormats(bool includeSurroundAsDefault, bool selectDefaults);
 
 	std::vector<AudioFormat*> GetFormats(int numChannels, int samplesPerSec, int bitsPerSample);
 	std::vector<AudioFormat*> GetFormats(int numChannels, int samplesPerSec);

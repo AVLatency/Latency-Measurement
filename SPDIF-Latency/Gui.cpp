@@ -284,7 +284,7 @@ bool Gui::DoGui()
                         ImGui::Text("");
                         GuiHelper::PeakLevel(adjustVolumeManager->rightChannelGrade, "Adjust the output volume of your Device Under Test (DUT) to give a consistent normalized recording.\n\n"
                             "When the DUT is muted, this peak level should be \"Quiet\". If it is not, this likely means you are getting cable crosstalk and your mesaurements will incorrectly be 0 ms audio latency!\n\n"
-                            "To solve the problem of cable crosstalk, try turning down the output volume in the Advanced Configuration or using a physical, inline volume control on your HDMI Audio Device output.");
+                            "To solve the problem of cable crosstalk, try turning down the output volume in the Advanced Configuration or using a physical, inline volume control on your Audio Device output.");
 
                         ImGui::EndTable();
                     }
@@ -294,7 +294,7 @@ bool Gui::DoGui()
                 if (ImGui::TreeNode("Advanced Configuration"))
                 {
                     ImGui::DragFloat("Output Volume", &TestConfiguration::OutputVolume, .001f, .1f, 1);
-                    ImGui::SameLine(); GuiHelper::HelpMarker("Should normally be left at 1. If you are experiencing cable crosstalk, you can try turning this volume down or using a physical, inline volume control on your HDMI Audio Device output.");
+                    ImGui::SameLine(); GuiHelper::HelpMarker("Should normally be left at 1. If you are experiencing cable crosstalk, you can try turning this volume down or using a physical, inline volume control on your Audio Device output.");
                     ImGui::DragFloat("Detection Threshold Multiplier", &TestConfiguration::DetectionThresholdMultiplier, .001f, .0001f, 1);
                     ImGui::SameLine(); GuiHelper::HelpMarker("Should normally be left at 1. If you are using a microphone that is extremely quiet, lowering this multiplier may help at the risk of incorrectly detecting crosstalk on the left and right audio input.");
                     ImGui::TreePop();
@@ -344,7 +344,7 @@ bool Gui::DoGui()
                 else if (state == MeasurementToolGuiState::FinishingAdjustVolume)
                 {
                     state = MeasurementToolGuiState::MeasurementConfig;
-                    outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, true, SpdifOutputOffsetProfiles::Profiles[SpdifOutputOffsetProfiles::SelectedProfileIndex]->FormatFilter);
+                    outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, false, true, SpdifOutputOffsetProfiles::Profiles[SpdifOutputOffsetProfiles::SelectedProfileIndex]->FormatFilter);
                     strcpy_s(TestNotes::Notes.DutModel, outputAudioEndpoints[outputDeviceIndex].Name.c_str());
                 }
             }
@@ -373,7 +373,7 @@ bool Gui::DoGui()
                 ImGui::PushFont(FontHelper::BoldFont);
                 ImGui::Text("Output Offset Profile");
                 ImGui::PopFont();
-                ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the time offset between the analog output and the HDMI output of the HDMI Audio Device for different audio formats.");
+                ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the time offset between the analog output and the S/PDIF output of the Audio Device for different audio formats. It also filters out Windows audio formats that are not supported by the device.");
                 ImGui::Spacing();
 
 
@@ -385,7 +385,7 @@ bool Gui::DoGui()
                         if (ImGui::Selectable(SpdifOutputOffsetProfiles::Profiles[n]->Name.c_str(), is_selected))
                         {
                             SpdifOutputOffsetProfiles::SelectedProfileIndex = n;
-                            outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, true, SpdifOutputOffsetProfiles::Profiles[SpdifOutputOffsetProfiles::SelectedProfileIndex]->FormatFilter);
+                            outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, false, true, SpdifOutputOffsetProfiles::Profiles[SpdifOutputOffsetProfiles::SelectedProfileIndex]->FormatFilter);
                         }
                         // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
                         if (is_selected)
@@ -424,16 +424,18 @@ bool Gui::DoGui()
                 }
                 else if (SpdifOutputOffsetProfiles::Profiles[SpdifOutputOffsetProfiles::SelectedProfileIndex] == &SpdifOutputOffsetProfiles::None)
                 {
-                    ImGui::TextWrapped("WARNING: using an HDMI Audio Device that does not have an output offset profile may result in inaccurate measurements!");
+                    ImGui::TextWrapped("WARNING: using an Audio Device that does not have an output offset profile may result in inaccurate measurements!");
                     ImGui::Spacing();
-                    ImGui::TextWrapped("If you have another HDMI Audio Device that is suitable for use with this tool, "
+                    ImGui::TextWrapped("If you have another Audio Device that is suitable for use with this tool, "
                         "please let me know by email to allen"/* spam bot protection */"@"/* spam bot protection */"avlatency.com and I might be able to add an output offset profile for you.");
                 }
 
                 ImGui::TableNextColumn();
                 ImGui::PushFont(FontHelper::BoldFont);
-                ImGui::Text("Audio Formats (LPCM)");
+                ImGui::Text("Windows Audio Formats (LPCM)");
                 ImGui::PopFont();
+                ImGui::SameLine(); GuiHelper::HelpMarker("This is the Windows audio format that will be used to send audio to the audio driver."
+                    " The final S/PDIF format may be slightly different. For example, 16 bit audio may be sent as 20 bit audio via S/PDIF or the speaker assignment may be disregarded.");
                 ImGui::Spacing();
 
                 std::vector<AudioFormat>& supportedFormats = outputAudioEndpoints[outputDeviceIndex].SupportedFormats;
@@ -444,7 +446,7 @@ bool Gui::DoGui()
                     {
                         format.UserSelected = false;
                     }
-                    outputAudioEndpoints[outputDeviceIndex].SetDefaultFormats(true);
+                    outputAudioEndpoints[outputDeviceIndex].SetDefaultFormats(false, true);
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("Select All"))
@@ -472,7 +474,6 @@ bool Gui::DoGui()
                         bool verified = currentProfile->OutputOffsets.contains(formatStr) && currentProfile->OutputOffsets[formatStr].verified;
                         GuiHelper::VerifiedMarker(verified, DpiScale);
                         ImGui::Checkbox(format.FormatString.c_str(), &format.UserSelected);
-                        GuiHelper::LeoBodnarNote(&format);
                     }
                     ImGui::EndChild();
                 }
@@ -520,12 +521,12 @@ bool Gui::DoGui()
                     ImGui::BeginDisabled();
                     char tempStr[128];
                     strcpy_s(tempStr, SpdifOutputOffsetProfiles::CurrentProfile()->Name.c_str());
-                    ImGui::InputText("HDMI Audio Device", tempStr, IM_ARRAYSIZE(tempStr));
+                    ImGui::InputText("Audio Device", tempStr, IM_ARRAYSIZE(tempStr));
                     ImGui::EndDisabled();
                 }
                 else
                 {
-                    ImGui::InputText("HDMI Audio Device", TestNotes::Notes.HDMIAudioDevice, IM_ARRAYSIZE(TestNotes::Notes.HDMIAudioDevice), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
+                    ImGui::InputText("Audio Device", TestNotes::Notes.HDMIAudioDevice, IM_ARRAYSIZE(TestNotes::Notes.HDMIAudioDevice), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
                 }
                 GuiHelper::OtherCombo("Recording Method", "Recording Method (Other)", &TestNotes::Notes.RecordingMethodIndex, TestNotes::Notes.RecordingMethodOptions, IM_ARRAYSIZE(TestNotes::Notes.RecordingMethodOptions), TestNotes::Notes.RecordingMethodOther, IM_ARRAYSIZE(TestNotes::Notes.RecordingMethodOther));
 
@@ -642,10 +643,6 @@ bool Gui::DoGui()
                 {
                     std::string stereoLatency = "Not measured";
                     std::string stereoFormat = "- LPCM 2ch-48kHz-16bit";
-                    std::string fiveOneLatency = "Not measured";
-                    std::string fiveOneFormat = "- LPCM 6ch-48kHz-16bit";
-                    std::string sevenOneLatency = "Not measured";
-                    std::string sevenOneFormat = "- LPCM 8ch-48kHz-16bit";
 
                     for (AveragedResult& result : testManager->SummaryResults)
                     {
@@ -654,32 +651,12 @@ bool Gui::DoGui()
                             stereoLatency = std::format("{} ms", round(result.AverageLatency()));
                             stereoFormat = std::format("- LPCM {}", result.Format->FormatString);
                         }
-                        if (result.Format->WaveFormat->nChannels == 6)
-                        {
-                            fiveOneLatency = std::format("{} ms", round(result.AverageLatency()));
-                            fiveOneFormat = std::format("- LPCM {}", result.Format->FormatString);
-                        }
-                        if (result.Format->WaveFormat->nChannels == 8)
-                        {
-                            sevenOneLatency = std::format("{} ms", round(result.AverageLatency()));
-                            sevenOneFormat = std::format("- LPCM {}", result.Format->FormatString);
-                        }
                     }
 
                     ImGui::PushFont(FontHelper::HeaderFont);
                     ImGui::Text(std::format("Stereo Audio Latency: {}", stereoLatency).c_str());
                     ImGui::PopFont();
                     ImGui::Text(stereoFormat.c_str());
-                    ImGui::Spacing();
-                    ImGui::PushFont(FontHelper::HeaderFont);
-                    ImGui::Text(std::format("5.1 Audio Latency: {}", fiveOneLatency).c_str());
-                    ImGui::PopFont();
-                    ImGui::Text(fiveOneFormat.c_str());
-                    ImGui::Spacing();
-                    ImGui::PushFont(FontHelper::HeaderFont);
-                    ImGui::Text(std::format("7.1 Audio Latency: {}", sevenOneLatency).c_str());
-                    ImGui::PopFont();
-                    ImGui::Text(sevenOneFormat.c_str());
 
                     ImGui::EndTabItem();
                 }
@@ -711,7 +688,6 @@ bool Gui::DoGui()
                             }
 
                             const AudioFormat* format = avgResult.Format;
-                            GuiHelper::GuiHelper::LeoBodnarNote(format);
 
                             if (resultFormatIndex == n)
                             {

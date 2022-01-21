@@ -343,7 +343,7 @@ bool Gui::DoGui()
                 else if (state == MeasurementToolGuiState::FinishingAdjustVolume)
                 {
                     state = MeasurementToolGuiState::MeasurementConfig;
-                    outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, true, AudioEndpoint::HdmiFormatsFilter);
+                    outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, true, true, AudioEndpoint::HdmiFormatsFilter);
                     strcpy_s(TestNotes::Notes.DutModel, outputAudioEndpoints[outputDeviceIndex].Name.c_str());
                 }
             }
@@ -427,7 +427,7 @@ bool Gui::DoGui()
                     {
                         format.UserSelected = false;
                     }
-                    outputAudioEndpoints[outputDeviceIndex].SetDefaultFormats(true);
+                    outputAudioEndpoints[outputDeviceIndex].SetDefaultFormats(true, true);
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("Select All"))

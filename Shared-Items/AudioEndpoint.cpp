@@ -32,7 +32,7 @@ AudioEndpoint::~AudioEndpoint()
 	SAFE_RELEASE(Device);
 }
 
-void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool selectDefaults, bool (*formatFilter)(WAVEFORMATEX*))
+void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool includeSurroundAsDefault, bool selectDefaults, bool (*formatFilter)(WAVEFORMATEX*))
 {
 	if (SupportedFormats.size() > 0)
 	{
@@ -133,13 +133,13 @@ void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool 
 		std::sort(SupportedFormats.begin(), SupportedFormats.end(), sortFunc);
 		std::sort(DuplicateSupportedFormats.begin(), DuplicateSupportedFormats.end(), sortFunc);
 
-		SetDefaultFormats(selectDefaults);
+		SetDefaultFormats(includeSurroundAsDefault, selectDefaults);
 	}
 
 	SAFE_RELEASE(pAudioClient);
 }
 
-void AudioEndpoint::SetDefaultFormats(bool selectDefaults)
+void AudioEndpoint::SetDefaultFormats(bool includeSurroundAsDefault, bool selectDefaults)
 {
 	std::vector<AudioFormat*> stereoFormats = GetFormats(2, 48000, 16);
 	if (stereoFormats.size() > 1)
@@ -169,36 +169,68 @@ void AudioEndpoint::SetDefaultFormats(bool selectDefaults)
 		}
 	}
 
-	std::vector<AudioFormat*> fivePointOneFormats = GetFormats(6, 48000, 16);
-	if (fivePointOneFormats.size() > 1)
+	if (includeSurroundAsDefault)
 	{
-		bool foundIt = false;
-		// This means there are multiple formats that all have non-zero channel masks, so pick the channel mask we care about
-		for (AudioFormat* format : fivePointOneFormats)
+		std::vector<AudioFormat*> fivePointOneFormats = GetFormats(6, 48000, 16);
+		if (fivePointOneFormats.size() > 1)
 		{
-			if (format->WaveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
-			{
-				// KSAUDIO_SPEAKER_5POINT1_SURROUND (using side/surround speakers)
-				if (reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->WaveFormat)->dwChannelMask == (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_SIDE_LEFT | SPEAKER_SIDE_RIGHT))
-				{
-					format->DefaultSelection = true;
-					if (selectDefaults)
-					{
-						format->UserSelected = true;
-					}
-					foundIt = true;
-				}
-			}
-		}
-		if (!foundIt)
-		{
+			bool foundIt = false;
+			// This means there are multiple formats that all have non-zero channel masks, so pick the channel mask we care about
 			for (AudioFormat* format : fivePointOneFormats)
 			{
 				if (format->WaveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
 				{
-					// KSAUDIO_SPEAKER_5POINT1 (using rear left/right of center speakers)
-					// Note: This format is excluded for HDMI, so this will never happen for HDMI formats.
-					if (reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->WaveFormat)->dwChannelMask == (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT))
+					// KSAUDIO_SPEAKER_5POINT1_SURROUND (using side/surround speakers)
+					if (reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->WaveFormat)->dwChannelMask == (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_SIDE_LEFT | SPEAKER_SIDE_RIGHT))
+					{
+						format->DefaultSelection = true;
+						if (selectDefaults)
+						{
+							format->UserSelected = true;
+						}
+						foundIt = true;
+					}
+				}
+			}
+			if (!foundIt)
+			{
+				for (AudioFormat* format : fivePointOneFormats)
+				{
+					if (format->WaveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
+					{
+						// KSAUDIO_SPEAKER_5POINT1 (using rear left/right of center speakers)
+						// Note: This format is excluded for HDMI, so this will never happen for HDMI formats.
+						if (reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->WaveFormat)->dwChannelMask == (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT))
+						{
+							format->DefaultSelection = true;
+							if (selectDefaults)
+							{
+								format->UserSelected = true;
+							}
+						}
+					}
+				}
+			}
+		}
+		else if (fivePointOneFormats.size() > 0)
+		{
+			fivePointOneFormats[0]->DefaultSelection = true;
+			if (selectDefaults)
+			{
+				fivePointOneFormats[0]->UserSelected = true;
+			}
+		}
+
+		std::vector<AudioFormat*> sevenPointOneFormats = GetFormats(8, 48000, 16);
+		if (sevenPointOneFormats.size() > 1)
+		{
+			// This means there are multiple formats that all have non-zero channel masks, so pick the channel mask we care about
+			for (AudioFormat* format : sevenPointOneFormats)
+			{
+				if (format->WaveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
+				{
+					// KSAUDIO_SPEAKER_7POINT1_SURROUND
+					if (reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->WaveFormat)->dwChannelMask == (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT | SPEAKER_SIDE_LEFT | SPEAKER_SIDE_RIGHT))
 					{
 						format->DefaultSelection = true;
 						if (selectDefaults)
@@ -209,42 +241,13 @@ void AudioEndpoint::SetDefaultFormats(bool selectDefaults)
 				}
 			}
 		}
-	}
-	else if (fivePointOneFormats.size() > 0)
-	{
-		fivePointOneFormats[0]->DefaultSelection = true;
-		if (selectDefaults)
+		else if (sevenPointOneFormats.size() > 0)
 		{
-			fivePointOneFormats[0]->UserSelected = true;
-		}
-	}
-
-	std::vector<AudioFormat*> sevenPointOneFormats = GetFormats(8, 48000, 16);
-	if (sevenPointOneFormats.size() > 1)
-	{
-		// This means there are multiple formats that all have non-zero channel masks, so pick the channel mask we care about
-		for (AudioFormat* format : sevenPointOneFormats)
-		{
-			if (format->WaveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
+			sevenPointOneFormats[0]->DefaultSelection = true;
+			if (selectDefaults)
 			{
-				// KSAUDIO_SPEAKER_7POINT1_SURROUND
-				if (reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->WaveFormat)->dwChannelMask == (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT | SPEAKER_SIDE_LEFT | SPEAKER_SIDE_RIGHT))
-				{
-					format->DefaultSelection = true;
-					if (selectDefaults)
-					{
-						format->UserSelected = true;
-					}
-				}
+				sevenPointOneFormats[0]->UserSelected = true;
 			}
-		}
-	}
-	else if (sevenPointOneFormats.size() > 0)
-	{
-		sevenPointOneFormats[0]->DefaultSelection = true;
-		if (selectDefaults)
-		{
-			sevenPointOneFormats[0]->UserSelected = true;
 		}
 	}
 }
