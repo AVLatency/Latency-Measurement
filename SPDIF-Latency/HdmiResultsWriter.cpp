@@ -22,7 +22,6 @@ void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::f
         detailedResultsStream << "DUT Model,";
         detailedResultsStream << "DUT Firmware Version,";
         detailedResultsStream << "DUT Output Type,";
-        detailedResultsStream << "DUT Video Mode,";
         detailedResultsStream << "DUT Audio Settings,";
         detailedResultsStream << "DUT Other Settings,";
         detailedResultsStream << ",";
@@ -31,12 +30,6 @@ void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::f
         detailedResultsStream << "Audio Sample Rate,";
         detailedResultsStream << "Audio Bit Depth,";
         detailedResultsStream << "Audio Speakers Description,";
-        detailedResultsStream << ",";
-        detailedResultsStream << "Video Resolution,";
-        detailedResultsStream << "Video Refresh Rate,";
-        detailedResultsStream << "Video Bit Depth,";
-        detailedResultsStream << "Video Color Format,";
-        detailedResultsStream << "Video Color Space,";
         detailedResultsStream << ",";
         detailedResultsStream << "Notes 1,";
         detailedResultsStream << "Notes 2,";
@@ -81,7 +74,6 @@ void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::f
     detailedResultsStream << "\"" << TestNotes::Notes.DutModel << "\","; //"DUT Model,";
     detailedResultsStream << "\"" << TestNotes::Notes.DutFirmwareVersion << "\","; //"DUT Firmware Version,";
     detailedResultsStream << "\"" << TestNotes::Notes.DutOutputType() << "\","; //"DUT,";
-    detailedResultsStream << "\"" << TestNotes::Notes.DutVideoMode << "\","; //"DUT Video Mode,";
     detailedResultsStream << "\"" << TestNotes::Notes.DutAudioSettings << "\",";
     detailedResultsStream << "\"" << TestNotes::Notes.DutOtherSettings << "\",";
     detailedResultsStream << "\"" << "\",";
@@ -90,12 +82,6 @@ void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::f
     detailedResultsStream << "\"" << result.Format->WaveFormat->nSamplesPerSec << "\",";
     detailedResultsStream << "\"" << result.Format->WaveFormat->wBitsPerSample << "\",";
     detailedResultsStream << "\"" << AudioFormat::GetChannelInfoString(result.Format->WaveFormat) << "\",";
-    detailedResultsStream << "\"" << "\",";
-    detailedResultsStream << "\"" << TestNotes::Notes.VideoRes() << "\",";
-    detailedResultsStream << "\"" << TestNotes::Notes.VideoRefreshRate << "\",";
-    detailedResultsStream << "\"" << TestNotes::Notes.VideoBitDepth << "\",";
-    detailedResultsStream << "\"" << TestNotes::Notes.VideoColorFormat << "\",";
-    detailedResultsStream << "\"" << TestNotes::Notes.VideoColorSpace() << "\",";
     detailedResultsStream << "\"" << "\",";
     detailedResultsStream << "\"" << TestNotes::Notes.Notes1 << "\",";
     detailedResultsStream << "\"" << TestNotes::Notes.Notes2 << "\",";
@@ -145,7 +131,6 @@ void HdmiResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& re
         resultsStream << "DUT Model,";
         resultsStream << "DUT Firmware Version,";
         resultsStream << "DUT Output Type,";
-        resultsStream << "DUT Video Mode,";
         resultsStream << "DUT Audio Settings,";
         resultsStream << "DUT Other Settings,";
         resultsStream << ",";
@@ -154,12 +139,6 @@ void HdmiResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& re
         resultsStream << "Audio Sample Rate,";
         resultsStream << "Audio Bit Depth,";
         resultsStream << "Audio Speakers Description,";
-        resultsStream << ",";
-        resultsStream << "Video Resolution,";
-        resultsStream << "Video Refresh Rate,";
-        resultsStream << "Video Bit Depth,";
-        resultsStream << "Video Color Format,";
-        resultsStream << "Video Color Space,";
         resultsStream << ",";
         resultsStream << "Notes 1,";
         resultsStream << "Notes 2,";
@@ -184,7 +163,6 @@ void HdmiResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& re
     resultsStream << "\"" << TestNotes::Notes.DutModel << "\","; //"DUT Model,";
     resultsStream << "\"" << TestNotes::Notes.DutFirmwareVersion << "\","; //"DUT Firmware Version,";
     resultsStream << "\"" << TestNotes::Notes.DutOutputType() << "\","; //"DUT,";
-    resultsStream << "\"" << TestNotes::Notes.DutVideoMode << "\","; //"DUT Video Mode,";
     resultsStream << "\"" << TestNotes::Notes.DutAudioSettings << "\",";
     resultsStream << "\"" << TestNotes::Notes.DutOtherSettings << "\",";
     resultsStream << "\"" << "\",";
@@ -193,12 +171,6 @@ void HdmiResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& re
     resultsStream << "\"" << result.Format->WaveFormat->nSamplesPerSec << "\",";
     resultsStream << "\"" << result.Format->WaveFormat->wBitsPerSample << "\",";
     resultsStream << "\"" << AudioFormat::GetChannelInfoString(result.Format->WaveFormat) << "\",";
-    resultsStream << "\"" << "\",";
-    resultsStream << "\"" << TestNotes::Notes.VideoRes() << "\",";
-    resultsStream << "\"" << TestNotes::Notes.VideoRefreshRate << "\",";
-    resultsStream << "\"" << TestNotes::Notes.VideoBitDepth << "\",";
-    resultsStream << "\"" << TestNotes::Notes.VideoColorFormat << "\",";
-    resultsStream << "\"" << TestNotes::Notes.VideoColorSpace() << "\",";
     resultsStream << "\"" << "\",";
     resultsStream << "\"" << TestNotes::Notes.Notes1 << "\",";
     resultsStream << "\"" << TestNotes::Notes.Notes2 << "\",";
