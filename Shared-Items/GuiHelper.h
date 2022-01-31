@@ -13,6 +13,7 @@ public:
 	static void OptionallyBoldText(const char* text, bool bold);
 	static void PeakLevel(AdjustVolumeManager::PeakLevelGrade grade, const char* helpText);
 	static void VerifiedMarker(bool verified, float dpiScale);
+	static void DearImGuiLegal();
 
 	static int CsvInputFilter(ImGuiInputTextCallbackData* data);
 };

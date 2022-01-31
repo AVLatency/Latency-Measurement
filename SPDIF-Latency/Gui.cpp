@@ -782,7 +782,13 @@ bool Gui::DoGui()
     if (ImGui::BeginPopupModal("About", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
         ImGui::Text("AV Latency.com S/PDIF Latency Measurement Tool\n\nFind out more about audio/video latency, input lag, and lip sync error at avlatency.com\nFind out more about this tool at github.com/AVLatency/Latency-Measurement");
+        
+        ImGui::Spacing();
+        GuiHelper::DearImGuiLegal();
+        ImGui::Spacing();
+
         ImGui::Separator();
+        ImGui::Spacing();
 
         ImGui::SetItemDefaultFocus();
         if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }

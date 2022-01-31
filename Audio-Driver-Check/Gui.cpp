@@ -297,8 +297,12 @@ bool Gui::DoGui()
         ImGui::Text("Find out more about audio/video latency, input lag, and lip sync error at avlatency.com\nFind out more about this tool at github.com/AVLatency/Latency-Measurement");
 
         ImGui::Spacing();
+        GuiHelper::DearImGuiLegal();
+        ImGui::Spacing();
+
         ImGui::Separator();
         ImGui::Spacing();
+
         ImGui::SetItemDefaultFocus();
         if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
 
