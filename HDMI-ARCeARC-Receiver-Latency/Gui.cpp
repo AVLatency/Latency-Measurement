@@ -455,7 +455,6 @@ bool Gui::DoGui()
                         bool verified = currentProfile->OutputOffsets.contains(formatStr) && currentProfile->OutputOffsets[formatStr].verified;
                         GuiHelper::VerifiedMarker(verified, DpiScale);
                         ImGui::Checkbox(format.FormatString.c_str(), &format.UserSelected);
-                        GuiHelper::LeoBodnarNote(&format);
                     }
                     ImGui::EndChild();
                 }
@@ -692,9 +691,6 @@ bool Gui::DoGui()
                             {
                                 ImGui::SetItemDefaultFocus();
                             }
-
-                            const AudioFormat* format = avgResult.Format;
-                            GuiHelper::GuiHelper::LeoBodnarNote(format);
 
                             if (resultFormatIndex == n)
                             {

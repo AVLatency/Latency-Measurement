@@ -102,21 +102,6 @@ void GuiHelper::VerifiedMarker(bool verified, float dpiScale)
     ImGui::SetCursorPosX(dpiScale * 35);
 }
 
-void GuiHelper::LeoBodnarNote(const AudioFormat* format)
-{
-    if (format->WaveFormat->nChannels == 2 && format->WaveFormat->nSamplesPerSec == 48000 && format->WaveFormat->wBitsPerSample == 16)
-    {
-        ImGui::SameLine();
-        ImGui::PushFont(FontHelper::BoldFont);
-        ImGui::Text("[Leo Bodnar]");
-        ImGui::PopFont();
-        ImGui::SameLine(); GuiHelper::HelpMarker("This audio format is used by the Leo Bodnar Input Lag Tester. "
-            "Visit avlatency.com for instructions on how to measure and calculate video latency with the Leo Bodnar tool and how to calculate lip sync error with the results from this software.\n\n"
-            "Please note that some TVs will switch to \"PC\" video mode when connected to a computer and will not switch to \"PC\" video mode when using the Leo Bodnar tester. "
-            "Please ensure both tests are using the same video mode to accurately calculate lip sync error.");
-    }
-}
-
 int GuiHelper::CsvInputFilter(ImGuiInputTextCallbackData * data)
 {
     if (strchr("\"", (char)data->EventChar)
