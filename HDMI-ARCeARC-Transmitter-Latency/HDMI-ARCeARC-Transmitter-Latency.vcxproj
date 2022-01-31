@@ -20,7 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{BB21389D-D94D-49F0-879E-43AAECB8183E}</ProjectGuid>
-    <RootNamespace>HDMI-ARCeARC-Generator-Latency</RootNamespace>
+    <RootNamespace>HDMI-ARCeARC-Transmitter-Latency</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -72,22 +72,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(ProjectDir)$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
-    <TargetName>HDMI ARC eARC Generator Latency</TargetName>
+    <TargetName>HDMI ARC eARC Transmitter Latency</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(ProjectDir)$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
-    <TargetName>HDMI ARC eARC Generator Latency</TargetName>
+    <TargetName>HDMI ARC eARC Transmitter Latency</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(ProjectDir)$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
-    <TargetName>HDMI ARC eARC Generator Latency</TargetName>
+    <TargetName>HDMI ARC eARC Transmitter Latency</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(ProjectDir)$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
-    <TargetName>HDMI ARC eARC Generator Latency</TargetName>
+    <TargetName>HDMI ARC eARC Transmitter Latency</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -188,7 +188,7 @@
     <None Include="..\imgui\misc\debuggers\imgui.natvis" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="HDMI-ARCeARC-Generator-Latency.rc" />
+    <ResourceCompile Include="HDMI-ARCeARC-Transmitter-Latency.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

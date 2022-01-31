@@ -69,6 +69,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="HDMI-ARCeARC-Generator-Latency.rc" />
+    <ResourceCompile Include="HDMI-ARCeARC-Transmitter-Latency.rc" />
   </ItemGroup>
 </Project>
