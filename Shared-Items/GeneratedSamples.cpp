@@ -70,7 +70,7 @@ void GeneratedSamples::GenerateLatencyMeasurementSamples()
     int tickFreq = GetTickFrequency(sampleRate);
 
     // Amplitudes
-    double wakeupToneAmp = 0.1;
+    double wakeupToneAmp = 0.04;
     double constantToneAmp = 0.001;
     double tickAmp = 0.6;
 
