@@ -11,7 +11,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Shared-Items", "Shared-Item
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Audio-Generator-Driver-Check", "Audio-Driver-Check\Audio-Driver-Check.vcxproj", "{B9A75E69-1F38-4704-B45D-B485D6683BBC}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HDMI-ARCeARC-Transmitter-Latency", "HDMI-ARCeARC-Transmitter-Latency\HDMI-ARCeARC-Transmitter-Latency.vcxproj", "{BB21389D-D94D-49F0-879E-43AAECB8183E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HDMI-to-Digital-Audio-Latency", "HDMI-to-Digital-Audio-Latency\HDMI-to-Digital-Audio-Latency.vcxproj", "{BB21389D-D94D-49F0-879E-43AAECB8183E}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HDMI-ARCeARC-Receiver-Latency", "HDMI-ARCeARC-Receiver-Latency\HDMI-ARCeARC-Receiver-Latency.vcxproj", "{4A26DF7F-640F-444B-A33F-C6CC95928F98}"
 EndProject

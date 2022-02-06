@@ -12,7 +12,7 @@
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
-HDMI_CABLE_MAP RCDATA "HDMI-ARCeARC-Transmitter-Latency_cable-map.png"
+HDMI_CABLE_MAP RCDATA "HDMI-to-Digital-Audio-Latency_cable-map.png"
 HDMI_EDID_MODE RCDATA "../Shared-Items/EDID-mode-TV.png"
 HDMI_HDV_MB01 RCDATA "../Shared-Items/AudioDevice_HDV-MB01.png"
 HDMI_WINDOWS_DISPLAY_SETTINGS RCDATA "../Shared-Items/AdvancedDisplaySettings.png"
