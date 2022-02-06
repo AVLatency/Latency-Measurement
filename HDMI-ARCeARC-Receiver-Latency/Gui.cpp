@@ -71,7 +71,7 @@ bool Gui::DoGui()
         "- Microphone: Make sure to position the mic as close as possible to the speaker because sound travels measurably slow. Position the mic close to the tweeter if there are separate speaker components.\n"
         "- DUT headphone output: Note that speaker and headphone output can sometimes have different latency.\n"
         "- Directly connect to DUT speaker output: Start the volume low as some amplifiers may be capable of high voltage outputs that could damage your audio input device.\n\n"
-        "Your \"HDMI Audio Device\" must be capabile of analog audio output AND HDMI audio output at the same time. The time offset between analog audio output and HDMI audio output must be known. A list of capable devices can be found on the GitHub wiki.\n\n"
+        "Your \"HDMI Audio Extractor\" must be capabile of analog audio output AND HDMI audio output at the same time. The time offset between analog audio output and HDMI audio output must be known. A list of capable devices can be found on the GitHub wiki.\n\n"
         "GitHub Wiki: github.com/AVLatency/Latency-Measurement/wiki");
     float cableMapScale = 0.55 * Gui::DpiScale;
     ImGui::Image((void*)resources.CableMapTexture, ImVec2(resources.CableMapTextureWidth * cableMapScale, resources.CableMapTextureHeight * cableMapScale));
@@ -200,7 +200,7 @@ bool Gui::DoGui()
             {
                 ImGui::Spacing();
                 ImGui::PushFont(FontHelper::BoldFont);
-                ImGui::Text("Input: Left Channel (HDMI Audio Device)");
+                ImGui::Text("Input: Left Channel (HDMI Audio Extractor)");
                 ImGui::PopFont();
 
                 float columnWidth = 110 * DpiScale;
@@ -283,7 +283,7 @@ bool Gui::DoGui()
                         ImGui::Text("");
                         GuiHelper::PeakLevel(adjustVolumeManager->rightChannelGrade, "Adjust the output volume of your Device Under Test (DUT) to give a consistent normalized recording.\n\n"
                             "When the DUT is muted, this peak level should be \"Quiet\". If it is not, this likely means you are getting cable crosstalk and your mesaurements will incorrectly be 0 ms audio latency!\n\n"
-                            "To solve the problem of cable crosstalk, try turning down the output volume in the Advanced Configuration or using a physical, inline volume control on your HDMI Audio Device output.");
+                            "To solve the problem of cable crosstalk, try turning down the output volume in the Advanced Configuration or using a physical, inline volume control on your HDMI Audio Extractor output.");
 
                         ImGui::EndTable();
                     }
@@ -293,7 +293,7 @@ bool Gui::DoGui()
                 if (ImGui::TreeNode("Advanced Configuration"))
                 {
                     ImGui::DragFloat("Output Volume", &TestConfiguration::OutputVolume, .001f, .1f, 1);
-                    ImGui::SameLine(); GuiHelper::HelpMarker("Should normally be left at 1. If you are experiencing cable crosstalk, you can try turning this volume down or using a physical, inline volume control on your HDMI Audio Device output.");
+                    ImGui::SameLine(); GuiHelper::HelpMarker("Should normally be left at 1. If you are experiencing cable crosstalk, you can try turning this volume down or using a physical, inline volume control on your HDMI Audio Extractor output.");
                     ImGui::DragFloat("Detection Threshold Multiplier", &TestConfiguration::DetectionThresholdMultiplier, .001f, .0001f, 1);
                     ImGui::SameLine(); GuiHelper::HelpMarker("Should normally be left at 1. If you are using a microphone that is extremely quiet, lowering this multiplier may help at the risk of incorrectly detecting crosstalk on the left and right audio input.");
                     ImGui::TreePop();
@@ -370,9 +370,9 @@ bool Gui::DoGui()
 
                 ImGui::TableNextColumn();
                 ImGui::PushFont(FontHelper::BoldFont);
-                ImGui::Text("HDMI Audio Device");
+                ImGui::Text("HDMI Audio Extractor");
                 ImGui::PopFont();
-                ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the time offset between the analog output and the HDMI output of the HDMI Audio Device for different audio formats.");
+                ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the time offset between the analog output and the HDMI output of the HDMI Audio Extractor for different audio formats.");
                 ImGui::Spacing();
 
 
@@ -407,9 +407,9 @@ bool Gui::DoGui()
                 }
                 else if (HdmiOutputOffsetProfiles::Profiles[HdmiOutputOffsetProfiles::SelectedProfileIndex] == &HdmiOutputOffsetProfiles::None)
                 {
-                    ImGui::TextWrapped("WARNING: using an HDMI Audio Device that does not have an output offset profile may result in inaccurate measurements!");
+                    ImGui::TextWrapped("WARNING: using an HDMI Audio Extractor that does not have an output offset profile may result in inaccurate measurements!");
                     ImGui::Spacing();
-                    ImGui::TextWrapped("If you have another HDMI Audio Device that is suitable for use with this tool, "
+                    ImGui::TextWrapped("If you have another HDMI Audio Extractor that is suitable for use with this tool, "
                         "please let me know by email to allen"/* spam bot protection */"@"/* spam bot protection */"avlatency.com and I might be able to add an output offset profile for you.");
                 }
 
@@ -502,12 +502,12 @@ bool Gui::DoGui()
                     ImGui::BeginDisabled();
                     char tempStr[128];
                     strcpy_s(tempStr, HdmiOutputOffsetProfiles::CurrentProfile()->Name.c_str());
-                    ImGui::InputText("HDMI Audio Device", tempStr, IM_ARRAYSIZE(tempStr));
+                    ImGui::InputText("HDMI Audio Extractor", tempStr, IM_ARRAYSIZE(tempStr));
                     ImGui::EndDisabled();
                 }
                 else
                 {
-                    ImGui::InputText("HDMI Audio Device", TestNotes::Notes.HDMIAudioDevice, IM_ARRAYSIZE(TestNotes::Notes.HDMIAudioDevice), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
+                    ImGui::InputText("HDMI Audio Extractor", TestNotes::Notes.HDMIAudioDevice, IM_ARRAYSIZE(TestNotes::Notes.HDMIAudioDevice), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
                 }
                 GuiHelper::OtherCombo("Recording Method", "Recording Method (Other)", &TestNotes::Notes.RecordingMethodIndex, TestNotes::Notes.RecordingMethodOptions, IM_ARRAYSIZE(TestNotes::Notes.RecordingMethodOptions), TestNotes::Notes.RecordingMethodOther, IM_ARRAYSIZE(TestNotes::Notes.RecordingMethodOther));
 
@@ -830,7 +830,7 @@ bool Gui::DoGui()
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     if (ImGui::BeginPopupModal("Reminder: EDID Mode", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("Set the EDID mode of your HDMI Audio Device to match the EDID of your DUT.");
+        ImGui::Text("Set the EDID mode of your HDMI Audio Extractor to match the EDID of your DUT.");
         ImGui::Spacing();
 
         float imageScale = 0.6 * Gui::DpiScale;

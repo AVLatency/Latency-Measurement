@@ -23,7 +23,7 @@ void GuiHelper::FormatDescriptions()
 {
     ImGui::Text("[V] Verified Accuracy");
     ImGui::SameLine(); HelpMarker("The accuracy of measurements for this audio format have been verified using electronics measurement equipment, such as an oscilloscope.\n\n"
-        "Audio formats that do not have the [V] verified accuracy marker may or may not be accurate, depending on whether the HDMI Audio Device is operating with the same audio output offset as it does for verified formats.\n\n"
+        "Audio formats that do not have the [V] verified accuracy marker may or may not be accurate, depending on whether the audio device (e.g. HDMI Audio Extractor) is operating with the same offset between audio outputs as it does for verified formats.\n\n"
         "This is not related to the consistency of measurement results.");
 
     ChannelDescriptions();
