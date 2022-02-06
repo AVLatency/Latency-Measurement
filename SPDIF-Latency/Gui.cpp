@@ -733,6 +733,7 @@ bool Gui::DoGui()
                 testManager = nullptr;
                 state = MeasurementToolGuiState::MeasurementConfig;
             }
+            ImGui::Spacing();
         }
 
             break;
