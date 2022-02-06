@@ -812,7 +812,7 @@ bool Gui::DoGui()
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     if (ImGui::BeginPopupModal("About", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("AV Latency.com HDMI to ARC / eARC / S/PDIF Latency Measurement Tool\n\nFind out more about audio/video latency, input lag, and lip sync error at avlatency.com\nFind out more about this tool at github.com/AVLatency/Latency-Measurement");
+        ImGui::Text("AV Latency.com HDMI to ARC, eARC, or S/PDIF Latency Measurement Tool\n\nFind out more about audio/video latency, input lag, and lip sync error at avlatency.com\nFind out more about this tool at github.com/AVLatency/Latency-Measurement");
         
         ImGui::Spacing();
         GuiHelper::DearImGuiLegal();
