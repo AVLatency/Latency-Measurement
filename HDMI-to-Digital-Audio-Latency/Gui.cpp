@@ -354,8 +354,7 @@ bool Gui::DoGui()
                 ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the time offset between the analog output and the HDMI output of the HDMI Audio Extractor for different audio formats.");
                 ImGui::Spacing();
 
-
-                if (ImGui::BeginListBox("", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing())))
+                if (ImGui::BeginListBox("Audio Extractor", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing())))
                 {
                     for (int n = 0; n < HdmiOutputOffsetProfiles::Profiles.size(); n++)
                     {
@@ -386,10 +385,63 @@ bool Gui::DoGui()
                 }
                 else if (HdmiOutputOffsetProfiles::Profiles[HdmiOutputOffsetProfiles::SelectedProfileIndex] == &HdmiOutputOffsetProfiles::None)
                 {
-                    ImGui::TextWrapped("WARNING: using an HDMI Audio Extractor that does not have an output offset profile may result in inaccurate measurements!");
+                    ImGui::PushFont(FontHelper::BoldFont);
+                    ImGui::Text("WARNING:");
+                    ImGui::PopFont();
+                    ImGui::TextWrapped("Using an HDMI Audio Extractor that is not on this list will likely result in inaccurate measurements! This is because the offset between its different audio outputs will not be accounted for in the reported measurements.");
                     ImGui::Spacing();
                     ImGui::TextWrapped("If you have another HDMI Audio Extractor that is suitable for use with this tool, "
-                        "please let me know by email to allen"/* spam bot protection */"@"/* spam bot protection */"avlatency.com and I might be able to add an output offset profile for you.");
+                        "please let me know by email to allen"/* spam bot protection */"@"/* spam bot protection */"avlatency.com and I might be able to add support for this device.");
+                }
+
+                ImGui::Spacing();
+                ImGui::Separator();
+                ImGui::Spacing();
+
+                ImGui::PushFont(FontHelper::BoldFont);
+                ImGui::Text("ARC, eARC, or S/PDIF DAC");
+                ImGui::PopFont();
+                ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the amount of time between the digital audio signal entering the DAC's input to the analog output of the DAC for different audio formats.");
+                ImGui::Spacing();
+
+                if (ImGui::BeginListBox("DAC", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing())))
+                {
+                    for (int n = 0; n < HdmiOutputOffsetProfiles::Profiles.size(); n++)
+                    {
+                        const bool is_selected = (HdmiOutputOffsetProfiles::SelectedProfileIndex == n);
+                        if (ImGui::Selectable(HdmiOutputOffsetProfiles::Profiles[n]->Name.c_str(), is_selected))
+                        {
+                            HdmiOutputOffsetProfiles::SelectedProfileIndex = n;
+                        }
+                        // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                        if (is_selected)
+                        {
+                            ImGui::SetItemDefaultFocus();
+                        }
+                    }
+                    ImGui::EndListBox();
+                }
+                ImGui::Spacing();
+
+                if (HdmiOutputOffsetProfiles::Profiles[HdmiOutputOffsetProfiles::SelectedProfileIndex] == &HdmiOutputOffsetProfiles::HDV_MB01)
+                {
+                    float imageScale = 0.45 * Gui::DpiScale;
+                    ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
+                    ImGui::TextWrapped("The HDV-MB01 is also sold under these names:");
+                    ImGui::Spacing();
+                    ImGui::TextWrapped("- J-Tech Digital JTD18G - H5CH\n"
+                        "- Monoprice Blackbird 24278\n"
+                        "- OREI HDA - 912\n");
+                }
+                else if (HdmiOutputOffsetProfiles::Profiles[HdmiOutputOffsetProfiles::SelectedProfileIndex] == &HdmiOutputOffsetProfiles::None)
+                {
+                    ImGui::PushFont(FontHelper::BoldFont);
+                    ImGui::Text("WARNING:");
+                    ImGui::PopFont();
+                    ImGui::TextWrapped("Using an HDMI Audio Extractor that is not on this list will likely result in inaccurate measurements! This is because the offset between its different audio outputs will not be accounted for in the reported measurements.");
+                    ImGui::Spacing();
+                    ImGui::TextWrapped("If you have another HDMI Audio Extractor that is suitable for use with this tool, "
+                        "please let me know by email to allen"/* spam bot protection */"@"/* spam bot protection */"avlatency.com and I might be able to add support for this device.");
                 }
 
                 ImGui::TableNextColumn();

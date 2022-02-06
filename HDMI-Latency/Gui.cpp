@@ -409,10 +409,13 @@ bool Gui::DoGui()
                 }
                 else if (HdmiOutputOffsetProfiles::Profiles[HdmiOutputOffsetProfiles::SelectedProfileIndex] == &HdmiOutputOffsetProfiles::None)
                 {
-                    ImGui::TextWrapped("WARNING: using an HDMI Audio Extractor that does not have an output offset profile may result in inaccurate measurements!");
+                    ImGui::PushFont(FontHelper::BoldFont);
+                    ImGui::Text("WARNING:");
+                    ImGui::PopFont();
+                    ImGui::TextWrapped("Using an HDMI Audio Extractor that is not on this list will likely result in inaccurate measurements! This is because the offset between its different audio outputs will not be accounted for in the reported measurements.");
                     ImGui::Spacing();
                     ImGui::TextWrapped("If you have another HDMI Audio Extractor that is suitable for use with this tool, "
-                        "please let me know by email to allen"/* spam bot protection */"@"/* spam bot protection */"avlatency.com and I might be able to add an output offset profile for you.");
+                        "please let me know by email to allen"/* spam bot protection */"@"/* spam bot protection */"avlatency.com and I might be able to add support for this device.");
                 }
 
                 ImGui::TableNextColumn();
