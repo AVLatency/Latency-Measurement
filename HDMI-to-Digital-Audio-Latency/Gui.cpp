@@ -11,6 +11,7 @@
 #include "DacLatencyProfiles.h"
 #include "Defines.h"
 #include "GuiHelper.h"
+#include "ProfileFormat.h"
 
 float Gui::DpiScale = 1.0f;
 bool Gui::DpiScaleChanged = false;
@@ -474,8 +475,10 @@ bool Gui::DoGui()
                     for (AudioFormat& format : supportedFormats)
                     {
                         OutputOffsetProfile* currentProfile = HdmiOutputOffsetProfiles::CurrentProfile();
-                        std::string formatStr = OutputOffsetProfile::FormatStr(format.WaveFormat);
-                        bool verified = currentProfile->OutputOffsets.contains(formatStr) && currentProfile->OutputOffsets[formatStr].verified;
+                        DacLatencyProfile* currentDacProfile = DacLatencyProfiles::CurrentProfile();
+                        std::string formatStr = ProfileFormat::FormatStr(format.WaveFormat);
+                        bool verified = currentProfile->OutputOffsets.contains(formatStr) && currentProfile->OutputOffsets[formatStr].verified
+                            && currentDacProfile->Latencies.contains(formatStr) && currentDacProfile->Latencies[formatStr].verified;
                         GuiHelper::VerifiedMarker(verified, DpiScale);
                         ImGui::Checkbox(format.FormatString.c_str(), &format.UserSelected);
                     }
@@ -699,7 +702,7 @@ bool Gui::DoGui()
                         for (auto avgResult : testManager->AveragedResults)
                         {
                             OutputOffsetProfile* currentProfile = HdmiOutputOffsetProfiles::CurrentProfile();
-                            std::string formatStr = OutputOffsetProfile::FormatStr(avgResult.Format->WaveFormat);
+                            std::string formatStr = ProfileFormat::FormatStr(avgResult.Format->WaveFormat);
                             bool verified = currentProfile->OutputOffsets.contains(formatStr) && currentProfile->OutputOffsets[formatStr].verified;
                             GuiHelper::VerifiedMarker(verified, DpiScale);
 

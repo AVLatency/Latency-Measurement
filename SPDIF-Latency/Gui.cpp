@@ -10,6 +10,7 @@
 #include "SpdifOutputOffsetProfiles.h"
 #include "Defines.h"
 #include "GuiHelper.h"
+#include "ProfileFormat.h"
 
 float Gui::DpiScale = 1.0f;
 bool Gui::DpiScaleChanged = false;
@@ -475,7 +476,7 @@ bool Gui::DoGui()
                     for (AudioFormat& format : supportedFormats)
                     {
                         OutputOffsetProfile* currentProfile = SpdifOutputOffsetProfiles::CurrentProfile();
-                        std::string formatStr = OutputOffsetProfile::FormatStr(format.WaveFormat);
+                        std::string formatStr = ProfileFormat::FormatStr(format.WaveFormat);
                         bool verified = currentProfile->OutputOffsets.contains(formatStr) && currentProfile->OutputOffsets[formatStr].verified;
                         GuiHelper::VerifiedMarker(verified, DpiScale);
                         ImGui::Checkbox(format.FormatString.c_str(), &format.UserSelected);
@@ -653,7 +654,7 @@ bool Gui::DoGui()
                         for (auto avgResult : testManager->AveragedResults)
                         {
                             OutputOffsetProfile* currentProfile = SpdifOutputOffsetProfiles::CurrentProfile();
-                            std::string formatStr = OutputOffsetProfile::FormatStr(avgResult.Format->WaveFormat);
+                            std::string formatStr = ProfileFormat::FormatStr(avgResult.Format->WaveFormat);
                             bool verified = currentProfile->OutputOffsets.contains(formatStr) && currentProfile->OutputOffsets[formatStr].verified;
                             GuiHelper::VerifiedMarker(verified, DpiScale);
 

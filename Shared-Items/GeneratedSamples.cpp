@@ -142,16 +142,16 @@ void GeneratedSamples::GenerateVolumeAdjustmentSamples()
         samples[i] = (float)sin(M_PI * 2 * constantToneFreq * time) * constantToneAmp;
     }
 
-    // Tick once per durationInSeconds
-    int tickSamplesLength = sampleRate / tickFreq;
-    for (int i = 0; i < samplesLength; i++)
-    {
-        if (i < tickSamplesLength)
-        {
-            double time = (double)i / sampleRate;
-            samples[i] = (float)sin(M_PI * 2 * tickFreq * time) * tickAmp;
-        }
-    }
+    //// Tick once per durationInSeconds
+    //int tickSamplesLength = sampleRate / tickFreq;
+    //for (int i = 0; i < samplesLength; i++)
+    //{
+    //    if (i < tickSamplesLength)
+    //    {
+    //        double time = (double)i / sampleRate;
+    //        samples[i] = (float)sin(M_PI * 2 * tickFreq * time) * tickAmp;
+    //    }
+    //}
 }
 
 void GeneratedSamples::GenerateTestPattern_ToneSamples()

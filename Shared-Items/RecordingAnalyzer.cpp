@@ -11,6 +11,7 @@
 #include <iomanip>
 #include "TestConfiguration.h"
 #include <ctime>
+#include "ProfileFormat.h"
 using namespace std;
 
 const std::string RecordingAnalyzer::validRecordingsFilename{ "Valid-Individual-Recordings.csv" };
@@ -18,7 +19,7 @@ const std::string RecordingAnalyzer::invalidRecordingsFilename{ "Invalid-Individ
 
 RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& generatedSamples, const WasapiInput& input, AudioFormat* format, OutputOffsetProfile* currentProfile)
 {
-    std::string formatStr = OutputOffsetProfile::FormatStr(format->WaveFormat);
+    std::string formatStr = ProfileFormat::FormatStr(format->WaveFormat);
     float offsetFromProfile = 0;
     bool verified = false;
     if (currentProfile->OutputOffsets.contains(formatStr))
@@ -245,7 +246,7 @@ std::vector<AveragedResult> RecordingAnalyzer::AnalyzeResults(std::vector<Record
 
             if (!alreadyHasAvgResult)
             {
-                std::string formatStr = OutputOffsetProfile::FormatStr(recordingResult.Format->WaveFormat);
+                std::string formatStr = ProfileFormat::FormatStr(recordingResult.Format->WaveFormat);
                 float offsetFromProfile = 0;
                 bool verified = false;
                 if (currentProfile->OutputOffsets.contains(formatStr))

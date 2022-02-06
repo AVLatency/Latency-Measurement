@@ -8,7 +8,7 @@ std::vector<OutputOffsetProfile*> HdmiOutputOffsetProfiles::Profiles;
 void HdmiOutputOffsetProfiles::InitializeProfiles()
 {
 	HDV_MB01.Name = "HDV-MB01";
-	// TODO, something like this: HDV_MB01.OutputOffsets[OutputOffsetProfile::FormatStr(2, 48000, 16)] = OutputOffsetProfile::OutputOffset(0, false);
+	// TODO, something like this: HDV_MB01.OutputOffsets[ProfileFormat::FormatStr(2, 48000, 16)] = OutputOffsetProfile::OutputOffset(0, false);
 	Profiles.push_back(&HDV_MB01);
 
 	None.Name = "Other";
