@@ -2,6 +2,10 @@
 #include "OutputOffsetProfile.h"
 #include <vector>
 
+/// <summary>
+/// Describes the offset between HDMI output and analog output of
+/// HDMI audio extractors.
+/// </summary>
 class HdmiOutputOffsetProfiles
 {
 public:

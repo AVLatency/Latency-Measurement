@@ -8,6 +8,7 @@
 #include "HdmiResultsWriter.h"
 #include "shellapi.h"
 #include "HdmiOutputOffsetProfiles.h"
+#include "DacLatencyProfiles.h"
 #include "Defines.h"
 #include "GuiHelper.h"
 
@@ -406,12 +407,12 @@ bool Gui::DoGui()
 
                 if (ImGui::BeginListBox("DAC", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing())))
                 {
-                    for (int n = 0; n < HdmiOutputOffsetProfiles::Profiles.size(); n++)
+                    for (int n = 0; n < DacLatencyProfiles::Profiles.size(); n++)
                     {
-                        const bool is_selected = (HdmiOutputOffsetProfiles::SelectedProfileIndex == n);
-                        if (ImGui::Selectable(HdmiOutputOffsetProfiles::Profiles[n]->Name.c_str(), is_selected))
+                        const bool is_selected = (DacLatencyProfiles::SelectedProfileIndex == n);
+                        if (ImGui::Selectable(DacLatencyProfiles::Profiles[n]->Name.c_str(), is_selected))
                         {
-                            HdmiOutputOffsetProfiles::SelectedProfileIndex = n;
+                            DacLatencyProfiles::SelectedProfileIndex = n;
                         }
                         // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
                         if (is_selected)
@@ -423,31 +424,22 @@ bool Gui::DoGui()
                 }
                 ImGui::Spacing();
 
-                if (HdmiOutputOffsetProfiles::Profiles[HdmiOutputOffsetProfiles::SelectedProfileIndex] == &HdmiOutputOffsetProfiles::HDV_MB01)
-                {
-                    float imageScale = 0.45 * Gui::DpiScale;
-                    ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
-                    ImGui::TextWrapped("The HDV-MB01 is also sold under these names:");
-                    ImGui::Spacing();
-                    ImGui::TextWrapped("- J-Tech Digital JTD18G - H5CH\n"
-                        "- Monoprice Blackbird 24278\n"
-                        "- OREI HDA - 912\n");
-                }
-                else if (HdmiOutputOffsetProfiles::Profiles[HdmiOutputOffsetProfiles::SelectedProfileIndex] == &HdmiOutputOffsetProfiles::None)
+                if (DacLatencyProfiles::Profiles[DacLatencyProfiles::SelectedProfileIndex] == &DacLatencyProfiles::None)
                 {
                     ImGui::PushFont(FontHelper::BoldFont);
                     ImGui::Text("WARNING:");
                     ImGui::PopFont();
-                    ImGui::TextWrapped("Using an HDMI Audio Extractor that is not on this list will likely result in inaccurate measurements! This is because the offset between its different audio outputs will not be accounted for in the reported measurements.");
+                    ImGui::TextWrapped("Using a DAC that is not on this list will likely result in inaccurate measurements! This is because the DAC's audio latency will not be accounted for in the reported measurements.");
                     ImGui::Spacing();
-                    ImGui::TextWrapped("If you have another HDMI Audio Extractor that is suitable for use with this tool, "
+                    ImGui::TextWrapped("If you have another DAC that is suitable for use with this tool, "
                         "please let me know by email to allen"/* spam bot protection */"@"/* spam bot protection */"avlatency.com and I might be able to add support for this device.");
                 }
 
                 ImGui::TableNextColumn();
                 ImGui::PushFont(FontHelper::BoldFont);
-                ImGui::Text("Audio Formats (LPCM)");
+                ImGui::Text("HDMI Audio Formats (LPCM)");
                 ImGui::PopFont();
+                ImGui::SameLine(); GuiHelper::HelpMarker("The audio format given to the HDMI Audio Extractor.\n\nThis is different than the audio format given by the DUT to the ARC, eARC, or S/PDIF DAC! The DUT may choose to transmit a different audio format.");
                 ImGui::Spacing();
 
                 std::vector<AudioFormat>& supportedFormats = outputAudioEndpoints[outputDeviceIndex].SupportedFormats;
@@ -540,7 +532,6 @@ bool Gui::DoGui()
                 {
                     ImGui::InputText("HDMI Audio Extractor", TestNotes::Notes.HDMIAudioDevice, IM_ARRAYSIZE(TestNotes::Notes.HDMIAudioDevice), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
                 }
-                GuiHelper::OtherCombo("Recording Method", "Recording Method (Other)", &TestNotes::Notes.RecordingMethodIndex, TestNotes::Notes.RecordingMethodOptions, IM_ARRAYSIZE(TestNotes::Notes.RecordingMethodOptions), TestNotes::Notes.RecordingMethodOther, IM_ARRAYSIZE(TestNotes::Notes.RecordingMethodOther));
 
                 ImGui::PushFont(FontHelper::BoldFont);
                 ImGui::Text("Device Under Test");

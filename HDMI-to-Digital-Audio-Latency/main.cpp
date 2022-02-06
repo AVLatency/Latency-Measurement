@@ -11,6 +11,7 @@
 #include "resource.h"
 #include <shellscalingapi.h>
 #include "HdmiOutputOffsetProfiles.h"
+#include "DacLatencyProfiles.h"
 #include "FilesystemCheck.h"
 #include "Defines.h"
 
@@ -98,6 +99,7 @@ int main(int, char**)
     style.ScaleAllSizes(Gui::DpiScale);
 
     HdmiOutputOffsetProfiles::InitializeProfiles();
+    DacLatencyProfiles::InitializeProfiles();
     Resources resources(wc.hInstance, g_pd3dDevice);
     Gui gui(resources);
 

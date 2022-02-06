@@ -1,3 +1,3 @@
 #pragma once
 
-#define APP_FOLDER "HDMI ARC eARC Transmitter Latency"
+#define APP_FOLDER "HDMI to ARC, eARC, or SPDIF Latency"

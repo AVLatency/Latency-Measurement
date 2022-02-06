@@ -7,18 +7,11 @@ public:
 
 	bool HDMIAudioDeviceUseOutputOffsetProfile = true;
 	char HDMIAudioDevice[128] = "";
-	int RecordingMethodIndex = 0;
-	const char* RecordingMethodOptions[4] = { "", "Microphone	", "Direct Connection", "Other" };
-	char RecordingMethodOther[128] = "";
-	const char* RecordingMethod()
-	{
-		return (RecordingMethodIndex == IM_ARRAYSIZE(RecordingMethodOptions) - 1 ? RecordingMethodOther : RecordingMethodOptions[RecordingMethodIndex]);
-	}
 
 	char DutModel[128] = "";
 	char DutFirmwareVersion[128] = "";
 	int DutOutputTypeIndex = 0;
-	const char* DutOutputTypeOptions[4] = { "", "Speaker", "Headphone Output", "Other" };
+	const char* DutOutputTypeOptions[6] = { "", "ARC", "eARC", "S/PDIF Optical", "S/PDIF Coaxial", "Other"};
 	char DutOutputTypeOther[128] = "";
 	const char* DutOutputType()
 	{
