@@ -66,15 +66,20 @@ void AdjustVolumeManager::SafeDeleteMonitorSamples()
 		delete[] rightChannelNormalizedTickMonitorSamples;
 		rightChannelNormalizedTickMonitorSamples = nullptr;
 	}
-	if (leftChannelTickReferenceSamples != nullptr)
+	if (tickReferenceSamples != nullptr)
 	{
-		delete[] leftChannelTickReferenceSamples;
-		leftChannelTickReferenceSamples = nullptr;
+		delete[] tickReferenceSamples;
+		tickReferenceSamples = nullptr;
 	}
-	if (rightChannelNormalizedTickReferenceSamples != nullptr)
+	if (tickReferenceSamples != nullptr)
 	{
-		delete[] rightChannelNormalizedTickReferenceSamples;
-		rightChannelNormalizedTickReferenceSamples = nullptr;
+		delete[] tickReferenceSamples;
+		tickReferenceSamples = nullptr;
+	}
+	if (normalizedTickReferenceSamples != nullptr)
+	{
+		delete[] normalizedTickReferenceSamples;
+		normalizedTickReferenceSamples = nullptr;
 	}
 }
 
@@ -224,8 +229,8 @@ void AdjustVolumeManager::CopyBuffer(float* sourceBuffer, int sourceBufferLength
 	leftChannelTickMonitorSamples = new float[tickMonitorSamplesLength];
 	rightChannelTickMonitorSamples = new float[tickMonitorSamplesLength];
 	rightChannelNormalizedTickMonitorSamples = new float[tickMonitorSamplesLength];
-	leftChannelTickReferenceSamples = new float[tickMonitorSamplesLength];
-	rightChannelNormalizedTickReferenceSamples = new float[tickMonitorSamplesLength];
+	tickReferenceSamples = new float[tickMonitorSamplesLength];
+	normalizedTickReferenceSamples = new float[tickMonitorSamplesLength];
 
 	// Find the peaks in the sourceBuffer, excluding some padding on the left and right of the source buffer:
 	int padding = tickMonitorSamplesLength * 2;
@@ -287,14 +292,14 @@ void AdjustVolumeManager::CopyBuffer(float* sourceBuffer, int sourceBufferLength
 		{
 			double time = (double)(i - tickSamplesLength) / input->waveFormat.Format.nSamplesPerSec;
 			float sample = (float)sin(M_PI * 2 * tickFrequency * time);
-			leftChannelTickReferenceSamples[i] = sample * 0.75;
-			rightChannelNormalizedTickReferenceSamples[i] = sample;
+			tickReferenceSamples[i] = sample * 0.75;
+			normalizedTickReferenceSamples[i] = sample;
 		}
 		else
 		{
 			// left or right padding
-			leftChannelTickReferenceSamples[i] = 0;
-			rightChannelNormalizedTickReferenceSamples[i] = 0;
+			tickReferenceSamples[i] = 0;
+			normalizedTickReferenceSamples[i] = 0;
 		}
 	}
 

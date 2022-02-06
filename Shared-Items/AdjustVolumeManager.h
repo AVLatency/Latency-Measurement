@@ -18,8 +18,8 @@ public:
 	float* leftChannelTickMonitorSamples = nullptr;
 	float* rightChannelTickMonitorSamples = nullptr;
 	float* rightChannelNormalizedTickMonitorSamples = nullptr;
-	float* leftChannelTickReferenceSamples = nullptr;
-	float* rightChannelNormalizedTickReferenceSamples = nullptr;
+	float* tickReferenceSamples = nullptr;
+	float* normalizedTickReferenceSamples = nullptr;
 	int tickMonitorSamplesLength = 0;
 
 	PeakLevelGrade leftChannelGrade = PeakLevelGrade::Quiet;

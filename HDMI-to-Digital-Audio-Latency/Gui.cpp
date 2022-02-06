@@ -66,17 +66,13 @@ bool Gui::DoGui()
 
     ImGui::Text("Cable Diagram:");
     ImGui::SameLine(); GuiHelper::HelpMarker(
-        "Before starting you must connect your audio device and cables as described in this diagram.\n\n"
-        "To record audio output from the Device Under Test (DUT) you can use a microphone or directly connect to the headphone or speaker output of the DUT.\n\n"
-        "- Microphone: Make sure to position the mic as close as possible to the speaker because sound travels measurably slow. Position the mic close to the tweeter if there are separate speaker components.\n"
-        "- DUT headphone output: Note that speaker and headphone output can sometimes have different latency.\n"
-        "- Directly connect to DUT speaker output: Start the volume low as some amplifiers may be capable of high voltage outputs that could damage your audio input device.\n\n"
-        "Your \"HDMI Audio Extractor\" must be capabile of analog audio output AND HDMI audio output at the same time. The time offset between analog audio output and HDMI audio output must be known. A list of capable devices can be found on the GitHub wiki.\n\n"
+        "Before starting you must connect your audio devices and cables as described in this diagram.\n\n"
+        "For your HDMI Audio Extractor, the time offset between analog audio output and HDMI audio output must be known. For your ARC, eARC, or S/PDIF DAC, the digital to analog latency must be known. A list of capable devices can be found on the GitHub wiki.\n\n"
         "GitHub Wiki: github.com/AVLatency/Latency-Measurement/wiki");
     float cableMapScale = 0.55 * Gui::DpiScale;
     ImGui::Image((void*)resources.CableMapTexture, ImVec2(resources.CableMapTextureWidth * cableMapScale, resources.CableMapTextureHeight * cableMapScale));
 
-    if (ImGui::BeginTable("MainViewTopLevelTable", 2, ImGuiTableFlags_Borders, ImVec2(1235 * DpiScale, 0)))
+    if (ImGui::BeginTable("MainViewTopLevelTable", 2, ImGuiTableFlags_Borders, ImVec2(1234 * DpiScale, 0)))
     {
         ImGui::TableSetupColumn("Col1", ImGuiTableColumnFlags_WidthFixed);
 
@@ -101,6 +97,7 @@ bool Gui::DoGui()
         {
         case MeasurementToolGuiState::GettingStarted:
         {
+            ImGui::Spacing();
             float scale = 0.55 * Gui::DpiScale;
             ImGui::Image((void*)resources.HdmiToDigitalAudioDefinitionTexture , ImVec2(resources.HdmiToDigitalAudioDefinitionTextureWidth * scale, resources.HdmiToDigitalAudioDefinitionTextureHeight * scale));
 
@@ -178,7 +175,7 @@ bool Gui::DoGui()
                     }
                     ImGui::EndCombo();
                 }
-                ImGui::SameLine(); GuiHelper::HelpMarker("You can use either a line in or mic input on your computer, but when using certain microphones you may find the mic input works better.\n\n"
+                ImGui::SameLine(); GuiHelper::HelpMarker("You can use either a line in or mic input on your computer.\n\n"
                     "This input device must be configured to have at least two channels. It can be any sample rate and bit depth, but at least 48 kHz 16 bit is recommended.");
 
                 ImGui::Spacing();
@@ -217,9 +214,9 @@ bool Gui::DoGui()
                     ImGui::TableNextRow();
                     ImGui::TableNextColumn();
                     ImGui::Text("Reference Image");
-                    if (adjustVolumeManager != nullptr && adjustVolumeManager->leftChannelTickReferenceSamples != nullptr)
+                    if (adjustVolumeManager != nullptr && adjustVolumeManager->tickReferenceSamples != nullptr)
                     {
-                        ImGui::PlotLines("", adjustVolumeManager->leftChannelTickReferenceSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
+                        ImGui::PlotLines("", adjustVolumeManager->tickReferenceSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
                     }
                     ImGui::Spacing();
 
@@ -238,7 +235,7 @@ bool Gui::DoGui()
 
                     ImGui::TableNextColumn();
                     ImGui::Text("");
-                    GuiHelper::PeakLevel(adjustVolumeManager->leftChannelGrade, "Adjust the volume of your input device through the Windows control panel to make the monitor amplitude fit with some headroom to spare. "
+                    GuiHelper::PeakLevel(adjustVolumeManager->leftChannelGrade, "Adjust the Output Volume and/or the volume of your input device through the Windows control panel to make the monitor amplitude fit with some headroom to spare."
                         "You may need to turn down the Microphone Boost in the Levels section of Additional device properties.");
 
                     ImGui::EndTable();
@@ -246,62 +243,40 @@ bool Gui::DoGui()
 
                 ImGui::Spacing();
                 ImGui::PushFont(FontHelper::BoldFont);
-                ImGui::Text("Input: Right Channel (DUT)");
+                ImGui::Text("Input: Right Channel (ARC, eARC, or S/PDIF DAC)");
                 ImGui::PopFont();
-                float fullTableWidth = 600 * DpiScale; // Need to set this explictly instead of just using ImGuiTableFlags_SizingFixedFit because there is another table inside that uses ImGuiTableFlags_SizingFixedFit
-                if (ImGui::BeginTable("RightChannelVolumeTable", 2, ImGuiTableFlags_None, ImVec2(fullTableWidth, 0)))
+                
+                if (ImGui::BeginTable("LeftChannelVolumeTable", 3, ImGuiTableFlags_SizingFixedFit))
                 {
                     ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, columnWidth);
 
                     ImGui::TableNextRow();
                     ImGui::TableNextColumn();
-                    ImGui::Text("Reference Image\n(Normalized)");
-                    if (adjustVolumeManager != nullptr && adjustVolumeManager->rightChannelNormalizedTickReferenceSamples != nullptr)
+                    ImGui::Text("Reference Image");
+                    if (adjustVolumeManager != nullptr && adjustVolumeManager->tickReferenceSamples != nullptr)
                     {
-                        ImGui::PlotLines("", adjustVolumeManager->rightChannelNormalizedTickReferenceSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
+                        ImGui::PlotLines("", adjustVolumeManager->tickReferenceSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
                     }
                     ImGui::Spacing();
 
                     ImGui::TableNextColumn();
-                    if (ImGui::BeginTable("RightChannelVolumeMontiorsTable", 3, ImGuiTableFlags_SizingFixedFit))
+                    ImGui::Text("Monitor");
+                    if (adjustVolumeManager != nullptr && adjustVolumeManager->rightChannelTickMonitorSamples != nullptr)
                     {
-                        ImGui::TableNextRow();
-                        ImGui::TableNextColumn();
-                        ImGui::Text("Monitor\n(Normalized)");
-                        if (adjustVolumeManager != nullptr && adjustVolumeManager->rightChannelNormalizedTickMonitorSamples != nullptr)
-                        {
-                            ImGui::PlotLines("", adjustVolumeManager->rightChannelNormalizedTickMonitorSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
-                        }
-                        ImGui::Spacing();
-
-                        ImGui::TableNextColumn();
-                        ImGui::Text("Monitor\n(Raw)");
-                        if (adjustVolumeManager != nullptr && adjustVolumeManager->rightChannelTickMonitorSamples != nullptr)
-                        {
-                            ImGui::PlotLines("", adjustVolumeManager->rightChannelTickMonitorSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
-                        }
-                        ImGui::Spacing();
-
-                        ImGui::TableNextColumn();
-                        ImGui::Text("");
-                        ImGui::Text("");
-                        GuiHelper::PeakLevel(adjustVolumeManager->rightChannelGrade, "Adjust the output volume of your Device Under Test (DUT) to give a consistent normalized recording.\n\n"
-                            "When the DUT is muted, this peak level should be \"Quiet\". If it is not, this likely means you are getting cable crosstalk and your mesaurements will incorrectly be 0 ms audio latency!\n\n"
-                            "To solve the problem of cable crosstalk, try turning down the output volume in the Advanced Configuration or using a physical, inline volume control on your HDMI Audio Extractor output.");
-
-                        ImGui::EndTable();
+                        ImGui::PlotLines("", adjustVolumeManager->rightChannelTickMonitorSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
                     }
+                    ImGui::Spacing();
+
+                    ImGui::TableNextColumn();
+                    ImGui::Text("");
+                    GuiHelper::PeakLevel(adjustVolumeManager->rightChannelGrade, "Adjust the Output Volume and/or the volume of your input device through the Windows control panel to make the monitor amplitude fit with some headroom to spare."
+                        "You may need to turn down the Microphone Boost in the Levels section of Additional device properties.");
+
                     ImGui::EndTable();
                 }
 
-                if (ImGui::TreeNode("Advanced Configuration"))
-                {
-                    ImGui::DragFloat("Output Volume", &TestConfiguration::OutputVolume, .001f, .1f, 1);
-                    ImGui::SameLine(); GuiHelper::HelpMarker("Should normally be left at 1. If you are experiencing cable crosstalk, you can try turning this volume down or using a physical, inline volume control on your HDMI Audio Extractor output.");
-                    ImGui::DragFloat("Detection Threshold Multiplier", &TestConfiguration::DetectionThresholdMultiplier, .001f, .0001f, 1);
-                    ImGui::SameLine(); GuiHelper::HelpMarker("Should normally be left at 1. If you are using a microphone that is extremely quiet, lowering this multiplier may help at the risk of incorrectly detecting crosstalk on the left and right audio input.");
-                    ImGui::TreePop();
-                }
+                ImGui::DragFloat("Output Volume", &TestConfiguration::OutputVolume, .001f, .1f, 1);
+                ImGui::SameLine(); GuiHelper::HelpMarker("If the peak level is Loud you can turn this down instead of changing your input device volume.");
 
                 if (state == MeasurementToolGuiState::AdjustVolume)
                 {

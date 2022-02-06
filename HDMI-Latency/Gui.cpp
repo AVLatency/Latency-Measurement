@@ -76,7 +76,7 @@ bool Gui::DoGui()
     float cableMapScale = 0.55 * Gui::DpiScale;
     ImGui::Image((void*)resources.CableMapTexture, ImVec2(resources.CableMapTextureWidth * cableMapScale, resources.CableMapTextureHeight * cableMapScale));
 
-    if (ImGui::BeginTable("MainViewTopLevelTable", 2, ImGuiTableFlags_Borders, ImVec2(1235 * DpiScale, 0)))
+    if (ImGui::BeginTable("MainViewTopLevelTable", 2, ImGuiTableFlags_Borders, ImVec2(1234 * DpiScale, 0)))
     {
         ImGui::TableSetupColumn("Col1", ImGuiTableColumnFlags_WidthFixed);
 
@@ -215,9 +215,9 @@ bool Gui::DoGui()
                     ImGui::TableNextRow();
                     ImGui::TableNextColumn();
                     ImGui::Text("Reference Image");
-                    if (adjustVolumeManager != nullptr && adjustVolumeManager->leftChannelTickReferenceSamples != nullptr)
+                    if (adjustVolumeManager != nullptr && adjustVolumeManager->tickReferenceSamples != nullptr)
                     {
-                        ImGui::PlotLines("", adjustVolumeManager->leftChannelTickReferenceSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
+                        ImGui::PlotLines("", adjustVolumeManager->tickReferenceSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
                     }
                     ImGui::Spacing();
 
@@ -254,9 +254,9 @@ bool Gui::DoGui()
                     ImGui::TableNextRow();
                     ImGui::TableNextColumn();
                     ImGui::Text("Reference Image\n(Normalized)");
-                    if (adjustVolumeManager != nullptr && adjustVolumeManager->rightChannelNormalizedTickReferenceSamples != nullptr)
+                    if (adjustVolumeManager != nullptr && adjustVolumeManager->normalizedTickReferenceSamples != nullptr)
                     {
-                        ImGui::PlotLines("", adjustVolumeManager->rightChannelNormalizedTickReferenceSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
+                        ImGui::PlotLines("", adjustVolumeManager->normalizedTickReferenceSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
                     }
                     ImGui::Spacing();
 
