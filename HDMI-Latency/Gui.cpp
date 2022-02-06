@@ -838,7 +838,7 @@ bool Gui::DoGui()
         float imageScale = 0.6 * Gui::DpiScale;
         ImGui::Image((void*)resources.EDIDModeTexture, ImVec2(resources.EDIDModeTextureWidth * imageScale, resources.EDIDModeTextureHeight * imageScale));
 
-        ImGui::Text("For HDMI audio extractors, set the switch to \"TV\" or \"Passthrough\".");
+        ImGui::Text("This EDID mode is often labelled \"TV\" on HDMI audio extractors.");
         ImGui::Spacing();
 
         ImGui::SetItemDefaultFocus();

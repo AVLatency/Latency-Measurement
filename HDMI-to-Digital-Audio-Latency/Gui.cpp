@@ -104,7 +104,7 @@ bool Gui::DoGui()
             float scale = 0.55 * Gui::DpiScale;
             ImGui::Image((void*)resources.HdmiToDigitalAudioDefinitionTexture , ImVec2(resources.HdmiToDigitalAudioDefinitionTextureWidth * scale, resources.HdmiToDigitalAudioDefinitionTextureHeight * scale));
 
-            ImGui::Text("Welcome to the AV Latency.com HDMI latency measurement tool!");
+            ImGui::Text("Welcome to the AV Latency.com HDMI to ARC, eARC, or S/PDIF Latency measurement tool!");
             ImGui::Spacing();
             ImGui::Text("Before starting, please connect your cables as described in the diagram above.");
             ImGui::Spacing();
@@ -840,7 +840,7 @@ bool Gui::DoGui()
         float imageScale = 0.6 * Gui::DpiScale;
         ImGui::Image((void*)resources.EDIDModeTexture, ImVec2(resources.EDIDModeTextureWidth * imageScale, resources.EDIDModeTextureHeight * imageScale));
 
-        ImGui::Text("For HDMI audio extractors, set the switch to \"TV\" or \"Passthrough\".");
+        ImGui::Text("This EDID mode is often labelled \"TV\" on HDMI audio extractors.");
         ImGui::Spacing();
 
         ImGui::SetItemDefaultFocus();
