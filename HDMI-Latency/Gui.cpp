@@ -114,6 +114,8 @@ bool Gui::DoGui()
             {
                 openEdidReminderDialog = true;
             }
+
+            ImGui::Spacing();
         }
             break;
         case MeasurementToolGuiState::SelectAudioDevices:

@@ -115,6 +115,8 @@ bool Gui::DoGui()
                 RefreshAudioEndpoints();
                 state = MeasurementToolGuiState::SelectAudioDevices;
             }
+
+            ImGui::Spacing();
         }
             break;
         case MeasurementToolGuiState::SelectAudioDevices:

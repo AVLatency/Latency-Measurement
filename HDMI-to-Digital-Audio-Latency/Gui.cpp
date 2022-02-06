@@ -101,6 +101,8 @@ bool Gui::DoGui()
         {
         case MeasurementToolGuiState::GettingStarted:
         {
+            float scale = 0.55 * Gui::DpiScale;
+            ImGui::Image((void*)resources.HdmiToDigitalAudioDefinitionTexture , ImVec2(resources.HdmiToDigitalAudioDefinitionTextureWidth * scale, resources.HdmiToDigitalAudioDefinitionTextureHeight * scale));
 
             ImGui::Text("Welcome to the AV Latency.com HDMI latency measurement tool!");
             ImGui::Spacing();
@@ -114,6 +116,8 @@ bool Gui::DoGui()
             {
                 openEdidReminderDialog = true;
             }
+
+            ImGui::Spacing();
         }
             break;
         case MeasurementToolGuiState::SelectAudioDevices:
