@@ -16,7 +16,6 @@ public:
 	std::atomic<int> PassCount = 0;
 	std::atomic<int> RecordingCount = 0;
 
-	std::vector<WAVEFORMATEX*> AllHDMIFormats;
 	std::vector<WAVEFORMATEX*> SupportedFormats;
 	std::vector<WAVEFORMATEX*> FailedFormats;
 
@@ -30,20 +29,6 @@ private:
 	const SystemInfo& systemInfo;
 
 	int PopulateSupportedFormats();
-	void PopulateExFormats();
-	void RecordExFormatTag(WAVEFORMATEX* exFormat);
-	void RecordExChannels(WAVEFORMATEX* exFormat);
-	void RecordExSamplesPerSec(WAVEFORMATEX* exFormat);
-	void RecordExBitsPerSample(WAVEFORMATEX* exFormat);
-	void RecordExFormat(WAVEFORMATEX* exFormat);
-
-	void PopulateExtensibleFormats();
-	void RecordExtensibleSubFormat(WAVEFORMATEXTENSIBLE* extensibleFormat);
-	void RecordExtensibleChannels(WAVEFORMATEXTENSIBLE* extensibleFormat);
-	void RecordExtensibleChannelMask(WAVEFORMATEXTENSIBLE* extensibleFormat);
-	void RecordExtensibleSamplesPerSec(WAVEFORMATEXTENSIBLE* extensibleFormat);
-	void RecordExtensibleBitsPerSample(WAVEFORMATEXTENSIBLE* extensibleFormat);
-	void RecordExtensibleFormat(WAVEFORMATEXTENSIBLE* extensibleFormat);
 
 	void SetBitsPerSample(WAVEFORMATEX* wfx, WORD bitsPerSample);
 

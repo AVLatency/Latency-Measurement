@@ -33,6 +33,9 @@
     <ClInclude Include="RecordingAnalyzer.h" />
     <ClInclude Include="RecordingResult.h" />
     <ClInclude Include="RecordingSingleChannelResult.h" />
+    <ClInclude Include="WindowsWaveFormats.h" />
+    <ClInclude Include="StringHelper.h" />
+    <ClInclude Include="AudioFormat.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\imgui\imgui.cpp">
@@ -68,6 +71,9 @@
     <ClCompile Include="RecordingAnalyzer.cpp" />
     <ClCompile Include="RecordingResult.cpp" />
     <ClCompile Include="RecordingSingleChannelResult.cpp" />
+    <ClCompile Include="StringHelper.cpp" />
+    <ClCompile Include="WindowsWaveFormats.cpp" />
+    <ClCompile Include="AudioFormat.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />
