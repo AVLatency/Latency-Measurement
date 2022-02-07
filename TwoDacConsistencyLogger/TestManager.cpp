@@ -112,6 +112,16 @@ int TestManager::PopulateSupportedFormats()
 		}
 	}
 
+	for (WAVEFORMATEXTENSIBLE* wfx : WindowsWaveFormats::Formats.AllExtensibleFormats)
+	{
+		HRESULT supportedHr = pAudioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, &wfx->Format, NULL);
+		if (supportedHr == S_OK)
+		{
+			// wfx is supported!
+			SupportedFormats.push_back(&wfx->Format);
+		}
+	}
+
 Exit:
 	SAFE_RELEASE(pEnumerator)
 	SAFE_RELEASE(pDevice)
