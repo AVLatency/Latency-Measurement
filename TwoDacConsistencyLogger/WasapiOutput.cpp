@@ -22,7 +22,7 @@ const int INT24_MAX = (1 << 23) - 1;
               if ((punk) != NULL)  \
                 { (punk)->Release(); (punk) = NULL; }
 
-WasapiOutput::WasapiOutput(const RecordingConfiguration & config) : recordingConfig { config }
+WasapiOutput::WasapiOutput(const GeneratedSamples & config) : recordingConfig { config }
 {
     this->waveFormat = config.WaveFormat;
 }
@@ -218,7 +218,7 @@ WORD WasapiOutput::GetFormatID()
 
 HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flags)
 {
-    if (sampleIndex >= recordingConfig.testWaveLength)
+    if (sampleIndex >= recordingConfig.samplesLength)
     {
         *flags = AUDCLNT_BUFFERFLAGS_SILENT;
         return S_OK;
@@ -230,13 +230,13 @@ HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flag
         float* castData = (float*)pData;
         for (UINT32 i = 0; i < bufferFrameCount * numChannels; i += numChannels)
         {
-            if (sampleIndex < recordingConfig.testWaveLength)
+            if (sampleIndex < recordingConfig.samplesLength)
             {
                 for (int c = 0; c < numChannels; c++)
                 {
                     if (c == 0)
                     {
-                        castData[i + c] = recordingConfig.testWave[sampleIndex];
+                        castData[i + c] = recordingConfig.samples[sampleIndex];
                     }
                     else
                     {
@@ -263,13 +263,13 @@ HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flag
         INT16* castData = (INT16*)pData;
         for (UINT32 i = 0; i < bufferFrameCount * numChannels; i += numChannels)
         {
-            if (sampleIndex < recordingConfig.testWaveLength)
+            if (sampleIndex < recordingConfig.samplesLength)
             {
                 for (int c = 0; c < numChannels; c++)
                 {
                     if (c == 0)
                     {
-                        castData[i + c] = (INT16)(round(recordingConfig.testWave[sampleIndex] * SHRT_MAX));
+                        castData[i + c] = (INT16)(round(recordingConfig.samples[sampleIndex] * SHRT_MAX));
                     }
                     else
                     {
@@ -297,9 +297,9 @@ HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flag
 
         for (int i = 0; i < dataLength; i += bytesPerFrame)
         {
-            if (sampleIndex < recordingConfig.testWaveLength)
+            if (sampleIndex < recordingConfig.samplesLength)
             {
-                int thirtyTwoBit = (int)round(recordingConfig.testWave[sampleIndex] * INT24_MAX);
+                int thirtyTwoBit = (int)round(recordingConfig.samples[sampleIndex] * INT24_MAX);
 
                 for (int c = 0; c < numChannels; c++)
                 {
@@ -343,13 +343,13 @@ HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flag
         INT32* castData = (INT32*)pData;
         for (UINT32 i = 0; i < bufferFrameCount * numChannels; i += numChannels)
         {
-            if (sampleIndex < recordingConfig.testWaveLength)
+            if (sampleIndex < recordingConfig.samplesLength)
             {
                 for (int c = 0; c < numChannels; c++)
                 {
                     if (c == 0)
                     {
-                        castData[i + c] = (INT32)(round(recordingConfig.testWave[sampleIndex] * INT_MAX));
+                        castData[i + c] = (INT32)(round(recordingConfig.samples[sampleIndex] * INT_MAX));
                     }
                     else
                     {
@@ -373,6 +373,6 @@ HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flag
         return -1; // TODO: a proper error message?
     }
     
-    *flags = sampleIndex < recordingConfig.testWaveLength ? 0 : AUDCLNT_BUFFERFLAGS_SILENT;
+    *flags = sampleIndex < recordingConfig.samplesLength ? 0 : AUDCLNT_BUFFERFLAGS_SILENT;
     return S_OK;
 }

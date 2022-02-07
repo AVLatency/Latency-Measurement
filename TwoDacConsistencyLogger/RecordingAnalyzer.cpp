@@ -14,7 +14,7 @@ using namespace std;
 const std::string RecordingAnalyzer::validResultsFilename{ "Valid-Results.csv" };
 const std::string RecordingAnalyzer::invalidResultsFilename{ "Invalid-Results.csv" };
 
-RecordingResult RecordingAnalyzer::AnalyzeRecording(const RecordingConfiguration& config, const SystemInfo& sysInfo, const WasapiOutput& output, const WasapiInput& input, float detectionThresholdMultiplier)
+RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& config, const SystemInfo& sysInfo, const WasapiOutput& output, const WasapiInput& input, float detectionThresholdMultiplier)
 {
     std::string testRootPath = GetTestRootPath(sysInfo);
     std::string recordingRootPath = testRootPath + format("{}ch-{}Hz-{}bit-{}-{}_{}-{}Hz-{}-{}-{}/",
@@ -174,12 +174,12 @@ std::string RecordingAnalyzer::GetChannelMaskString(WAVEFORMATEX* waveFormat)
     return result;
 }
 
-RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const RecordingConfiguration& config, float* recordedSamples, int recordedSamplesLength, int inputSampleRate, float detectionThresholdMultiplier)
+RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const GeneratedSamples& config, float* recordedSamples, int recordedSamplesLength, int inputSampleRate, float detectionThresholdMultiplier)
 {
     RecordingSingleChannelResult result;
     result.RecordingSampleRate = inputSampleRate;
 
-    int tickDurationInSamples = inputSampleRate / RecordingConfiguration::GetTickFrequency(config.WaveFormat->nSamplesPerSec);
+    int tickDurationInSamples = inputSampleRate / GeneratedSamples::GetTickFrequency(config.WaveFormat->nSamplesPerSec);
 
     // Find the max and min amplitudes
     float maxAmplitude = 0;
@@ -401,7 +401,7 @@ void RecordingAnalyzer::SaveRecording(const WasapiInput& input, std::string guid
     f.seekp(data_chunk_pos + (unsigned long long)4); // first four are the "data" characters
     write_word(f, file_length - data_chunk_pos + 8, 4); // size of all the actual audio data in bytes. (Adding 8 to account for the "data----" characters)
 }
-void RecordingAnalyzer::SaveResult(const RecordingConfiguration& config, const SystemInfo& sysInfo, int inputSampleRate, RecordingResult result, std::string testRootPath, std::string recordingRootPath, std::string outputDeviceName, std::string inputDeviceName)
+void RecordingAnalyzer::SaveResult(const GeneratedSamples& config, const SystemInfo& sysInfo, int inputSampleRate, RecordingResult result, std::string testRootPath, std::string recordingRootPath, std::string outputDeviceName, std::string inputDeviceName)
 {
     bool isValid = result.Channel1.ValidResult && result.Channel2.ValidResult;
     std::string detailedResultsCsvPath = recordingRootPath + (isValid ? validResultsFilename : invalidResultsFilename);

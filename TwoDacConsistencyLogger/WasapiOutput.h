@@ -1,18 +1,18 @@
 #pragma once
 #include <Audioclient.h>
 #include <string>
-#include "RecordingConfiguration.h"
+#include "GeneratedSamples.h"
 
 class WasapiOutput
 {
 public:
-	WasapiOutput(const RecordingConfiguration& config);
+	WasapiOutput(const GeneratedSamples& config);
 	void StartOutput();
 
 	std::string DeviceName = "";
 
 private:
-	const RecordingConfiguration& recordingConfig;
+	const GeneratedSamples& recordingConfig;
 	WAVEFORMATEX* waveFormat;
 	int sampleIndex = 0;
 

@@ -18,7 +18,7 @@
 
 const IID IID_IAudioCaptureClient = __uuidof(IAudioCaptureClient);
 
-WasapiInput::WasapiInput(const RecordingConfiguration& config)
+WasapiInput::WasapiInput(const GeneratedSamples& config)
 {
     testWaveDurationInSeconds = config.TestWaveDurationInSeconds();
 }

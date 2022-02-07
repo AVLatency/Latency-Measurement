@@ -29,12 +29,12 @@
     <ClInclude Include="TestManager.h" />
     <ClInclude Include="WasapiOutput.h" />
     <ClInclude Include="WasapiInput.h" />
-    <ClInclude Include="RecordingConfiguration.h" />
     <ClInclude Include="RecordingAnalyzer.h" />
     <ClInclude Include="RecordingResult.h" />
     <ClInclude Include="RecordingSingleChannelResult.h" />
     <ClInclude Include="WindowsWaveFormats.h" />
     <ClInclude Include="StringHelper.h" />
+    <ClInclude Include="GeneratedSamples.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\imgui\imgui.cpp">
@@ -66,12 +66,12 @@
     <ClCompile Include="TestManager.cpp" />
     <ClCompile Include="WasapiOutput.cpp" />
     <ClCompile Include="WasapiInput.cpp" />
-    <ClCompile Include="RecordingConfiguration.cpp" />
     <ClCompile Include="RecordingAnalyzer.cpp" />
     <ClCompile Include="RecordingResult.cpp" />
     <ClCompile Include="RecordingSingleChannelResult.cpp" />
     <ClCompile Include="StringHelper.cpp" />
     <ClCompile Include="WindowsWaveFormats.cpp" />
+    <ClCompile Include="GeneratedSamples.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />
