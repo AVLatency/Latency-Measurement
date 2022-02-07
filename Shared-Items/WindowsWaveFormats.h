@@ -7,8 +7,8 @@ class WindowsWaveFormats
 public:
 	static WindowsWaveFormats Formats;
 
-	std::vector<WAVEFORMATEXTENSIBLE*> AllHDMIExtensibleFormats;
-	std::vector<WAVEFORMATEX*> AllHDMIExFormats;
+	std::vector<WAVEFORMATEXTENSIBLE*> AllExtensibleFormats;
+	std::vector<WAVEFORMATEX*> AllExFormats;
 
 	WindowsWaveFormats();
 

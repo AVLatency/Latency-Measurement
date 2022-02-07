@@ -1,6 +1,5 @@
 #include "WindowsWaveFormats.h"
 
-// TODO: rename to "WindowsWaveFormats"
 WindowsWaveFormats WindowsWaveFormats::Formats;
 
 WindowsWaveFormats::WindowsWaveFormats()
@@ -248,7 +247,7 @@ void WindowsWaveFormats::RecordExtensibleFormat(WAVEFORMATEXTENSIBLE* extensible
 {
 	WAVEFORMATEXTENSIBLE* pWfx = new WAVEFORMATEXTENSIBLE();
 	*pWfx = *extensibleFormat;
-	AllHDMIExtensibleFormats.push_back(pWfx);
+	AllExtensibleFormats.push_back(pWfx);
 }
 
 void WindowsWaveFormats::PopulateExFormats()
@@ -329,7 +328,7 @@ void WindowsWaveFormats::RecordExFormat(WAVEFORMATEX* exFormat)
 {
 	WAVEFORMATEX* pWfx = new WAVEFORMATEX();
 	*pWfx = *exFormat;
-	AllHDMIExFormats.push_back(pWfx);
+	AllExFormats.push_back(pWfx);
 }
 
 void WindowsWaveFormats::SetBitsPerSample(WAVEFORMATEX* wfx, WORD bitsPerSample)

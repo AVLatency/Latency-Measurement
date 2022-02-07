@@ -46,7 +46,7 @@ void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool 
 	if (!FAILED(hr))
 	{
 		// Favour formats that have channel masks
-		for (WAVEFORMATEXTENSIBLE* waveFormat : WindowsWaveFormats::Formats.AllHDMIExtensibleFormats)
+		for (WAVEFORMATEXTENSIBLE* waveFormat : WindowsWaveFormats::Formats.AllExtensibleFormats)
 		{
 			if (formatFilter((WAVEFORMATEX*)waveFormat))
 			{
@@ -62,7 +62,7 @@ void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool 
 			}
 		}
 		// Next, look at formats that don't have channel masks
-		for (WAVEFORMATEXTENSIBLE* waveFormat : WindowsWaveFormats::Formats.AllHDMIExtensibleFormats)
+		for (WAVEFORMATEXTENSIBLE* waveFormat : WindowsWaveFormats::Formats.AllExtensibleFormats)
 		{
 			if (formatFilter((WAVEFORMATEX*)waveFormat))
 			{
@@ -86,7 +86,7 @@ void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool 
 				}
 			}
 		}
-		for (WAVEFORMATEX* waveFormat : WindowsWaveFormats::Formats.AllHDMIExFormats)
+		for (WAVEFORMATEX* waveFormat : WindowsWaveFormats::Formats.AllExFormats)
 		{
 			if (formatFilter((WAVEFORMATEX*)waveFormat))
 			{
