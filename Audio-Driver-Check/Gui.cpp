@@ -93,7 +93,7 @@ bool Gui::DoGui()
         std::stringstream copyableFormatList;
         std::vector<AudioFormat>& supportedFormats = outputAudioEndpoints[outputDeviceIndex].SupportedFormats;
         std::vector<AudioFormat>& duplicateFormats = outputAudioEndpoints[outputDeviceIndex].DuplicateSupportedFormats;
-        if (ImGui::BeginChild("formatsChildWindow", ImVec2(0, 30 * ImGui::GetTextLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar))
+        ImGui::BeginChild("formatsChildWindow", ImVec2(0, 30 * ImGui::GetTextLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar);
         {
             for (AudioFormat& format : supportedFormats)
             {
@@ -122,8 +122,8 @@ bool Gui::DoGui()
                 copyableFormatList << format.FormatString << std::endl;
             }
 
-            ImGui::EndChild();
         }
+        ImGui::EndChild();
 
         GuiHelper::ChannelDescriptions();
         ImGui::Spacing();

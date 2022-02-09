@@ -471,7 +471,7 @@ bool Gui::DoGui()
                     }
                 }
 
-                if (ImGui::BeginChild("formatsChildWindow", ImVec2(0, 15 * ImGui::GetTextLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar))
+                ImGui::BeginChild("formatsChildWindow", ImVec2(0, 15 * ImGui::GetTextLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar);
                 {
                     for (AudioFormat& format : supportedFormats)
                     {
@@ -481,8 +481,8 @@ bool Gui::DoGui()
                         GuiHelper::VerifiedMarker(verified, DpiScale);
                         ImGui::Checkbox(format.FormatString.c_str(), &format.UserSelected);
                     }
-                    ImGui::EndChild();
                 }
+                ImGui::EndChild();
 
                 GuiHelper::FormatDescriptions();
 
@@ -648,7 +648,7 @@ bool Gui::DoGui()
                     ImGui::BeginGroup();
 
                     const AudioFormat* selectedFormat = nullptr;
-                    if (ImGui::BeginChild("", ImVec2(350 * DpiScale, 15 * ImGui::GetTextLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar))
+                    ImGui::BeginChild("", ImVec2(350 * DpiScale, 15 * ImGui::GetTextLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar);
                     {
                         int n = 0;
                         for (auto avgResult : testManager->AveragedResults)
@@ -678,8 +678,8 @@ bool Gui::DoGui()
 
                             n++;
                         }
-                        ImGui::EndChild();
                     }
+                    ImGui::EndChild();
 
                     GuiHelper::FormatDescriptions();
 
