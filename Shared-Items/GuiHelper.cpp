@@ -21,12 +21,15 @@ void GuiHelper::HelpMarker(const char* desc)
 
 void GuiHelper::FormatDescriptions()
 {
-    ImGui::Text("[V] Verified Accuracy");
-    ImGui::SameLine(); HelpMarker("The accuracy of measurements for this audio format have been verified using electronics measurement equipment, such as an oscilloscope.\n\n"
-        "Audio formats that do not have the [V] verified accuracy marker may or may not be accurate, depending on whether the audio device (e.g. HDMI Audio Extractor) is operating with the same offset between audio outputs as it does for verified formats.\n\n"
-        "This is not related to the consistency of measurement results.");
-
     ChannelDescriptions();
+}
+
+void GuiHelper::VerifiedHelp()
+{
+    ImGui::SameLine(); HelpMarker("If \"Yes\", The accuracy of measurements for this specific audio format have been verified using electronics measurement equipment, such as an oscilloscope.\n\n"
+        "Measurements for audio formats that do not have verified accuracy are likely still extremely accurate, because the devices recommended for use with this tool "
+        "operate with the same offset or latency, regardless of audio format.\n\n"
+        "This is not related to the consistency of measurement results.");
 }
 
 void GuiHelper::ChannelDescriptions()
@@ -91,15 +94,6 @@ void GuiHelper::PeakLevel(AdjustVolumeManager::PeakLevelGrade grade, const char*
         break;
     }
     ImGui::PopFont();
-}
-
-void GuiHelper::VerifiedMarker(bool verified, float dpiScale)
-{
-    if (verified)
-    {
-        ImGui::Text("[V]"); ImGui::SameLine();
-    }
-    ImGui::SetCursorPosX(dpiScale * 35);
 }
 
 void GuiHelper::DearImGuiLegal()

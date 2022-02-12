@@ -458,8 +458,6 @@ bool Gui::DoGui()
                     {
                         OutputOffsetProfile* currentProfile = HdmiOutputOffsetProfiles::CurrentProfile();
                         std::string formatStr = ProfileFormat::FormatStr(format.WaveFormat);
-                        bool verified = currentProfile->OutputOffsets.contains(formatStr) && currentProfile->OutputOffsets[formatStr].verified;
-                        GuiHelper::VerifiedMarker(verified, DpiScale);
                         ImGui::Checkbox(format.FormatString.c_str(), &format.UserSelected);
                     }
                 }
@@ -684,8 +682,6 @@ bool Gui::DoGui()
                         {
                             OutputOffsetProfile* currentProfile = HdmiOutputOffsetProfiles::CurrentProfile();
                             std::string formatStr = ProfileFormat::FormatStr(avgResult.Format->WaveFormat);
-                            bool verified = currentProfile->OutputOffsets.contains(formatStr) && currentProfile->OutputOffsets[formatStr].verified;
-                            GuiHelper::VerifiedMarker(verified, DpiScale);
 
                             const bool is_selected = (resultFormatIndex == n);
                             if (ImGui::Selectable(avgResult.Format->FormatString.c_str(), is_selected))
@@ -729,6 +725,7 @@ bool Gui::DoGui()
                             ImGui::Text(std::format("Output Offset Profile: {}", avgResult.OutputOffsetProfileName).c_str());
                             ImGui::Text(std::format("Output Offset Value: {} ms", avgResult.OutputOffsetFromProfile).c_str());
                             ImGui::Text(std::format("Verified Accuracy: {}", avgResult.Verified ? "Yes" : "No").c_str());
+                            GuiHelper::VerifiedHelp();
 
                             break;
                         }
