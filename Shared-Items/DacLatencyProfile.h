@@ -12,7 +12,10 @@
 class DacLatencyProfile
 {
 public:
+	enum struct DacInputType { Unknown, ARC, eARC, SPDIF_Optical, SPDIF_Coax };
+
 	std::string Name;
 	float Latency = 0; // in milliseconds
+	DacInputType InputType;
 };
 
