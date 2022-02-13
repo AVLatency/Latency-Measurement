@@ -15,6 +15,11 @@ public:
 	void StartPlayback();
 	void StopPlayback();
 
+	static WORD GetFormatID(WAVEFORMATEX* waveFormat);
+	static INT16 FloatToINT16(float sample);
+	static INT32 FloatToPaddedINT24(float sample);
+	static INT32 FloatToINT32(float sample);
+
 private:
 	const AudioEndpoint& endpoint;
 	bool loop;
@@ -30,4 +35,3 @@ private:
 	HRESULT LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flags);
 	bool FinishedPlayback(bool loopIfNeeded);
 };
-
