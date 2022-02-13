@@ -325,6 +325,7 @@ bool Gui::DoGui()
                     state = MeasurementToolGuiState::MeasurementConfig;
                     outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, true, true, HdmiOutputOffsetProfiles::CurrentProfile()->FormatFilter);
                     strcpy_s(TestNotes::Notes.DutModel, outputAudioEndpoints[outputDeviceIndex].Name.c_str());
+                    SetDutOutputType();
                 }
             }
         }
@@ -414,6 +415,7 @@ bool Gui::DoGui()
                         if (ImGui::Selectable(DacLatencyProfiles::Profiles[n]->Name.c_str(), is_selected))
                         {
                             DacLatencyProfiles::SelectedProfileIndex = n;
+                            SetDutOutputType();
                         }
                         // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
                         if (is_selected)
@@ -942,5 +944,28 @@ void Gui::StartTest()
         fileString = fileString.substr(0, 80); // 80 is a magic number that will keep path lengths reasonable without needing to do a lot of Windows API programming.
 
         testManager = new TestManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex], selectedFormats, fileString, APP_FOLDER, (IResultsWriter&)HdmiResultsWriter::Writer, HdmiOutputOffsetProfiles::CurrentProfile());
+    }
+}
+
+void Gui::SetDutOutputType()
+{
+    switch (DacLatencyProfiles::CurrentProfile()->InputType)
+    {
+    case DacLatencyProfile::DacInputType::ARC:
+        TestNotes::Notes.DutOutputTypeIndex = 1;
+        break;
+    case DacLatencyProfile::DacInputType::eARC:
+        TestNotes::Notes.DutOutputTypeIndex = 2;
+        break;
+    case DacLatencyProfile::DacInputType::SPDIF_Optical:
+        TestNotes::Notes.DutOutputTypeIndex = 3;
+        break;
+    case DacLatencyProfile::DacInputType::SPDIF_Coax:
+        TestNotes::Notes.DutOutputTypeIndex = 4;
+        break;
+    case DacLatencyProfile::DacInputType::Unknown:
+    default:
+        TestNotes::Notes.DutOutputTypeIndex = 0;
+        break;
     }
 }
