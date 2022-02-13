@@ -19,6 +19,9 @@ void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstre
         detailedResultsStream << "HDMI Audio Extractor,";
         detailedResultsStream << "Output Offset Profile,";
         detailedResultsStream << "Output Offset Profile Value (ms),";
+        detailedResultsStream << "DAC,";
+        detailedResultsStream << "DAC Latency Profile,";
+        detailedResultsStream << "DAC Latency Value (ms),";
         detailedResultsStream << ",";
         detailedResultsStream << "DUT Model,";
         detailedResultsStream << "DUT Firmware Version,";
@@ -79,6 +82,9 @@ void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstre
     detailedResultsStream << "\"" << TestNotes::Notes.HDMIAudioDevice << "\","; //"HDMI Audio Extractor,";
     detailedResultsStream << "\"" << result.OutputOffsetProfileName << "\","; //"Output Offset Profile,";
     detailedResultsStream << "\"" << result.OutputOffsetFromProfile << "\","; //"Output Offset Profile Value (ms),";
+    detailedResultsStream << "\"" << "TODO" << "\","; //"DAC,";
+    detailedResultsStream << "\"" << result.ReferenceDacName << "\","; //"DAC Latency Profile,";
+    detailedResultsStream << "\"" << result.ReferenceDacLatency << "\","; //"DAC Latency Value (ms),";
     detailedResultsStream << "\"" << "\",";
     detailedResultsStream << "\"" << TestNotes::Notes.DutModel << "\","; //"DUT Model,";
     detailedResultsStream << "\"" << TestNotes::Notes.DutFirmwareVersion << "\","; //"DUT Firmware Version,";
@@ -144,6 +150,9 @@ void ResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& result
         resultsStream << "HDMI Audio Extractor,";
         resultsStream << "Output Offset Profile,";
         resultsStream << "Output Offset Profile Value (ms),";
+        resultsStream << "DAC,";
+        resultsStream << "DAC Latency Profile,";
+        resultsStream << "DAC Latency Value (ms),";
         resultsStream << ",";
         resultsStream << "DUT Model,";
         resultsStream << "DUT Firmware Version,";
@@ -184,6 +193,9 @@ void ResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& result
     resultsStream << "\"" << TestNotes::Notes.HDMIAudioDevice << "\","; //"HDMI Audio Extractor,";
     resultsStream << "\"" << result.OutputOffsetProfileName << "\","; //"Output Offset Profile,";
     resultsStream << "\"" << result.OutputOffsetFromProfile << "\","; //"Output Offset Profile Value (ms),";
+    resultsStream << "\"" << "TODO" << "\","; //"DAC,";
+    resultsStream << "\"" << result.ReferenceDacName << "\","; //"DAC Latency Profile,";
+    resultsStream << "\"" << result.ReferenceDacLatency << "\","; //"DAC Latency Value (ms),";
     resultsStream << "\"" << "\",";
     resultsStream << "\"" << TestNotes::Notes.DutModel << "\","; //"DUT Model,";
     resultsStream << "\"" << TestNotes::Notes.DutFirmwareVersion << "\","; //"DUT Firmware Version,";
