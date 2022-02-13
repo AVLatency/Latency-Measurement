@@ -1,10 +1,10 @@
-#include "HdmiResultsWriter.h"
+#include "ResultsWriter.h"
 #include "TestNotes.h"
 #include <imgui.h>
 
-HdmiResultsWriter HdmiResultsWriter::Writer;
+ResultsWriter ResultsWriter::Writer;
 
-void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstream& detailedResultsStream, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result, std::string inputFormat)
+void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstream& detailedResultsStream, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result, std::string inputFormat)
 {
     if (writeHeader)
     {
@@ -16,14 +16,14 @@ void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::f
         detailedResultsStream << "Verified,";
         detailedResultsStream << ",";
         detailedResultsStream << "Raw Offset (ms),";
-        detailedResultsStream << "Audio Device,";
-        detailedResultsStream << "Recording Method,";
+        detailedResultsStream << "HDMI Audio Extractor,";
         detailedResultsStream << "Output Offset Profile,";
         detailedResultsStream << "Output Offset Profile Value (ms),";
         detailedResultsStream << ",";
         detailedResultsStream << "DUT Model,";
         detailedResultsStream << "DUT Firmware Version,";
         detailedResultsStream << "DUT Output Type,";
+        detailedResultsStream << "DUT Video Mode,";
         detailedResultsStream << "DUT Audio Settings,";
         detailedResultsStream << "DUT Other Settings,";
         detailedResultsStream << ",";
@@ -32,6 +32,12 @@ void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::f
         detailedResultsStream << "Audio Sample Rate,";
         detailedResultsStream << "Audio Bit Depth,";
         detailedResultsStream << "Audio Speakers Description,";
+        detailedResultsStream << ",";
+        detailedResultsStream << "Video Resolution,";
+        detailedResultsStream << "Video Refresh Rate,";
+        detailedResultsStream << "Video Bit Depth,";
+        detailedResultsStream << "Video Color Format,";
+        detailedResultsStream << "Video Color Space,";
         detailedResultsStream << ",";
         detailedResultsStream << "Notes 1,";
         detailedResultsStream << "Notes 2,";
@@ -70,14 +76,14 @@ void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::f
     detailedResultsStream << "\"" << (result.Verified ? "Yes" : "No") << "\","; //"Verified,";
     detailedResultsStream << "\"" << "\",";
     detailedResultsStream << "\"" << result.Offset() << "\","; //"Raw Offset (ms),";
-    detailedResultsStream << "\"" << TestNotes::Notes.HDMIAudioDevice << "\","; //"Audio Device,";
-    detailedResultsStream << "\"" << TestNotes::Notes.RecordingMethod() << "\","; //"Recording Method,";
+    detailedResultsStream << "\"" << TestNotes::Notes.HDMIAudioDevice << "\","; //"HDMI Audio Extractor,";
     detailedResultsStream << "\"" << result.OutputOffsetProfileName << "\","; //"Output Offset Profile,";
     detailedResultsStream << "\"" << result.OutputOffsetFromProfile << "\","; //"Output Offset Profile Value (ms),";
     detailedResultsStream << "\"" << "\",";
     detailedResultsStream << "\"" << TestNotes::Notes.DutModel << "\","; //"DUT Model,";
     detailedResultsStream << "\"" << TestNotes::Notes.DutFirmwareVersion << "\","; //"DUT Firmware Version,";
     detailedResultsStream << "\"" << TestNotes::Notes.DutOutputType() << "\","; //"DUT,";
+    detailedResultsStream << "\"" << TestNotes::Notes.DutVideoMode << "\","; //"DUT Video Mode,";
     detailedResultsStream << "\"" << TestNotes::Notes.DutAudioSettings << "\",";
     detailedResultsStream << "\"" << TestNotes::Notes.DutOtherSettings << "\",";
     detailedResultsStream << "\"" << "\",";
@@ -86,6 +92,12 @@ void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::f
     detailedResultsStream << "\"" << result.Format->WaveFormat->nSamplesPerSec << "\",";
     detailedResultsStream << "\"" << result.Format->WaveFormat->wBitsPerSample << "\",";
     detailedResultsStream << "\"" << AudioFormat::GetChannelInfoString(result.Format->WaveFormat) << "\",";
+    detailedResultsStream << "\"" << "\",";
+    detailedResultsStream << "\"" << TestNotes::Notes.VideoRes() << "\",";
+    detailedResultsStream << "\"" << TestNotes::Notes.VideoRefreshRate << "\",";
+    detailedResultsStream << "\"" << TestNotes::Notes.VideoBitDepth << "\",";
+    detailedResultsStream << "\"" << TestNotes::Notes.VideoColorFormat << "\",";
+    detailedResultsStream << "\"" << TestNotes::Notes.VideoColorSpace() << "\",";
     detailedResultsStream << "\"" << "\",";
     detailedResultsStream << "\"" << TestNotes::Notes.Notes1 << "\",";
     detailedResultsStream << "\"" << TestNotes::Notes.Notes2 << "\",";
@@ -116,7 +128,7 @@ void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::f
     detailedResultsStream << "\"" << result.Channel2.InvalidReason << "\"" << std::endl; //"Ch 2 Invalid Reason";
 }
 
-void HdmiResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& resultsStream, const AveragedResult& result)
+void ResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& resultsStream, const AveragedResult& result)
 {
     if (writeHeader)
     {
@@ -129,14 +141,14 @@ void HdmiResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& re
         resultsStream << "Verified Accuracy,";
         resultsStream << "Valid Measurements,";
         resultsStream << ",";
-        resultsStream << "Audio Device,";
-        resultsStream << "Recording Method,";
+        resultsStream << "HDMI Audio Extractor,";
         resultsStream << "Output Offset Profile,";
         resultsStream << "Output Offset Profile Value (ms),";
         resultsStream << ",";
         resultsStream << "DUT Model,";
         resultsStream << "DUT Firmware Version,";
         resultsStream << "DUT Output Type,";
+        resultsStream << "DUT Video Mode,";
         resultsStream << "DUT Audio Settings,";
         resultsStream << "DUT Other Settings,";
         resultsStream << ",";
@@ -145,6 +157,12 @@ void HdmiResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& re
         resultsStream << "Audio Sample Rate,";
         resultsStream << "Audio Bit Depth,";
         resultsStream << "Audio Speakers Description,";
+        resultsStream << ",";
+        resultsStream << "Video Resolution,";
+        resultsStream << "Video Refresh Rate,";
+        resultsStream << "Video Bit Depth,";
+        resultsStream << "Video Color Format,";
+        resultsStream << "Video Color Space,";
         resultsStream << ",";
         resultsStream << "Notes 1,";
         resultsStream << "Notes 2,";
@@ -163,14 +181,14 @@ void HdmiResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& re
     resultsStream << "\"" << (result.Verified ? "Yes" : "No") << "\","; //"Verified,";
     resultsStream << "\"" << result.Offsets.size() << "\",";
     resultsStream << "\"" << "\",";
-    resultsStream << "\"" << TestNotes::Notes.HDMIAudioDevice << "\","; //"Audio Device,";
-    resultsStream << "\"" << TestNotes::Notes.RecordingMethod() << "\","; //"Recording Method,";
+    resultsStream << "\"" << TestNotes::Notes.HDMIAudioDevice << "\","; //"HDMI Audio Extractor,";
     resultsStream << "\"" << result.OutputOffsetProfileName << "\","; //"Output Offset Profile,";
     resultsStream << "\"" << result.OutputOffsetFromProfile << "\","; //"Output Offset Profile Value (ms),";
     resultsStream << "\"" << "\",";
     resultsStream << "\"" << TestNotes::Notes.DutModel << "\","; //"DUT Model,";
     resultsStream << "\"" << TestNotes::Notes.DutFirmwareVersion << "\","; //"DUT Firmware Version,";
     resultsStream << "\"" << TestNotes::Notes.DutOutputType() << "\","; //"DUT,";
+    resultsStream << "\"" << TestNotes::Notes.DutVideoMode << "\","; //"DUT Video Mode,";
     resultsStream << "\"" << TestNotes::Notes.DutAudioSettings << "\",";
     resultsStream << "\"" << TestNotes::Notes.DutOtherSettings << "\",";
     resultsStream << "\"" << "\",";
@@ -179,6 +197,12 @@ void HdmiResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& re
     resultsStream << "\"" << result.Format->WaveFormat->nSamplesPerSec << "\",";
     resultsStream << "\"" << result.Format->WaveFormat->wBitsPerSample << "\",";
     resultsStream << "\"" << AudioFormat::GetChannelInfoString(result.Format->WaveFormat) << "\",";
+    resultsStream << "\"" << "\",";
+    resultsStream << "\"" << TestNotes::Notes.VideoRes() << "\",";
+    resultsStream << "\"" << TestNotes::Notes.VideoRefreshRate << "\",";
+    resultsStream << "\"" << TestNotes::Notes.VideoBitDepth << "\",";
+    resultsStream << "\"" << TestNotes::Notes.VideoColorFormat << "\",";
+    resultsStream << "\"" << TestNotes::Notes.VideoColorSpace() << "\",";
     resultsStream << "\"" << "\",";
     resultsStream << "\"" << TestNotes::Notes.Notes1 << "\",";
     resultsStream << "\"" << TestNotes::Notes.Notes2 << "\",";

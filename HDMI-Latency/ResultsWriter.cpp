@@ -1,10 +1,10 @@
-#include "HdmiResultsWriter.h"
+#include "ResultsWriter.h"
 #include "TestNotes.h"
 #include <imgui.h>
 
-HdmiResultsWriter HdmiResultsWriter::Writer;
+ResultsWriter ResultsWriter::Writer;
 
-void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstream& detailedResultsStream, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result, std::string inputFormat)
+void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstream& detailedResultsStream, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result, std::string inputFormat)
 {
     if (writeHeader)
     {
@@ -17,6 +17,7 @@ void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::f
         detailedResultsStream << ",";
         detailedResultsStream << "Raw Offset (ms),";
         detailedResultsStream << "HDMI Audio Extractor,";
+        detailedResultsStream << "Recording Method,";
         detailedResultsStream << "Output Offset Profile,";
         detailedResultsStream << "Output Offset Profile Value (ms),";
         detailedResultsStream << ",";
@@ -77,6 +78,7 @@ void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::f
     detailedResultsStream << "\"" << "\",";
     detailedResultsStream << "\"" << result.Offset() << "\","; //"Raw Offset (ms),";
     detailedResultsStream << "\"" << TestNotes::Notes.HDMIAudioDevice << "\","; //"HDMI Audio Extractor,";
+    detailedResultsStream << "\"" << TestNotes::Notes.RecordingMethod() << "\","; //"Recording Method,";
     detailedResultsStream << "\"" << result.OutputOffsetProfileName << "\","; //"Output Offset Profile,";
     detailedResultsStream << "\"" << result.OutputOffsetFromProfile << "\","; //"Output Offset Profile Value (ms),";
     detailedResultsStream << "\"" << "\",";
@@ -128,7 +130,7 @@ void HdmiResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::f
     detailedResultsStream << "\"" << result.Channel2.InvalidReason << "\"" << std::endl; //"Ch 2 Invalid Reason";
 }
 
-void HdmiResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& resultsStream, const AveragedResult& result)
+void ResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& resultsStream, const AveragedResult& result)
 {
     if (writeHeader)
     {
@@ -142,6 +144,7 @@ void HdmiResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& re
         resultsStream << "Valid Measurements,";
         resultsStream << ",";
         resultsStream << "HDMI Audio Extractor,";
+        resultsStream << "Recording Method,";
         resultsStream << "Output Offset Profile,";
         resultsStream << "Output Offset Profile Value (ms),";
         resultsStream << ",";
@@ -182,6 +185,7 @@ void HdmiResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& re
     resultsStream << "\"" << result.Offsets.size() << "\",";
     resultsStream << "\"" << "\",";
     resultsStream << "\"" << TestNotes::Notes.HDMIAudioDevice << "\","; //"HDMI Audio Extractor,";
+    resultsStream << "\"" << TestNotes::Notes.RecordingMethod() << "\","; //"Recording Method,";
     resultsStream << "\"" << result.OutputOffsetProfileName << "\","; //"Output Offset Profile,";
     resultsStream << "\"" << result.OutputOffsetFromProfile << "\","; //"Output Offset Profile Value (ms),";
     resultsStream << "\"" << "\",";
