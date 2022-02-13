@@ -421,7 +421,7 @@ bool Gui::DoGui()
 
                 ImGui::TableNextColumn();
                 ImGui::PushFont(FontHelper::BoldFont);
-                ImGui::Text("Audio Formats (LPCM)");
+                ImGui::Text("HDMI Audio Formats (LPCM)");
                 ImGui::PopFont();
                 ImGui::Spacing();
 
