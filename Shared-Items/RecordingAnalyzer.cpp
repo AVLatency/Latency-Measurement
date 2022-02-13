@@ -16,10 +16,10 @@ using namespace std;
 const std::string RecordingAnalyzer::validRecordingsFilename{ "Valid-Individual-Recordings.csv" };
 const std::string RecordingAnalyzer::invalidRecordingsFilename{ "Invalid-Individual-Recordings.csv" };
 
-RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& generatedSamples, const WasapiInput& input, AudioFormat* format, OutputOffsetProfile* currentProfile)
+RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& generatedSamples, const WasapiInput& input, AudioFormat* format, OutputOffsetProfile* currentProfile, DacLatencyProfile* referenceDacLatency)
 {
     OutputOffsetProfile::OutputOffset offset = currentProfile->GetOffsetFromWaveFormat(format->WaveFormat);
-    RecordingResult result(format, currentProfile->Name, offset.value, offset.verified);
+    RecordingResult result(format, currentProfile->Name, offset.value, offset.verified, referenceDacLatency->Name, referenceDacLatency->Latency);
 
     // Extract individual channels for analysis
     int inputSampleRate = input.waveFormat.Format.nSamplesPerSec;
@@ -216,7 +216,7 @@ RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const Gener
     return result;
 }
 
-std::vector<AveragedResult> RecordingAnalyzer::AnalyzeResults(std::vector<RecordingResult> results, time_t tTime, const AudioEndpoint& outputEndpoint, OutputOffsetProfile* currentProfile)
+std::vector<AveragedResult> RecordingAnalyzer::AnalyzeResults(std::vector<RecordingResult> results, time_t tTime, const AudioEndpoint& outputEndpoint)
 {
     std::vector<AveragedResult> averagedResults;
 
@@ -237,8 +237,7 @@ std::vector<AveragedResult> RecordingAnalyzer::AnalyzeResults(std::vector<Record
 
             if (!alreadyHasAvgResult)
             {
-                OutputOffsetProfile::OutputOffset offset = currentProfile->GetOffsetFromWaveFormat(recordingResult.Format->WaveFormat);
-                AveragedResult avgResult(tTime, recordingResult.Format, outputEndpoint, currentProfile->Name, offset.value, offset.verified);
+                AveragedResult avgResult(tTime, recordingResult.Format, outputEndpoint, recordingResult.OutputOffsetProfileName, recordingResult.OutputOffsetFromProfile, recordingResult.Verified, recordingResult.ReferenceDacName, recordingResult.ReferenceDacLatency);
                 avgResult.Offsets.push_back(recordingResult.Offset());
                 averagedResults.push_back(avgResult);
             }

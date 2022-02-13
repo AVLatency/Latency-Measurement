@@ -10,12 +10,13 @@
 #include <vector>
 #include "AveragedResult.h"
 #include "OutputOffsetProfile.h"
+#include "DacLatencyProfile.h"
 
 class RecordingAnalyzer
 {
 public:
-	static RecordingResult AnalyzeRecording(const GeneratedSamples& generatedSamples, const WasapiInput& input, AudioFormat* format, OutputOffsetProfile* currentProfile);
-	static std::vector<AveragedResult> AnalyzeResults(std::vector<RecordingResult> results, time_t tTime, const AudioEndpoint& outputEndpoint, OutputOffsetProfile* currentProfile);
+	static RecordingResult AnalyzeRecording(const GeneratedSamples& generatedSamples, const WasapiInput& input, AudioFormat* format, OutputOffsetProfile* currentProfile, DacLatencyProfile* referenceDacLatency);
+	static std::vector<AveragedResult> AnalyzeResults(std::vector<RecordingResult> results, time_t tTime, const AudioEndpoint& outputEndpoint);
 
 	static void SaveRecording(const WasapiInput& input, std::string path, std::string filename);
 	static void SaveIndividualResult(IResultsWriter& writer, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result, std::string testRootPath, std::string inputFormat);

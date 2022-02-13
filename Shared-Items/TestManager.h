@@ -10,6 +10,7 @@
 #include "IResultsWriter.h"
 #include "AveragedResult.h"
 #include "OutputOffsetProfile.h"
+#include "DacLatencyProfile.h"
 
 class TestManager
 {
@@ -38,7 +39,7 @@ public:
 	/// <summary>
 	/// Will start the test on a new thread
 	/// </summary>
-	TestManager(AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, std::vector<AudioFormat*> selectedFormats, std::string fileString, std::string appDirectory, IResultsWriter& resultsWriter, OutputOffsetProfile* currentProfile);
+	TestManager(AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, std::vector<AudioFormat*> selectedFormats, std::string fileString, std::string appDirectory, IResultsWriter& resultsWriter, OutputOffsetProfile* currentProfile, DacLatencyProfile* referenceDacLatency);
 	~TestManager();
 	/// <summary>
 	/// Should be called from the originating thread when IsFinished == true. This will join and delete the test thread.
@@ -55,6 +56,7 @@ private:
 	IResultsWriter& resultsWriter;
 
 	OutputOffsetProfile* outputOffsetProfile;
+	DacLatencyProfile* referenceDacLatency;
 
 	void StartTest();
 	bool PerformRecording(AudioFormat* audioFormat);
