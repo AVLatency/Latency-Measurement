@@ -403,7 +403,7 @@ bool Gui::DoGui()
                 ImGui::PushFont(FontHelper::BoldFont);
                 ImGui::Text("ARC, eARC, or S/PDIF DAC");
                 ImGui::PopFont();
-                ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the amount of time between the digital audio signal entering the DAC's input to the analog output of the DAC for different audio formats.");
+                ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the amount of time between the digital audio signal entering the DAC's input to the analog output of the DAC. Only DACs that have similar latency for all audio formats are compatable with this tool.");
                 ImGui::Spacing();
 
                 if (ImGui::BeginListBox("DAC", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing())))
