@@ -10,7 +10,6 @@
 #include "HdmiOutputOffsetProfiles.h"
 #include "Defines.h"
 #include "GuiHelper.h"
-#include "ProfileFormat.h"
 
 float Gui::DpiScale = 1.0f;
 bool Gui::DpiScaleChanged = false;
@@ -346,7 +345,7 @@ bool Gui::DoGui()
                 else if (state == MeasurementToolGuiState::FinishingAdjustVolume)
                 {
                     state = MeasurementToolGuiState::MeasurementConfig;
-                    outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, true, true, AudioEndpoint::HdmiFormatsFilter);
+                    outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, true, true, HdmiOutputOffsetProfiles::CurrentProfile()->FormatFilter);
                     strcpy_s(TestNotes::Notes.DutModel, outputAudioEndpoints[outputDeviceIndex].Name.c_str());
                 }
             }
@@ -387,6 +386,7 @@ bool Gui::DoGui()
                         if (ImGui::Selectable(HdmiOutputOffsetProfiles::Profiles[n]->Name.c_str(), is_selected))
                         {
                             HdmiOutputOffsetProfiles::SelectedProfileIndex = n;
+                            outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, true, true, HdmiOutputOffsetProfiles::CurrentProfile()->FormatFilter);
                         }
                         // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
                         if (is_selected)
@@ -398,7 +398,7 @@ bool Gui::DoGui()
                 }
                 ImGui::Spacing();
 
-                if (HdmiOutputOffsetProfiles::Profiles[HdmiOutputOffsetProfiles::SelectedProfileIndex] == &HdmiOutputOffsetProfiles::HDV_MB01)
+                if (HdmiOutputOffsetProfiles::Profiles[HdmiOutputOffsetProfiles::SelectedProfileIndex] == HdmiOutputOffsetProfiles::HDV_MB01)
                 {
                     float imageScale = 0.45 * Gui::DpiScale;
                     ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
@@ -408,7 +408,7 @@ bool Gui::DoGui()
                         "- Monoprice Blackbird 24278\n"
                         "- OREI HDA - 912\n");
                 }
-                else if (HdmiOutputOffsetProfiles::Profiles[HdmiOutputOffsetProfiles::SelectedProfileIndex] == &HdmiOutputOffsetProfiles::None)
+                else if (HdmiOutputOffsetProfiles::Profiles[HdmiOutputOffsetProfiles::SelectedProfileIndex] == HdmiOutputOffsetProfiles::None)
                 {
                     ImGui::PushFont(FontHelper::BoldFont);
                     ImGui::Text("WARNING:");
@@ -456,8 +456,6 @@ bool Gui::DoGui()
                 {
                     for (AudioFormat& format : supportedFormats)
                     {
-                        OutputOffsetProfile* currentProfile = HdmiOutputOffsetProfiles::CurrentProfile();
-                        std::string formatStr = ProfileFormat::FormatStr(format.WaveFormat);
                         ImGui::Checkbox(format.FormatString.c_str(), &format.UserSelected);
                     }
                 }
@@ -500,7 +498,7 @@ bool Gui::DoGui()
                 ImGui::SameLine(); GuiHelper::HelpMarker("These notes will be included in the .csv spreadsheet result files that are saved in the folder that this app was launched from.");
                 ImGui::Spacing();
 
-                TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile = HdmiOutputOffsetProfiles::CurrentProfile() != &HdmiOutputOffsetProfiles::None;
+                TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile = HdmiOutputOffsetProfiles::CurrentProfile() != HdmiOutputOffsetProfiles::None;
                 if (TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile)
                 {
                     ImGui::BeginDisabled();
@@ -680,9 +678,6 @@ bool Gui::DoGui()
                         int n = 0;
                         for (auto avgResult : testManager->AveragedResults)
                         {
-                            OutputOffsetProfile* currentProfile = HdmiOutputOffsetProfiles::CurrentProfile();
-                            std::string formatStr = ProfileFormat::FormatStr(avgResult.Format->WaveFormat);
-
                             const bool is_selected = (resultFormatIndex == n);
                             if (ImGui::Selectable(avgResult.Format->FormatString.c_str(), is_selected))
                             {

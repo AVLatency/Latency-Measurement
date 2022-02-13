@@ -11,7 +11,6 @@
 #include <iomanip>
 #include "TestConfiguration.h"
 #include <ctime>
-#include "ProfileFormat.h"
 using namespace std;
 
 const std::string RecordingAnalyzer::validRecordingsFilename{ "Valid-Individual-Recordings.csv" };
@@ -19,16 +18,8 @@ const std::string RecordingAnalyzer::invalidRecordingsFilename{ "Invalid-Individ
 
 RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& generatedSamples, const WasapiInput& input, AudioFormat* format, OutputOffsetProfile* currentProfile)
 {
-    std::string formatStr = ProfileFormat::FormatStr(format->WaveFormat);
-    float offsetFromProfile = 0;
-    bool verified = false;
-    if (currentProfile->OutputOffsets.contains(formatStr))
-    {
-        offsetFromProfile = currentProfile->OutputOffsets[formatStr].value;
-        verified = currentProfile->OutputOffsets[formatStr].verified;
-    }
-
-    RecordingResult result(format, currentProfile->Name, offsetFromProfile, verified);
+    OutputOffsetProfile::OutputOffset offset = currentProfile->GetOffsetFromWaveFormat(format->WaveFormat);
+    RecordingResult result(format, currentProfile->Name, offset.value, offset.verified);
 
     // Extract individual channels for analysis
     int inputSampleRate = input.waveFormat.Format.nSamplesPerSec;
@@ -246,15 +237,8 @@ std::vector<AveragedResult> RecordingAnalyzer::AnalyzeResults(std::vector<Record
 
             if (!alreadyHasAvgResult)
             {
-                std::string formatStr = ProfileFormat::FormatStr(recordingResult.Format->WaveFormat);
-                float offsetFromProfile = 0;
-                bool verified = false;
-                if (currentProfile->OutputOffsets.contains(formatStr))
-                {
-                    offsetFromProfile = currentProfile->OutputOffsets[formatStr].value;
-                    verified = currentProfile->OutputOffsets[formatStr].verified;
-                }
-                AveragedResult avgResult(tTime, recordingResult.Format, outputEndpoint, currentProfile->Name, offsetFromProfile, verified);
+                OutputOffsetProfile::OutputOffset offset = currentProfile->GetOffsetFromWaveFormat(recordingResult.Format->WaveFormat);
+                AveragedResult avgResult(tTime, recordingResult.Format, outputEndpoint, currentProfile->Name, offset.value, offset.verified);
                 avgResult.Offsets.push_back(recordingResult.Offset());
                 averagedResults.push_back(avgResult);
             }

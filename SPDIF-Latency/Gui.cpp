@@ -10,7 +10,6 @@
 #include "SpdifOutputOffsetProfiles.h"
 #include "Defines.h"
 #include "GuiHelper.h"
-#include "ProfileFormat.h"
 
 float Gui::DpiScale = 1.0f;
 bool Gui::DpiScaleChanged = false;
@@ -347,7 +346,7 @@ bool Gui::DoGui()
                 else if (state == MeasurementToolGuiState::FinishingAdjustVolume)
                 {
                     state = MeasurementToolGuiState::MeasurementConfig;
-                    outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, false, true, SpdifOutputOffsetProfiles::Profiles[SpdifOutputOffsetProfiles::SelectedProfileIndex]->FormatFilter);
+                    outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, false, true, SpdifOutputOffsetProfiles::CurrentProfile()->FormatFilter);
                     strcpy_s(TestNotes::Notes.DutModel, outputAudioEndpoints[outputDeviceIndex].Name.c_str());
                 }
             }
@@ -388,7 +387,7 @@ bool Gui::DoGui()
                         if (ImGui::Selectable(SpdifOutputOffsetProfiles::Profiles[n]->Name.c_str(), is_selected))
                         {
                             SpdifOutputOffsetProfiles::SelectedProfileIndex = n;
-                            outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, false, true, SpdifOutputOffsetProfiles::Profiles[SpdifOutputOffsetProfiles::SelectedProfileIndex]->FormatFilter);
+                            outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, false, true, SpdifOutputOffsetProfiles::CurrentProfile()->FormatFilter);
                         }
                         // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
                         if (is_selected)
@@ -400,7 +399,7 @@ bool Gui::DoGui()
                 }
                 ImGui::Spacing();
 
-                if (SpdifOutputOffsetProfiles::Profiles[SpdifOutputOffsetProfiles::SelectedProfileIndex] == &SpdifOutputOffsetProfiles::HDV_MB01)
+                if (SpdifOutputOffsetProfiles::Profiles[SpdifOutputOffsetProfiles::SelectedProfileIndex] == SpdifOutputOffsetProfiles::HDV_MB01)
                 {
                     float imageScale = 0.45 * Gui::DpiScale;
                     ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
@@ -425,7 +424,7 @@ bool Gui::DoGui()
                         ImGui::TreePop();
                     }
                 }
-                else if (SpdifOutputOffsetProfiles::Profiles[SpdifOutputOffsetProfiles::SelectedProfileIndex] == &SpdifOutputOffsetProfiles::None)
+                else if (SpdifOutputOffsetProfiles::Profiles[SpdifOutputOffsetProfiles::SelectedProfileIndex] == SpdifOutputOffsetProfiles::None)
                 {
                     ImGui::PushFont(FontHelper::BoldFont);
                     ImGui::Text("WARNING:");
@@ -475,8 +474,6 @@ bool Gui::DoGui()
                 {
                     for (AudioFormat& format : supportedFormats)
                     {
-                        OutputOffsetProfile* currentProfile = SpdifOutputOffsetProfiles::CurrentProfile();
-                        std::string formatStr = ProfileFormat::FormatStr(format.WaveFormat);
                         ImGui::Checkbox(format.FormatString.c_str(), &format.UserSelected);
                     }
                 }
@@ -519,7 +516,7 @@ bool Gui::DoGui()
                 ImGui::SameLine(); GuiHelper::HelpMarker("These notes will be included in the .csv spreadsheet result files that are saved in the folder that this app was launched from.");
                 ImGui::Spacing();
 
-                TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile = SpdifOutputOffsetProfiles::CurrentProfile() != &SpdifOutputOffsetProfiles::None;
+                TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile = SpdifOutputOffsetProfiles::CurrentProfile() != SpdifOutputOffsetProfiles::None;
                 if (TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile)
                 {
                     ImGui::BeginDisabled();
@@ -651,9 +648,6 @@ bool Gui::DoGui()
                         int n = 0;
                         for (auto avgResult : testManager->AveragedResults)
                         {
-                            OutputOffsetProfile* currentProfile = SpdifOutputOffsetProfiles::CurrentProfile();
-                            std::string formatStr = ProfileFormat::FormatStr(avgResult.Format->WaveFormat);
-
                             const bool is_selected = (resultFormatIndex == n);
                             if (ImGui::Selectable(avgResult.Format->FormatString.c_str(), is_selected))
                             {

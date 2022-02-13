@@ -184,6 +184,7 @@ INT16 WasapiOutput::FloatToINT16(float sample)
 
 INT32 WasapiOutput::FloatToPaddedINT24(float sample)
 {
+#pragma warning(disable:4244)
     // This is duplicated in LoadData. Make sure to update that as well if any of this changes.
     int thirtyTwoBit = (int)round((double)sample * INT24_MAX);
     INT32 result;
@@ -193,6 +194,7 @@ INT32 WasapiOutput::FloatToPaddedINT24(float sample)
     resultArray[2] = thirtyTwoBit >> 8;
     resultArray[3] = thirtyTwoBit >> 16;
     resultArray[3] |= (thirtyTwoBit >> 31) << 7; // negative bit
+#pragma warning(default:4244)
     return result;
 }
 
