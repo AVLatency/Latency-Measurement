@@ -389,6 +389,10 @@ bool Gui::DoGui()
                         {
                             SpdifOutputOffsetProfiles::SelectedProfileIndex = n;
                             outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, false, true, SpdifOutputOffsetProfiles::CurrentProfile()->FormatFilter);
+                            if (SpdifOutputOffsetProfiles::CurrentProfile() == SpdifOutputOffsetProfiles::None)
+                            {
+                                strcpy_s(TestNotes::Notes.HDMIAudioDevice, "");
+                            }
                         }
                         // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
                         if (is_selected)
@@ -521,9 +525,8 @@ bool Gui::DoGui()
                 if (TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile)
                 {
                     ImGui::BeginDisabled();
-                    char tempStr[128];
-                    strcpy_s(tempStr, SpdifOutputOffsetProfiles::CurrentProfile()->Name.c_str());
-                    ImGui::InputText("Audio Device", tempStr, IM_ARRAYSIZE(tempStr));
+                    strcpy_s(TestNotes::Notes.HDMIAudioDevice, SpdifOutputOffsetProfiles::CurrentProfile()->Name.c_str());
+                    ImGui::InputText("Audio Device", TestNotes::Notes.HDMIAudioDevice, IM_ARRAYSIZE(TestNotes::Notes.HDMIAudioDevice));
                     ImGui::EndDisabled();
                 }
                 else

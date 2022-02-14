@@ -7,6 +7,8 @@ public:
 
 	bool HDMIAudioDeviceUseOutputOffsetProfile = true;
 	char HDMIAudioDevice[128] = "";
+	bool DACUseLatencyProfile = true;
+	char DAC[128] = "";
 
 	char DutModel[128] = "";
 	char DutFirmwareVersion[128] = "";

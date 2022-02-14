@@ -388,6 +388,10 @@ bool Gui::DoGui()
                         {
                             HdmiOutputOffsetProfiles::SelectedProfileIndex = n;
                             outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, true, true, HdmiOutputOffsetProfiles::CurrentProfile()->FormatFilter);
+                            if (HdmiOutputOffsetProfiles::CurrentProfile() == HdmiOutputOffsetProfiles::None)
+                            {
+                                strcpy_s(TestNotes::Notes.HDMIAudioDevice, "");
+                            }
                         }
                         // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
                         if (is_selected)
@@ -503,9 +507,8 @@ bool Gui::DoGui()
                 if (TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile)
                 {
                     ImGui::BeginDisabled();
-                    char tempStr[128];
-                    strcpy_s(tempStr, HdmiOutputOffsetProfiles::CurrentProfile()->Name.c_str());
-                    ImGui::InputText("HDMI Audio Extractor", tempStr, IM_ARRAYSIZE(tempStr));
+                    strcpy_s(TestNotes::Notes.HDMIAudioDevice, HdmiOutputOffsetProfiles::CurrentProfile()->Name.c_str());
+                    ImGui::InputText("HDMI Audio Extractor", TestNotes::Notes.HDMIAudioDevice, IM_ARRAYSIZE(TestNotes::Notes.HDMIAudioDevice));
                     ImGui::EndDisabled();
                 }
                 else

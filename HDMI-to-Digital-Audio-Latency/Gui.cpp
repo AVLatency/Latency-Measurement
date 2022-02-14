@@ -365,6 +365,10 @@ bool Gui::DoGui()
                         {
                             HdmiOutputOffsetProfiles::SelectedProfileIndex = n;
                             outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, true, true, HdmiOutputOffsetProfiles::CurrentProfile()->FormatFilter);
+                            if (HdmiOutputOffsetProfiles::CurrentProfile() == HdmiOutputOffsetProfiles::None)
+                            {
+                                strcpy_s(TestNotes::Notes.HDMIAudioDevice, "");
+                            }
                         }
                         // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
                         if (is_selected)
@@ -415,6 +419,10 @@ bool Gui::DoGui()
                         if (ImGui::Selectable(DacLatencyProfiles::Profiles[n]->Name.c_str(), is_selected))
                         {
                             DacLatencyProfiles::SelectedProfileIndex = n;
+                            if (DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::None)
+                            {
+                                strcpy_s(TestNotes::Notes.DAC, "");
+                            }
                             SetDutOutputType();
                         }
                         // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
@@ -522,14 +530,26 @@ bool Gui::DoGui()
                 if (TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile)
                 {
                     ImGui::BeginDisabled();
-                    char tempStr[128];
-                    strcpy_s(tempStr, HdmiOutputOffsetProfiles::CurrentProfile()->Name.c_str());
-                    ImGui::InputText("HDMI Audio Extractor", tempStr, IM_ARRAYSIZE(tempStr));
+                    strcpy_s(TestNotes::Notes.HDMIAudioDevice, HdmiOutputOffsetProfiles::CurrentProfile()->Name.c_str());
+                    ImGui::InputText("HDMI Audio Extractor", TestNotes::Notes.HDMIAudioDevice, IM_ARRAYSIZE(TestNotes::Notes.HDMIAudioDevice));
                     ImGui::EndDisabled();
                 }
                 else
                 {
                     ImGui::InputText("HDMI Audio Extractor", TestNotes::Notes.HDMIAudioDevice, IM_ARRAYSIZE(TestNotes::Notes.HDMIAudioDevice), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
+                }
+
+                TestNotes::Notes.DACUseLatencyProfile = DacLatencyProfiles::CurrentProfile() != &DacLatencyProfiles::None;
+                if (TestNotes::Notes.DACUseLatencyProfile)
+                {
+                    ImGui::BeginDisabled();
+                    strcpy_s(TestNotes::Notes.DAC, DacLatencyProfiles::CurrentProfile()->Name.c_str());
+                    ImGui::InputText("ARC, eARC, or S/PDIF DAC", TestNotes::Notes.DAC, IM_ARRAYSIZE(TestNotes::Notes.DAC));
+                    ImGui::EndDisabled();
+                }
+                else
+                {
+                    ImGui::InputText("ARC, eARC, or S/PDIF DAC", TestNotes::Notes.DAC, IM_ARRAYSIZE(TestNotes::Notes.DAC), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
                 }
 
                 ImGui::PushFont(FontHelper::BoldFont);
