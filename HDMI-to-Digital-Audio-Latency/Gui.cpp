@@ -395,7 +395,7 @@ bool Gui::DoGui()
                     ImGui::PushFont(FontHelper::BoldFont);
                     ImGui::Text("WARNING:");
                     ImGui::PopFont();
-                    ImGui::TextWrapped("Using an HDMI Audio Extractor that is not on this list will likely result in inaccurate measurements! This is because the offset between its different audio outputs will not be accounted for in the reported measurements.");
+                    ImGui::TextWrapped("Using an HDMI Audio Extractor that is not on this list may result in inaccurate measurements! This is because the offset between its different audio outputs will not be accounted for in the reported measurements.");
                     ImGui::Spacing();
                     ImGui::TextWrapped("If you have another HDMI Audio Extractor that is suitable for use with this tool, "
                         "please let me know by email to allen"/* spam bot protection */"@"/* spam bot protection */"avlatency.com and I might be able to add support for this device.");
@@ -411,7 +411,7 @@ bool Gui::DoGui()
                 ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the amount of time between the digital audio signal entering the DAC's input to the analog output of the DAC. Only DACs that have similar latency for all audio formats are compatable with this tool.");
                 ImGui::Spacing();
 
-                if (ImGui::BeginListBox("DAC", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing())))
+                if (ImGui::BeginListBox("DAC", ImVec2(-FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing())))
                 {
                     for (int n = 0; n < DacLatencyProfiles::Profiles.size(); n++)
                     {
@@ -440,7 +440,7 @@ bool Gui::DoGui()
                     ImGui::PushFont(FontHelper::BoldFont);
                     ImGui::Text("WARNING:");
                     ImGui::PopFont();
-                    ImGui::TextWrapped("Using a DAC that is not on this list will likely result in inaccurate measurements! This is because the DAC's audio latency will not be accounted for in the reported measurements.");
+                    ImGui::TextWrapped("Using a DAC that is not on this list may result in inaccurate measurements! This is because the DAC's audio latency will not be accounted for in the reported measurements.");
                     ImGui::Spacing();
                     ImGui::TextWrapped("If you have another DAC that is suitable for use with this tool, "
                         "please let me know by email to allen"/* spam bot protection */"@"/* spam bot protection */"avlatency.com and I might be able to add support for this device.");

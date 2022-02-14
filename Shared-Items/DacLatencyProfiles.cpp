@@ -32,7 +32,7 @@ void DacLatencyProfiles::InitializeProfiles()
 
 	None.Name = "Other";
 	None.Latency = 0;
-	SHARCV1_EARC.InputType = DacLatencyProfile::DacInputType::Unknown;
+	None.InputType = DacLatencyProfile::DacInputType::Unknown;
 	Profiles.push_back(&None);
 }
 
