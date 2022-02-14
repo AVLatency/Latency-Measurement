@@ -781,9 +781,9 @@ bool Gui::DoGui()
                             ImGui::Text(std::format("Output Offset Profile: {}", avgResult.OutputOffsetProfileName).c_str());
                             ImGui::Text(std::format("Output Offset Value: {} ms", avgResult.OutputOffsetFromProfile).c_str());
                             ImGui::Text(std::format("Verified Accuracy: {}", avgResult.Verified ? "Yes" : "No").c_str());
+                            GuiHelper::VerifiedHelp();
                             ImGui::Text(std::format("DAC: {}", avgResult.ReferenceDacName).c_str());
                             ImGui::Text(std::format("DAC Audio Latency: {} ms", avgResult.ReferenceDacLatency).c_str());
-                            GuiHelper::VerifiedHelp();
 
                             break;
                         }

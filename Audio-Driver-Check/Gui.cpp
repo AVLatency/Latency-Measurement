@@ -316,8 +316,8 @@ bool Gui::DoGui()
                     copyableFormatText << '\t' << waveFormat->nChannels
                         << '\t' << waveFormat->nSamplesPerSec
                         << '\t' << waveFormat->wBitsPerSample
-                        << '\t' << highSampleBits
-                        << '\t' << lowSampleBits;
+                        << "\t0b" << highSampleBits
+                        << "\t0b" << lowSampleBits;
 
                     ImGui::SetClipboardText(copyableFormatText.str().c_str());
                 }
