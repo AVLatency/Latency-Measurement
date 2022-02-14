@@ -665,6 +665,12 @@ bool Gui::DoGui()
             break;
         case MeasurementToolGuiState::Results:
         {
+            std::string audioLatencyType = "Audio";
+            if (TestNotes::Notes.DutOutputType() != "")
+            {
+                audioLatencyType = TestNotes::Notes.DutOutputType();
+            }
+
             ImGui::PushFont(FontHelper::BoldFont);
             ImGui::Text("Measurement Results");
             ImGui::PopFont();
@@ -706,17 +712,17 @@ bool Gui::DoGui()
                     }
 
                     ImGui::PushFont(FontHelper::HeaderFont);
-                    ImGui::Text(std::format("Stereo Audio Latency: {}", stereoLatency).c_str());
+                    ImGui::Text(std::format("Stereo {} Latency: {}", audioLatencyType, stereoLatency).c_str());
                     ImGui::PopFont();
                     ImGui::Text(stereoFormat.c_str());
                     ImGui::Spacing();
                     ImGui::PushFont(FontHelper::HeaderFont);
-                    ImGui::Text(std::format("5.1 Audio Latency: {}", fiveOneLatency).c_str());
+                    ImGui::Text(std::format("5.1 {} Latency: {}", audioLatencyType, fiveOneLatency).c_str());
                     ImGui::PopFont();
                     ImGui::Text(fiveOneFormat.c_str());
                     ImGui::Spacing();
                     ImGui::PushFont(FontHelper::HeaderFont);
-                    ImGui::Text(std::format("7.1 Audio Latency: {}", sevenOneLatency).c_str());
+                    ImGui::Text(std::format("7.1 {} Latency: {}", audioLatencyType, sevenOneLatency).c_str());
                     ImGui::PopFont();
                     ImGui::Text(sevenOneFormat.c_str());
 
@@ -764,17 +770,19 @@ bool Gui::DoGui()
                         if (avgResult.Format == selectedFormat)
                         {
                             ImGui::PushFont(FontHelper::BoldFont);
-                            ImGui::Text(std::format("Average Audio Latency: {} ms", round(avgResult.AverageLatency())).c_str());
+                            ImGui::Text(std::format("Average {} Latency: {} ms", audioLatencyType, round(avgResult.AverageLatency())).c_str());
                             ImGui::PopFont();
                             ImGui::Text(std::format("(rounded from: {} ms)", avgResult.AverageLatency()).c_str());
                             ImGui::Spacing();
-                            ImGui::Text(std::format("Min Audio Latency: {} ms", avgResult.MinLatency()).c_str());
-                            ImGui::Text(std::format("Max Audio Latency: {} ms", avgResult.MaxLatency()).c_str());
+                            ImGui::Text(std::format("Min {} Latency: {} ms", audioLatencyType, avgResult.MinLatency()).c_str());
+                            ImGui::Text(std::format("Max {} Latency: {} ms", audioLatencyType, avgResult.MaxLatency()).c_str());
                             ImGui::Text(std::format("Valid Measurements: {}", avgResult.Offsets.size()).c_str());
                             ImGui::Spacing();
                             ImGui::Text(std::format("Output Offset Profile: {}", avgResult.OutputOffsetProfileName).c_str());
                             ImGui::Text(std::format("Output Offset Value: {} ms", avgResult.OutputOffsetFromProfile).c_str());
                             ImGui::Text(std::format("Verified Accuracy: {}", avgResult.Verified ? "Yes" : "No").c_str());
+                            ImGui::Text(std::format("DAC: {}", avgResult.ReferenceDacName).c_str());
+                            ImGui::Text(std::format("DAC Audio Latency: {} ms", avgResult.ReferenceDacLatency).c_str());
                             GuiHelper::VerifiedHelp();
 
                             break;
