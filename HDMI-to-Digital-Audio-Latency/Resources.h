@@ -19,6 +19,14 @@ public:
 	int HDV_MB01TextureWidth = 0;
 	int HDV_MB01TextureHeight = 0;
 
+	ID3D11ShaderResourceView* CV121ADTexture = NULL;
+	int CV121ADTextureWidth = 0;
+	int CV121ADTextureHeight = 0;
+
+	ID3D11ShaderResourceView* SHARCv1Texture = NULL;
+	int SHARCv1TextureWidth = 0;
+	int SHARCv1TextureHeight = 0;
+
 	ID3D11ShaderResourceView* WindowsDisplaySettingsTexture = NULL;
 	int WindowsDisplaySettingsTextureWidth = 0;
 	int WindowsDisplaySettingsTextureHeight = 0;

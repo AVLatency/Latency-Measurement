@@ -384,7 +384,7 @@ bool Gui::DoGui()
                 {
                     float imageScale = 0.45 * Gui::DpiScale;
                     ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
-                    ImGui::TextWrapped("The HDV-MB01 is also sold under these names:");
+                    ImGui::TextWrapped("The HDV-MB01 is sold under these names:");
                     ImGui::Spacing();
                     ImGui::TextWrapped("- J-Tech Digital JTD18G - H5CH\n"
                         "- Monoprice Blackbird 24278\n"
@@ -435,7 +435,23 @@ bool Gui::DoGui()
                 }
                 ImGui::Spacing();
 
-                if (DacLatencyProfiles::Profiles[DacLatencyProfiles::SelectedProfileIndex] == &DacLatencyProfiles::None)
+                if (DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::CV121AD_ARC
+                    || DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::CV121AD_SPDIF_COAX
+                    || DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::CV121AD_SPDIF_OPTICAL)
+                {
+                    float imageScale = 0.30 * Gui::DpiScale;
+                    ImGui::Image((void*)resources.CV121ADTexture, ImVec2(resources.CV121ADTextureWidth * imageScale, resources.CV121ADTextureHeight * imageScale));
+                    ImGui::TextWrapped("The CV121AD is sold under these names:");
+                    ImGui::Spacing();
+                    ImGui::TextWrapped("- MYPIN 192KHz DAC Converter Multifunction Audio Converter");
+                }
+                else if (DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::SHARCV1_EARC)
+                {
+                    float imageScale = 0.6 * Gui::DpiScale;
+                    ImGui::Image((void*)resources.SHARCv1Texture, ImVec2(resources.SHARCv1TextureWidth * imageScale, resources.SHARCv1TextureHeight * imageScale));
+                    ImGui::TextWrapped("The SHARC v1 is produced and sold by Thenaudio.");
+                }
+                else if (DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::None)
                 {
                     ImGui::PushFont(FontHelper::BoldFont);
                     ImGui::Text("WARNING:");

@@ -407,7 +407,7 @@ bool Gui::DoGui()
                 {
                     float imageScale = 0.45 * Gui::DpiScale;
                     ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
-                    ImGui::TextWrapped("The HDV-MB01 is also sold under these names:");
+                    ImGui::TextWrapped("The HDV-MB01 is sold under these names:");
                     ImGui::Spacing();
                     ImGui::TextWrapped("- J-Tech Digital JTD18G - H5CH\n"
                         "- Monoprice Blackbird 24278\n"
