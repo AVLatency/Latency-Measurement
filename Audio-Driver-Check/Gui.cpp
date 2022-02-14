@@ -316,6 +316,7 @@ bool Gui::DoGui()
                     copyableFormatText << '\t' << waveFormat->nChannels
                         << '\t' << waveFormat->nSamplesPerSec
                         << '\t' << waveFormat->wBitsPerSample
+                        << '\t' << TestConfiguration::OutputVolume
                         << "\t0b" << highSampleBits
                         << "\t0b" << lowSampleBits;
 
