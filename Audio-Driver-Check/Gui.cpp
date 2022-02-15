@@ -317,6 +317,7 @@ bool Gui::DoGui()
                         << '\t' << waveFormat->nSamplesPerSec
                         << '\t' << waveFormat->wBitsPerSample
                         << '\t' << TestConfiguration::OutputVolume
+                        << '\t' << (firstChannelOnly ? "Left" : "All")
                         << "\t0b" << highSampleBits
                         << "\t0b" << lowSampleBits;
 
