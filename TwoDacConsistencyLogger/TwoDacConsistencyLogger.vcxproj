@@ -155,8 +155,8 @@
     <ClInclude Include="..\imgui\imgui_internal.h" />
     <ClInclude Include="..\imgui\backends\imgui_impl_dx11.h" />
     <ClInclude Include="..\imgui\backends\imgui_impl_win32.h" />
+    <ClInclude Include="GeneratedSamples.h" />
     <ClInclude Include="RecordingAnalyzer.h" />
-    <ClInclude Include="RecordingConfiguration.h" />
     <ClInclude Include="RecordingResult.h" />
     <ClInclude Include="RecordingSingleChannelResult.h" />
     <ClInclude Include="StringHelper.h" />
@@ -175,9 +175,9 @@
     <ClCompile Include="..\imgui\imgui_widgets.cpp" />
     <ClCompile Include="..\imgui\backends\imgui_impl_dx11.cpp" />
     <ClCompile Include="..\imgui\backends\imgui_impl_win32.cpp" />
+    <ClCompile Include="GeneratedSamples.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="RecordingAnalyzer.cpp" />
-    <ClCompile Include="RecordingConfiguration.cpp" />
     <ClCompile Include="RecordingResult.cpp" />
     <ClCompile Include="RecordingSingleChannelResult.cpp" />
     <ClCompile Include="StringHelper.cpp" />

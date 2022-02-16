@@ -177,7 +177,33 @@ void WasapiOutput::StopPlayback()
     stopRequested = true;
 }
 
-WORD WasapiOutput::GetFormatID()
+INT16 WasapiOutput::FloatToINT16(float sample)
+{
+    return (INT16)(round((double)sample * SHRT_MAX));
+}
+
+INT32 WasapiOutput::FloatToPaddedINT24(float sample)
+{
+#pragma warning(disable:4244)
+    // This is duplicated in LoadData. Make sure to update that as well if any of this changes.
+    int thirtyTwoBit = (int)round((double)sample * INT24_MAX);
+    INT32 result;
+    byte* resultArray = (byte*)&result;
+    resultArray[0] = 0; // padding
+    resultArray[1] = thirtyTwoBit; // little endian, least significant first
+    resultArray[2] = thirtyTwoBit >> 8;
+    resultArray[3] = thirtyTwoBit >> 16;
+    resultArray[3] |= (thirtyTwoBit >> 31) << 7; // negative bit
+#pragma warning(default:4244)
+    return result;
+}
+
+INT32 WasapiOutput::FloatToINT32(float sample)
+{
+    return (INT32)(round((double)sample * INT_MAX));
+}
+
+WORD WasapiOutput::GetFormatID(WAVEFORMATEX* waveFormat)
 {
     if (waveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
     {
@@ -187,6 +213,11 @@ WORD WasapiOutput::GetFormatID()
     {
         return waveFormat->wFormatTag;
     }
+}
+
+WORD WasapiOutput::GetFormatID()
+{
+    return GetFormatID(waveFormat);
 }
 
 HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flags)
@@ -243,7 +274,7 @@ HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flag
                 {
                     if (!firstChannelOnly || c == 0)
                     {
-                        castData[i + c] = (INT16)(round(audioSamples[sampleIndex] * volume * SHRT_MAX));
+                        castData[i + c] = FloatToINT16(audioSamples[sampleIndex] * volume);
                     }
                     else
                     {
@@ -273,7 +304,10 @@ HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flag
         {
             if (!FinishedPlayback(true))
             {
-                int thirtyTwoBit = (int)round(audioSamples[sampleIndex] * volume * INT24_MAX);
+                // This is duplicated in FloatToPaddedINT24(float sample). Make sure to update that as well if any of this changes.
+#pragma warning(disable:26451) // disabling to have consistent behaviour between this and FloatToPaddedINT24
+                int thirtyTwoBit = (int)round((double)(audioSamples[sampleIndex] * volume) * INT24_MAX);
+#pragma warning(default:26451)
 
                 for (int c = 0; c < numChannels; c++)
                 {
@@ -321,7 +355,7 @@ HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flag
                 {
                     if (!firstChannelOnly || c == 0)
                     {
-                        castData[i + c] = (INT32)(round(audioSamples[sampleIndex] * volume * INT_MAX));
+                        castData[i + c] = FloatToINT32(audioSamples[sampleIndex] * volume);
                     }
                     else
                     {

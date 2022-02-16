@@ -9,8 +9,8 @@
 class HdmiOutputOffsetProfiles
 {
 public:
-	static OutputOffsetProfile HDV_MB01;
-	static OutputOffsetProfile None;
+	static OutputOffsetProfile* HDV_MB01;
+	static OutputOffsetProfile* None;
 
 	static std::vector<OutputOffsetProfile*> Profiles;
 	static int SelectedProfileIndex;
@@ -18,5 +18,9 @@ public:
 	static void InitializeProfiles();
 
 	static OutputOffsetProfile* CurrentProfile();
+
+private:
+	static OutputOffsetProfile::OutputOffset HDV_MB01_GetOffset(int numChannels, int sampleRate, int bitDepth);
+	static OutputOffsetProfile::OutputOffset None_GetOffset(int numChannels, int sampleRate, int bitDepth);
 };
 

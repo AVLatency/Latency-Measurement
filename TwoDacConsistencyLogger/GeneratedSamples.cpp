@@ -4,9 +4,6 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-#define TICK_AMPLITUDE 0.6;
-#define CONSTANT_TONE_AMPLITUDE 0.001;
-
 GeneratedSamples::GeneratedSamples(WAVEFORMATEX* waveFormat, WaveType type)
     : GeneratedSamples(waveFormat, Config(type) ) { }
 
@@ -73,8 +70,8 @@ void GeneratedSamples::GenerateLatencyMeasurementSamples()
 
     // Amplitudes
     double wakeupToneAmp = 0.04;
-    double constantToneAmp = CONSTANT_TONE_AMPLITUDE;
-    double tickAmp = TICK_AMPLITUDE;
+    double constantToneAmp = 0.001;
+    double tickAmp = 0.6;
 
     // Wave generation:
     samplesLength = (int)(tickTimesInSamples[tickTimesInSamplesLength - 1] + endPadding * sampleRate);
@@ -130,8 +127,8 @@ void GeneratedSamples::GenerateVolumeAdjustmentSamples()
     int tickFreq = GetTickFrequency(sampleRate);
 
     // Amplitudes
-    double tickAmp = TICK_AMPLITUDE;
-    double constantToneAmp = CONSTANT_TONE_AMPLITUDE;
+    double tickAmp = 0.6;
+    double constantToneAmp = 0.001;
 
     // Wave generation:
     samplesLength = (int)(durationSeconds * sampleRate);
@@ -144,16 +141,16 @@ void GeneratedSamples::GenerateVolumeAdjustmentSamples()
         samples[i] = (float)sin(M_PI * 2 * constantToneFreq * time) * constantToneAmp;
     }
 
-    // Tick once per durationInSeconds
-    int tickSamplesLength = sampleRate / tickFreq;
-    for (int i = 0; i < samplesLength; i++)
-    {
-        if (i < tickSamplesLength)
-        {
-            double time = (double)i / sampleRate;
-            samples[i] = (float)sin(M_PI * 2 * tickFreq * time) * tickAmp;
-        }
-    }
+    //// Tick once per durationInSeconds
+    //int tickSamplesLength = sampleRate / tickFreq;
+    //for (int i = 0; i < samplesLength; i++)
+    //{
+    //    if (i < tickSamplesLength)
+    //    {
+    //        double time = (double)i / sampleRate;
+    //        samples[i] = (float)sin(M_PI * 2 * tickFreq * time) * tickAmp;
+    //    }
+    //}
 }
 
 void GeneratedSamples::GenerateTestPattern_ToneSamples()

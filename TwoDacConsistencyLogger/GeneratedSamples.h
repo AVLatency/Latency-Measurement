@@ -1,10 +1,22 @@
 #pragma once
 #include <audioclient.h>
 
-struct RecordingConfiguration
+struct GeneratedSamples
 {
 public:
+	enum struct WaveType { LatencyMeasurement, VolumeAdjustment, TestPattern_TonePlusHighFreq, TestPattern_Tone, TestPattern_ToneHighFreqBlip, TestPattern_ToneHighFreqOnOff, TestPattern_VisuallyIdentifiable };
+
+	struct Config
+	{
+		WaveType waveType;
+		double blipFrequency;
+		int blipSampleLength;
+		double onOffFrequency; // sampleRate / 24 is the maximum amount of silence that will not trigger a fade-in on the HDV-MB01 HDMI audio extractor
+		Config(WaveType type) : waveType(type), blipFrequency(1), blipSampleLength(24), onOffFrequency(1) {};
+	};
+
 	WAVEFORMATEX* WaveFormat;
+	WaveType Type;
 
     // Test wave is constructed like this:
 	// Quiet [constantToneFreq] Hz tone played at start
@@ -25,8 +37,8 @@ public:
 	// - This gives time for the audio to feedback into the recording input.
 	// - Audio will immediately stop being recorded when playback has finished, which means some
 	//   of the end of this test wave will be cut off.
-	float* testWave;
-	int testWaveLength;
+	float* samples;
+	int samplesLength;
 
 	/// <summary>
 	/// Time relative to tick 1 in the tick pattern
@@ -41,14 +53,20 @@ public:
 	/// </summary>
 	double constantToneFreq = 300;
 
-	RecordingConfiguration(WAVEFORMATEX* waveFormat);
-	~RecordingConfiguration();
+	GeneratedSamples(WAVEFORMATEX* waveFormat, WaveType type);
+	GeneratedSamples(WAVEFORMATEX* waveFormat, Config config);
+	~GeneratedSamples();
 
 	double TestWaveDurationInSeconds() const;
 
 	static int GetTickFrequency(int sampleRate);
 
 private:
-	void CreateTestWave();
+	void GenerateLatencyMeasurementSamples();
+	void GenerateVolumeAdjustmentSamples();
+	void GenerateTestPattern_ToneSamples();
+	void GenerateTestPattern_TonePlusHighFreqSamples();
+	void GenerateTestPattern_ToneHighFreqOnOffSamples(double frequency);
+	void GenerateTestPattern_ToneHighFreqBlip(int blipSampleLength, double frequency);
+	void GenerateTestPattern_VisuallyIdentifiableSamples();
 };
-

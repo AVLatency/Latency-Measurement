@@ -28,7 +28,7 @@
     <ClInclude Include="Gui.h" />
     <ClInclude Include="Resources.h" />
     <ClInclude Include="TestNotes.h" />
-    <ClInclude Include="HdmiResultsWriter.h" />
+    <ClInclude Include="ResultsWriter.h" />
     <ClInclude Include="Defines.h" />
   </ItemGroup>
   <ItemGroup>
@@ -59,7 +59,7 @@
     <ClCompile Include="Gui.cpp" />
     <ClCompile Include="Resources.cpp" />
     <ClCompile Include="TestNotes.cpp" />
-    <ClCompile Include="HdmiResultsWriter.cpp" />
+    <ClCompile Include="ResultsWriter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\imgui\misc\debuggers\imgui.natvis">

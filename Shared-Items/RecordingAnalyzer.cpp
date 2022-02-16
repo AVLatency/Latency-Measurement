@@ -11,24 +11,15 @@
 #include <iomanip>
 #include "TestConfiguration.h"
 #include <ctime>
-#include "ProfileFormat.h"
 using namespace std;
 
 const std::string RecordingAnalyzer::validRecordingsFilename{ "Valid-Individual-Recordings.csv" };
 const std::string RecordingAnalyzer::invalidRecordingsFilename{ "Invalid-Individual-Recordings.csv" };
 
-RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& generatedSamples, const WasapiInput& input, AudioFormat* format, OutputOffsetProfile* currentProfile)
+RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& generatedSamples, const WasapiInput& input, AudioFormat* format, OutputOffsetProfile* currentProfile, DacLatencyProfile* referenceDacLatency)
 {
-    std::string formatStr = ProfileFormat::FormatStr(format->WaveFormat);
-    float offsetFromProfile = 0;
-    bool verified = false;
-    if (currentProfile->OutputOffsets.contains(formatStr))
-    {
-        offsetFromProfile = currentProfile->OutputOffsets[formatStr].value;
-        verified = currentProfile->OutputOffsets[formatStr].verified;
-    }
-
-    RecordingResult result(format, currentProfile->Name, offsetFromProfile, verified);
+    OutputOffsetProfile::OutputOffset offset = currentProfile->GetOffsetFromWaveFormat(format->WaveFormat);
+    RecordingResult result(format, currentProfile->Name, offset.value, offset.verified, referenceDacLatency->Name, referenceDacLatency->Latency);
 
     // Extract individual channels for analysis
     int inputSampleRate = input.waveFormat.Format.nSamplesPerSec;
@@ -225,7 +216,7 @@ RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const Gener
     return result;
 }
 
-std::vector<AveragedResult> RecordingAnalyzer::AnalyzeResults(std::vector<RecordingResult> results, time_t tTime, const AudioEndpoint& outputEndpoint, OutputOffsetProfile* currentProfile)
+std::vector<AveragedResult> RecordingAnalyzer::AnalyzeResults(std::vector<RecordingResult> results, time_t tTime, const AudioEndpoint& outputEndpoint)
 {
     std::vector<AveragedResult> averagedResults;
 
@@ -246,15 +237,7 @@ std::vector<AveragedResult> RecordingAnalyzer::AnalyzeResults(std::vector<Record
 
             if (!alreadyHasAvgResult)
             {
-                std::string formatStr = ProfileFormat::FormatStr(recordingResult.Format->WaveFormat);
-                float offsetFromProfile = 0;
-                bool verified = false;
-                if (currentProfile->OutputOffsets.contains(formatStr))
-                {
-                    offsetFromProfile = currentProfile->OutputOffsets[formatStr].value;
-                    verified = currentProfile->OutputOffsets[formatStr].verified;
-                }
-                AveragedResult avgResult(tTime, recordingResult.Format, outputEndpoint, currentProfile->Name, offsetFromProfile, verified);
+                AveragedResult avgResult(tTime, recordingResult.Format, outputEndpoint, recordingResult.OutputOffsetProfileName, recordingResult.OutputOffsetFromProfile, recordingResult.Verified, recordingResult.ReferenceDacName, recordingResult.ReferenceDacLatency);
                 avgResult.Offsets.push_back(recordingResult.Offset());
                 averagedResults.push_back(avgResult);
             }

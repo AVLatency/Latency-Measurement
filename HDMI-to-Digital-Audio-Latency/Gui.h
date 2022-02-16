@@ -42,4 +42,6 @@ private:
 
 	void StartAjdustVolumeAudio();
 	void StartTest();
+
+	void SetDutOutputType();
 };

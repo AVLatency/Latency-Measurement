@@ -3,7 +3,7 @@
 #include <Mmdeviceapi.h>
 #include "WasapiOutput.h"
 #include "WasapiInput.h"
-#include "RecordingConfiguration.h"
+#include "GeneratedSamples.h"
 #include "RecordingAnalyzer.h"
 #include "WindowsWaveFormats.h"
 #include <algorithm>
@@ -146,7 +146,7 @@ void TestManager::SetBitsPerSample(WAVEFORMATEX* wfx, WORD bitsPerSample)
 
 bool TestManager::PerformRecording(WAVEFORMATEX* waveFormat)
 {
-	RecordingConfiguration* recordingConfig = new RecordingConfiguration(waveFormat);
+	GeneratedSamples* recordingConfig = new GeneratedSamples(waveFormat, GeneratedSamples::WaveType::LatencyMeasurement);
 
 	bool validResult = false;
 	for (int i = 0; i < config.NumberOfRetries + 1; i++)

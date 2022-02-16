@@ -1,12 +1,12 @@
 #pragma once
 #include <Audioclient.h>
-#include "RecordingConfiguration.h"
+#include "GeneratedSamples.h"
 #include <string>
 
 class WasapiInput
 {
 public:
-	WasapiInput(const RecordingConfiguration& config);
+	WasapiInput(const GeneratedSamples& config);
 	~WasapiInput();
 	void StartRecording();
 

@@ -93,7 +93,7 @@ bool Gui::DoGui()
         std::stringstream copyableFormatList;
         std::vector<AudioFormat>& supportedFormats = outputAudioEndpoints[outputDeviceIndex].SupportedFormats;
         std::vector<AudioFormat>& duplicateFormats = outputAudioEndpoints[outputDeviceIndex].DuplicateSupportedFormats;
-        if (ImGui::BeginChild("formatsChildWindow", ImVec2(0, 30 * ImGui::GetTextLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar))
+        ImGui::BeginChild("formatsChildWindow", ImVec2(0, 30 * ImGui::GetTextLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar);
         {
             for (AudioFormat& format : supportedFormats)
             {
@@ -122,8 +122,8 @@ bool Gui::DoGui()
                 copyableFormatList << format.FormatString << std::endl;
             }
 
-            ImGui::EndChild();
         }
+        ImGui::EndChild();
 
         GuiHelper::ChannelDescriptions();
         ImGui::Spacing();
@@ -232,7 +232,7 @@ bool Gui::DoGui()
             }
 
             ImGui::Spacing();
-            if (ImGui::Button("Start Output"))
+            if (state == GuiState::SelectAudioDevice && ImGui::Button("Start Output"))
             {
                 state = GuiState::PlayingAudio;
                 GeneratedSamples::Config config(waveType);
@@ -250,31 +250,90 @@ bool Gui::DoGui()
                 SetThreadExecutionState(ES_DISPLAY_REQUIRED); // Prevent display from turning off while running this tool.
                 outputThread = new std::thread([this] { output->StartPlayback(); });
             }
-        }
-    }
-    if (disabled)
-    {
-        ImGui::EndDisabled();
-    }
 
-    if (state == GuiState::PlayingAudio)
-    {
-        ImGui::Spacing();
-        ImGui::SliderFloat("Output Volume", &TestConfiguration::OutputVolume, .001f, 1);
-        ImGui::Spacing();
+            if (disabled)
+            {
+                ImGui::EndDisabled();
+            }
 
-        if (ImGui::Button("Stop"))
-        {
-            output->StopPlayback();
-            state = GuiState::RequestedStop;
-        }
-    }
-    else if (state == GuiState::RequestedStop)
-    {
-        if (!output->playbackInProgress)
-        {
-            Finish(false);
-            state = GuiState::SelectAudioDevice;
+            if (state == GuiState::PlayingAudio)
+            {
+                if (ImGui::Button("Stop Output"))
+                {
+                    output->StopPlayback();
+                    state = GuiState::RequestedStop;
+                }
+
+                ImGui::Spacing();
+                ImGui::SliderFloat("Output Volume", &TestConfiguration::OutputVolume, .001f, 1);
+
+                std::string highSampleBits;
+                std::string lowSampleBits;
+                if (waveType == GeneratedSamples::WaveType::TestPattern_ToneHighFreqBlip
+                    || waveType == GeneratedSamples::WaveType::TestPattern_ToneHighFreqOnOff
+                    || waveType == GeneratedSamples::WaveType::TestPattern_VisuallyIdentifiable)
+                {
+                    if (WasapiOutput::GetFormatID(waveFormat) == WAVE_FORMAT_PCM && waveFormat->wBitsPerSample == 16)
+                    {
+                        highSampleBits = std::format("{:016b}", WasapiOutput::FloatToINT16(1.0f * TestConfiguration::OutputVolume));
+                        lowSampleBits = std::format("{:016b}", WasapiOutput::FloatToINT16(-1.0f * TestConfiguration::OutputVolume));
+                    }
+                    else if (WasapiOutput::GetFormatID(waveFormat) == WAVE_FORMAT_PCM && waveFormat->wBitsPerSample == 24)
+                    {
+                        highSampleBits = std::format("{:032b}", WasapiOutput::FloatToPaddedINT24(1.0f * TestConfiguration::OutputVolume));
+                        lowSampleBits = std::format("{:032b}", WasapiOutput::FloatToPaddedINT24(-1.0f * TestConfiguration::OutputVolume));
+                    }
+                    else if (WasapiOutput::GetFormatID(waveFormat) == WAVE_FORMAT_PCM && waveFormat->wBitsPerSample == 32)
+                    {
+                        highSampleBits = std::format("{:032b}", WasapiOutput::FloatToINT32(1.0f * TestConfiguration::OutputVolume));
+                        lowSampleBits = std::format("{:032b}", WasapiOutput::FloatToINT32(-1.0f * TestConfiguration::OutputVolume));
+                    }
+                    else if (WasapiOutput::GetFormatID(waveFormat) == WAVE_FORMAT_IEEE_FLOAT && waveFormat->wBitsPerSample == 32)
+                    {
+                        highSampleBits = std::format("{:032b}", 1.0f * TestConfiguration::OutputVolume);
+                        lowSampleBits = std::format("{:032b}", -1.0f * TestConfiguration::OutputVolume);
+                    }
+
+                    std::replace(lowSampleBits.begin(), lowSampleBits.end(), '-', '1');
+
+                    ImGui::Text("High Sample: "); ImGui::SameLine(); ImGui::Text(highSampleBits.c_str());
+                    ImGui::Text("Low Sample: "); ImGui::SameLine(); ImGui::Text(lowSampleBits.c_str());
+                }
+
+                ImGui::Spacing();
+
+                if (ImGui::Button("Copy format to clipboard"))
+                {
+                    std::stringstream copyableFormatText;
+                    if (WasapiOutput::GetFormatID(waveFormat) == WAVE_FORMAT_PCM)
+                    {
+                        copyableFormatText << "LPCM";
+                    }
+                    else if (WasapiOutput::GetFormatID(waveFormat) == WAVE_FORMAT_IEEE_FLOAT)
+                    {
+                        copyableFormatText << "IEEE Floating Point";
+                    }
+                    copyableFormatText << '\t' << waveFormat->nChannels
+                        << '\t' << waveFormat->nSamplesPerSec
+                        << '\t' << waveFormat->wBitsPerSample
+                        << '\t' << TestConfiguration::OutputVolume
+                        << '\t' << (firstChannelOnly ? "Left" : "All")
+                        << "\t0b" << highSampleBits
+                        << "\t0b" << lowSampleBits;
+
+                    ImGui::SetClipboardText(copyableFormatText.str().c_str());
+                }
+
+                ImGui::Spacing();
+            }
+            else if (state == GuiState::RequestedStop)
+            {
+                if (!output->playbackInProgress)
+                {
+                    Finish(false);
+                    state = GuiState::SelectAudioDevice;
+                }
+            }
         }
     }
 

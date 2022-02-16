@@ -5,13 +5,12 @@
 #include "FontHelper.h"
 #include "TestNotes.h"
 #include "TestConfiguration.h"
-#include "HdmiResultsWriter.h"
+#include "ResultsWriter.h"
 #include "shellapi.h"
 #include "HdmiOutputOffsetProfiles.h"
 #include "DacLatencyProfiles.h"
 #include "Defines.h"
 #include "GuiHelper.h"
-#include "ProfileFormat.h"
 
 float Gui::DpiScale = 1.0f;
 bool Gui::DpiScaleChanged = false;
@@ -324,8 +323,9 @@ bool Gui::DoGui()
                 else if (state == MeasurementToolGuiState::FinishingAdjustVolume)
                 {
                     state = MeasurementToolGuiState::MeasurementConfig;
-                    outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, true, true, AudioEndpoint::HdmiFormatsFilter);
+                    outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, true, true, HdmiOutputOffsetProfiles::CurrentProfile()->FormatFilter);
                     strcpy_s(TestNotes::Notes.DutModel, outputAudioEndpoints[outputDeviceIndex].Name.c_str());
+                    SetDutOutputType();
                 }
             }
         }
@@ -364,6 +364,11 @@ bool Gui::DoGui()
                         if (ImGui::Selectable(HdmiOutputOffsetProfiles::Profiles[n]->Name.c_str(), is_selected))
                         {
                             HdmiOutputOffsetProfiles::SelectedProfileIndex = n;
+                            outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, true, true, HdmiOutputOffsetProfiles::CurrentProfile()->FormatFilter);
+                            if (HdmiOutputOffsetProfiles::CurrentProfile() == HdmiOutputOffsetProfiles::None)
+                            {
+                                strcpy_s(TestNotes::Notes.HDMIAudioDevice, "");
+                            }
                         }
                         // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
                         if (is_selected)
@@ -375,22 +380,22 @@ bool Gui::DoGui()
                 }
                 ImGui::Spacing();
 
-                if (HdmiOutputOffsetProfiles::Profiles[HdmiOutputOffsetProfiles::SelectedProfileIndex] == &HdmiOutputOffsetProfiles::HDV_MB01)
+                if (HdmiOutputOffsetProfiles::Profiles[HdmiOutputOffsetProfiles::SelectedProfileIndex] == HdmiOutputOffsetProfiles::HDV_MB01)
                 {
                     float imageScale = 0.45 * Gui::DpiScale;
                     ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
-                    ImGui::TextWrapped("The HDV-MB01 is also sold under these names:");
+                    ImGui::TextWrapped("The HDV-MB01 is sold under these names:");
                     ImGui::Spacing();
                     ImGui::TextWrapped("- J-Tech Digital JTD18G - H5CH\n"
                         "- Monoprice Blackbird 24278\n"
                         "- OREI HDA - 912\n");
                 }
-                else if (HdmiOutputOffsetProfiles::Profiles[HdmiOutputOffsetProfiles::SelectedProfileIndex] == &HdmiOutputOffsetProfiles::None)
+                else if (HdmiOutputOffsetProfiles::Profiles[HdmiOutputOffsetProfiles::SelectedProfileIndex] == HdmiOutputOffsetProfiles::None)
                 {
                     ImGui::PushFont(FontHelper::BoldFont);
                     ImGui::Text("WARNING:");
                     ImGui::PopFont();
-                    ImGui::TextWrapped("Using an HDMI Audio Extractor that is not on this list will likely result in inaccurate measurements! This is because the offset between its different audio outputs will not be accounted for in the reported measurements.");
+                    ImGui::TextWrapped("Using an HDMI Audio Extractor that is not on this list may result in inaccurate measurements! This is because the offset between its different audio outputs will not be accounted for in the reported measurements.");
                     ImGui::Spacing();
                     ImGui::TextWrapped("If you have another HDMI Audio Extractor that is suitable for use with this tool, "
                         "please let me know by email to allen"/* spam bot protection */"@"/* spam bot protection */"avlatency.com and I might be able to add support for this device.");
@@ -403,10 +408,10 @@ bool Gui::DoGui()
                 ImGui::PushFont(FontHelper::BoldFont);
                 ImGui::Text("ARC, eARC, or S/PDIF DAC");
                 ImGui::PopFont();
-                ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the amount of time between the digital audio signal entering the DAC's input to the analog output of the DAC for different audio formats.");
+                ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the amount of time between the digital audio signal entering the DAC's input to the analog output of the DAC. Only DACs that have similar latency for all audio formats are compatable with this tool.");
                 ImGui::Spacing();
 
-                if (ImGui::BeginListBox("DAC", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing())))
+                if (ImGui::BeginListBox("DAC", ImVec2(-FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing())))
                 {
                     for (int n = 0; n < DacLatencyProfiles::Profiles.size(); n++)
                     {
@@ -414,6 +419,11 @@ bool Gui::DoGui()
                         if (ImGui::Selectable(DacLatencyProfiles::Profiles[n]->Name.c_str(), is_selected))
                         {
                             DacLatencyProfiles::SelectedProfileIndex = n;
+                            if (DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::None)
+                            {
+                                strcpy_s(TestNotes::Notes.DAC, "");
+                            }
+                            SetDutOutputType();
                         }
                         // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
                         if (is_selected)
@@ -425,12 +435,28 @@ bool Gui::DoGui()
                 }
                 ImGui::Spacing();
 
-                if (DacLatencyProfiles::Profiles[DacLatencyProfiles::SelectedProfileIndex] == &DacLatencyProfiles::None)
+                if (DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::CV121AD_ARC
+                    || DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::CV121AD_SPDIF_COAX
+                    || DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::CV121AD_SPDIF_OPTICAL)
+                {
+                    float imageScale = 0.30 * Gui::DpiScale;
+                    ImGui::Image((void*)resources.CV121ADTexture, ImVec2(resources.CV121ADTextureWidth * imageScale, resources.CV121ADTextureHeight * imageScale));
+                    ImGui::TextWrapped("The CV121AD is sold under these names:");
+                    ImGui::Spacing();
+                    ImGui::TextWrapped("- MYPIN 192KHz DAC Converter Multifunction Audio Converter");
+                }
+                else if (DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::SHARCV1_EARC)
+                {
+                    float imageScale = 0.6 * Gui::DpiScale;
+                    ImGui::Image((void*)resources.SHARCv1Texture, ImVec2(resources.SHARCv1TextureWidth * imageScale, resources.SHARCv1TextureHeight * imageScale));
+                    ImGui::TextWrapped("The SHARC v1 is produced and sold by Thenaudio.");
+                }
+                else if (DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::None)
                 {
                     ImGui::PushFont(FontHelper::BoldFont);
                     ImGui::Text("WARNING:");
                     ImGui::PopFont();
-                    ImGui::TextWrapped("Using a DAC that is not on this list will likely result in inaccurate measurements! This is because the DAC's audio latency will not be accounted for in the reported measurements.");
+                    ImGui::TextWrapped("Using a DAC that is not on this list may result in inaccurate measurements! This is because the DAC's audio latency will not be accounted for in the reported measurements.");
                     ImGui::Spacing();
                     ImGui::TextWrapped("If you have another DAC that is suitable for use with this tool, "
                         "please let me know by email to allen"/* spam bot protection */"@"/* spam bot protection */"avlatency.com and I might be able to add support for this device.");
@@ -470,20 +496,14 @@ bool Gui::DoGui()
                     }
                 }
 
-                if (ImGui::BeginChild("formatsChildWindow", ImVec2(0, 15 * ImGui::GetTextLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar))
+                ImGui::BeginChild("formatsChildWindow", ImVec2(0, 15 * ImGui::GetTextLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar);
                 {
                     for (AudioFormat& format : supportedFormats)
                     {
-                        OutputOffsetProfile* currentProfile = HdmiOutputOffsetProfiles::CurrentProfile();
-                        DacLatencyProfile* currentDacProfile = DacLatencyProfiles::CurrentProfile();
-                        std::string formatStr = ProfileFormat::FormatStr(format.WaveFormat);
-                        bool verified = currentProfile->OutputOffsets.contains(formatStr) && currentProfile->OutputOffsets[formatStr].verified
-                            && currentDacProfile->Latencies.contains(formatStr) && currentDacProfile->Latencies[formatStr].verified;
-                        GuiHelper::VerifiedMarker(verified, DpiScale);
                         ImGui::Checkbox(format.FormatString.c_str(), &format.UserSelected);
                     }
-                    ImGui::EndChild();
                 }
+                ImGui::EndChild();
 
                 GuiHelper::FormatDescriptions();
 
@@ -522,18 +542,30 @@ bool Gui::DoGui()
                 ImGui::SameLine(); GuiHelper::HelpMarker("These notes will be included in the .csv spreadsheet result files that are saved in the folder that this app was launched from.");
                 ImGui::Spacing();
 
-                TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile = HdmiOutputOffsetProfiles::CurrentProfile() != &HdmiOutputOffsetProfiles::None;
+                TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile = HdmiOutputOffsetProfiles::CurrentProfile() != HdmiOutputOffsetProfiles::None;
                 if (TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile)
                 {
                     ImGui::BeginDisabled();
-                    char tempStr[128];
-                    strcpy_s(tempStr, HdmiOutputOffsetProfiles::CurrentProfile()->Name.c_str());
-                    ImGui::InputText("HDMI Audio Extractor", tempStr, IM_ARRAYSIZE(tempStr));
+                    strcpy_s(TestNotes::Notes.HDMIAudioDevice, HdmiOutputOffsetProfiles::CurrentProfile()->Name.c_str());
+                    ImGui::InputText("HDMI Audio Extractor", TestNotes::Notes.HDMIAudioDevice, IM_ARRAYSIZE(TestNotes::Notes.HDMIAudioDevice));
                     ImGui::EndDisabled();
                 }
                 else
                 {
                     ImGui::InputText("HDMI Audio Extractor", TestNotes::Notes.HDMIAudioDevice, IM_ARRAYSIZE(TestNotes::Notes.HDMIAudioDevice), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
+                }
+
+                TestNotes::Notes.DACUseLatencyProfile = DacLatencyProfiles::CurrentProfile() != &DacLatencyProfiles::None;
+                if (TestNotes::Notes.DACUseLatencyProfile)
+                {
+                    ImGui::BeginDisabled();
+                    strcpy_s(TestNotes::Notes.DAC, DacLatencyProfiles::CurrentProfile()->Name.c_str());
+                    ImGui::InputText("ARC, eARC, or S/PDIF DAC", TestNotes::Notes.DAC, IM_ARRAYSIZE(TestNotes::Notes.DAC));
+                    ImGui::EndDisabled();
+                }
+                else
+                {
+                    ImGui::InputText("ARC, eARC, or S/PDIF DAC", TestNotes::Notes.DAC, IM_ARRAYSIZE(TestNotes::Notes.DAC), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
                 }
 
                 ImGui::PushFont(FontHelper::BoldFont);
@@ -633,6 +665,12 @@ bool Gui::DoGui()
             break;
         case MeasurementToolGuiState::Results:
         {
+            std::string audioLatencyType = "Audio";
+            if (TestNotes::Notes.DutOutputType() != "")
+            {
+                audioLatencyType = TestNotes::Notes.DutOutputType();
+            }
+
             ImGui::PushFont(FontHelper::BoldFont);
             ImGui::Text("Measurement Results");
             ImGui::PopFont();
@@ -674,17 +712,17 @@ bool Gui::DoGui()
                     }
 
                     ImGui::PushFont(FontHelper::HeaderFont);
-                    ImGui::Text(std::format("Stereo Audio Latency: {}", stereoLatency).c_str());
+                    ImGui::Text(std::format("Stereo {} Latency: {}", audioLatencyType, stereoLatency).c_str());
                     ImGui::PopFont();
                     ImGui::Text(stereoFormat.c_str());
                     ImGui::Spacing();
                     ImGui::PushFont(FontHelper::HeaderFont);
-                    ImGui::Text(std::format("5.1 Audio Latency: {}", fiveOneLatency).c_str());
+                    ImGui::Text(std::format("5.1 {} Latency: {}", audioLatencyType, fiveOneLatency).c_str());
                     ImGui::PopFont();
                     ImGui::Text(fiveOneFormat.c_str());
                     ImGui::Spacing();
                     ImGui::PushFont(FontHelper::HeaderFont);
-                    ImGui::Text(std::format("7.1 Audio Latency: {}", sevenOneLatency).c_str());
+                    ImGui::Text(std::format("7.1 {} Latency: {}", audioLatencyType, sevenOneLatency).c_str());
                     ImGui::PopFont();
                     ImGui::Text(sevenOneFormat.c_str());
 
@@ -696,16 +734,11 @@ bool Gui::DoGui()
                     ImGui::BeginGroup();
 
                     const AudioFormat* selectedFormat = nullptr;
-                    if (ImGui::BeginChild("", ImVec2(350 * DpiScale, 15 * ImGui::GetTextLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar))
+                    ImGui::BeginChild("", ImVec2(350 * DpiScale, 15 * ImGui::GetTextLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar);
                     {
                         int n = 0;
                         for (auto avgResult : testManager->AveragedResults)
                         {
-                            OutputOffsetProfile* currentProfile = HdmiOutputOffsetProfiles::CurrentProfile();
-                            std::string formatStr = ProfileFormat::FormatStr(avgResult.Format->WaveFormat);
-                            bool verified = currentProfile->OutputOffsets.contains(formatStr) && currentProfile->OutputOffsets[formatStr].verified;
-                            GuiHelper::VerifiedMarker(verified, DpiScale);
-
                             const bool is_selected = (resultFormatIndex == n);
                             if (ImGui::Selectable(avgResult.Format->FormatString.c_str(), is_selected))
                             {
@@ -724,8 +757,8 @@ bool Gui::DoGui()
 
                             n++;
                         }
-                        ImGui::EndChild();
                     }
+                    ImGui::EndChild();
 
                     GuiHelper::FormatDescriptions();
 
@@ -737,17 +770,20 @@ bool Gui::DoGui()
                         if (avgResult.Format == selectedFormat)
                         {
                             ImGui::PushFont(FontHelper::BoldFont);
-                            ImGui::Text(std::format("Average Audio Latency: {} ms", round(avgResult.AverageLatency())).c_str());
+                            ImGui::Text(std::format("Average {} Latency: {} ms", audioLatencyType, round(avgResult.AverageLatency())).c_str());
                             ImGui::PopFont();
                             ImGui::Text(std::format("(rounded from: {} ms)", avgResult.AverageLatency()).c_str());
                             ImGui::Spacing();
-                            ImGui::Text(std::format("Min Audio Latency: {} ms", avgResult.MinLatency()).c_str());
-                            ImGui::Text(std::format("Max Audio Latency: {} ms", avgResult.MaxLatency()).c_str());
+                            ImGui::Text(std::format("Min {} Latency: {} ms", audioLatencyType, avgResult.MinLatency()).c_str());
+                            ImGui::Text(std::format("Max {} Latency: {} ms", audioLatencyType, avgResult.MaxLatency()).c_str());
                             ImGui::Text(std::format("Valid Measurements: {}", avgResult.Offsets.size()).c_str());
                             ImGui::Spacing();
                             ImGui::Text(std::format("Output Offset Profile: {}", avgResult.OutputOffsetProfileName).c_str());
                             ImGui::Text(std::format("Output Offset Value: {} ms", avgResult.OutputOffsetFromProfile).c_str());
                             ImGui::Text(std::format("Verified Accuracy: {}", avgResult.Verified ? "Yes" : "No").c_str());
+                            GuiHelper::VerifiedHelp();
+                            ImGui::Text(std::format("DAC: {}", avgResult.ReferenceDacName).c_str());
+                            ImGui::Text(std::format("DAC Audio Latency: {} ms", avgResult.ReferenceDacLatency).c_str());
 
                             break;
                         }
@@ -951,6 +987,29 @@ void Gui::StartTest()
         std::string fileString = StringHelper::GetFilenameSafeString(std::format("{} {}", TestNotes::Notes.DutModel, TestNotes::Notes.DutOutputType()));
         fileString = fileString.substr(0, 80); // 80 is a magic number that will keep path lengths reasonable without needing to do a lot of Windows API programming.
 
-        testManager = new TestManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex], selectedFormats, fileString, APP_FOLDER, (IResultsWriter&)HdmiResultsWriter::Writer, HdmiOutputOffsetProfiles::CurrentProfile());
+        testManager = new TestManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex], selectedFormats, fileString, APP_FOLDER, (IResultsWriter&)ResultsWriter::Writer, HdmiOutputOffsetProfiles::CurrentProfile(), DacLatencyProfiles::CurrentProfile());
+    }
+}
+
+void Gui::SetDutOutputType()
+{
+    switch (DacLatencyProfiles::CurrentProfile()->InputType)
+    {
+    case DacLatencyProfile::DacInputType::ARC:
+        TestNotes::Notes.DutOutputTypeIndex = 1;
+        break;
+    case DacLatencyProfile::DacInputType::eARC:
+        TestNotes::Notes.DutOutputTypeIndex = 2;
+        break;
+    case DacLatencyProfile::DacInputType::SPDIF_Optical:
+        TestNotes::Notes.DutOutputTypeIndex = 3;
+        break;
+    case DacLatencyProfile::DacInputType::SPDIF_Coax:
+        TestNotes::Notes.DutOutputTypeIndex = 4;
+        break;
+    case DacLatencyProfile::DacInputType::Unknown:
+    default:
+        TestNotes::Notes.DutOutputTypeIndex = 0;
+        break;
     }
 }

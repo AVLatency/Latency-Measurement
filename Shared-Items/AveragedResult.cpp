@@ -9,6 +9,7 @@ float AveragedResult::AverageLatency() const
 	}
 	average /= Offsets.size();
 	average -= OutputOffsetFromProfile;
+	average -= ReferenceDacLatency;
 
 	return average;
 }
@@ -23,7 +24,7 @@ float AveragedResult::MinLatency() const
 			min = offset;
 		}
 	}
-	return min - OutputOffsetFromProfile;
+	return min - OutputOffsetFromProfile - ReferenceDacLatency;
 }
 
 float AveragedResult::MaxLatency() const
@@ -36,5 +37,5 @@ float AveragedResult::MaxLatency() const
 			max = offset;
 		}
 	}
-	return max - OutputOffsetFromProfile;
+	return max - OutputOffsetFromProfile - ReferenceDacLatency;
 }
