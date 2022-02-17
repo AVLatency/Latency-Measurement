@@ -13,7 +13,7 @@ int TestConfiguration::NumMeasurements = 10;
 float TestConfiguration::OutputVolume = 1.0f;
 float TestConfiguration::BaseDetectionThreadshold = 0.05f;
 float TestConfiguration::DetectionThresholdMultiplier = 1.0f;
-int TestConfiguration::AttemptsBeforeFail = 4;
+int TestConfiguration::AttemptsBeforeFail = 6;
 
 float TestConfiguration::DetectionThreshold()
 {
