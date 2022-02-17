@@ -6,6 +6,8 @@
 #include "GeneratedSamples.h"
 #include "RecordingAnalyzer.h"
 #include "WindowsWaveFormats.h"
+#include <algorithm>
+#include <random>
 
 #define EXIT_ON_ERROR(hres)  \
               if (FAILED(hres)) { goto Exit; }
@@ -35,6 +37,11 @@ void TestManager::StartTest()
 	{
 		PassCount = i;
 		RecordingCount = 0;
+
+		std::random_device rd;
+		std::mt19937 g(rd());
+		std::shuffle(SupportedFormats.begin(), SupportedFormats.end(), g);
+
 		for (WAVEFORMATEX* waveFormat : SupportedFormats)
 		{
 			if (!StopRequested && std::find(FailedFormats.begin(), FailedFormats.end(), waveFormat) == FailedFormats.end())
