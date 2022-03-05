@@ -66,7 +66,7 @@ void GeneratedSamples::GenerateLatencyMeasurementSamples()
         round(tickTimes[0] * sampleRate),
         round(tickTimes[1] * sampleRate),
         round(tickTimes[2] * sampleRate) }; int tickTimesInSamplesLength = 3;
-    double endPadding = 0.2f;
+    double endPadding = 0.4f;
 
     // Frequencies
     int tickFreq = GetTickFrequency(sampleRate);
