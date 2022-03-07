@@ -47,73 +47,85 @@ RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const Gener
     result.RecordingSampleRate = inputSampleRate;
 
     int tickDurationInSamples = inputSampleRate / GeneratedSamples::GetTickFrequency(config.WaveFormat->nSamplesPerSec);
+    vector<TickPosition> allTickPositions;
 
-    // Find the max and min amplitudes
-    float maxAmplitude = 0;
-    float minAmplitude = 0;
+    bool lastIndexWasHigh = recordedSamples[0] > 0;
+    int minIndex = 0;
+    int maxIndex = 0;
     for (int i = 0; i < recordedSamplesLength; i++)
     {
-        if (recordedSamples[i] > maxAmplitude)
+        if (lastIndexWasHigh)
         {
-            maxAmplitude = recordedSamples[i];
-        }
-        if (recordedSamples[i] < minAmplitude)
-        {
-            minAmplitude = recordedSamples[i];
-        }
-    }
-    float halfMaxAmplitude = maxAmplitude / 2.0f;
-    float halfMinAmplitude = minAmplitude / 2.0f;
-
-    // create a list of times where the sound goes higher or lower than half of the max amplitude
-    vector<int> possibleTickStarts;
-    // double duration to account for error due to physical effects of sudden change in amplitude.
-    int tickDurationPlusErrorDurationInSamples = tickDurationInSamples * 2;
-    for (int i = 0; i < recordedSamplesLength; i++)
-    {
-        if (recordedSamples[i] > halfMaxAmplitude || recordedSamples[i] < halfMinAmplitude)
-        {
-            possibleTickStarts.push_back(i);
-            // Skip over the rest of this possible tick.
-            i += tickDurationPlusErrorDurationInSamples;
-        }
-    }
-
-    vector<TickPosition> possibleTickPositions;
-    for(int tickStart : possibleTickStarts)
-    {
-        int minIndex = tickStart;
-        int maxIndex = tickStart;
-        bool inverted = false;
-        for (int tickIndex = tickStart + 1; tickIndex < tickStart + tickDurationPlusErrorDurationInSamples; tickIndex++)
-        {
-            if (recordedSamples[tickIndex] > recordedSamples[maxIndex])
+            if (recordedSamples[i] > recordedSamples[maxIndex])
             {
-                maxIndex = tickIndex;
+                maxIndex = i;
             }
-            if (recordedSamples[tickIndex] < recordedSamples[minIndex])
-            {
-                minIndex = tickIndex;
-            }
-        }
-
-        if (recordedSamples[minIndex] > halfMinAmplitude || recordedSamples[maxIndex] < halfMaxAmplitude)
-        {
-            // This tick isn't a high enough frequency to match the type of tick we're looking for.
         }
         else
         {
-            // This tick seems to be a high frequency and is likely real. Let's keep track of its position.
-            if (minIndex < maxIndex)
+            if (recordedSamples[i] < recordedSamples[minIndex])
             {
-                // this means tick is inverted, if this is a tick...
-                inverted = true;
+                minIndex = i;
+            }
+        }
+
+        bool isIndexHigh = recordedSamples[i] > 0;
+
+        if (lastIndexWasHigh != isIndexHigh)
+        {
+            // We just crossed the zero mark
+
+            // Checking for slightly (2 times) lower frequency ticks just in case the speaker / DAC is slow
+            // to suddenly present a high frequency.
+            if (i - (lastIndexWasHigh ? maxIndex : minIndex) <= tickDurationInSamples / 2) // this should actually be only (tickDurationInSamples / 4) samples long
+            {
+                // This tick seems to be a high frequency and is likely real. Let's keep track of its position.
+                TickPosition pos;
+                pos.tickInverted = !lastIndexWasHigh;
+                pos.index = pos.tickInverted ? minIndex : maxIndex;
+                allTickPositions.push_back(pos);
             }
 
-            TickPosition pos;
-            pos.index = inverted ? minIndex : maxIndex;
-            pos.tickInverted = inverted;
-            possibleTickPositions.push_back(pos);
+            // reset and continue going through the samples
+            lastIndexWasHigh = isIndexHigh;
+            minIndex = i;
+            maxIndex = i;
+        }
+    }
+
+    // Find the min and max amplitudes to help further filter the ticks that have been found
+    float min = 0;
+    float max = 0;
+    for (TickPosition tick : allTickPositions)
+    {
+        if (tick.tickInverted && recordedSamples[tick.index] < min)
+        {
+            min = recordedSamples[tick.index];
+        }
+        if (!tick.tickInverted && recordedSamples[tick.index] > max)
+        {
+            max = recordedSamples[tick.index];
+        }
+    }
+
+    vector<TickPosition> possibleTickPositions; // This is a filtered list of allTickPositions that only contains the first ticks of a group of ticks
+    // min and max acceptable are set to .4 because sampling alignment means that it is possible to sample anywhere between 1x and 0.5x of the tick at 48 kHz input. (Nyquist frequency stuff)
+    float minAcceptable = min * 0.4;
+    float maxAcceptable = max * 0.4;
+    for (TickPosition tick : allTickPositions)
+    {
+        if (possibleTickPositions.size() > 0)
+        {
+            if (tick.index - possibleTickPositions[possibleTickPositions.size() - 1].index < tickDurationInSamples * 75) // 75 times the tick duration to give lots of time for echos to settle down
+            {
+                // In this case, we've already recorded this group of ticks to possibleTickPositions. It can be ignored.
+                continue;
+            }
+        }
+        if ((tick.tickInverted && recordedSamples[tick.index] < minAcceptable)
+            || (!tick.tickInverted && recordedSamples[tick.index] > maxAcceptable))
+        {
+            possibleTickPositions.push_back(tick);
         }
     }
 
@@ -129,7 +141,7 @@ RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const Gener
     if (invertedCount >= 3 && nonInvertedCount >= 3)
     {
         result.ValidResult = false;
-        result.InvalidReason = "There are three or more posssible inverted ticks AND three ore more possible non-inverted ticks";
+        result.InvalidReason = "There are three or more posssible inverted ticks AND three or more possible non-inverted ticks";
         return result;
     }
 
@@ -187,7 +199,10 @@ RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const Gener
     result.SamplesToTick3 = possibleTickPositions[2].index;
 
     // Finally, check to see if the ticks we detected were where we expected them to be:
-    int errorThresholdInSamples = round(6 * (inputSampleRate / 48000.0f)); // My tests have shown times where the third tick can be a full 5 samples off at 48kHz even though the recording is perfect.
+
+    // My tests have shown times where the third tick can be a full 5 samples off at 48kHz even though the recording is perfect. This is due to different audio clocks, etc.
+    // But to be safe, add on a bit more wiggle room to deal with microphone recording nonsense (acoustics and physical effects, etc.).
+    int errorThresholdInSamples = round(10 * (inputSampleRate / 48000.0f));
 
     int samplesExpectedFrom1to2 = round(config.patternTick2RelTime * inputSampleRate);
     int actualSamplesFrom1to2 = result.SamplesToTick2 - result.SamplesToTick1;

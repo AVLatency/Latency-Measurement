@@ -25,6 +25,10 @@ public:
 private:
 	struct TickPosition
 	{
+		/// <summary>
+		/// This is the index of the first peak of the tick.
+		/// If tickInverted == true, it will be a negative peak, positive otherwise.
+		/// </summary>
 		int index;
 		bool tickInverted;
 	};
