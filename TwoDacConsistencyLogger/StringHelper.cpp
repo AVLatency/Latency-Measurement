@@ -1,5 +1,5 @@
 #include "StringHelper.h"
-#include <atlconv.h>
+#include <Objbase.h>
 #include <ctime>
 #include <format>
 
@@ -7,10 +7,10 @@ std::string StringHelper::GetGuidString()
 {
     GUID guid;
     HRESULT h = CoCreateGuid(&guid);
-    OLECHAR* tempStr;
+    LPOLESTR tempStr;
     h = StringFromCLSID(guid, &tempStr);
-    USES_CONVERSION;
-    std::string guidStdString = OLE2CA(tempStr);
+    std::wstring ws(tempStr); // LPOLESTR is basically a wchar_t* ( https://stackoverflow.com/a/7751580/1123295 )
+    std::string guidStdString(ws.begin(), ws.end()); // it's just a GUID, so it doesn't have anything more than ASCII, so use this method of converting: https://stackoverflow.com/a/6623809/1123295
     CoTaskMemFree(tempStr);
     return guidStdString;
 }
