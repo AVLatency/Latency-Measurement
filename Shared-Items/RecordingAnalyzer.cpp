@@ -3,7 +3,6 @@
 #include "RecordingResult.h"
 #include <fstream>
 #include <iostream>
-#include <atlconv.h>
 #include <vector>
 #include <algorithm>
 #include <format>
