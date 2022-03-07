@@ -28,7 +28,6 @@ private:
 	static const std::string invalidResultsFilename;
 
 	static std::string GetTestRootPath(const SystemInfo& sysInfo);
-	static std::string GetGuidString();
 	static WORD GetFormatID(WAVEFORMATEX* waveFormat);
 	static std::string GetAudioDataFormatString(WAVEFORMATEX* waveFormat);
 	static std::string GetChannelMaskString(WAVEFORMATEX* waveFormat);

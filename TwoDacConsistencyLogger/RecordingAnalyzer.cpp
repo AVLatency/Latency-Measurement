@@ -8,6 +8,7 @@
 #include <format>
 #include <filesystem>
 #include <iomanip>
+#include "StringHelper.h"
 using namespace std;
 
 const std::string RecordingAnalyzer::validResultsFilename{ "Valid-Results.csv" };
@@ -30,7 +31,7 @@ RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& conf
 
     filesystem::create_directories(filesystem::path(recordingRootPath));
 
-    std::string guidStdString = GetGuidString();
+    std::string guidStdString = StringHelper::GetGuidString();
     SaveRecording(input, recordingRootPath + guidStdString + ".wav");
 
     RecordingResult result;
@@ -62,18 +63,6 @@ RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& conf
 std::string RecordingAnalyzer::GetTestRootPath(const SystemInfo& sysInfo)
 {
     return format("Results/{}/{}/", sysInfo.Extractor, sysInfo.DAC);
-}
-
-std::string RecordingAnalyzer::GetGuidString()
-{
-    GUID guid;
-    HRESULT h = CoCreateGuid(&guid);
-    OLECHAR* tempStr;
-    h = StringFromCLSID(guid, &tempStr);
-    USES_CONVERSION;
-    std::string guidStdString = OLE2CA(tempStr);
-    CoTaskMemFree(tempStr);
-    return guidStdString;
 }
 
 WORD RecordingAnalyzer::GetFormatID(WAVEFORMATEX* waveFormat)
