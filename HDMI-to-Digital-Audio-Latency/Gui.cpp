@@ -205,8 +205,9 @@ bool Gui::DoGui()
                 ImGui::Text("Input: Left Channel (HDMI Audio Extractor)");
                 ImGui::PopFont();
 
-                float columnWidth = 110 * DpiScale;
-                ImVec2 plotDimensions(100 * DpiScale, 100 * DpiScale);
+                int plotWidth = 310;
+                float columnWidth = (plotWidth + 10) * DpiScale;
+                ImVec2 plotDimensions(plotWidth* DpiScale, 100 * DpiScale);
 
                 if (ImGui::BeginTable("LeftChannelVolumeTable", 3, ImGuiTableFlags_SizingFixedFit))
                 {
@@ -228,11 +229,6 @@ bool Gui::DoGui()
                         ImGui::PlotLines("", adjustVolumeManager->leftChannelTickMonitorSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
                     }
                     ImGui::Spacing();
-                    //if (adjustVolumeManager != nullptr && adjustVolumeManager->lastInputBufferCopy != nullptr)
-                    //{
-                    //    auto buffer = adjustVolumeManager->lastInputBufferCopy;
-                    //    ImGui::PlotLines("", buffer, adjustVolumeManager->input->recordingBufferLength / 2, 0, NULL, -1, 1, ImVec2(400, 100), sizeof(float) * 2);
-                    //}
 
                     ImGui::TableNextColumn();
                     ImGui::Text("");
