@@ -38,6 +38,7 @@ bool Gui::DoGui()
 
     bool openAboutDialog = false;
     bool openEdidReminderDialog = false;
+    bool openSampleRateLowDialog = false;
     bool openMidTestFilesystemErrorDialog = false;
     if (testManager != nullptr && testManager->ShouldShowFilesystemError && !testManager->HasShownFilesystemError)
     {
@@ -179,7 +180,7 @@ bool Gui::DoGui()
                     ImGui::EndCombo();
                 }
                 ImGui::SameLine(); GuiHelper::HelpMarker("You can use either a line in or mic input on your computer, but when using certain microphones you may find the mic input works better.\n\n"
-                    "This input device must be configured to have at least two channels. It can be any sample rate and bit depth, but at least 48 kHz 16 bit is recommended.");
+                    "This input device must be configured to have at least two channels. At least 48 kHz 16 bit is recommended for this tool to work well.");
 
                 ImGui::Spacing();
                 if (ImGui::Button("Back"))
@@ -189,8 +190,16 @@ bool Gui::DoGui()
                 ImGui::SameLine();
                 if (ImGui::Button("Adjust Volumes"))
                 {
-                    state = MeasurementToolGuiState::AdjustVolume;
-                    StartAjdustVolumeAudio();
+                    lastCheckedInputSampleRate = AudioEndpointHelper::GetInputMixFormatSampleRate(inputAudioEndpoints[inputDeviceIndex]);
+                    if (lastCheckedInputSampleRate < 48000)
+                    {
+                        openSampleRateLowDialog = true;
+                    }
+                    else
+                    {
+                        state = MeasurementToolGuiState::AdjustVolume;
+                        StartAjdustVolumeAudio();
+                    }
                 }
             }
 
@@ -790,6 +799,36 @@ bool Gui::DoGui()
 
         ImGui::SetItemDefaultFocus();
         if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+
+        ImGui::EndPopup();
+    }
+
+    if (openSampleRateLowDialog)
+    {
+        ImGui::OpenPopup("Low Input Device Sample Rate");
+    }
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+    if (ImGui::BeginPopupModal("Low Input Device Sample Rate", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text(std::format("The current input device sample rate is only {} Hz, but a sample rate of\nat least 48000 Hz is recommended for this tool to work well.\n\n"
+            "Use the Windows sound settings for your selected input device under\n\"Additional device properties\" to change the sample rate.", lastCheckedInputSampleRate).c_str());
+
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+
+        if (ImGui::Button("Ignore", ImVec2(120, 0)))
+        {
+            ImGui::CloseCurrentPopup();
+            state = MeasurementToolGuiState::AdjustVolume;
+            StartAjdustVolumeAudio();
+        }
+        ImGui::SameLine();
+        ImGui::SetItemDefaultFocus();
+        if (ImGui::Button("Cancel", ImVec2(120, 0)))
+        {
+            ImGui::CloseCurrentPopup();
+        }
 
         ImGui::EndPopup();
     }

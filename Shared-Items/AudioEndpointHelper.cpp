@@ -95,4 +95,35 @@ Exit:
         SAFE_RELEASE(pCollection)
         SAFE_RELEASE(pEndpoint)
         SAFE_RELEASE(pProps)
+
+    return result;
+}
+
+int AudioEndpointHelper::GetInputMixFormatSampleRate(const AudioEndpoint& endpoint)
+{
+    const IID IID_IAudioClient = __uuidof(IAudioClient);
+    HRESULT hr;
+    IAudioClient* pAudioClient = NULL;
+    WAVEFORMATEX* pWaveFormat = NULL;
+    int sampleRate = 0;
+
+    hr = CoInitialize(NULL);
+    EXIT_ON_ERROR(hr)
+
+    hr = endpoint.Device->Activate(
+        IID_IAudioClient, CLSCTX_ALL,
+        NULL, (void**)&pAudioClient);
+    EXIT_ON_ERROR(hr)
+
+    hr = pAudioClient->GetMixFormat(&pWaveFormat);
+    EXIT_ON_ERROR(hr)
+    
+    sampleRate = pWaveFormat->nSamplesPerSec;
+
+Exit:
+    CoTaskMemFree(pWaveFormat);
+    SAFE_RELEASE(pAudioClient)
+    CoUninitialize();
+
+    return sampleRate;
 }

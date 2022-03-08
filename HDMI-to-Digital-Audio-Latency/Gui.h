@@ -33,6 +33,8 @@ private:
 	std::vector<AudioEndpoint> outputAudioEndpoints; // TODO: refs and pointers to these are used here and there, which isn't safe.
 	std::vector<AudioEndpoint> inputAudioEndpoints; // TODO: refs and pointers to these are used here and there, which isn't safe.
 
+	int lastCheckedInputSampleRate = 0;
+
 	int resultFormatIndex;
 
 	AdjustVolumeManager* adjustVolumeManager = nullptr;
