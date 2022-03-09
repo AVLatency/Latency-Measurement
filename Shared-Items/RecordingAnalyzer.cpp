@@ -196,8 +196,8 @@ void RecordingAnalyzer::CleanUpEdgesList(std::vector<RecordingAnalyzer::TickPosi
     {
         if (i < edgesList.size())
         {
-            int indexLowerBound = edgesList[i].index - round(0.005 * sampleRate); // 5 milliseconds before the highest magnitude
-            int indexUpperBound = edgesList[i].index + round(0.01 * sampleRate); // 10 milliseconds after the highest magnitude
+            int indexLowerBound = edgesList[i].index - round(0.002 * sampleRate); // 2 milliseconds before the highest magnitude to account for weird echos and aucoustics
+            int indexUpperBound = edgesList[i].index; // the highest magnitude is the upper bound of this cluster.
             int firstEdgeInCluster = i;
             for (int j = i; j < edgesList.size(); j++)
             {
