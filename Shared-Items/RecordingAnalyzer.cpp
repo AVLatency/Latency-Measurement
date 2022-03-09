@@ -14,6 +14,9 @@ using namespace std;
 
 const std::string RecordingAnalyzer::validRecordingsFilename{ "Valid-Individual-Recordings.csv" };
 const std::string RecordingAnalyzer::invalidRecordingsFilename{ "Invalid-Individual-Recordings.csv" };
+// TODO: is 0.25 really the best choice? It seems to be, since lower is getting pretty close to cable crosstalk on my presonus audio interface
+// when mixing line in and Sure SM58 mic...
+const float RecordingAnalyzer::relMinEdgeMagnitude{ 0.25 };
 
 RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& generatedSamples, const WasapiInput& input, AudioFormat* format, OutputOffsetProfile* currentProfile, DacLatencyProfile* referenceDacLatency)
 {
@@ -46,9 +49,7 @@ RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const Gener
     RecordingSingleChannelResult result;
     result.RecordingSampleRate = inputSampleRate;
 
-    bool fallingEdge;
-    vector<TickPosition> possibleTickPositions = GetTicks(recordedSamples, recordedSamplesLength, inputSampleRate, GeneratedSamples::GetTickFrequency(config.WaveFormat->nSamplesPerSec), 3, fallingEdge);
-    result.PhaseInverted = !fallingEdge;
+    vector<TickPosition> possibleTickPositions = GetTicks(recordedSamples, recordedSamplesLength, inputSampleRate, GeneratedSamples::GetTickFrequency(config.WaveFormat->nSamplesPerSec), 3);
 
     if (possibleTickPositions.size() < 3)
     {
@@ -56,22 +57,22 @@ RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const Gener
         result.InvalidReason = "Cannot find 3 high frequency ticks";
         if (possibleTickPositions.size() > 0)
         {
-            result.SamplesToTick1 = possibleTickPositions[0].index;
+            result.SamplesToTick1 = possibleTickPositions[0].endIndex;
         }
         if (possibleTickPositions.size() > 1)
         {
-            result.SamplesToTick2 = possibleTickPositions[1].index;
+            result.SamplesToTick2 = possibleTickPositions[1].endIndex;
         }
         if (possibleTickPositions.size() > 2)
         {
-            result.SamplesToTick3 = possibleTickPositions[2].index;
+            result.SamplesToTick3 = possibleTickPositions[2].endIndex;
         }
         return result;
     }
 
-    result.SamplesToTick1 = possibleTickPositions[0].index;
-    result.SamplesToTick2 = possibleTickPositions[1].index;
-    result.SamplesToTick3 = possibleTickPositions[2].index;
+    result.SamplesToTick1 = possibleTickPositions[0].endIndex;
+    result.SamplesToTick2 = possibleTickPositions[1].endIndex;
+    result.SamplesToTick3 = possibleTickPositions[2].endIndex;
 
     // Finally, check to see if the ticks we detected were where we expected them to be:
 
@@ -105,7 +106,7 @@ RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const Gener
     return result;
 }
 
-std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* recordedSamples, int recordedSamplesLength, int sampleRate, int expectedTickFrequency, int numTicks, bool& fallingEdge)
+std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* recordedSamples, int recordedSamplesLength, int sampleRate, int expectedTickFrequency, int numTicks)
 {
     // Needs to work with the following scenarios:
     // - Legitimate ticks exist in the sample set
@@ -121,15 +122,8 @@ std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* 
     // and gives some wiggle room for unexpected DAC behaviour, acoustics, audio clock issues, sampling limitations, etc.
     // sort each list of edges by magnitude
     // filter out edges with relatively low magnitude compared to the highest magnitude
-    // filter out edges that directly surround the highest magnitude edges
-    //
-    // Next, decide which of the two lists to use (the rising or the falling edge list):
-    // first, see if one list has notably higher magnitude of change than the other list:
-    //      average all three for each list, see if one is > 0.8 of the other. If it is, use that list
-    // otherwise:
-    //      use the list that has the earlier first index
-    //
-    // whether a mic has inverted polarity or not does not matter, but it is returned from this function anyway. (rising edge list is inverted ones)
+    // find the top numTicks in terms of magnitude and assume that these are clusters representing the tick
+    // record the earliest edge from each cluster. This is the tick.
 
     float maxAmp = -1;
     float minAmp = 1;
@@ -150,10 +144,8 @@ std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* 
 
     int tickDurationInSamples = ceil((float)sampleRate / expectedTickFrequency);
 
-    vector<TickPosition> fallingEdges;
-    float largestFallingEdge = 0;
-    vector<TickPosition> risingEdges;
-    float largestRisingEdge = 0;
+    vector<TickPosition> edges;
+    float largestEdge = 0;
 
     for (int i = 0; i < recordedSamplesLength; i++)
     {
@@ -169,157 +161,48 @@ std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* 
             }
         }
 
-        bool falling = recordedSamples[i] > recordedSamples[highestMagnitudeIndex];
-
         // This next if statement contains optimizations to prevent every single change in amplitude being added to the rising or falling edges vector:
         if (highestMagnitude > TestConfiguration::DetectionThreshold() // This is needed to address cable crosstalk. It also addressess the scenario where there are no legitimate ticks in this sample set.
             && highestMagnitude > detectionThresholdRelativeToSampleSet // This is mostly just an optimization
-            && highestMagnitude > 0.25 * (falling ? largestFallingEdge : largestRisingEdge))
+            && highestMagnitude > relMinEdgeMagnitude * largestEdge)
         {
             TickPosition tick;
             tick.index = i;
+            tick.endIndex = highestMagnitudeIndex;
             tick.magnitude = highestMagnitude;
-            if (falling)
+            edges.push_back(tick);
+            if (highestMagnitude > largestEdge)
             {
-                fallingEdges.push_back(tick);
-                if (highestMagnitude > largestFallingEdge)
-                {
-                    largestFallingEdge = highestMagnitude;
-                }
-            }
-            else
-            {
-                risingEdges.push_back(tick);
-                if (highestMagnitude > largestRisingEdge)
-                {
-                    largestRisingEdge = highestMagnitude;
-                }
+                largestEdge = highestMagnitude;
             }
         }
     }
 
-    CleanUpEdgesList(fallingEdges, largestFallingEdge, numTicks, sampleRate);
-    CleanUpEdgesList(risingEdges, largestRisingEdge, numTicks, sampleRate);
+    CleanUpEdgesList(edges, largestEdge, numTicks, sampleRate);
 
-    vector<TickPosition> result;
-
-    if (fallingEdges.size() < numTicks && risingEdges.size() < numTicks)
-    {
-        // neither list has enough ticks. Return whichever has more, favouring falling edges.
-        if (risingEdges.size() > fallingEdges.size())
-        {
-            copy(risingEdges.begin(), risingEdges.end(), back_inserter(result));
-            fallingEdge = false;
-        }
-        else
-        {
-            copy(fallingEdges.begin(), fallingEdges.end(), back_inserter(result));
-            fallingEdge = true;
-        }
-    }
-    else if (fallingEdges.size() < numTicks || risingEdges.size() < numTicks)
-    {
-        // one list has enough ticks, but the other doesn't
-        if (risingEdges.size() > fallingEdges.size())
-        {
-            copy(risingEdges.begin(), risingEdges.begin() + numTicks, back_inserter(result));
-            fallingEdge = false;
-        }
-        else
-        {
-            copy(fallingEdges.begin(), fallingEdges.begin() + numTicks, back_inserter(result));
-            fallingEdge = true;
-        }
-    }
-    else
-    {
-        // both lists have enough ticks, so favour the one with much higher magnitudes or, if they're around
-        // the same magnitudes, favour the one with the earlier ticks
-        float avgFalling = 0;
-        for (int i = 0; i < numTicks; i++)
-        {
-            avgFalling += fallingEdges[i].magnitude;
-        }
-        avgFalling /= numTicks;
-
-        float avgRising = 0;
-        for (int i = 0; i < numTicks; i++)
-        {
-            avgRising += risingEdges[i].magnitude;
-        }
-        avgRising /= numTicks;
-
-        if (avgFalling > avgRising && avgRising < (0.8 * avgFalling))
-        {
-            // falling edges have notably higher magnitude
-            copy(fallingEdges.begin(), fallingEdges.begin() + numTicks, back_inserter(result));
-            fallingEdge = true;
-        }
-        else if (avgRising > avgFalling && avgFalling < (0.8 * avgRising))
-        {
-            // rising edges have notably higher magnitude
-            copy(risingEdges.begin(), risingEdges.begin() + numTicks, back_inserter(result));
-            fallingEdge = false;
-        }
-        else
-        {
-            // around the same magnitude, choose the one that has the earliest first index
-            if (fallingEdges[0].index < risingEdges[0].index)
-            {
-                copy(fallingEdges.begin(), fallingEdges.begin() + numTicks, back_inserter(result));
-                fallingEdge = true;
-            }
-            else
-            {
-                copy(risingEdges.begin(), risingEdges.begin() + numTicks, back_inserter(result));
-                fallingEdge = false;
-            }
-        }
-    }
-
-    return result;
+    return edges;
 }
 
 void RecordingAnalyzer::CleanUpEdgesList(std::vector<RecordingAnalyzer::TickPosition>& edgesList, float largestEdge, int numTicks, int sampleRate)
 {
-    // Clean up the lists to only have edges that are > 0.25 of the largest one, to match the previous detection logic for edges that are early in the list
-    edgesList.erase(remove_if(edgesList.begin(), edgesList.end(), [largestEdge](auto tick) { return tick.magnitude < 0.25 * largestEdge; }), edgesList.end());
+    // Clean up the lists to only have edges that are > relMinEdgeMagnitude of the largest one, to match the previous detection logic for edges that are early in the list
+    edgesList.erase(remove_if(edgesList.begin(), edgesList.end(), [&](auto tick) { return tick.magnitude < relMinEdgeMagnitude* largestEdge; }), edgesList.end());
 
     sort(edgesList.begin(), edgesList.end(), [&](auto a, auto b) { return a.magnitude > b.magnitude; });
 
     // This results in a bunch of edges clustered together (from echos). Now these need to be cleaned up to only contain one from each cluster.
-    
-    //// METHOD 1: Use the largest magnitude from each cluster
-    //std::vector<TickPosition> newList;
-    //for (int i = 0; i < numTicks; i++)
-    //{
-    //    if (i < edgesList.size())
-    //    {
-    //        int indexLowerBound = edgesList[i].index - round(0.005 * sampleRate); // 5 milliseconds before the highest magnitude
-    //        int indexUpperBound = edgesList[i].index - round(0.01 * sampleRate); // 10 milliseconds after the highest magnitude
-    //        edgesList.erase(remove_if(edgesList.begin() + i, edgesList.end(), [indexLowerBound, indexUpperBound](auto tick)
-    //            {
-    //                return tick.index < indexUpperBound && tick.index > indexLowerBound;
-    //            }), edgesList.end());
-    //    }
-    //}
-
-    // METHOD 2: Use the first from each cluster that is within 0.6 times the highest magnitude in the cluster
-    // 0.6 times is used because this is more than half of the max, meaning it should represent the top of the
-    // first peak, rather than just before the first peak.
-    std::vector<TickPosition> newList;
+    // Use the first from each cluster:
     for (int i = 0; i < numTicks; i++)
     {
         if (i < edgesList.size())
         {
             int indexLowerBound = edgesList[i].index - round(0.005 * sampleRate); // 5 milliseconds before the highest magnitude
-            int indexUpperBound = edgesList[i].index - round(0.01 * sampleRate); // 10 milliseconds after the highest magnitude
+            int indexUpperBound = edgesList[i].index + round(0.01 * sampleRate); // 10 milliseconds after the highest magnitude
             int firstEdgeInCluster = i;
             for (int j = i; j < edgesList.size(); j++)
             {
                 if (edgesList[j].index < indexUpperBound
                     && edgesList[j].index > indexLowerBound
-                    && edgesList[j].magnitude > 0.6 * edgesList[i].magnitude
                     && edgesList[j].index < edgesList[firstEdgeInCluster].index)
                 {
                     firstEdgeInCluster = j;
@@ -327,8 +210,8 @@ void RecordingAnalyzer::CleanUpEdgesList(std::vector<RecordingAnalyzer::TickPosi
             }
             // replace the highest magnitude edge with the first edge from its cluster
             edgesList[i] = edgesList[firstEdgeInCluster];
-            // then remove the old edge that was just copied to the beginning
-            edgesList.erase(remove_if(edgesList.begin() + i, edgesList.end(), [indexLowerBound, indexUpperBound](auto tick)
+            // Remove the rest of the edges that are in this cluster
+            edgesList.erase(remove_if(edgesList.begin() + i + 1, edgesList.end(), [&](auto tick)
                 {
                     return tick.index < indexUpperBound && tick.index > indexLowerBound;
                 }), edgesList.end());
