@@ -147,6 +147,7 @@ std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* 
     vector<TickPosition> edges;
     float largestEdge = 0;
 
+    // TODO: possible optimization: do this backwards since ticks will usually appear near the end of the recording
     for (int i = 0; i < recordedSamplesLength; i++)
     {
         float highestMagnitude = 0;
