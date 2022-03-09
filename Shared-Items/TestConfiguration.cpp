@@ -15,6 +15,11 @@ float TestConfiguration::BaseDetectionThreadshold = 0.05f;
 float TestConfiguration::DetectionThresholdMultiplier = 1.0f;
 int TestConfiguration::AttemptsBeforeFail = 6;
 
+/// <summary>
+/// The detection threshold exists for the sole reason of preventing crosstalk
+/// from giving incorrectly valid results when one of the channels is not wired
+/// up or working correctly.
+/// </summary>
 float TestConfiguration::DetectionThreshold()
 {
 	return BaseDetectionThreadshold * DetectionThresholdMultiplier;
