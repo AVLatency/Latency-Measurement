@@ -125,29 +125,13 @@ std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* 
     // find the top numTicks in terms of magnitude and assume that these are clusters representing the tick
     // record the earliest edge from each cluster. This is the tick.
 
-    float maxAmp = -1;
-    float minAmp = 1;
-    for (int i = 0; i < recordedSamplesLength; i++)
-    {
-        if (recordedSamples[i] > maxAmp)
-        {
-            maxAmp = recordedSamples[i];
-        }
-        if (recordedSamples[i] < minAmp)
-        {
-            minAmp = recordedSamples[i];
-        }
-    }
-    float ampRange = maxAmp - minAmp;
-    // if it's less than 0.05 times the max possible magnitude in this recording, it can be ignored
-    float detectionThresholdRelativeToSampleSet = 0.05 * ampRange;
-
     int tickDurationInSamples = ceil((float)sampleRate / expectedTickFrequency);
 
-    vector<TickPosition> edges;
-    float largestEdge = 0;
+    // TODO: Maybe interleaving or using a struct would improve performance regarding memory access(?)
+    float* allEdgeMagnitudes = new float[recordedSamplesLength];
+    int* allEdgeEnds = new int[recordedSamplesLength];
 
-    // TODO: possible optimization: do this backwards since ticks will usually appear near the end of the recording
+    float largestEdge = 0;
     for (int i = 0; i < recordedSamplesLength; i++)
     {
         float highestMagnitude = 0;
@@ -161,34 +145,40 @@ std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* 
                 highestMagnitudeIndex = j;
             }
         }
+        allEdgeMagnitudes[i] = highestMagnitude;
+        allEdgeEnds[i] = highestMagnitudeIndex;
 
-        // This next if statement contains optimizations to prevent every single change in amplitude being added to the rising or falling edges vector:
-        if (highestMagnitude > TestConfiguration::DetectionThreshold() // This is needed to address cable crosstalk. It also addressess the scenario where there are no legitimate ticks in this sample set.
-            && highestMagnitude > detectionThresholdRelativeToSampleSet // This is mostly just an optimization
-            && highestMagnitude > relMinEdgeMagnitude * largestEdge)
+        if (highestMagnitude > largestEdge)
         {
-            TickPosition tick;
-            tick.index = i;
-            tick.endIndex = highestMagnitudeIndex;
-            tick.magnitude = highestMagnitude;
-            edges.push_back(tick);
-            if (highestMagnitude > largestEdge)
-            {
-                largestEdge = highestMagnitude;
-            }
+            largestEdge = highestMagnitude;
         }
     }
 
-    CleanUpEdgesList(edges, largestEdge, numTicks, sampleRate);
+    vector<TickPosition> largeEdges;
+    for (int i = 0; i < recordedSamplesLength; i++)
+    {
+        // This next if statement contains optimizations to prevent every single change in amplitude being added to the rising or falling edges vector:
+        if (allEdgeMagnitudes[i] > TestConfiguration::DetectionThreshold() // This is needed to address cable crosstalk. It also addressess the scenario where there are no legitimate ticks in this sample set.
+            && allEdgeMagnitudes[i] > relMinEdgeMagnitude * largestEdge) // This filtering allows for easy detection of the first edge in a cluster of edges that represents a tick.
+        {
+            TickPosition tick;
+            tick.index = i;
+            tick.endIndex = allEdgeEnds[i];
+            tick.magnitude = allEdgeMagnitudes[i];
+            largeEdges.push_back(tick);
+        }
+    }
 
-    return edges;
+    CleanUpEdgesList(largeEdges, largestEdge, numTicks, sampleRate);
+
+    delete[] allEdgeMagnitudes;
+    delete[] allEdgeEnds;
+
+    return largeEdges;
 }
 
 void RecordingAnalyzer::CleanUpEdgesList(std::vector<RecordingAnalyzer::TickPosition>& edgesList, float largestEdge, int numTicks, int sampleRate)
 {
-    // Clean up the lists to only have edges that are > relMinEdgeMagnitude of the largest one, to match the previous detection logic for edges that are early in the list
-    edgesList.erase(remove_if(edgesList.begin(), edgesList.end(), [&](auto tick) { return tick.magnitude < relMinEdgeMagnitude* largestEdge; }), edgesList.end());
-
     sort(edgesList.begin(), edgesList.end(), [&](auto a, auto b) { return a.magnitude > b.magnitude; });
 
     // This results in a bunch of edges clustered together (from echos). Now these need to be cleaned up to only contain one from each cluster.
