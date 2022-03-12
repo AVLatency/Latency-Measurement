@@ -42,8 +42,6 @@ public:
 private:
 	static const std::string validRecordingsFilename;
 	static const std::string invalidRecordingsFilename;
-	static const float relMinEdgeMagnitude;
 
 	static RecordingSingleChannelResult AnalyzeSingleChannel(const GeneratedSamples& config, float* recordedSamples, int recordedSamplesLength, int inputSampleRate);
-	static void CleanUpEdgesList(std::vector<TickPosition>& edgesList, float largestEdge, int numTicks, int sampleRat);
 };

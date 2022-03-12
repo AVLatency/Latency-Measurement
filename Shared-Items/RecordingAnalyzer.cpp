@@ -14,9 +14,6 @@ using namespace std;
 
 const std::string RecordingAnalyzer::validRecordingsFilename{ "Valid-Individual-Recordings.csv" };
 const std::string RecordingAnalyzer::invalidRecordingsFilename{ "Invalid-Individual-Recordings.csv" };
-// TODO: is 0.25 really the best choice? It seems to be, since lower is getting pretty close to cable crosstalk on my presonus audio interface
-// when mixing line in and Sure SM58 mic...
-const float RecordingAnalyzer::relMinEdgeMagnitude{ 0.25 };
 
 RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& generatedSamples, const WasapiInput& input, AudioFormat* format, OutputOffsetProfile* currentProfile, DacLatencyProfile* referenceDacLatency)
 {
@@ -118,25 +115,24 @@ std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* 
     // Algorithm goes something like this:
     // 
     // look for all rising and falling edges, recording magnitude
-    // magnitude is greatest change over tickDurationInSamples, which is as low as half the tick wave frequency we expect
-    // and gives some wiggle room for unexpected DAC behaviour, acoustics, audio clock issues, sampling limitations, etc.
-    // sort each list of edges by magnitude
-    // filter out edges with relatively low magnitude compared to the highest magnitude
-    // find the top numTicks in terms of magnitude and assume that these are clusters representing the tick
+    // magnitude is greatest change over tickDurationInSamples / 2, which is the tick wave frequency we expect
+    // sort each list of edges by magnitude. There will be clusters of large edges surrounding the largest edges
     // record the earliest edge from each cluster. This is the tick.
 
     int tickDurationInSamples = ceil((float)sampleRate / expectedTickFrequency);
+    int halfTickDurationInSamples = ceil((float)(sampleRate / 2) / expectedTickFrequency);
 
-    // TODO: Maybe interleaving or using a struct would improve performance regarding memory access(?)
-    float* allEdgeMagnitudes = new float[recordedSamplesLength];
-    int* allEdgeEnds = new int[recordedSamplesLength];
-
-    float largestEdge = 0;
+    TickPosition* allEdges = new TickPosition[recordedSamplesLength];
+    vector<TickPosition> largeEdges;
     for (int i = 0; i < recordedSamplesLength; i++)
     {
         float highestMagnitude = 0;
         int highestMagnitudeIndex = i;
-        for (int j = i; j < recordedSamplesLength && j - i < tickDurationInSamples; j++)
+        // The highest change in magnitude for a tick will occur over halfTickDurationInSamples, give or take
+        // It's possible that more change happens over a slightly longer period of time, but this is not important
+        // because the bulk of the change will still happen over this time, which will cause it to exceed the
+        // TestConfiguration::DetectionThreshold, which is all that matters.
+        for (int j = i; j < recordedSamplesLength && j - i < halfTickDurationInSamples; j++)
         {
             float thisMagnitude = abs(recordedSamples[i] - recordedSamples[j]);
             if (thisMagnitude > highestMagnitude)
@@ -145,78 +141,103 @@ std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* 
                 highestMagnitudeIndex = j;
             }
         }
-        allEdgeMagnitudes[i] = highestMagnitude;
-        allEdgeEnds[i] = highestMagnitudeIndex;
+        allEdges[i].index = i;
+        allEdges[i].magnitude = highestMagnitude;
+        allEdges[i].endIndex = highestMagnitudeIndex;
 
-        if (highestMagnitude > largestEdge)
+        // It is important that the DetectionThreshold is configured to filter cable crosstalk.
+        // It may also filter the majority of edges when there are no legitimate ticks in this sample set,
+        // but this is more valuable as an optimization because the later code will validate the tick
+        // positions based on their expected positions, so noise will usually never result in a valid measurement.
+        if (highestMagnitude > TestConfiguration::DetectionThreshold())
         {
-            largestEdge = highestMagnitude;
+            largeEdges.push_back(allEdges[i]);
         }
     }
 
-    vector<TickPosition> largeEdges;
-    for (int i = 0; i < recordedSamplesLength; i++)
+    // The edge list has a bunch of edges clustered together (from echos). Now these need to be cleaned up to only contain one from each cluster.
     {
-        // This next if statement contains optimizations to prevent every single change in amplitude being added to the rising or falling edges vector:
-        if (allEdgeMagnitudes[i] > TestConfiguration::DetectionThreshold() // This is needed to address cable crosstalk. It also addressess the scenario where there are no legitimate ticks in this sample set.
-            && allEdgeMagnitudes[i] > relMinEdgeMagnitude * largestEdge) // This filtering allows for easy detection of the first edge in a cluster of edges that represents a tick.
+        // Sort by magnitude to find the top numTicks clusters
+        sort(largeEdges.begin(), largeEdges.end(), [&](auto a, auto b) { return a.magnitude > b.magnitude; });
+
+        // for each of the clusters
+        for (int i = 0; i < numTicks && i < largeEdges.size(); i++)
         {
-            TickPosition tick;
-            tick.index = i;
-            tick.endIndex = allEdgeEnds[i];
-            tick.magnitude = allEdgeMagnitudes[i];
-            largeEdges.push_back(tick);
-        }
-    }
-
-    CleanUpEdgesList(largeEdges, largestEdge, numTicks, sampleRate);
-
-    delete[] allEdgeMagnitudes;
-    delete[] allEdgeEnds;
-
-    return largeEdges;
-}
-
-void RecordingAnalyzer::CleanUpEdgesList(std::vector<RecordingAnalyzer::TickPosition>& edgesList, float largestEdge, int numTicks, int sampleRate)
-{
-    sort(edgesList.begin(), edgesList.end(), [&](auto a, auto b) { return a.magnitude > b.magnitude; });
-
-    // This results in a bunch of edges clustered together (from echos). Now these need to be cleaned up to only contain one from each cluster.
-    // Use the first from each cluster:
-    for (int i = 0; i < numTicks; i++)
-    {
-        if (i < edgesList.size())
-        {
-            int indexLowerBound = edgesList[i].index - round(0.002 * sampleRate); // 2 milliseconds before the highest magnitude to account for weird echos and aucoustics
-            int indexUpperBound = edgesList[i].index + round(0.01 * sampleRate); // 10 milliseconds after the highest magnitude
-            int firstEdgeInCluster = i;
-            for (int j = i; j < edgesList.size(); j++)
+            // Find the first edge from this cluster:
+            TickPosition clusterStart = largeEdges[i];
+            // Look as far as 10 milliseconds back from the largest tick in this cluster.
+            // This is a lot of time for the types of echos I would expect and have seen in rough tests,
+            // but I don't see why it couldn't go even higher if it's ever needed...
+            // (I'm thinking maybe a theatre could have weird echos that result in the maximum
+            //  magnitude being a while after the initial sound)
+            while (clusterStart.index > largeEdges[i].index - round(0.01 * sampleRate))
             {
-                if (edgesList[j].index < indexUpperBound
-                    && edgesList[j].index > indexLowerBound
-                    && edgesList[j].index < edgesList[firstEdgeInCluster].index)
+                int earliestIndex = clusterStart.index;
+                // Look back 3 full cycles at a time. If more than 3 cycles of the tick don't pass the
+                // detection threshold test, then we've found the start of this cluster.
+                // Using 3 cycles here isn't based off of anything in particular. Just sounds like a good amount
+                // to deal with crazy acoustics where echos are causing all types of weird wave effects
+                int earliestIndexToCheck = clusterStart.index - (tickDurationInSamples * 3);
+                for (int j = clusterStart.index - 1; j >= earliestIndexToCheck && j >= 0; j--)
                 {
-                    firstEdgeInCluster = j;
+                    if (allEdges[j].magnitude > TestConfiguration::DetectionThreshold())
+                    {
+                        earliestIndex = j;
+                    }
+                }
+                if (earliestIndex != clusterStart.index)
+                {
+                    clusterStart = allEdges[earliestIndex];
+                    if (earliestIndexToCheck <= 0)
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    break;
                 }
             }
-            // replace the highest magnitude edge with the first edge from its cluster
-            edgesList[i] = edgesList[firstEdgeInCluster];
-            // Remove the rest of the edges that are in this cluster
-            edgesList.erase(remove_if(edgesList.begin() + i + 1, edgesList.end(), [&](auto tick)
+            int indexLowerBound = clusterStart.index;
+            // The actual peak for this high frequency edge might be a bit further along than we initially measured.
+            // Adjust this end point to be the actual peak of the wave:
+            for (int j = clusterStart.endIndex; j < clusterStart.endIndex + halfTickDurationInSamples && j < recordedSamplesLength; j++)
+            {
+                float newMagnitude = abs(recordedSamples[clusterStart.index] - recordedSamples[j]);
+                if (clusterStart.magnitude < newMagnitude)
                 {
-                    return tick.index < indexUpperBound && tick.index > indexLowerBound;
-                }), edgesList.end());
+                    clusterStart.magnitude = newMagnitude;
+                    clusterStart.endIndex = j;
+                }
+            }
+            // replace the highest magnitude edge with the first edge from its cluster that ends at a peak
+            largeEdges[i] = clusterStart;
+
+            // 20 milliseconds after the highest magnitude. Don't worry about any smart detection of the end because
+            // we are assuming weird lingering echos.
+            // 20 ms is a nice spot because we're expecting tick 2 to arrive 30 ms after tick 1 (see GeneratedSamples::patternTick2RelTime)
+            int indexUpperBound = clusterStart.index + round(0.020 * sampleRate);
+
+            // Remove the rest of the edges that are in this cluster
+            largeEdges.erase(remove_if(largeEdges.begin() + i + 1, largeEdges.end(), [&](auto tick)
+                {
+                    return tick.index < indexUpperBound && tick.index >= indexLowerBound;
+                }), largeEdges.end());
         }
     }
 
     // Take the top ticks, up to numTicks
-    if (edgesList.size() > numTicks)
+    if (largeEdges.size() > numTicks)
     {
-        edgesList.erase(edgesList.begin() + numTicks, edgesList.end());
+        largeEdges.erase(largeEdges.begin() + numTicks, largeEdges.end());
     }
 
     // put back in chronological order
-    sort(edgesList.begin(), edgesList.end(), [&](auto a, auto b) { return a.index < b.index; });
+    sort(largeEdges.begin(), largeEdges.end(), [&](auto a, auto b) { return a.index < b.index; });
+
+    delete[] allEdges;
+
+    return largeEdges;
 }
 
 std::vector<AveragedResult> RecordingAnalyzer::AnalyzeResults(std::vector<RecordingResult> results, time_t tTime, const AudioEndpoint& outputEndpoint)
