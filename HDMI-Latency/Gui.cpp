@@ -40,6 +40,7 @@ bool Gui::DoGui()
     bool openEdidReminderDialog = false;
     bool openSampleRateLowDialog = false;
     bool openMidTestFilesystemErrorDialog = false;
+    bool openNoMesaurementsErrorDialog = false;
     if (testManager != nullptr && testManager->ShouldShowFilesystemError && !testManager->HasShownFilesystemError)
     {
         openMidTestFilesystemErrorDialog = true;
@@ -597,6 +598,10 @@ bool Gui::DoGui()
                 {
                     resultFormatIndex = 0;
                     state = MeasurementToolGuiState::Results;
+                    if (testManager->AveragedResults.size() == 0)
+                    {
+                        openNoMesaurementsErrorDialog = true;
+                    }
                 }
                 else
                 {
@@ -884,6 +889,28 @@ bool Gui::DoGui()
         ImGui::SameLine();
         ImGui::SetItemDefaultFocus();
         if (ImGui::Button("Cancel", ImVec2(120, 0)))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
+    }
+
+    if (openNoMesaurementsErrorDialog)
+    {
+        ImGui::OpenPopup("No Valid Measurements");
+    }
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+    if (ImGui::BeginPopupModal("No Valid Measurements", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("Audio latency could not be measured. Please revisit the Adjust Volumes step to ensure\nthat everything is configured correctly.\n\n"
+            "If you are sure that the volume levels and detection threshold are configured correctly,\nconsider using the Advanced Configuration options in the Measurement Config step.");
+
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+
+        if (ImGui::Button("OK", ImVec2(120, 0)))
         {
             ImGui::CloseCurrentPopup();
         }
