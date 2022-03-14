@@ -33,20 +33,21 @@ RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& gene
         channelSampleIndex++;
     }
 
-    result.Channel1 = AnalyzeSingleChannel(generatedSamples, ch1RecordedSamples, channelSamplesLength, inputSampleRate);
-    result.Channel2 = AnalyzeSingleChannel(generatedSamples, ch2RecordedSamples, channelSamplesLength, inputSampleRate);
+    result.Channel1 = AnalyzeSingleChannel(generatedSamples, ch1RecordedSamples, channelSamplesLength, inputSampleRate, TestConfiguration::Ch1DetectionThreshold);
+    result.Channel2 = AnalyzeSingleChannel(generatedSamples, ch2RecordedSamples, channelSamplesLength, inputSampleRate, TestConfiguration::Ch2DetectionThreshold);
 
     delete[] ch1RecordedSamples;
     delete[] ch2RecordedSamples;
     return result;
 }
 
-RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const GeneratedSamples& config, float* recordedSamples, int recordedSamplesLength, int inputSampleRate)
+RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const GeneratedSamples& config, float* recordedSamples, int recordedSamplesLength, int inputSampleRate, float threshold)
 {
     RecordingSingleChannelResult result;
     result.RecordingSampleRate = inputSampleRate;
+    result.DetectionThreshold = threshold;
 
-    vector<TickPosition> possibleTickPositions = GetTicks(recordedSamples, recordedSamplesLength, inputSampleRate, GeneratedSamples::GetTickFrequency(config.WaveFormat->nSamplesPerSec), 3);
+    vector<TickPosition> possibleTickPositions = GetTicks(recordedSamples, recordedSamplesLength, inputSampleRate, GeneratedSamples::GetTickFrequency(config.WaveFormat->nSamplesPerSec), 3, threshold);
 
     if (possibleTickPositions.size() < 3)
     {
@@ -95,15 +96,13 @@ RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const Gener
     }
     else
     {
-        // TODO: (Maybe this could be improved?) With these positions now known, check to make sure that the rest of the wave is smooth.
-        // If it isn't, audio migtht be glitching.
         result.ValidResult = true;
     }
 
     return result;
 }
 
-std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* recordedSamples, int recordedSamplesLength, int sampleRate, int expectedTickFrequency, int numTicks)
+std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* recordedSamples, int recordedSamplesLength, int sampleRate, int expectedTickFrequency, int numTicks, float threshold)
 {
     // Needs to work with the following scenarios:
     // - Legitimate ticks exist in the sample set
@@ -149,7 +148,7 @@ std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* 
         // It may also filter the majority of edges when there are no legitimate ticks in this sample set,
         // but this is more valuable as an optimization because the later code will validate the tick
         // positions based on their expected positions, so noise will usually never result in a valid measurement.
-        if (highestMagnitude > TestConfiguration::DetectionThreshold())
+        if (highestMagnitude > threshold)
         {
             largeEdges.push_back(allEdges[i]);
         }
@@ -180,7 +179,7 @@ std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* 
                 int earliestIndexToCheck = clusterStart.index - (tickDurationInSamples * 3);
                 for (int j = clusterStart.index - 1; j >= earliestIndexToCheck && j >= 0; j--)
                 {
-                    if (allEdges[j].magnitude > TestConfiguration::DetectionThreshold())
+                    if (allEdges[j].magnitude > threshold)
                     {
                         earliestIndex = j;
                     }

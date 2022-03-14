@@ -318,11 +318,7 @@ void AdjustVolumeManager::Stop()
 
 AdjustVolumeManager::PeakLevelGrade AdjustVolumeManager::GetGrade(float value)
 {
-	if (value < TestConfiguration::DetectionThreshold())
-	{
-		return AdjustVolumeManager::PeakLevelGrade::Quiet;
-	}
-	else if (value > 0.9)
+	if (value > 0.9)
 	{
 		return AdjustVolumeManager::PeakLevelGrade::Loud;
 	}

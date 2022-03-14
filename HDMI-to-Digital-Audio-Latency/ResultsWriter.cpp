@@ -59,11 +59,11 @@ void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstre
         detailedResultsStream << "Ch 2 Rel Milliseconds to Tick 2,";
         detailedResultsStream << "Ch 1 Rel Milliseconds to Tick 3,";
         detailedResultsStream << "Ch 2 Rel Milliseconds to Tick 3,";
-        detailedResultsStream << "Ch 1 Phase Inverted,";
+        detailedResultsStream << "Ch 1 Detection Threshold,";
         detailedResultsStream << "Ch 1 Samples to Tick 1,";
         detailedResultsStream << "Ch 1 Samples to Tick 2,";
         detailedResultsStream << "Ch 1 Samples to Tick 3,";
-        detailedResultsStream << "Ch 2 Phase Inverted,";
+        detailedResultsStream << "Ch 2 Detection Threshold,";
         detailedResultsStream << "Ch 2 Samples to Tick 1,";
         detailedResultsStream << "Ch 2 Samples to Tick 2,";
         detailedResultsStream << "Ch 2 Samples to Tick 3,";
@@ -122,11 +122,11 @@ void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstre
     detailedResultsStream << "\"" << result.Channel2.RelMillisecondsToTick2() << "\","; //"Ch 2 Rel Milliseconds to Tick 2,";
     detailedResultsStream << "\"" << result.Channel1.RelMillisecondsToTick3() << "\","; //"Ch 1 Rel Milliseconds to Tick 3,";
     detailedResultsStream << "\"" << result.Channel2.RelMillisecondsToTick3() << "\","; //"Ch 2 Rel Milliseconds to Tick 3,";
-    detailedResultsStream << "\"" << (result.Channel1.PhaseInverted ? "true" : "false") << "\","; //"Ch 1 Phase Inverted,";
+    detailedResultsStream << "\"" << result.Channel1.DetectionThreshold << "\","; //"Ch 1 Detection Threshold,";
     detailedResultsStream << "\"" << result.Channel1.SamplesToTick1 << "\","; //"Ch 1 Samples to Tick 1,";
     detailedResultsStream << "\"" << result.Channel1.SamplesToTick2 << "\","; //"Ch 1 Samples to Tick 2,";
     detailedResultsStream << "\"" << result.Channel1.SamplesToTick3 << "\","; //"Ch 1 Samples to Tick 3,";
-    detailedResultsStream << "\"" << (result.Channel2.PhaseInverted ? "true" : "false") << "\","; //"Ch 2 Phase Inverted,";
+    detailedResultsStream << "\"" << result.Channel2.DetectionThreshold << "\","; //"Ch 2 Detection Threshold,";
     detailedResultsStream << "\"" << result.Channel2.SamplesToTick1 << "\","; //"Ch 2 Samples to Tick 1,";
     detailedResultsStream << "\"" << result.Channel2.SamplesToTick2 << "\","; //"Ch 2 Samples to Tick 2,";
     detailedResultsStream << "\"" << result.Channel2.SamplesToTick3 << "\","; //"Ch 2 Samples to Tick 3,";

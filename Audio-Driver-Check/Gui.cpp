@@ -213,14 +213,14 @@ bool Gui::DoGui()
                 break;
             case 4:
                 waveType = GeneratedSamples::WaveType::TestPattern_ToneHighFreqBlip;
-                ImGui::DragFloat("Frequency (Hz)", &blipFrequency, 1, 0.01, 1000000);
+                ImGui::DragFloat("Frequency (Hz)", &blipFrequency, 1, 0.01, 1000000, "%.3f", ImGuiSliderFlags_AlwaysClamp);
                 ImGui::SameLine(); HelpMarker("How often the blip will occur, not the frequency of the audio tone.");
                 ImGui::InputInt("Sample Length", &blipSampleLength);
                 ImGui::SameLine(); HelpMarker("The time duration of this blip will depend on sample rate.");
                 break;
             case 5:
                 waveType = GeneratedSamples::WaveType::TestPattern_ToneHighFreqOnOff;
-                ImGui::DragFloat("On/Off Frequency (Hz)", &onOffFrequency, 1, 0.01, 1000000);
+                ImGui::DragFloat("On/Off Frequency (Hz)", &onOffFrequency, 1, 0.01, 1000000, "%.3f", ImGuiSliderFlags_AlwaysClamp);
                 break;
             case 6:
                 waveType = GeneratedSamples::WaveType::TestPattern_VisuallyIdentifiable;

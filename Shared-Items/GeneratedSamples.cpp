@@ -3,6 +3,7 @@
 // for M_PI:
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include "TestConfiguration.h"
 
 #define TICK_AMPLITUDE 0.6;
 #define CONSTANT_TONE_AMPLITUDE 0.001;
@@ -66,7 +67,7 @@ void GeneratedSamples::GenerateLatencyMeasurementSamples()
         round(tickTimes[0] * sampleRate),
         round(tickTimes[1] * sampleRate),
         round(tickTimes[2] * sampleRate) }; int tickTimesInSamplesLength = 3;
-    double endPadding = 0.4f;
+    double endPadding = max(TestConfiguration::RecordingLegnth - startPadding - patternTick3RelTime, 0.1);
 
     // Frequencies
     int tickFreq = GetTickFrequency(sampleRate);

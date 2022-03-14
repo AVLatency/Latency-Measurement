@@ -16,5 +16,5 @@ public:
     int SamplesToTick3 = 0;
     float RelMillisecondsToTick3() const { return (SamplesToTick3 - SamplesToTick1) / (float)RecordingSampleRate * 1000.0f; };
 
-    bool PhaseInverted = false; // TODO: remove this
+    float DetectionThreshold = 0;
 };
