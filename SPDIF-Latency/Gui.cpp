@@ -595,8 +595,10 @@ bool Gui::DoGui()
                 else
                 {
                     ImGui::Text("Measurement in progres...");
-                    ImGui::ProgressBar(testManager->PassCount / (float)testManager->TotalPasses);
-                    ImGui::ProgressBar(testManager->RecordingCount / (float)testManager->TotalRecordingsPerPass);
+                    float overall = testManager->PassCount / (float)testManager->TotalPasses;
+                    ImGui::ProgressBar(overall, ImVec2(-FLT_MIN, 0), std::format("Overall: {:.0f}%", overall * 100).c_str());
+                    float currentPass = testManager->RecordingCount / (float)testManager->TotalRecordingsPerPass;
+                    ImGui::ProgressBar(currentPass, ImVec2(-FLT_MIN, 0), std::format("Current Pass: {:.0f}%", currentPass * 100).c_str());
 
                     if (state != MeasurementToolGuiState::CancellingMeasuring)
                     {
