@@ -80,19 +80,48 @@ void GuiHelper::AdjustVolumeDisplay(const AdjustVolumeManager::VolumeAnalysis& a
     //ImGui::SetCursorPosX(pos);
 
     float plotHeight = 100 * DpiScale;
+    ImVec2 tickPlotSize = ImVec2(540 * DpiScale, plotHeight);
+    ImVec2 fullPlotSize = ImVec2(500 * DpiScale, plotHeight);
+    float plotVerticalScale = analysis.MaxPlotValue;
 
     ImGui::Spacing();
     ImGui::PushFont(FontHelper::BoldFont);
     ImGui::Text(title);
     ImGui::PopFont();
 
+    auto plotYPos = ImGui::GetCursorPosY();
     ImGui::PlotHistogram("", &analysis.PeakValue, 1, 0, NULL, 0, 1, ImVec2(20 * DpiScale, plotHeight));
     ImGui::SameLine();
-    ImGui::PlotHistogram("", analysis.TickMonitorSamples, analysis.TickMonitorSamplesLength, 0, NULL, 0, analysis.MaxPlotValue, ImVec2(100 * DpiScale, plotHeight));
+    auto firstPlotXPos = ImGui::GetCursorPosX();
+    ImGui::PlotHistogram("", analysis.TickMonitorSamples, analysis.TickMonitorSamplesLength, 0, NULL, 0, plotVerticalScale, tickPlotSize);
     ImGui::SameLine();
-    ImGui::PlotHistogram("", analysis.FullMonitorSamples, analysis.FullMonitorSamplesLength, 0, NULL, 0, analysis.MaxPlotValue, ImVec2(500 * DpiScale, plotHeight));
-    ImGui::Text(std::format("TickMonitorSamplesLength: {} FullMonitorSamplesLength: {} TickPosition: {} MaxPlotValue: {} AutoThreshold: {}",
-        analysis.TickMonitorSamplesLength, analysis.FullMonitorSamplesLength, analysis.TickPosition, analysis.MaxPlotValue, analysis.AutoThreshold).c_str());
+    auto secondPlotXPos = ImGui::GetCursorPosX();
+    ImGui::PlotHistogram("", analysis.FullMonitorSamples, analysis.FullMonitorSamplesLength, 0, NULL, 0, plotVerticalScale, fullPlotSize);
+
+    float thresholdValues[2]{ analysis.AutoThreshold, analysis.AutoThreshold };
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0));
+    ImGui::SetCursorPosY(plotYPos);
+    ImGui::SetCursorPosX(firstPlotXPos);
+    ImGui::PlotLines("", thresholdValues, 2, 0, NULL, 0, plotVerticalScale, tickPlotSize);
+    ImGui::SameLine();
+    ImGui::PlotLines("", thresholdValues, 2, 0, NULL, 0, plotVerticalScale, fullPlotSize);
+    ImGui::PopStyleColor();
+
+    HelpMarker("Peak audio level");
+    ImGui::SameLine();
+    ImGui::SetCursorPosX(firstPlotXPos);
+    ImGui::Text("Zooomed In View (Normalized)");
+    ImGui::SameLine();
+    HelpMarker("This zoomed in view shows the loudest high frequency sound.");
+    ImGui::SameLine();
+    ImGui::SetCursorPosX(secondPlotXPos);
+    ImGui::Text("Zooomed Out View (Normalized)");
+    ImGui::SameLine();
+    HelpMarker("This zoomed out view shows the time surrounding the loudest high frequency sound.");
+
+    //// Debug stuff:
+    //ImGui::Text(std::format("TickMonitorSamplesLength: {} FullMonitorSamplesLength: {} TickPosition: {} MaxPlotValue: {} AutoThreshold: {}",
+    //    analysis.TickMonitorSamplesLength, analysis.FullMonitorSamplesLength, analysis.TickPosition, analysis.MaxPlotValue, analysis.AutoThreshold).c_str());
 }
 
 void GuiHelper::PeakLevel(AdjustVolumeManager::PeakLevelGrade grade, const char* helpText)

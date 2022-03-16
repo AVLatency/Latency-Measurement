@@ -302,6 +302,12 @@ bool Gui::DoGui()
                 //    ImGui::EndTable();
                 //}
 
+                //// Debug stuff
+                //ImGui::DragInt("TickMonitorCycles", &adjustVolumeManager->TickMonitorCycles, 0.3, 10, 300);
+                //ImGui::DragInt("FullMonitorDivisions", &adjustVolumeManager->FullMonitorDivisions, 0.3, 5, 300);
+
+                ImGui::Spacing();
+
                 if (ImGui::TreeNode("Advanced Configuration"))
                 {
                     ImGui::DragFloat("Output Volume", &TestConfiguration::OutputVolume, .001f, .1f, 1, "%.3f", ImGuiSliderFlags_AlwaysClamp);

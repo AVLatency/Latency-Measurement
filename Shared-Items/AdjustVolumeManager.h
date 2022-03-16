@@ -32,13 +32,16 @@ public:
 	VolumeAnalysis LeftVolumeAnalysis;
 	VolumeAnalysis RightVolumeAnalysis;
 
+	int TickMonitorCycles = 67; // exact number chosen because it looks good at 100% DpiScale.
+	int FullMonitorDivisions = 10;
+
 	AdjustVolumeManager(const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint);
 	~AdjustVolumeManager();
 	void Tick();
 	void Stop();
 
 private:
-	const double recordBufferDurationInSeconds = 1.5;
+	const double recordBufferDurationInSeconds = 0.5;
 	bool lastBufferFlipWasTo1 = true;
 	std::thread* outputThread = nullptr;
 	std::thread* inputThread = nullptr;

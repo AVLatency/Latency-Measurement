@@ -263,9 +263,9 @@ void AdjustVolumeManager::AnalyseChannel(VolumeAnalysis& analysis, float* record
 	analysis.MaxPlotValue = allEdges[largestEdgeIndex];
 
 	// Tick monitor
-	analysis.TickMonitorSamplesLength = 64 * tickDurationInSamples;
+	analysis.TickMonitorSamplesLength = TickMonitorCycles * tickDurationInSamples;
 	analysis.TickMonitorSamples = new float[analysis.TickMonitorSamplesLength];
-	int tickMonitorStart = largestEdgeIndex - (analysis.TickMonitorSamplesLength / 2);
+	int tickMonitorStart = largestEdgeIndex - (analysis.TickMonitorSamplesLength / 3);
 	if (tickMonitorStart < 0)
 	{
 		tickMonitorStart = 0;
@@ -280,24 +280,49 @@ void AdjustVolumeManager::AnalyseChannel(VolumeAnalysis& analysis, float* record
 	}
 
 	// Full monitor
-	analysis.FullMonitorSamplesLength = ceil(sampleRate * 0.08); // Generated samples is 0.1, 0.02 is the threshold used for looking for echos.
-	analysis.FullMonitorSamples = new float[analysis.FullMonitorSamplesLength];
-
-	int fullMonitorStart = largestEdgeIndex - (analysis.FullMonitorSamplesLength / 2);
+	int sourceSampleCount = ceil(sampleRate * 0.08); // Generated samples is 0.1, 0.02 is the threshold used for looking for echos.
+	int fullMonitorStart = largestEdgeIndex - (sourceSampleCount / 2);
 	if (fullMonitorStart < 0)
 	{
 		fullMonitorStart = 0;
 	}
-	if (fullMonitorStart + analysis.FullMonitorSamplesLength > recordedSamplesLength)
+	if (fullMonitorStart + sourceSampleCount > recordedSamplesLength)
 	{
-		fullMonitorStart = recordedSamplesLength - analysis.FullMonitorSamplesLength;
+		fullMonitorStart = recordedSamplesLength - sourceSampleCount;
 	}
-	for (int i = fullMonitorStart; i < fullMonitorStart + analysis.FullMonitorSamplesLength; i++)
+
+	analysis.FullMonitorSamplesLength = sourceSampleCount / FullMonitorDivisions + (sourceSampleCount % FullMonitorDivisions == 0 ? 0 : 1);
+	analysis.FullMonitorSamples = new float[analysis.FullMonitorSamplesLength];
+	for (int i = fullMonitorStart; i < fullMonitorStart + sourceSampleCount; i+= FullMonitorDivisions)
 	{
-		analysis.FullMonitorSamples[i - fullMonitorStart] = allEdges[i];
-		if (i == largestEdgeIndex)
+		bool foundTick = false;
+
+		float largestEdge = 0;
+		for (int j = 0; j < FullMonitorDivisions && i + j < recordedSamplesLength; j++)
 		{
-			analysis.TickPosition = i - fullMonitorStart;
+			if (allEdges[i + j] > largestEdge)
+			{
+				largestEdge = allEdges[i + j];
+			}
+			if (i + j == largestEdgeIndex)
+			{
+				foundTick = true;
+			}
+		}
+
+		if ((i - fullMonitorStart) / FullMonitorDivisions < analysis.FullMonitorSamplesLength)
+		{
+			analysis.FullMonitorSamples[(i - fullMonitorStart) / FullMonitorDivisions] = largestEdge;
+		}
+		else
+		{
+			// this should never happen
+			throw "My math was wrong on array indices";
+		}
+
+		if (foundTick)
+		{
+			analysis.TickPosition = (i - fullMonitorStart) / FullMonitorDivisions;
 		}
 	}
 
