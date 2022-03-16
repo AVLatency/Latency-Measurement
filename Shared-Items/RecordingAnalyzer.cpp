@@ -33,6 +33,7 @@ RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& gene
         channelSampleIndex++;
     }
 
+    // TODO: each of these could be done on a different thread to improve performance.
     result.Channel1 = AnalyzeSingleChannel(generatedSamples, ch1RecordedSamples, channelSamplesLength, inputSampleRate, TestConfiguration::Ch1DetectionThreshold);
     result.Channel2 = AnalyzeSingleChannel(generatedSamples, ch2RecordedSamples, channelSamplesLength, inputSampleRate, TestConfiguration::Ch2DetectionThreshold);
 

@@ -74,6 +74,27 @@ void GuiHelper::OptionallyBoldText(const char* text, bool bold)
     }
 }
 
+void GuiHelper::AdjustVolumeDisplay(const AdjustVolumeManager::VolumeAnalysis& analysis, float DpiScale, const char* title)
+{
+    //auto pos = ImGui::GetCursorPosX();
+    //ImGui::SetCursorPosX(pos);
+
+    float plotHeight = 100 * DpiScale;
+
+    ImGui::Spacing();
+    ImGui::PushFont(FontHelper::BoldFont);
+    ImGui::Text(title);
+    ImGui::PopFont();
+
+    ImGui::PlotHistogram("", &analysis.PeakValue, 1, 0, NULL, 0, 1, ImVec2(20 * DpiScale, plotHeight));
+    ImGui::SameLine();
+    ImGui::PlotHistogram("", analysis.TickMonitorSamples, analysis.TickMonitorSamplesLength, 0, NULL, 0, analysis.MaxPlotValue, ImVec2(100 * DpiScale, plotHeight));
+    ImGui::SameLine();
+    ImGui::PlotHistogram("", analysis.FullMonitorSamples, analysis.FullMonitorSamplesLength, 0, NULL, 0, analysis.MaxPlotValue, ImVec2(500 * DpiScale, plotHeight));
+    ImGui::Text(std::format("TickMonitorSamplesLength: {} FullMonitorSamplesLength: {} TickPosition: {} MaxPlotValue: {} AutoThreshold: {}",
+        analysis.TickMonitorSamplesLength, analysis.FullMonitorSamplesLength, analysis.TickPosition, analysis.MaxPlotValue, analysis.AutoThreshold).c_str());
+}
+
 void GuiHelper::PeakLevel(AdjustVolumeManager::PeakLevelGrade grade, const char* helpText)
 {
     ImGui::Text("Peak level:");

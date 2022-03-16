@@ -41,7 +41,8 @@ AdjustVolumeManager::~AdjustVolumeManager()
 	delete outputThread;
 	delete inputThread;
 
-	SafeDeleteMonitorSamples();
+	SafeResetVolumeAnalysis(LeftVolumeAnalysis);
+	SafeResetVolumeAnalysis(RightVolumeAnalysis);
 
 	if (generatedSamples != nullptr)
 	{
@@ -49,38 +50,25 @@ AdjustVolumeManager::~AdjustVolumeManager()
 	}
 }
 
-void AdjustVolumeManager::SafeDeleteMonitorSamples()
+void AdjustVolumeManager::SafeResetVolumeAnalysis(VolumeAnalysis& analysis)
 {
-	if (leftChannelTickMonitorSamples != nullptr)
+	analysis.PeakValue = 0;
+	if (analysis.TickMonitorSamples != nullptr)
 	{
-		delete[] leftChannelTickMonitorSamples;
-		leftChannelTickMonitorSamples = nullptr;
+		delete[] analysis.TickMonitorSamples;
+		analysis.TickMonitorSamples = nullptr;
 	}
-	if (rightChannelTickMonitorSamples != nullptr)
+	analysis.TickMonitorSamplesLength = 0;
+	if (analysis.FullMonitorSamples != nullptr)
 	{
-		delete[] rightChannelTickMonitorSamples;
-		rightChannelTickMonitorSamples = nullptr;
+		delete[] analysis.FullMonitorSamples;
+		analysis.FullMonitorSamples = nullptr;
 	}
-	if (rightChannelNormalizedTickMonitorSamples != nullptr)
-	{
-		delete[] rightChannelNormalizedTickMonitorSamples;
-		rightChannelNormalizedTickMonitorSamples = nullptr;
-	}
-	if (tickReferenceSamples != nullptr)
-	{
-		delete[] tickReferenceSamples;
-		tickReferenceSamples = nullptr;
-	}
-	if (tickReferenceSamples != nullptr)
-	{
-		delete[] tickReferenceSamples;
-		tickReferenceSamples = nullptr;
-	}
-	if (normalizedTickReferenceSamples != nullptr)
-	{
-		delete[] normalizedTickReferenceSamples;
-		normalizedTickReferenceSamples = nullptr;
-	}
+	analysis.FullMonitorSamplesLength = 0;
+	analysis.TickPosition = 0;
+	analysis.MaxPlotValue = 1;
+	analysis.AutoThreshold = 0.1;
+	analysis.Grade = PeakLevelGrade::Quiet;
 }
 
 /// <summary>
@@ -221,109 +209,103 @@ void AdjustVolumeManager::CopyBuffer(float* sourceBuffer, int sourceBufferLength
 		channelIndex++;
 	}
 
-	// Get some info about the ticks that were generated and create the sample buffers
-	int tickFrequency = generatedSamples->GetTickFrequency(generatedSamples->WaveFormat->nSamplesPerSec);
-	int tickSamplesLength = input->waveFormat.Format.nSamplesPerSec / tickFrequency;
-	tickMonitorSamplesLength = 3 * tickSamplesLength;
-	SafeDeleteMonitorSamples();
-	leftChannelTickMonitorSamples = new float[tickMonitorSamplesLength];
-	rightChannelTickMonitorSamples = new float[tickMonitorSamplesLength];
-	rightChannelNormalizedTickMonitorSamples = new float[tickMonitorSamplesLength];
-	tickReferenceSamples = new float[tickMonitorSamplesLength];
-	normalizedTickReferenceSamples = new float[tickMonitorSamplesLength];
-
-	// Find the peaks in the sourceBuffer, excluding some padding on the left and right of the source buffer:
-	int padding = tickMonitorSamplesLength * 2;
-	int leftMaxAbsIndex = padding;
-	int rightMaxAbsIndex = padding;
-	for (int i = padding; i < perChannelSourceBufferLength - padding; i++)
-	{
-		if (abs(leftSourceBuffer[i]) > abs(leftSourceBuffer[leftMaxAbsIndex]))
-		{
-			leftMaxAbsIndex = i;
-		}
-		if (abs(rightSourceBuffer[i]) > abs(rightSourceBuffer[rightMaxAbsIndex]))
-		{
-			rightMaxAbsIndex = i;
-		}
-	}
-
-	// Find the middle of the detected ticks:
-	// This math hackery depends on all indexing of sourceBuffer to be divisible by 8 to make sure
-	// that we're always indexing the right channel.
-	int leftChannelTickStart;
-	if (abs(leftSourceBuffer[leftMaxAbsIndex + (tickSamplesLength / 2)]) > abs(leftSourceBuffer[leftMaxAbsIndex - (tickSamplesLength / 2)]))
-	{
-		// Middle of tick is to the right of MaxAbsIndex
-		leftChannelTickStart = leftMaxAbsIndex - (tickSamplesLength / 4);
-	}
-	else
-	{
-		// Middle of tick is to the left of MaxAbsIndex
-		leftChannelTickStart = leftMaxAbsIndex - (tickSamplesLength * 3 / 4);
-	}
-	int rightChannelTickStart;
-	if (abs(rightSourceBuffer[rightMaxAbsIndex + (tickSamplesLength / 2)]) > abs(rightSourceBuffer[rightMaxAbsIndex - (tickSamplesLength / 2)]))
-	{
-		// Middle of tick is to the right of MaxAbsIndex
-		rightChannelTickStart = rightMaxAbsIndex - (tickSamplesLength / 4);
-	}
-	else
-	{
-		// Middle of tick is to the left of MaxAbsIndex
-		rightChannelTickStart = rightMaxAbsIndex - (tickSamplesLength * 3 / 4);
-	}
-
-	// Fill in the sample buffers
-	for (int i = 0; i < tickMonitorSamplesLength; i++)
-	{
-		leftChannelTickMonitorSamples[i] = leftSourceBuffer[leftChannelTickStart - tickSamplesLength + i];
-		float rightSample = rightSourceBuffer[rightChannelTickStart - tickSamplesLength + i];
-		rightChannelTickMonitorSamples[i] = rightSample;
-		float normalizedRightSample = rightSample / abs(rightSourceBuffer[rightMaxAbsIndex]);
-		rightChannelNormalizedTickMonitorSamples[i] = normalizedRightSample;
-	}
-
-
-	// Finally, generate the reference samples, using some of the variables from above:
-	for (int i = 0; i < tickMonitorSamplesLength; i++)
-	{
-		if (i >= tickSamplesLength && i < tickSamplesLength * 2)
-		{
-			double time = (double)(i - tickSamplesLength) / input->waveFormat.Format.nSamplesPerSec;
-			float sample = (float)sin(M_PI * 2 * tickFrequency * time);
-			tickReferenceSamples[i] = sample * 0.75;
-			normalizedTickReferenceSamples[i] = sample;
-		}
-		else
-		{
-			// left or right padding
-			tickReferenceSamples[i] = 0;
-			normalizedTickReferenceSamples[i] = 0;
-		}
-	}
-
-	leftChannelGrade = GetGrade(abs(leftSourceBuffer[leftMaxAbsIndex]));
-	rightChannelGrade = GetGrade(abs(rightSourceBuffer[rightMaxAbsIndex]));
+	AnalyseChannel(LeftVolumeAnalysis, leftSourceBuffer, perChannelSourceBufferLength);
+	AnalyseChannel(RightVolumeAnalysis, rightSourceBuffer, perChannelSourceBufferLength);
 
 	delete[] leftSourceBuffer;
 	delete[] rightSourceBuffer;
+}
+
+void AdjustVolumeManager::AnalyseChannel(VolumeAnalysis& analysis, float* recordedSamples, int recordedSamplesLength)
+{
+	// Get some info about the ticks that were generated and create the sample buffers
+	int sampleRate = generatedSamples->WaveFormat->nSamplesPerSec;
+	int expectedTickFrequency = generatedSamples->GetTickFrequency(sampleRate);
+	int tickDurationInSamples = ceil((float)sampleRate / expectedTickFrequency);
+	int halfTickDurationInSamples = ceil((float)(sampleRate / 2) / expectedTickFrequency);
+
+	SafeResetVolumeAnalysis(analysis);
+
+	for (int i = 0; i < recordedSamplesLength; i++)
+	{
+		if (abs(recordedSamples[i]) > analysis.PeakValue)
+		{
+			analysis.PeakValue = abs(recordedSamples[i]);
+		}
+	}
+
+	float* allEdges = new float[recordedSamplesLength];
+	int largestEdgeIndex = 0;
+	float largestEdge = 0;
+	for (int i = 0; i < recordedSamplesLength; i++)
+	{
+		float highestMagnitude = 0;
+		// The highest change in magnitude for a tick will occur over halfTickDurationInSamples, give or take
+		// It's possible that more change happens over a slightly longer period of time, but this is not important
+		// because the bulk of the change will still happen over this time, which will cause it to exceed the
+		// TestConfiguration::DetectionThreshold, which is all that matters.
+		for (int j = i; j < recordedSamplesLength && j - i < halfTickDurationInSamples; j++)
+		{
+			float thisMagnitude = abs(recordedSamples[i] - recordedSamples[j]);
+			if (thisMagnitude > highestMagnitude)
+			{
+				highestMagnitude = thisMagnitude;
+			}
+		}
+		allEdges[i] = highestMagnitude;
+
+		if (highestMagnitude > largestEdge)
+		{
+			largestEdgeIndex = i;
+			largestEdge = highestMagnitude;
+		}
+	}
+	analysis.MaxPlotValue = allEdges[largestEdgeIndex];
+
+	// Tick monitor
+	analysis.TickMonitorSamplesLength = 64 * tickDurationInSamples;
+	analysis.TickMonitorSamples = new float[analysis.TickMonitorSamplesLength];
+	int tickMonitorStart = largestEdgeIndex - (analysis.TickMonitorSamplesLength / 2);
+	if (tickMonitorStart < 0)
+	{
+		tickMonitorStart = 0;
+	}
+	if (tickMonitorStart + analysis.TickMonitorSamplesLength > recordedSamplesLength)
+	{
+		tickMonitorStart = recordedSamplesLength - analysis.TickMonitorSamplesLength;
+	}
+	for (int i = tickMonitorStart; i < tickMonitorStart + analysis.TickMonitorSamplesLength; i++)
+	{
+		analysis.TickMonitorSamples[i - tickMonitorStart] = allEdges[i];
+	}
+
+	// Full monitor
+	analysis.FullMonitorSamplesLength = ceil(sampleRate * 0.08); // Generated samples is 0.1, 0.02 is the threshold used for looking for echos.
+	analysis.FullMonitorSamples = new float[analysis.FullMonitorSamplesLength];
+
+	int fullMonitorStart = largestEdgeIndex - (analysis.FullMonitorSamplesLength / 2);
+	if (fullMonitorStart < 0)
+	{
+		fullMonitorStart = 0;
+	}
+	if (fullMonitorStart + analysis.FullMonitorSamplesLength > recordedSamplesLength)
+	{
+		fullMonitorStart = recordedSamplesLength - analysis.FullMonitorSamplesLength;
+	}
+	for (int i = fullMonitorStart; i < fullMonitorStart + analysis.FullMonitorSamplesLength; i++)
+	{
+		analysis.FullMonitorSamples[i - fullMonitorStart] = allEdges[i];
+		if (i == largestEdgeIndex)
+		{
+			analysis.TickPosition = i - fullMonitorStart;
+		}
+	}
+
+	delete[] allEdges;
 }
 
 void AdjustVolumeManager::Stop()
 {
 	input->StopRecording();
 	output->StopPlayback();
-}
-
-AdjustVolumeManager::PeakLevelGrade AdjustVolumeManager::GetGrade(float value)
-{
-	if (value > 0.9)
-	{
-		return AdjustVolumeManager::PeakLevelGrade::Loud;
-	}
-	else
-	{
-		return AdjustVolumeManager::PeakLevelGrade::Good;
-	}
 }
