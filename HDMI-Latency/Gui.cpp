@@ -211,8 +211,8 @@ bool Gui::DoGui()
 
             if (state >= MeasurementToolGuiState::AdjustVolume)
             {
-                GuiHelper::AdjustVolumeDisplay(adjustVolumeManager->LeftVolumeAnalysis, DpiScale, "Input: Left Channel (HDMI Audio Extractor)");
-                GuiHelper::AdjustVolumeDisplay(adjustVolumeManager->RightVolumeAnalysis, DpiScale, "Input: Right Channel (DUT)");
+                GuiHelper::AdjustVolumeDisplay("left channel volume", adjustVolumeManager->LeftVolumeAnalysis, DpiScale, "Input: Left Channel (HDMI Audio Extractor)", &TestConfiguration::Ch1AutoThresholdDetection, &TestConfiguration::Ch1DetectionThreshold);
+                GuiHelper::AdjustVolumeDisplay("right channel volume", adjustVolumeManager->RightVolumeAnalysis, DpiScale, "Input: Right Channel (DUT)", &TestConfiguration::Ch2AutoThresholdDetection, &TestConfiguration::Ch2DetectionThreshold);
 
                 //ImGui::Spacing();
                 //ImGui::PushFont(FontHelper::BoldFont);

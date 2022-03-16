@@ -74,8 +74,9 @@ void GuiHelper::OptionallyBoldText(const char* text, bool bold)
     }
 }
 
-void GuiHelper::AdjustVolumeDisplay(const AdjustVolumeManager::VolumeAnalysis& analysis, float DpiScale, const char* title)
+void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManager::VolumeAnalysis& analysis, float DpiScale, const char* title, bool* useAutoThreshold, float* manualThreshold)
 {
+    ImGui::PushID(imGuiID);
     //auto pos = ImGui::GetCursorPosX();
     //ImGui::SetCursorPosX(pos);
 
@@ -88,6 +89,7 @@ void GuiHelper::AdjustVolumeDisplay(const AdjustVolumeManager::VolumeAnalysis& a
     ImGui::PushFont(FontHelper::BoldFont);
     ImGui::Text(title);
     ImGui::PopFont();
+    GuiHelper::PeakLevel(analysis.Grade, "");
 
     auto plotYPos = ImGui::GetCursorPosY();
     ImGui::PlotHistogram("", &analysis.PeakValue, 1, 0, NULL, 0, 1, ImVec2(20 * DpiScale, plotHeight));
@@ -98,7 +100,8 @@ void GuiHelper::AdjustVolumeDisplay(const AdjustVolumeManager::VolumeAnalysis& a
     auto secondPlotXPos = ImGui::GetCursorPosX();
     ImGui::PlotHistogram("", analysis.FullMonitorSamples, analysis.FullMonitorSamplesLength, 0, NULL, 0, plotVerticalScale, fullPlotSize);
 
-    float thresholdValues[2]{ analysis.AutoThreshold, analysis.AutoThreshold };
+    float threshold = *useAutoThreshold ? analysis.AutoThreshold : *manualThreshold;
+    float thresholdValues[2]{ threshold, threshold };
     ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0));
     ImGui::SetCursorPosY(plotYPos);
     ImGui::SetCursorPosX(firstPlotXPos);
@@ -119,15 +122,23 @@ void GuiHelper::AdjustVolumeDisplay(const AdjustVolumeManager::VolumeAnalysis& a
     ImGui::SameLine();
     HelpMarker("This zoomed out view shows the time surrounding the loudest high frequency sound.");
 
+    ImGui::Checkbox("Automatic Threshold Detection", useAutoThreshold);
+    if (!*useAutoThreshold)
+    {
+        ImGui::DragFloat("Manual Threshold", manualThreshold, 0.001, 0, 1.9, "%.3f", ImGuiSliderFlags_AlwaysClamp | ImGuiSliderFlags_Logarithmic);
+    }
+
     //// Debug stuff:
     //ImGui::Text(std::format("TickMonitorSamplesLength: {} FullMonitorSamplesLength: {} TickPosition: {} MaxPlotValue: {} AutoThreshold: {}",
     //    analysis.TickMonitorSamplesLength, analysis.FullMonitorSamplesLength, analysis.TickPosition, analysis.MaxPlotValue, analysis.AutoThreshold).c_str());
+
+    ImGui::PopID();
 }
 
 void GuiHelper::PeakLevel(AdjustVolumeManager::PeakLevelGrade grade, const char* helpText)
 {
-    ImGui::Text("Peak level:");
-    ImGui::SameLine(); GuiHelper::HelpMarker(helpText);
+    ImGui::Text("Volume:");
+    ImGui::SameLine();
     ImGui::PushFont(FontHelper::BoldFont);
     switch (grade)
     {
@@ -135,15 +146,19 @@ void GuiHelper::PeakLevel(AdjustVolumeManager::PeakLevelGrade grade, const char*
         ImGui::Text("Good");
         break;
     case AdjustVolumeManager::PeakLevelGrade::Loud:
-        ImGui::Text("Loud");
+        ImGui::TextColored((ImVec4)ImColor::HSV(0, 0.6f, 0.6f), "Loud");
         break;
     case AdjustVolumeManager::PeakLevelGrade::Quiet:
         ImGui::TextColored((ImVec4)ImColor::HSV(0, 0.6f, 0.6f), "Quiet");
+        break;
+    case AdjustVolumeManager::PeakLevelGrade::Crosstalk:
+        ImGui::TextColored((ImVec4)ImColor::HSV(0, 0.6f, 0.6f), "Cable crosstalk detected");
         break;
     default:
         break;
     }
     ImGui::PopFont();
+    //ImGui::SameLine(); GuiHelper::HelpMarker(helpText);
 }
 
 void GuiHelper::DearImGuiLegal()

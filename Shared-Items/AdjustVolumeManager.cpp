@@ -326,6 +326,8 @@ void AdjustVolumeManager::AnalyseChannel(VolumeAnalysis& analysis, float* record
 		}
 	}
 
+	analysis.Grade = PeakLevelGrade::Good; // TODO
+
 	delete[] allEdges;
 }
 
