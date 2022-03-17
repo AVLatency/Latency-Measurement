@@ -13,11 +13,15 @@ public:
 	struct VolumeAnalysis
 	{
 	public:
+		bool CableCrosstalkDetection = true;
+
 		float PeakValue = 0;
 		float* TickMonitorSamples = nullptr;
+		int TickMonitorSampleRate;
 		int TickMonitorSamplesLength = 0;
 		float* FullMonitorSamples = nullptr;
 		int FullMonitorSamplesLength = 0;
+		int FullMonitorSampleRate;
 		int TickPosition = 0;
 		float MaxPlotValue = 1;
 		float AutoThreshold = 0.1;

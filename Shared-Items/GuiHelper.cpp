@@ -74,7 +74,7 @@ void GuiHelper::OptionallyBoldText(const char* text, bool bold)
     }
 }
 
-void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManager::VolumeAnalysis& analysis, float DpiScale, const char* title, bool* useAutoThreshold, float* manualThreshold)
+void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManager::VolumeAnalysis& analysis, float DpiScale, const char* title, bool* useAutoThreshold, float* manualThreshold, bool* cableCrosstalkDetection)
 {
     ImGui::PushID(imGuiID);
     //auto pos = ImGui::GetCursorPosX();
@@ -90,6 +90,8 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
     ImGui::Text(title);
     ImGui::PopFont();
     GuiHelper::PeakLevel(analysis.Grade, "");
+
+    // TODO: default hidden, but optional "Show raw wave"
 
     auto plotYPos = ImGui::GetCursorPosY();
     ImGui::PlotHistogram("", &analysis.PeakValue, 1, 0, NULL, 0, 1, ImVec2(20 * DpiScale, plotHeight));
@@ -116,14 +118,14 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
     HelpMarker("Peak audio level");
     ImGui::SameLine();
     ImGui::SetCursorPosX(firstPlotXPos);
-    ImGui::Text("Zooomed In View (Normalized)");
+    ImGui::Text(std::format("Duration: {} ms", analysis.TickMonitorSamplesLength * 1000.0f / analysis.TickMonitorSampleRate).c_str());
     ImGui::SameLine();
-    HelpMarker("This zoomed in view shows the loudest high frequency sound.");
+    HelpMarker("X axis: Time\nY axis: Normalized magnitude of edges of high frequencies (> ~11 kHz)");
     ImGui::SameLine();
     ImGui::SetCursorPosX(secondPlotXPos);
-    ImGui::Text("Zooomed Out View (Normalized)");
+    ImGui::Text(std::format("Duration: {} ms", analysis.FullMonitorSamplesLength * 1000.0f / analysis.FullMonitorSampleRate).c_str());
     ImGui::SameLine();
-    HelpMarker("This zoomed out view shows the time surrounding the loudest high frequency sound.");
+    HelpMarker("X axis: Time\nY axis: Normalized magnitude of edges of high frequencies (> ~11 kHz)");
 
     ImGui::Checkbox("Automatic Threshold Detection", useAutoThreshold);
     if (!*useAutoThreshold)
@@ -131,9 +133,11 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
         ImGui::DragFloat("Manual Threshold", manualThreshold, 0.001, 0, 1.9, "%.3f", ImGuiSliderFlags_AlwaysClamp | ImGuiSliderFlags_Logarithmic);
     }
 
-    //// Debug stuff:
-    //ImGui::Text(std::format("TickMonitorSamplesLength: {} FullMonitorSamplesLength: {} TickPosition: {} MaxPlotValue: {} AutoThreshold: {}",
-    //    analysis.TickMonitorSamplesLength, analysis.FullMonitorSamplesLength, analysis.TickPosition, analysis.MaxPlotValue, analysis.AutoThreshold).c_str());
+    ImGui::Checkbox("Cable Crosstalk Detection", cableCrosstalkDetection);
+
+    // Debug stuff:
+    ImGui::Text(std::format("TickMonitorSamplesLength: {} FullMonitorSamplesLength: {} TickPosition: {} MaxPlotValue: {} AutoThreshold: {}",
+        analysis.TickMonitorSamplesLength, analysis.FullMonitorSamplesLength, analysis.TickPosition, analysis.MaxPlotValue, analysis.AutoThreshold).c_str());
 
     ImGui::PopID();
 }

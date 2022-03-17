@@ -208,7 +208,7 @@ void AdjustVolumeManager::CopyBuffer(float* sourceBuffer, int sourceBufferLength
 		rightSourceBuffer[channelIndex] = sourceBuffer[i + 1];
 		channelIndex++;
 	}
-
+	int sampleRate = input->waveFormat.Format.nSamplesPerSec;
 	AnalyseChannel(LeftVolumeAnalysis, leftSourceBuffer, perChannelSourceBufferLength);
 	AnalyseChannel(RightVolumeAnalysis, rightSourceBuffer, perChannelSourceBufferLength);
 
@@ -219,10 +219,11 @@ void AdjustVolumeManager::CopyBuffer(float* sourceBuffer, int sourceBufferLength
 void AdjustVolumeManager::AnalyseChannel(VolumeAnalysis& analysis, float* recordedSamples, int recordedSamplesLength)
 {
 	// Get some info about the ticks that were generated and create the sample buffers
-	int sampleRate = generatedSamples->WaveFormat->nSamplesPerSec;
-	int expectedTickFrequency = generatedSamples->GetTickFrequency(sampleRate);
-	int tickDurationInSamples = ceil((float)sampleRate / expectedTickFrequency);
-	int halfTickDurationInSamples = ceil((float)(sampleRate / 2) / expectedTickFrequency);
+	int outputSampleRate = generatedSamples->WaveFormat->nSamplesPerSec;
+	int inputSampleRate = input->waveFormat.Format.nSamplesPerSec;
+	int expectedTickFrequency = generatedSamples->GetTickFrequency(outputSampleRate);
+	int tickDurationInSamples = ceil((float)inputSampleRate / expectedTickFrequency);
+	int halfTickDurationInSamples = ceil((float)(inputSampleRate / 2) / expectedTickFrequency);
 
 	SafeResetVolumeAnalysis(analysis);
 
@@ -274,9 +275,12 @@ void AdjustVolumeManager::AnalyseChannel(VolumeAnalysis& analysis, float* record
 	//   of largest edge:
 	analysis.AutoThreshold = allEdges[largestEdgeIndex] * .12f;
 
+	// TODO: tick monitor should act like full monitor to handle higher sample rates.
+
 	// Tick monitor
 	analysis.TickMonitorSamplesLength = TickMonitorCycles * tickDurationInSamples;
 	analysis.TickMonitorSamples = new float[analysis.TickMonitorSamplesLength];
+	analysis.TickMonitorSampleRate = inputSampleRate;
 	int tickMonitorStart = largestEdgeIndex - (analysis.TickMonitorSamplesLength / 3);
 	if (tickMonitorStart < 0)
 	{
@@ -291,8 +295,10 @@ void AdjustVolumeManager::AnalyseChannel(VolumeAnalysis& analysis, float* record
 		analysis.TickMonitorSamples[i - tickMonitorStart] = allEdges[i];
 	}
 
+	// TODO: Full monitor should scale the divider based on input sample rate.
+
 	// Full monitor
-	int sourceSampleCount = ceil(sampleRate * 0.08); // Generated samples is 0.1, 0.02 is the threshold used for looking for echos.
+	int sourceSampleCount = ceil(inputSampleRate * 0.08); // Generated samples is 0.10 seconds, 0.02 seconds is the threshold used for looking for echos after the tick.
 	int fullMonitorStart = largestEdgeIndex - (sourceSampleCount / 2);
 	if (fullMonitorStart < 0)
 	{
@@ -305,6 +311,7 @@ void AdjustVolumeManager::AnalyseChannel(VolumeAnalysis& analysis, float* record
 
 	analysis.FullMonitorSamplesLength = sourceSampleCount / FullMonitorDivisions + (sourceSampleCount % FullMonitorDivisions == 0 ? 0 : 1);
 	analysis.FullMonitorSamples = new float[analysis.FullMonitorSamplesLength];
+	analysis.FullMonitorSampleRate = inputSampleRate / FullMonitorDivisions;
 	for (int i = fullMonitorStart; i < fullMonitorStart + sourceSampleCount; i+= FullMonitorDivisions)
 	{
 		bool foundTick = false;
@@ -338,7 +345,7 @@ void AdjustVolumeManager::AnalyseChannel(VolumeAnalysis& analysis, float* record
 		}
 	}
 
-	analysis.Grade = PeakLevelGrade::Good; // TODO
+	analysis.Grade = PeakLevelGrade::Good; // TODO: look for other ticks. if there are any, then it's quiet. Or, if it lines up with other channel, it means that it's crosstalk.
 
 	delete[] allEdges;
 }
