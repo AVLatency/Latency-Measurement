@@ -191,7 +191,7 @@ bool Gui::DoGui()
                 if (ImGui::Button("Adjust Volumes"))
                 {
                     lastCheckedInputSampleRate = AudioEndpointHelper::GetInputMixFormatSampleRate(inputAudioEndpoints[inputDeviceIndex]);
-                    if (lastCheckedInputSampleRate < 48000)
+                    if (lastCheckedInputSampleRate > 48000)
                     {
                         openSampleRateLowDialog = true;
                     }
@@ -211,6 +211,10 @@ bool Gui::DoGui()
 
             if (state >= MeasurementToolGuiState::AdjustVolume)
             {
+                ImGui::Spacing();
+                ImGui::Text(std::format("Input Sample Rate: {} Hz (recommended: 48000 Hz)", lastCheckedInputSampleRate).c_str());
+                ImGui::Spacing();
+
                 GuiHelper::AdjustVolumeDisplay("left channel volume", adjustVolumeManager->LeftVolumeAnalysis, DpiScale, "Input: Left Channel (HDMI Audio Extractor)", &TestConfiguration::Ch1AutoThresholdDetection, &TestConfiguration::Ch1DetectionThreshold);
                 GuiHelper::AdjustVolumeDisplay("right channel volume", adjustVolumeManager->RightVolumeAnalysis, DpiScale, "Input: Right Channel (DUT)", &TestConfiguration::Ch2AutoThresholdDetection, &TestConfiguration::Ch2DetectionThreshold);
 
@@ -877,12 +881,13 @@ bool Gui::DoGui()
 
     if (openSampleRateLowDialog)
     {
-        ImGui::OpenPopup("Low Input Device Sample Rate");
+        ImGui::OpenPopup("High Input Device Sample Rate");
     }
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    if (ImGui::BeginPopupModal("Low Input Device Sample Rate", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    if (ImGui::BeginPopupModal("High Input Device Sample Rate", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text(std::format("The current input device sample rate is only {} Hz, but a sample rate of\nat least 48000 Hz is recommended for this tool to work well.\n\n"
+        ImGui::Text(std::format("Higher sample rates may introduce high frequency noise.\n\n"
+            "The current input device sample rate is {} Hz, but a sample rate of\n48000 Hz may work better with this tool.\n\n"
             "Use the Windows sound settings for your selected input device under\n\"Additional device properties\" to change the sample rate.", lastCheckedInputSampleRate).c_str());
 
         ImGui::Spacing();

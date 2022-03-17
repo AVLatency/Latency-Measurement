@@ -100,8 +100,11 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
     auto secondPlotXPos = ImGui::GetCursorPosX();
     ImGui::PlotHistogram("", analysis.FullMonitorSamples, analysis.FullMonitorSamplesLength, 0, NULL, 0, plotVerticalScale, fullPlotSize);
 
-    float threshold = *useAutoThreshold ? analysis.AutoThreshold : *manualThreshold;
-    float thresholdValues[2]{ threshold, threshold };
+    if (*useAutoThreshold)
+    {
+        *manualThreshold = analysis.AutoThreshold;
+    }
+    float thresholdValues[2]{ *manualThreshold, *manualThreshold };
     ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0));
     ImGui::SetCursorPosY(plotYPos);
     ImGui::SetCursorPosX(firstPlotXPos);
@@ -137,19 +140,16 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
 
 void GuiHelper::PeakLevel(AdjustVolumeManager::PeakLevelGrade grade, const char* helpText)
 {
-    ImGui::Text("Volume:");
+    ImGui::Text("Volume level:");
     ImGui::SameLine();
     ImGui::PushFont(FontHelper::BoldFont);
     switch (grade)
     {
     case AdjustVolumeManager::PeakLevelGrade::Good:
-        ImGui::Text("Good");
-        break;
-    case AdjustVolumeManager::PeakLevelGrade::Loud:
-        ImGui::TextColored((ImVec4)ImColor::HSV(0, 0.6f, 0.6f), "Loud");
+        ImGui::Text("OK");
         break;
     case AdjustVolumeManager::PeakLevelGrade::Quiet:
-        ImGui::TextColored((ImVec4)ImColor::HSV(0, 0.6f, 0.6f), "Quiet");
+        ImGui::TextColored((ImVec4)ImColor::HSV(0, 0.6f, 0.6f), "Noisy / Quiet");
         break;
     case AdjustVolumeManager::PeakLevelGrade::Crosstalk:
         ImGui::TextColored((ImVec4)ImColor::HSV(0, 0.6f, 0.6f), "Cable crosstalk detected");

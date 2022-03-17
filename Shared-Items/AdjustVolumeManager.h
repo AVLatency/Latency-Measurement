@@ -8,7 +8,7 @@
 class AdjustVolumeManager
 {
 public:
-	enum struct PeakLevelGrade { Good, Loud, Quiet, Crosstalk };
+	enum struct PeakLevelGrade { Good, Quiet, Crosstalk };
 
 	struct VolumeAnalysis
 	{

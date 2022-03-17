@@ -262,6 +262,18 @@ void AdjustVolumeManager::AnalyseChannel(VolumeAnalysis& analysis, float* record
 	}
 	analysis.MaxPlotValue = allEdges[largestEdgeIndex];
 
+	// Here's a story that describes the worst case scenario for a tick:
+	// - Largest edge is from high peak to low peak, but doubled because of echo
+	// - This results in a value of 1
+	// - The leading edge should still be detected. Without the echo, it's edge
+	//   magnitude would be 0.5 of the largest edge, but becaues of the echo
+	//   it's actually only 0.25 of the largest edge
+	// - Worst-case sampling of this leading edge would only reveal half of its
+	//   magnitude, which brings it down to 0.125 of the largest edge.
+	// - To give just a tad more wiggle-room, I've chosen to round down to 12%
+	//   of largest edge:
+	analysis.AutoThreshold = allEdges[largestEdgeIndex] * .12f;
+
 	// Tick monitor
 	analysis.TickMonitorSamplesLength = TickMonitorCycles * tickDurationInSamples;
 	analysis.TickMonitorSamples = new float[analysis.TickMonitorSamplesLength];
