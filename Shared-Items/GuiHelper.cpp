@@ -76,6 +76,11 @@ void GuiHelper::OptionallyBoldText(const char* text, bool bold)
 
 void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManager::VolumeAnalysis& analysis, float DpiScale, const char* title, bool* useAutoThreshold, float* manualThreshold, bool* cableCrosstalkDetection)
 {
+    if (*useAutoThreshold)
+    {
+        *manualThreshold = analysis.AutoThreshold;
+    }
+
     ImGui::PushID(imGuiID);
     //auto pos = ImGui::GetCursorPosX();
     //ImGui::SetCursorPosX(pos);
@@ -83,7 +88,7 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
     float plotHeight = 100 * DpiScale;
     ImVec2 tickPlotSize = ImVec2(540 * DpiScale, plotHeight);
     ImVec2 fullPlotSize = ImVec2(500 * DpiScale, plotHeight);
-    float plotVerticalScale = analysis.MaxPlotValue;
+    float plotVerticalScale = max(analysis.MaxEdgeMagnitude, *manualThreshold);
 
     ImGui::Spacing();
     ImGui::PushFont(FontHelper::BoldFont);
@@ -91,41 +96,73 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
     ImGui::PopFont();
     GuiHelper::PeakLevel(analysis.Grade, "");
 
-    // TODO: default hidden, but optional "Show raw wave"
-
-    auto plotYPos = ImGui::GetCursorPosY();
-    ImGui::PlotHistogram("", &analysis.PeakValue, 1, 0, NULL, 0, 1, ImVec2(20 * DpiScale, plotHeight));
-    ImGui::SameLine();
-    auto firstPlotXPos = ImGui::GetCursorPosX();
-    ImGui::PlotHistogram("", analysis.TickMonitorSamples, analysis.TickMonitorSamplesLength, 0, NULL, 0, plotVerticalScale, tickPlotSize);
-    ImGui::SameLine();
-    auto secondPlotXPos = ImGui::GetCursorPosX();
-    ImGui::PlotHistogram("", analysis.FullMonitorSamples, analysis.FullMonitorSamplesLength, 0, NULL, 0, plotVerticalScale, fullPlotSize);
-
-    if (*useAutoThreshold)
+    // TODO: hide this by default:
     {
-        *manualThreshold = analysis.AutoThreshold;
-    }
-    float thresholdValues[2]{ *manualThreshold, *manualThreshold };
-    ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0));
-    ImGui::SetCursorPosY(plotYPos);
-    ImGui::SetCursorPosX(firstPlotXPos);
-    ImGui::PlotLines("", thresholdValues, 2, 0, NULL, 0, plotVerticalScale, tickPlotSize);
-    ImGui::SameLine();
-    ImGui::PlotLines("", thresholdValues, 2, 0, NULL, 0, plotVerticalScale, fullPlotSize);
-    ImGui::PopStyleColor();
+        float zeroValues[2]{ 0, 0 };
+        auto plotYPos = ImGui::GetCursorPosY();
+        ImGui::PlotHistogram("", &analysis.RawWavePeak, 1, 0, NULL, 0, 1, ImVec2(20 * DpiScale, plotHeight));
+        ImGui::SameLine();
+        auto firstPlotXPos = ImGui::GetCursorPosX();
+        ImGui::PlotLines("", zeroValues, 2, 0, NULL, -1 * analysis.RawWavePeak, analysis.RawWavePeak, tickPlotSize); 
+        ImGui::SameLine();
+        auto secondPlotXPos = ImGui::GetCursorPosX();
+        ImGui::PlotLines("", zeroValues, 2, 0, NULL, -1 * analysis.RawWavePeak, analysis.RawWavePeak, tickPlotSize);
 
-    HelpMarker("Peak audio level");
-    ImGui::SameLine();
-    ImGui::SetCursorPosX(firstPlotXPos);
-    ImGui::Text(std::format("Duration: {} ms", analysis.TickMonitorSamplesLength * 1000.0f / analysis.TickMonitorSampleRate).c_str());
-    ImGui::SameLine();
-    HelpMarker("X axis: Time\nY axis: Normalized magnitude of edges of high frequencies (> ~11 kHz)");
-    ImGui::SameLine();
-    ImGui::SetCursorPosX(secondPlotXPos);
-    ImGui::Text(std::format("Duration: {} ms", analysis.FullMonitorSamplesLength * 1000.0f / analysis.FullMonitorSampleRate).c_str());
-    ImGui::SameLine();
-    HelpMarker("X axis: Time\nY axis: Normalized magnitude of edges of high frequencies (> ~11 kHz)");
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0));
+        ImGui::SetCursorPosY(plotYPos);
+        ImGui::SetCursorPosX(firstPlotXPos);
+        ImGui::PlotLines("", analysis.RawWaveSamples, analysis.RawTickViewLength, analysis.RawTickViewStartIndex, NULL, -1 * analysis.RawWavePeak, analysis.RawWavePeak, tickPlotSize);
+        ImGui::SameLine();
+        ImGui::PlotLines("", analysis.RawWaveSamples, analysis.RawFullViewLength, analysis.RawFullViewStartIndex, NULL, -1 * analysis.RawWavePeak, analysis.RawWavePeak, tickPlotSize);
+        ImGui::PopStyleColor();
+
+        HelpMarker("Peak audio level");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(firstPlotXPos);
+        ImGui::Text(std::format("Duration: {} ms", analysis.TickMonitorSamplesLength * 1000.0f / analysis.SampleRate).c_str());
+        ImGui::SameLine();
+        HelpMarker("X axis: Time\nY axis: Normalized magnitude of edges of high frequencies (> ~11 kHz)");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(secondPlotXPos);
+        ImGui::Text(std::format("Duration: {} ms", analysis.FullMonitorSamplesLength * 1000.0f / analysis.SampleRate).c_str());
+        ImGui::SameLine();
+        HelpMarker("X axis: Time\nY axis: Normalized magnitude of edges of high frequencies (> ~11 kHz)");
+    }
+
+
+    ImGui::Spacing();
+
+    {
+        auto plotYPos = ImGui::GetCursorPosY();
+        ImGui::PlotHistogram("", &analysis.MaxEdgeMagnitude, 1, 0, NULL, 0, 2, ImVec2(20 * DpiScale, plotHeight));
+        ImGui::SameLine();
+        auto firstPlotXPos = ImGui::GetCursorPosX();
+        ImGui::PlotHistogram("", analysis.TickMonitorSamples, analysis.TickMonitorSamplesLength, 0, NULL, 0, plotVerticalScale, tickPlotSize);
+        ImGui::SameLine();
+        auto secondPlotXPos = ImGui::GetCursorPosX();
+        ImGui::PlotHistogram("", analysis.FullMonitorSamples, analysis.FullMonitorSamplesLength, 0, NULL, 0, plotVerticalScale, fullPlotSize);
+
+        float thresholdValues[2]{ *manualThreshold, *manualThreshold };
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0));
+        ImGui::SetCursorPosY(plotYPos);
+        ImGui::SetCursorPosX(firstPlotXPos);
+        ImGui::PlotLines("", thresholdValues, 2, 0, NULL, 0, plotVerticalScale, tickPlotSize);
+        ImGui::SameLine();
+        ImGui::PlotLines("", thresholdValues, 2, 0, NULL, 0, plotVerticalScale, fullPlotSize);
+        ImGui::PopStyleColor();
+
+        HelpMarker("Peak audio level");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(firstPlotXPos);
+        ImGui::Text(std::format("Duration: {} ms", analysis.TickMonitorSamplesLength * 1000.0f / analysis.SampleRate).c_str());
+        ImGui::SameLine();
+        HelpMarker("X axis: Time\nY axis: Normalized magnitude of edges of high frequencies (> ~11 kHz)");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(secondPlotXPos);
+        ImGui::Text(std::format("Duration: {} ms", analysis.FullMonitorSamplesLength * 1000.0f / analysis.SampleRate).c_str());
+        ImGui::SameLine();
+        HelpMarker("X axis: Time\nY axis: Normalized magnitude of edges of high frequencies (> ~11 kHz)");
+    }
 
     ImGui::Checkbox("Automatic Threshold Detection", useAutoThreshold);
     if (!*useAutoThreshold)
@@ -134,10 +171,6 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
     }
 
     ImGui::Checkbox("Cable Crosstalk Detection", cableCrosstalkDetection);
-
-    // Debug stuff:
-    ImGui::Text(std::format("TickMonitorSamplesLength: {} FullMonitorSamplesLength: {} TickPosition: {} MaxPlotValue: {} AutoThreshold: {}",
-        analysis.TickMonitorSamplesLength, analysis.FullMonitorSamplesLength, analysis.TickPosition, analysis.MaxPlotValue, analysis.AutoThreshold).c_str());
 
     ImGui::PopID();
 }

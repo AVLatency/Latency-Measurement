@@ -15,15 +15,28 @@ public:
 	public:
 		bool CableCrosstalkDetection = true;
 
-		float PeakValue = 0;
+		int SampleRate = 0;
+
+		float* RawWaveSamples = nullptr;
+		int RawWaveSamplesLength = 0;
+		float RawWavePeak = 0;
+
+		float* AllEdges = nullptr;
+		int AllEdgesLength = 0;
+		float MaxEdgeMagnitude = 1;
+
+		int RawTickViewStartIndex = 0;
+		int RawTickViewLength = 0;
+		int RawFullViewStartIndex = 0;
+		int RawFullViewLength = 0;
+
+		// Monitor arrays are low-fi versions of the above arrays that sample
+		// the max value for each sample bin
 		float* TickMonitorSamples = nullptr;
-		int TickMonitorSampleRate;
 		int TickMonitorSamplesLength = 0;
 		float* FullMonitorSamples = nullptr;
 		int FullMonitorSamplesLength = 0;
-		int FullMonitorSampleRate;
-		int TickPosition = 0;
-		float MaxPlotValue = 1;
+
 		float AutoThreshold = 0.1;
 		PeakLevelGrade Grade = PeakLevelGrade::Quiet;
 	};
@@ -56,6 +69,9 @@ private:
 	void SetBitsPerSample(WAVEFORMATEX* wfx, WORD bitsPerSample);
 
 	void CopyBuffer(float* sourceBuffer, int sourceBufferLength);
+	/// <summary>
+	/// Memory ownership of recordedSamples array is transferred away from caller!
+	/// </summary>
 	void AnalyseChannel(VolumeAnalysis& analysis, float* recordedSamples, int recordedSamplesLength);
 };
 

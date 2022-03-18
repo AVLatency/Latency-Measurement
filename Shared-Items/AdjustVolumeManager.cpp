@@ -52,22 +52,39 @@ AdjustVolumeManager::~AdjustVolumeManager()
 
 void AdjustVolumeManager::SafeResetVolumeAnalysis(VolumeAnalysis& analysis)
 {
-	analysis.PeakValue = 0;
+	if (analysis.RawWaveSamples != nullptr)
+	{
+		delete[] analysis.RawWaveSamples;
+		analysis.RawWaveSamples = nullptr;
+	}
+	analysis.RawWaveSamplesLength = 0;
+
+	if (analysis.AllEdges != nullptr)
+	{
+		delete[] analysis.AllEdges;
+		analysis.AllEdges = nullptr;
+	}
+	analysis.AllEdgesLength = 0;
+
+	analysis.RawTickViewStartIndex = 0;
+	analysis.RawTickViewLength = 0;
+	analysis.RawFullViewStartIndex = 0;
+	analysis.RawFullViewLength = 0;
+
 	if (analysis.TickMonitorSamples != nullptr)
 	{
 		delete[] analysis.TickMonitorSamples;
 		analysis.TickMonitorSamples = nullptr;
 	}
 	analysis.TickMonitorSamplesLength = 0;
+
 	if (analysis.FullMonitorSamples != nullptr)
 	{
 		delete[] analysis.FullMonitorSamples;
 		analysis.FullMonitorSamples = nullptr;
 	}
 	analysis.FullMonitorSamplesLength = 0;
-	analysis.TickPosition = 0;
-	analysis.MaxPlotValue = 1;
-	analysis.AutoThreshold = 0.1;
+
 	analysis.Grade = PeakLevelGrade::Quiet;
 }
 
@@ -211,9 +228,6 @@ void AdjustVolumeManager::CopyBuffer(float* sourceBuffer, int sourceBufferLength
 	int sampleRate = input->waveFormat.Format.nSamplesPerSec;
 	AnalyseChannel(LeftVolumeAnalysis, leftSourceBuffer, perChannelSourceBufferLength);
 	AnalyseChannel(RightVolumeAnalysis, rightSourceBuffer, perChannelSourceBufferLength);
-
-	delete[] leftSourceBuffer;
-	delete[] rightSourceBuffer;
 }
 
 void AdjustVolumeManager::AnalyseChannel(VolumeAnalysis& analysis, float* recordedSamples, int recordedSamplesLength)
@@ -227,15 +241,21 @@ void AdjustVolumeManager::AnalyseChannel(VolumeAnalysis& analysis, float* record
 
 	SafeResetVolumeAnalysis(analysis);
 
+	analysis.SampleRate = inputSampleRate;
+	analysis.RawWaveSamples = recordedSamples;
+	analysis.RawWaveSamplesLength = recordedSamplesLength;
 	for (int i = 0; i < recordedSamplesLength; i++)
 	{
-		if (abs(recordedSamples[i]) > analysis.PeakValue)
+		if (abs(recordedSamples[i]) > analysis.RawWavePeak)
 		{
-			analysis.PeakValue = abs(recordedSamples[i]);
+			analysis.RawWavePeak = abs(recordedSamples[i]);
 		}
 	}
 
-	float* allEdges = new float[recordedSamplesLength];
+	analysis.AllEdges = new float[recordedSamplesLength];
+	analysis.AllEdgesLength = recordedSamplesLength;
+
+	float* allEdges = analysis.AllEdges;
 	int largestEdgeIndex = 0;
 	float largestEdge = 0;
 	for (int i = 0; i < recordedSamplesLength; i++)
@@ -261,7 +281,7 @@ void AdjustVolumeManager::AnalyseChannel(VolumeAnalysis& analysis, float* record
 			largestEdge = highestMagnitude;
 		}
 	}
-	analysis.MaxPlotValue = allEdges[largestEdgeIndex];
+	analysis.MaxEdgeMagnitude = allEdges[largestEdgeIndex];
 
 	// Here's a story that describes the worst case scenario for a tick:
 	// - Largest edge is from high peak to low peak, but doubled because of echo
@@ -275,29 +295,7 @@ void AdjustVolumeManager::AnalyseChannel(VolumeAnalysis& analysis, float* record
 	//   of largest edge:
 	analysis.AutoThreshold = allEdges[largestEdgeIndex] * .12f;
 
-	// TODO: tick monitor should act like full monitor to handle higher sample rates.
-
-	// Tick monitor
-	analysis.TickMonitorSamplesLength = TickMonitorCycles * tickDurationInSamples;
-	analysis.TickMonitorSamples = new float[analysis.TickMonitorSamplesLength];
-	analysis.TickMonitorSampleRate = inputSampleRate;
-	int tickMonitorStart = largestEdgeIndex - (analysis.TickMonitorSamplesLength / 3);
-	if (tickMonitorStart < 0)
-	{
-		tickMonitorStart = 0;
-	}
-	if (tickMonitorStart + analysis.TickMonitorSamplesLength > recordedSamplesLength)
-	{
-		tickMonitorStart = recordedSamplesLength - analysis.TickMonitorSamplesLength;
-	}
-	for (int i = tickMonitorStart; i < tickMonitorStart + analysis.TickMonitorSamplesLength; i++)
-	{
-		analysis.TickMonitorSamples[i - tickMonitorStart] = allEdges[i];
-	}
-
-	// TODO: Full monitor should scale the divider based on input sample rate.
-
-	// Full monitor
+	// Full view start index and length
 	int sourceSampleCount = ceil(inputSampleRate * 0.08); // Generated samples is 0.10 seconds, 0.02 seconds is the threshold used for looking for echos after the tick.
 	int fullMonitorStart = largestEdgeIndex - (sourceSampleCount / 2);
 	if (fullMonitorStart < 0)
@@ -309,45 +307,83 @@ void AdjustVolumeManager::AnalyseChannel(VolumeAnalysis& analysis, float* record
 		fullMonitorStart = recordedSamplesLength - sourceSampleCount;
 	}
 
-	analysis.FullMonitorSamplesLength = sourceSampleCount / FullMonitorDivisions + (sourceSampleCount % FullMonitorDivisions == 0 ? 0 : 1);
-	analysis.FullMonitorSamples = new float[analysis.FullMonitorSamplesLength];
-	analysis.FullMonitorSampleRate = inputSampleRate / FullMonitorDivisions;
-	for (int i = fullMonitorStart; i < fullMonitorStart + sourceSampleCount; i+= FullMonitorDivisions)
+	// Tick view start index and length
+	analysis.RawTickViewLength = TickMonitorCycles * tickDurationInSamples;
+	analysis.RawTickViewStartIndex = largestEdgeIndex - (analysis.RawTickViewLength / 3);
+	if (analysis.RawTickViewStartIndex < 0)
 	{
-		bool foundTick = false;
-
-		float largestEdge = 0;
-		for (int j = 0; j < FullMonitorDivisions && i + j < recordedSamplesLength; j++)
-		{
-			if (allEdges[i + j] > largestEdge)
-			{
-				largestEdge = allEdges[i + j];
-			}
-			if (i + j == largestEdgeIndex)
-			{
-				foundTick = true;
-			}
-		}
-
-		if ((i - fullMonitorStart) / FullMonitorDivisions < analysis.FullMonitorSamplesLength)
-		{
-			analysis.FullMonitorSamples[(i - fullMonitorStart) / FullMonitorDivisions] = largestEdge;
-		}
-		else
-		{
-			// this should never happen
-			throw "My math was wrong on array indices";
-		}
-
-		if (foundTick)
-		{
-			analysis.TickPosition = (i - fullMonitorStart) / FullMonitorDivisions;
-		}
+		analysis.RawTickViewStartIndex = 0;
+	}
+	if (analysis.RawTickViewStartIndex + analysis.RawTickViewLength > recordedSamplesLength)
+	{
+		analysis.RawTickViewStartIndex = recordedSamplesLength - analysis.RawTickViewLength;
 	}
 
-	analysis.Grade = PeakLevelGrade::Good; // TODO: look for other ticks. if there are any, then it's quiet. Or, if it lines up with other channel, it means that it's crosstalk.
+	// Full view start index and length
+	analysis.RawFullViewLength = ceil(inputSampleRate * 0.08); // Generated samples is 0.10 seconds, 0.02 seconds is the threshold used for looking for echos after the tick.
+	analysis.RawFullViewStartIndex = largestEdgeIndex - (analysis.RawFullViewLength / 2);
+	if (analysis.RawFullViewStartIndex < 0)
+	{
+		analysis.RawFullViewStartIndex = 0;
+	}
+	if (analysis.RawFullViewStartIndex + analysis.RawFullViewLength > recordedSamplesLength)
+	{
+		analysis.RawFullViewStartIndex = recordedSamplesLength - analysis.RawFullViewLength;
+	}
 
-	delete[] allEdges;
+
+
+	//for (int i = tickMonitorStart; i < tickMonitorStart + analysis.TickMonitorSamplesLength; i++)
+	//{
+	//	analysis.TickMonitorSamples[i - tickMonitorStart] = allEdges[i];
+	//}
+
+	// TODO: Full monitor should scale the divider based on input sample rate.
+
+	// Full monitor
+	//int sourceSampleCount = ceil(inputSampleRate * 0.08); // Generated samples is 0.10 seconds, 0.02 seconds is the threshold used for looking for echos after the tick.
+	//int fullMonitorStart = largestEdgeIndex - (sourceSampleCount / 2);
+	//if (fullMonitorStart < 0)
+	//{
+	//	fullMonitorStart = 0;
+	//}
+	//if (fullMonitorStart + sourceSampleCount > recordedSamplesLength)
+	//{
+	//	fullMonitorStart = recordedSamplesLength - sourceSampleCount;
+	//}
+
+	//analysis.FullMonitorSamplesLength = sourceSampleCount / FullMonitorDivisions + (sourceSampleCount % FullMonitorDivisions == 0 ? 0 : 1);
+	//analysis.FullMonitorSamples = new float[analysis.FullMonitorSamplesLength];
+	//analysis.FullMonitorSampleRate = inputSampleRate / FullMonitorDivisions;
+	//for (int i = fullMonitorStart; i < fullMonitorStart + sourceSampleCount; i+= FullMonitorDivisions)
+	//{
+	//	bool foundTick = false;
+
+	//	float largestEdge = 0;
+	//	for (int j = 0; j < FullMonitorDivisions && i + j < recordedSamplesLength; j++)
+	//	{
+	//		if (allEdges[i + j] > largestEdge)
+	//		{
+	//			largestEdge = allEdges[i + j];
+	//		}
+	//		if (i + j == largestEdgeIndex)
+	//		{
+	//			foundTick = true;
+	//		}
+	//	}
+
+	//	if ((i - fullMonitorStart) / FullMonitorDivisions < analysis.FullMonitorSamplesLength)
+	//	{
+	//		analysis.FullMonitorSamples[(i - fullMonitorStart) / FullMonitorDivisions] = largestEdge;
+	//	}
+	//	else
+	//	{
+	//		// this should never happen
+	//		throw "My math was wrong on array indices";
+	//	}
+	//}
+
+	analysis.Grade = PeakLevelGrade::Good; // TODO: look for other ticks. if there are any, then it's quiet. Or, if it lines up with other channel, it means that it's crosstalk.
 }
 
 void AdjustVolumeManager::Stop()
