@@ -74,7 +74,7 @@ void GuiHelper::OptionallyBoldText(const char* text, bool bold)
     }
 }
 
-void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManager::VolumeAnalysis& analysis, float DpiScale, const char* title, bool* useAutoThreshold, float* manualThreshold, bool* cableCrosstalkDetection)
+void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManager::VolumeAnalysis& analysis, float DpiScale, float tickMonitorWidth, float fullMonitorWidth, const char* title, bool* useAutoThreshold, float* manualThreshold, bool* cableCrosstalkDetection)
 {
     if (*useAutoThreshold)
     {
@@ -86,8 +86,8 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
     //ImGui::SetCursorPosX(pos);
 
     float plotHeight = 100 * DpiScale;
-    ImVec2 tickPlotSize = ImVec2(540 * DpiScale, plotHeight);
-    ImVec2 fullPlotSize = ImVec2(500 * DpiScale, plotHeight);
+    ImVec2 tickPlotSize = ImVec2(tickMonitorWidth, plotHeight);
+    ImVec2 fullPlotSize = ImVec2(fullMonitorWidth, plotHeight);
     float plotVerticalScale = max(analysis.MaxEdgeMagnitude, *manualThreshold);
 
     ImGui::Spacing();

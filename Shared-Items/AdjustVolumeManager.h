@@ -49,10 +49,11 @@ public:
 	VolumeAnalysis LeftVolumeAnalysis;
 	VolumeAnalysis RightVolumeAnalysis;
 
-	int TickMonitorCycles = 67; // exact number chosen because it looks good at 100% DpiScale.
-	int FullMonitorDivisions = 10;
+	int TargetTickMonitorSampleLength;
+	int TargetFullMonitorSampleLength;
+	int TickMonitorCycles = 67; // exact number chosen because it shows lots of detail at 100% DpiScale.
 
-	AdjustVolumeManager(const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint);
+	AdjustVolumeManager(const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, int targetTickMonitorSampleLength, int targetFullMonitorSampleLength);
 	~AdjustVolumeManager();
 	void Tick();
 	void Stop();
