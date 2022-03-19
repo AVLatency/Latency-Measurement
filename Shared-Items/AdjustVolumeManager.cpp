@@ -58,6 +58,7 @@ void AdjustVolumeManager::SafeResetVolumeAnalysis(VolumeAnalysis& analysis)
 		analysis.RawWaveSamples = nullptr;
 	}
 	analysis.RawWaveSamplesLength = 0;
+	analysis.RawWavePeak = 0;
 
 	if (analysis.AllEdges != nullptr)
 	{
@@ -65,6 +66,7 @@ void AdjustVolumeManager::SafeResetVolumeAnalysis(VolumeAnalysis& analysis)
 		analysis.AllEdges = nullptr;
 	}
 	analysis.AllEdgesLength = 0;
+	analysis.MaxEdgeMagnitude = 0;
 
 	analysis.RawTickViewStartIndex = 0;
 	analysis.RawTickViewLength = 0;
@@ -294,18 +296,6 @@ void AdjustVolumeManager::AnalyseChannel(VolumeAnalysis& analysis, float* record
 	// - To give just a tad more wiggle-room, I've chosen to round down to 12%
 	//   of largest edge:
 	analysis.AutoThreshold = allEdges[largestEdgeIndex] * .12f;
-
-	// Full view start index and length
-	int sourceSampleCount = ceil(inputSampleRate * 0.08); // Generated samples is 0.10 seconds, 0.02 seconds is the threshold used for looking for echos after the tick.
-	int fullMonitorStart = largestEdgeIndex - (sourceSampleCount / 2);
-	if (fullMonitorStart < 0)
-	{
-		fullMonitorStart = 0;
-	}
-	if (fullMonitorStart + sourceSampleCount > recordedSamplesLength)
-	{
-		fullMonitorStart = recordedSamplesLength - sourceSampleCount;
-	}
 
 	// Tick view start index and length
 	analysis.RawTickViewLength = TickMonitorCycles * tickDurationInSamples;

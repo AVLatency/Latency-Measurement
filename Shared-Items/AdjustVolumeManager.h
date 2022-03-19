@@ -23,7 +23,7 @@ public:
 
 		float* AllEdges = nullptr;
 		int AllEdgesLength = 0;
-		float MaxEdgeMagnitude = 1;
+		float MaxEdgeMagnitude = 0;
 
 		int RawTickViewStartIndex = 0;
 		int RawTickViewLength = 0;

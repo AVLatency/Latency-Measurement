@@ -216,7 +216,13 @@ bool Gui::DoGui()
                 ImGui::Spacing();
 
                 GuiHelper::AdjustVolumeDisplay("left channel volume", adjustVolumeManager->LeftVolumeAnalysis, DpiScale, "Input: Left Channel (HDMI Audio Extractor)", &TestConfiguration::Ch1AutoThresholdDetection, &TestConfiguration::Ch1DetectionThreshold, &adjustVolumeManager->LeftVolumeAnalysis.CableCrosstalkDetection);
+                ImGui::Spacing();
+                ImGui::Spacing();
+                ImGui::Spacing();
                 GuiHelper::AdjustVolumeDisplay("right channel volume", adjustVolumeManager->RightVolumeAnalysis, DpiScale, "Input: Right Channel (DUT)", &TestConfiguration::Ch2AutoThresholdDetection, &TestConfiguration::Ch2DetectionThreshold, &adjustVolumeManager->RightVolumeAnalysis.CableCrosstalkDetection);
+                ImGui::Spacing();
+                ImGui::Spacing();
+                ImGui::Spacing();
 
                 //ImGui::Spacing();
                 //ImGui::PushFont(FontHelper::BoldFont);

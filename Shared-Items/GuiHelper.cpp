@@ -96,60 +96,68 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
     ImGui::PopFont();
     GuiHelper::PeakLevel(analysis.Grade, "");
 
-    // TODO: hide this by default:
+    if (ImGui::CollapsingHeader("Raw Wave View"))
     {
         float zeroValues[2]{ 0, 0 };
         auto plotYPos = ImGui::GetCursorPosY();
         ImGui::PlotHistogram("", &analysis.RawWavePeak, 1, 0, NULL, 0, 1, ImVec2(20 * DpiScale, plotHeight));
         ImGui::SameLine();
         auto firstPlotXPos = ImGui::GetCursorPosX();
+        ImGui::PushStyleColor(ImGuiCol_PlotLines, ImVec4(0.61f, 0.61f, 0.61f, 0.50f));
+        ImGui::PushStyleColor(ImGuiCol_PlotLinesHovered, ImVec4(0.61f, 0.61f, 0.61f, 0.50f));
         ImGui::PlotLines("", zeroValues, 2, 0, NULL, -1 * analysis.RawWavePeak, analysis.RawWavePeak, tickPlotSize); 
         ImGui::SameLine();
         auto secondPlotXPos = ImGui::GetCursorPosX();
-        ImGui::PlotLines("", zeroValues, 2, 0, NULL, -1 * analysis.RawWavePeak, analysis.RawWavePeak, tickPlotSize);
+        ImGui::PlotLines("", zeroValues, 2, 0, NULL, -1 * analysis.RawWavePeak, analysis.RawWavePeak, fullPlotSize);
+        ImGui::PopStyleColor(); // ImGuiCol_PlotLinesHovered
+        ImGui::PopStyleColor(); // ImGuiCol_PlotLines
 
         ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0));
+        ImGui::PushStyleColor(ImGuiCol_PlotLines, ImGui::GetColorU32(ImGuiCol_PlotHistogram));
         ImGui::SetCursorPosY(plotYPos);
         ImGui::SetCursorPosX(firstPlotXPos);
-        ImGui::PlotLines("", analysis.RawWaveSamples, analysis.RawTickViewLength, analysis.RawTickViewStartIndex, NULL, -1 * analysis.RawWavePeak, analysis.RawWavePeak, tickPlotSize);
+        ImGui::PlotLines("", analysis.RawWaveSamples + analysis.RawTickViewStartIndex, analysis.RawTickViewLength, 0, NULL, -1 * analysis.RawWavePeak, analysis.RawWavePeak, tickPlotSize);
         ImGui::SameLine();
-        ImGui::PlotLines("", analysis.RawWaveSamples, analysis.RawFullViewLength, analysis.RawFullViewStartIndex, NULL, -1 * analysis.RawWavePeak, analysis.RawWavePeak, tickPlotSize);
-        ImGui::PopStyleColor();
+        ImGui::PlotLines("", analysis.RawWaveSamples + analysis.RawFullViewStartIndex, analysis.RawFullViewLength, 0, NULL, -1 * analysis.RawWavePeak, analysis.RawWavePeak, fullPlotSize);
+        ImGui::PopStyleColor(); // ImGuiCol_PlotLines
+        ImGui::PopStyleColor(); // ImGuiCol_FrameBg
 
         HelpMarker("Peak audio level");
         ImGui::SameLine();
         ImGui::SetCursorPosX(firstPlotXPos);
-        ImGui::Text(std::format("Duration: {} ms", analysis.TickMonitorSamplesLength * 1000.0f / analysis.SampleRate).c_str());
+        ImGui::Text(std::format("Duration: {} ms", analysis.RawTickViewLength * 1000.0f / analysis.SampleRate).c_str());
         ImGui::SameLine();
         HelpMarker("X axis: Time\nY axis: Normalized magnitude of edges of high frequencies (> ~11 kHz)");
         ImGui::SameLine();
         ImGui::SetCursorPosX(secondPlotXPos);
-        ImGui::Text(std::format("Duration: {} ms", analysis.FullMonitorSamplesLength * 1000.0f / analysis.SampleRate).c_str());
+        ImGui::Text(std::format("Duration: {} ms", analysis.RawFullViewLength * 1000.0f / analysis.SampleRate).c_str());
         ImGui::SameLine();
         HelpMarker("X axis: Time\nY axis: Normalized magnitude of edges of high frequencies (> ~11 kHz)");
     }
-
-
     ImGui::Spacing();
-
+    if (ImGui::CollapsingHeader("High Frequency Edges", ImGuiTreeNodeFlags_DefaultOpen))
     {
         auto plotYPos = ImGui::GetCursorPosY();
         ImGui::PlotHistogram("", &analysis.MaxEdgeMagnitude, 1, 0, NULL, 0, 2, ImVec2(20 * DpiScale, plotHeight));
         ImGui::SameLine();
         auto firstPlotXPos = ImGui::GetCursorPosX();
+        ImGui::PushStyleColor(ImGuiCol_PlotHistogramHovered, ImGui::GetColorU32(ImGuiCol_PlotHistogram));
         ImGui::PlotHistogram("", analysis.TickMonitorSamples, analysis.TickMonitorSamplesLength, 0, NULL, 0, plotVerticalScale, tickPlotSize);
         ImGui::SameLine();
         auto secondPlotXPos = ImGui::GetCursorPosX();
         ImGui::PlotHistogram("", analysis.FullMonitorSamples, analysis.FullMonitorSamplesLength, 0, NULL, 0, plotVerticalScale, fullPlotSize);
+        ImGui::PopStyleColor(); // ImGuiCol_PlotHistogramHovered
 
         float thresholdValues[2]{ *manualThreshold, *manualThreshold };
         ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0));
+        ImGui::PushStyleColor(ImGuiCol_PlotLines, ImGui::GetColorU32(ImGuiCol_Text));
         ImGui::SetCursorPosY(plotYPos);
         ImGui::SetCursorPosX(firstPlotXPos);
         ImGui::PlotLines("", thresholdValues, 2, 0, NULL, 0, plotVerticalScale, tickPlotSize);
         ImGui::SameLine();
         ImGui::PlotLines("", thresholdValues, 2, 0, NULL, 0, plotVerticalScale, fullPlotSize);
-        ImGui::PopStyleColor();
+        ImGui::PopStyleColor(); // ImGuiCol_PlotLines
+        ImGui::PopStyleColor(); // ImGuiCol_FrameBg
 
         HelpMarker("Peak audio level");
         ImGui::SameLine();
