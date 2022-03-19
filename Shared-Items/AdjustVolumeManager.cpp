@@ -321,59 +321,60 @@ void AdjustVolumeManager::AnalyseChannel(VolumeAnalysis& analysis, float* record
 		analysis.RawFullViewStartIndex = recordedSamplesLength - analysis.RawFullViewLength;
 	}
 
-
-
-	//for (int i = tickMonitorStart; i < tickMonitorStart + analysis.TickMonitorSamplesLength; i++)
-	//{
-	//	analysis.TickMonitorSamples[i - tickMonitorStart] = allEdges[i];
-	//}
-
-	// TODO: Full monitor should scale the divider based on input sample rate.
-
-	// Full monitor
-	//int sourceSampleCount = ceil(inputSampleRate * 0.08); // Generated samples is 0.10 seconds, 0.02 seconds is the threshold used for looking for echos after the tick.
-	//int fullMonitorStart = largestEdgeIndex - (sourceSampleCount / 2);
-	//if (fullMonitorStart < 0)
-	//{
-	//	fullMonitorStart = 0;
-	//}
-	//if (fullMonitorStart + sourceSampleCount > recordedSamplesLength)
-	//{
-	//	fullMonitorStart = recordedSamplesLength - sourceSampleCount;
-	//}
-
-	//analysis.FullMonitorSamplesLength = sourceSampleCount / FullMonitorDivisions + (sourceSampleCount % FullMonitorDivisions == 0 ? 0 : 1);
-	//analysis.FullMonitorSamples = new float[analysis.FullMonitorSamplesLength];
-	//analysis.FullMonitorSampleRate = inputSampleRate / FullMonitorDivisions;
-	//for (int i = fullMonitorStart; i < fullMonitorStart + sourceSampleCount; i+= FullMonitorDivisions)
-	//{
-	//	bool foundTick = false;
-
-	//	float largestEdge = 0;
-	//	for (int j = 0; j < FullMonitorDivisions && i + j < recordedSamplesLength; j++)
-	//	{
-	//		if (allEdges[i + j] > largestEdge)
-	//		{
-	//			largestEdge = allEdges[i + j];
-	//		}
-	//		if (i + j == largestEdgeIndex)
-	//		{
-	//			foundTick = true;
-	//		}
-	//	}
-
-	//	if ((i - fullMonitorStart) / FullMonitorDivisions < analysis.FullMonitorSamplesLength)
-	//	{
-	//		analysis.FullMonitorSamples[(i - fullMonitorStart) / FullMonitorDivisions] = largestEdge;
-	//	}
-	//	else
-	//	{
-	//		// this should never happen
-	//		throw "My math was wrong on array indices";
-	//	}
-	//}
+	analysis.TickMonitorSamplesLength = 200; // TODO: replace 200 with something based on DPI
+	analysis.TickMonitorSamples = CreateLowFiSamples(analysis.AllEdges, analysis.RawTickViewStartIndex, analysis.RawTickViewLength, analysis.TickMonitorSamplesLength);
+	analysis.FullMonitorSamplesLength = 200; // TODO: replace 200 with something based on DPI
+	analysis.FullMonitorSamples = CreateLowFiSamples(analysis.AllEdges, analysis.RawFullViewStartIndex, analysis.RawFullViewLength, analysis.FullMonitorSamplesLength);
 
 	analysis.Grade = PeakLevelGrade::Good; // TODO: look for other ticks. if there are any, then it's quiet. Or, if it lines up with other channel, it means that it's crosstalk.
+}
+
+float* AdjustVolumeManager::CreateLowFiSamples(float* allSamples, int sourceStartIndex, int sourceLength, int destinationLength)
+{
+	float* result = new float[destinationLength];
+	for (int i = 0; i < destinationLength; i++)
+	{
+		result[i] = 0;
+	}
+	// Definitely one of the slowest possible ways of doing this. But it's also dead simple.
+	for (int i = 0; i < sourceLength * destinationLength; i++)
+	{
+		if (allSamples[sourceStartIndex + (i / destinationLength)] > result[i / sourceLength])
+		{
+			result[i / sourceLength] = allSamples[sourceStartIndex + (i / destinationLength)];
+		}
+	}
+	return result;
+
+	// this is something similar that probably is a starting point for an optimization
+//analysis.FullMonitorSamplesLength = sourceSampleCount / FullMonitorDivisions + (sourceSampleCount % FullMonitorDivisions == 0 ? 0 : 1);
+//for (int i = fullMonitorStart; i < fullMonitorStart + sourceSampleCount; i+= FullMonitorDivisions)
+//{
+//	bool foundTick = false;
+
+//	float largestEdge = 0;
+//	for (int j = 0; j < FullMonitorDivisions && i + j < recordedSamplesLength; j++)
+//	{
+//		if (allEdges[i + j] > largestEdge)
+//		{
+//			largestEdge = allEdges[i + j];
+//		}
+//		if (i + j == largestEdgeIndex)
+//		{
+//			foundTick = true;
+//		}
+//	}
+
+//	if ((i - fullMonitorStart) / FullMonitorDivisions < analysis.FullMonitorSamplesLength)
+//	{
+//		analysis.FullMonitorSamples[(i - fullMonitorStart) / FullMonitorDivisions] = largestEdge;
+//	}
+//	else
+//	{
+//		// this should never happen
+//		throw "My math was wrong on array indices";
+//	}
+//}
 }
 
 void AdjustVolumeManager::Stop()

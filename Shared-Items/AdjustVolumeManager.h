@@ -73,5 +73,7 @@ private:
 	/// Memory ownership of recordedSamples array is transferred away from caller!
 	/// </summary>
 	void AnalyseChannel(VolumeAnalysis& analysis, float* recordedSamples, int recordedSamplesLength);
+
+	float* CreateLowFiSamples(float* allSamples, int sourceStartIndex, int sourceLength, int destinationLength);
 };
 

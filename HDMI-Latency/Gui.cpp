@@ -211,10 +211,6 @@ bool Gui::DoGui()
 
             if (state >= MeasurementToolGuiState::AdjustVolume)
             {
-                ImGui::Spacing();
-                ImGui::Text(std::format("Input Sample Rate: {} Hz (recommended: 48000 Hz)", lastCheckedInputSampleRate).c_str());
-                ImGui::Spacing();
-
                 GuiHelper::AdjustVolumeDisplay("left channel volume", adjustVolumeManager->LeftVolumeAnalysis, DpiScale, "Input: Left Channel (HDMI Audio Extractor)", &TestConfiguration::Ch1AutoThresholdDetection, &TestConfiguration::Ch1DetectionThreshold, &adjustVolumeManager->LeftVolumeAnalysis.CableCrosstalkDetection);
                 ImGui::Spacing();
                 ImGui::Spacing();
@@ -224,99 +220,13 @@ bool Gui::DoGui()
                 ImGui::Spacing();
                 ImGui::Spacing();
 
-                //ImGui::Spacing();
-                //ImGui::PushFont(FontHelper::BoldFont);
-                //ImGui::Text("Input: Left Channel (HDMI Audio Extractor)");
-                //ImGui::PopFont();
-
-                //int plotWidth = 310;
-                //float columnWidth = (plotWidth + 10) * DpiScale;
-                //ImVec2 plotDimensions(plotWidth* DpiScale, 100 * DpiScale);
-
-                //if (ImGui::BeginTable("LeftChannelVolumeTable", 3, ImGuiTableFlags_SizingFixedFit))
-                //{
-                //    ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, columnWidth);
-
-                //    ImGui::TableNextRow();
-                //    ImGui::TableNextColumn();
-                //    ImGui::Text("Reference Image");
-                //    if (adjustVolumeManager != nullptr && adjustVolumeManager->tickReferenceSamples != nullptr)
-                //    {
-                //        ImGui::PlotLines("", adjustVolumeManager->tickReferenceSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
-                //    }
-                //    ImGui::Spacing();
-
-                //    ImGui::TableNextColumn();
-                //    ImGui::Text("Monitor");
-                //    if (adjustVolumeManager != nullptr && adjustVolumeManager->leftChannelTickMonitorSamples != nullptr)
-                //    {
-                //        ImGui::PlotLines("", adjustVolumeManager->leftChannelTickMonitorSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
-                //    }
-                //    ImGui::Spacing();
-
-                //    ImGui::TableNextColumn();
-                //    ImGui::Text("");
                 //    GuiHelper::PeakLevel(adjustVolumeManager->leftChannelGrade, "Adjust the volume of your input device through the Windows control panel to make the monitor amplitude fit with some headroom to spare. "
                 //        "You may need to turn down the Microphone Boost in the Levels section of Additional device properties.");
 
-                //    ImGui::EndTable();
-                //}
-
-                //ImGui::Spacing();
-                //ImGui::PushFont(FontHelper::BoldFont);
-                //ImGui::Text("Input: Right Channel (DUT)");
-                //ImGui::PopFont();
-                //float fullTableWidth = 1200 * DpiScale; // Need to set this explictly to some larger than neccessary value instead of just using ImGuiTableFlags_SizingFixedFit because there is another table inside that uses ImGuiTableFlags_SizingFixedFit
-                //if (ImGui::BeginTable("RightChannelVolumeTable", 2, ImGuiTableFlags_None, ImVec2(fullTableWidth, 0)))
-                //{
-                //    ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, columnWidth);
-
-                //    ImGui::TableNextRow();
-                //    ImGui::TableNextColumn();
-                //    ImGui::Text("Reference Image\n(Normalized)");
-                //    if (adjustVolumeManager != nullptr && adjustVolumeManager->normalizedTickReferenceSamples != nullptr)
-                //    {
-                //        ImGui::PlotLines("", adjustVolumeManager->normalizedTickReferenceSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
-                //    }
-                //    ImGui::Spacing();
-
-                //    ImGui::TableNextColumn();
-                //    if (ImGui::BeginTable("RightChannelVolumeMontiorsTable", 3, ImGuiTableFlags_SizingFixedFit))
-                //    {
-                //        ImGui::TableNextRow();
-                //        ImGui::TableNextColumn();
-                //        ImGui::Text("Monitor\n(Normalized)");
-                //        if (adjustVolumeManager != nullptr && adjustVolumeManager->rightChannelNormalizedTickMonitorSamples != nullptr)
-                //        {
-                //            ImGui::PlotLines("", adjustVolumeManager->rightChannelNormalizedTickMonitorSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
-                //        }
-                //        ImGui::Spacing();
-
-                //        ImGui::TableNextColumn();
-                //        ImGui::Text("Monitor\n(Raw)");
-                //        if (adjustVolumeManager != nullptr && adjustVolumeManager->rightChannelTickMonitorSamples != nullptr)
-                //        {
-                //            ImGui::PlotLines("", adjustVolumeManager->rightChannelTickMonitorSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
-                //        }
-                //        ImGui::Spacing();
-
-                //        ImGui::TableNextColumn();
-                //        ImGui::Text("");
-                //        ImGui::Text("");
                 //        GuiHelper::PeakLevel(adjustVolumeManager->rightChannelGrade, "Adjust the output volume of your Device Under Test (DUT) to give a consistent normalized recording.\n\n"
                 //            "When the DUT is muted, this peak level should be \"Quiet\". If it is not, this likely means you are getting cable crosstalk and your measurements will incorrectly be 0 ms audio latency!\n\n"
                 //            "To solve the problem of cable crosstalk, try turning down the output volume in the Advanced Configuration or using a physical, inline volume control on your HDMI Audio Extractor output.");
 
-                //        ImGui::EndTable();
-                //    }
-                //    ImGui::EndTable();
-                //}
-
-                //// Debug stuff
-                //ImGui::DragInt("TickMonitorCycles", &adjustVolumeManager->TickMonitorCycles, 0.3, 10, 300);
-                //ImGui::DragInt("FullMonitorDivisions", &adjustVolumeManager->FullMonitorDivisions, 0.3, 5, 300);
-
-                ImGui::Spacing();
 
                 if (ImGui::TreeNode("Advanced Configuration"))
                 {
@@ -325,6 +235,15 @@ bool Gui::DoGui()
                     ImGui::TreePop();
                 }
 
+                if (ImGui::CollapsingHeader("Instructions and Troubleshooting"))
+                {
+                    ImGui::Text(std::format("Instructions: Adjust volume of DUT and input device volumes.", lastCheckedInputSampleRate).c_str());
+                    ImGui::Spacing();
+                    ImGui::Text(std::format("Input Sample Rate: {} Hz (recommended: 48000 Hz)", lastCheckedInputSampleRate).c_str());
+                }
+
+                ImGui::Spacing();
+                
                 if (state == MeasurementToolGuiState::AdjustVolume)
                 {
                     ImGui::Spacing();
