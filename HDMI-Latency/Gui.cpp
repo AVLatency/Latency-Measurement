@@ -38,7 +38,6 @@ bool Gui::DoGui()
 
     bool openAboutDialog = false;
     bool openEdidReminderDialog = false;
-    bool openSampleRateLowDialog = false;
     bool openMidTestFilesystemErrorDialog = false;
     bool openNoMesaurementsErrorDialog = false;
     if (testManager != nullptr && testManager->ShouldShowFilesystemError && !testManager->HasShownFilesystemError)
@@ -191,15 +190,8 @@ bool Gui::DoGui()
                 if (ImGui::Button("Adjust Volumes"))
                 {
                     lastCheckedInputSampleRate = AudioEndpointHelper::GetInputMixFormatSampleRate(inputAudioEndpoints[inputDeviceIndex]);
-                    if (lastCheckedInputSampleRate > 48000)
-                    {
-                        openSampleRateLowDialog = true;
-                    }
-                    else
-                    {
-                        state = MeasurementToolGuiState::AdjustVolume;
-                        StartAjdustVolumeAudio();
-                    }
+                    state = MeasurementToolGuiState::AdjustVolume;
+                    StartAjdustVolumeAudio();
                 }
             }
 
@@ -211,11 +203,11 @@ bool Gui::DoGui()
 
             if (state >= MeasurementToolGuiState::AdjustVolume)
             {
-                GuiHelper::AdjustVolumeDisplay("left channel volume", adjustVolumeManager->LeftVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, "Input: Left Channel (HDMI Audio Extractor)", &TestConfiguration::Ch1AutoThresholdDetection, &TestConfiguration::Ch1DetectionThreshold, &adjustVolumeManager->LeftVolumeAnalysis.CableCrosstalkDetection);
+                GuiHelper::AdjustVolumeDisplay("left channel volume", adjustVolumeManager->LeftVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, "Left Channel Input (HDMI Audio Extractor)", &TestConfiguration::Ch1AutoThresholdDetection, &TestConfiguration::Ch1DetectionThreshold, &adjustVolumeManager->LeftVolumeAnalysis.CableCrosstalkDetection);
                 ImGui::Spacing();
                 ImGui::Spacing();
                 ImGui::Spacing();
-                GuiHelper::AdjustVolumeDisplay("right channel volume", adjustVolumeManager->RightVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, "Input: Right Channel (DUT)", &TestConfiguration::Ch2AutoThresholdDetection, &TestConfiguration::Ch2DetectionThreshold, &adjustVolumeManager->RightVolumeAnalysis.CableCrosstalkDetection);
+                GuiHelper::AdjustVolumeDisplay("right channel volume", adjustVolumeManager->RightVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, "Right Channel Input (DUT)", &TestConfiguration::Ch2AutoThresholdDetection, &TestConfiguration::Ch2DetectionThreshold, &adjustVolumeManager->RightVolumeAnalysis.CableCrosstalkDetection);
                 ImGui::Spacing();
                 ImGui::Spacing();
                 ImGui::Spacing();
@@ -228,18 +220,30 @@ bool Gui::DoGui()
                 //            "To solve the problem of cable crosstalk, try turning down the output volume in the Advanced Configuration or using a physical, inline volume control on your HDMI Audio Extractor output.");
 
 
+
+
+                ImGui::PushFont(FontHelper::HeaderFont);
+                ImGui::Text("Instructions and Troubleshooting");
+                ImGui::PopFont();
+                if (ImGui::TreeNode("Instructions and Troubleshooting"))
+                {
+                    ImGui::Text(std::format("Instructions: Adjust volume of DUT and input device volumes.", lastCheckedInputSampleRate).c_str());
+                    ImGui::Spacing();
+                    ImGui::Text(std::format("Input Sample Rate: {} Hz (recommended: 48000 Hz)", lastCheckedInputSampleRate).c_str());
+                    if (lastCheckedInputSampleRate > 48000)
+                    {
+                        ImGui::Text(std::format("Higher sample rates may introduce high frequency noise.\n\n"
+                            "A sample rate of48000 Hz may work better with this tool.\n\n"
+                            "Use the Windows sound settings for your selected input device under\n\"Additional device properties\" to change the sample rate.", lastCheckedInputSampleRate).c_str());
+                    }
+
+                    ImGui::TreePop();
+                }
                 if (ImGui::TreeNode("Advanced Configuration"))
                 {
                     ImGui::DragFloat("Output Volume", &TestConfiguration::OutputVolume, .001f, .1f, 1, "%.3f", ImGuiSliderFlags_AlwaysClamp);
                     ImGui::SameLine(); GuiHelper::HelpMarker("Should normally be left at 1. If you are experiencing cable crosstalk, you can try turning this volume down or using a physical, inline volume control on your HDMI Audio Extractor output.");
                     ImGui::TreePop();
-                }
-
-                if (ImGui::CollapsingHeader("Instructions and Troubleshooting"))
-                {
-                    ImGui::Text(std::format("Instructions: Adjust volume of DUT and input device volumes.", lastCheckedInputSampleRate).c_str());
-                    ImGui::Spacing();
-                    ImGui::Text(std::format("Input Sample Rate: {} Hz (recommended: 48000 Hz)", lastCheckedInputSampleRate).c_str());
                 }
 
                 ImGui::Spacing();
@@ -800,37 +804,6 @@ bool Gui::DoGui()
         {
             RefreshAudioEndpoints();
             state = MeasurementToolGuiState::SelectAudioDevices;
-            ImGui::CloseCurrentPopup();
-        }
-
-        ImGui::EndPopup();
-    }
-
-    if (openSampleRateLowDialog)
-    {
-        ImGui::OpenPopup("High Input Device Sample Rate");
-    }
-    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    if (ImGui::BeginPopupModal("High Input Device Sample Rate", NULL, ImGuiWindowFlags_AlwaysAutoResize))
-    {
-        ImGui::Text(std::format("Higher sample rates may introduce high frequency noise.\n\n"
-            "The current input device sample rate is {} Hz, but a sample rate of\n48000 Hz may work better with this tool.\n\n"
-            "Use the Windows sound settings for your selected input device under\n\"Additional device properties\" to change the sample rate.", lastCheckedInputSampleRate).c_str());
-
-        ImGui::Spacing();
-        ImGui::Separator();
-        ImGui::Spacing();
-
-        if (ImGui::Button("Ignore", ImVec2(120, 0)))
-        {
-            ImGui::CloseCurrentPopup();
-            state = MeasurementToolGuiState::AdjustVolume;
-            StartAjdustVolumeAudio();
-        }
-        ImGui::SameLine();
-        ImGui::SetItemDefaultFocus();
-        if (ImGui::Button("Cancel", ImVec2(120, 0)))
-        {
             ImGui::CloseCurrentPopup();
         }
 

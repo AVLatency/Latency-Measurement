@@ -82,8 +82,6 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
     }
 
     ImGui::PushID(imGuiID);
-    //auto pos = ImGui::GetCursorPosX();
-    //ImGui::SetCursorPosX(pos);
 
     float plotHeight = 100 * DpiScale;
     ImVec2 tickPlotSize = ImVec2(tickMonitorWidth, plotHeight);
@@ -91,7 +89,7 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
     float plotVerticalScale = max(analysis.MaxEdgeMagnitude, *manualThreshold);
 
     ImGui::Spacing();
-    ImGui::PushFont(FontHelper::BoldFont);
+    ImGui::PushFont(FontHelper::HeaderFont);
     ImGui::Text(title);
     ImGui::PopFont();
     GuiHelper::PeakLevel(analysis.Grade, "");
@@ -122,17 +120,17 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
         ImGui::PopStyleColor(); // ImGuiCol_PlotLines
         ImGui::PopStyleColor(); // ImGuiCol_FrameBg
 
-        HelpMarker("Peak audio level");
+        HelpMarker("Peak audio level (visible range: 0.0 to 1.0)\n\nNote: Some audio devices are capable of fully capable of audio levels greater than 1.0.");
         ImGui::SameLine();
         ImGui::SetCursorPosX(firstPlotXPos);
-        ImGui::Text(std::format("Duration: {} ms", analysis.RawTickViewLength * 1000.0f / analysis.SampleRate).c_str());
+        ImGui::Text(std::format("Duration: {:.3} ms", analysis.RawTickViewLength * 1000.0f / analysis.SampleRate).c_str());
         ImGui::SameLine();
-        HelpMarker("X axis: Time\nY axis: Normalized magnitude of edges of high frequencies (> ~11 kHz)");
+        HelpMarker("X axis: Time\nY axis: Normalized audio level");
         ImGui::SameLine();
         ImGui::SetCursorPosX(secondPlotXPos);
-        ImGui::Text(std::format("Duration: {} ms", analysis.RawFullViewLength * 1000.0f / analysis.SampleRate).c_str());
+        ImGui::Text(std::format("Duration: {:.3} ms", analysis.RawFullViewLength * 1000.0f / analysis.SampleRate).c_str());
         ImGui::SameLine();
-        HelpMarker("X axis: Time\nY axis: Normalized magnitude of edges of high frequencies (> ~11 kHz)");
+        HelpMarker("X axis: Time\nY axis: Normalized audio level (visual aliasing and distortion may occur in this low-fidelity waveform view)");
     }
     ImGui::Spacing();
     if (ImGui::CollapsingHeader("High Frequency Edges", ImGuiTreeNodeFlags_DefaultOpen))
@@ -159,15 +157,19 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
         ImGui::PopStyleColor(); // ImGuiCol_PlotLines
         ImGui::PopStyleColor(); // ImGuiCol_FrameBg
 
-        HelpMarker("Peak audio level");
+        HelpMarker("Largest magnitude high frequency edge (visible range: 0.0 to 2.0)\n\nNote: Some audio devices are capable of fully capable of edge magnitudes greater than 2.0.");
         ImGui::SameLine();
         ImGui::SetCursorPosX(firstPlotXPos);
-        ImGui::Text(std::format("Duration: {} ms", analysis.TickMonitorSamplesLength * 1000.0f / analysis.SampleRate).c_str());
+        float duration = analysis.RawTickViewLength == 0 || analysis.TickMonitorSamplesLength == 0 ? 0
+            : analysis.TickMonitorSamplesLength * 1000.0f / (((float)analysis.TickMonitorSamplesLength / analysis.RawTickViewLength) * analysis.SampleRate);
+        ImGui::Text(std::format("Duration: {:.3} ms", duration).c_str());
         ImGui::SameLine();
         HelpMarker("X axis: Time\nY axis: Normalized magnitude of edges of high frequencies (> ~11 kHz)");
         ImGui::SameLine();
         ImGui::SetCursorPosX(secondPlotXPos);
-        ImGui::Text(std::format("Duration: {} ms", analysis.FullMonitorSamplesLength * 1000.0f / analysis.SampleRate).c_str());
+        duration = analysis.RawFullViewLength == 0 || analysis.FullMonitorSamplesLength == 0 ? 0
+            : analysis.FullMonitorSamplesLength * 1000.0f / (((float)analysis.FullMonitorSamplesLength / analysis.RawFullViewLength) * analysis.SampleRate);
+        ImGui::Text(std::format("Duration: {:.3} ms", duration).c_str());
         ImGui::SameLine();
         HelpMarker("X axis: Time\nY axis: Normalized magnitude of edges of high frequencies (> ~11 kHz)");
     }
@@ -177,7 +179,10 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
     {
         ImGui::DragFloat("Manual Threshold", manualThreshold, 0.001, 0, 1.9, "%.4f", ImGuiSliderFlags_AlwaysClamp | ImGuiSliderFlags_Logarithmic);
     }
-
+    else
+    {
+        ImGui::SameLine();
+    }
     ImGui::Checkbox("Cable Crosstalk Detection", cableCrosstalkDetection);
 
     ImGui::PopID();
@@ -185,19 +190,19 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
 
 void GuiHelper::PeakLevel(AdjustVolumeManager::PeakLevelGrade grade, const char* helpText)
 {
-    ImGui::Text("Volume level:");
-    ImGui::SameLine();
     ImGui::PushFont(FontHelper::BoldFont);
+    ImGui::Text("Signal Quality:");
+    ImGui::SameLine();
     switch (grade)
     {
     case AdjustVolumeManager::PeakLevelGrade::Good:
         ImGui::Text("OK");
         break;
     case AdjustVolumeManager::PeakLevelGrade::Quiet:
-        ImGui::TextColored((ImVec4)ImColor::HSV(0, 0.6f, 0.6f), "Noisy / Quiet");
+        ImGui::TextColored((ImVec4)ImColor::HSV(0, 0.7f, 1.0f), "Noisy / Quiet");
         break;
     case AdjustVolumeManager::PeakLevelGrade::Crosstalk:
-        ImGui::TextColored((ImVec4)ImColor::HSV(0, 0.6f, 0.6f), "Cable crosstalk detected");
+        ImGui::TextColored((ImVec4)ImColor::HSV(0, 0.7f, 1.0f), "Cable crosstalk detected");
         break;
     default:
         break;
