@@ -199,10 +199,10 @@ void GuiHelper::PeakLevel(AdjustVolumeManager::PeakLevelGrade grade, const char*
         ImGui::Text("OK");
         break;
     case AdjustVolumeManager::PeakLevelGrade::Quiet:
-        ImGui::TextColored((ImVec4)ImColor::HSV(0, 0.7f, 1.0f), "Noisy / Quiet");
+        ImGui::TextColored((ImVec4)ImColor::HSV(0, 0.5f, 1.0f), "Noisy / Quiet");
         break;
     case AdjustVolumeManager::PeakLevelGrade::Crosstalk:
-        ImGui::TextColored((ImVec4)ImColor::HSV(0, 0.7f, 1.0f), "Cable crosstalk detected");
+        ImGui::TextColored((ImVec4)ImColor::HSV(0, 0.5f, 1.0f), "Cable crosstalk detected");
         break;
     default:
         break;
@@ -210,12 +210,28 @@ void GuiHelper::PeakLevel(AdjustVolumeManager::PeakLevelGrade grade, const char*
     ImGui::PopFont();
 }
 
-void GuiHelper::AdjustVolumeInstructionsTroubleshooting(int lastCheckedInputSampleRate, float* outputVolume)
+void GuiHelper::AdjustVolumeInstructionsTroubleshooting(int lastCheckedInputSampleRate, float* outputVolume, void* exampleTexture, int exampleTextureWidth, int exampleTextureHeight, float DpiScale)
 {
     ImGui::PushFont(FontHelper::HeaderFont);
     ImGui::Text("Instructions and Troubleshooting");
     ImGui::PopFont();
-    if (ImGui::TreeNode("Instructions and Troubleshooting"))
+
+    ImGui::Spacing();
+    ImGui::PushFont(FontHelper::BoldFont);
+    ImGui::Text("Basic Instructions:");
+    ImGui::PopFont();
+    ImGui::SameLine();
+    ImGui::Text("Adjust the output volume of the DUT and adjust your Windows input device volume level to make the Signal Quality for both channels OK.");
+    ImGui::Spacing();
+
+    if (ImGui::TreeNode("Example"))
+    {
+        ImGui::Text(std::format("The following is a screenshot of correctly adjusted volume levels:", lastCheckedInputSampleRate).c_str());
+        float exampleTextureScale = 0.95 * DpiScale;
+        ImGui::Image(exampleTexture, ImVec2(exampleTextureWidth * exampleTextureScale, exampleTextureHeight * exampleTextureScale));
+        ImGui::TreePop();
+    }
+    if (ImGui::TreeNode("Detailed Instructions and Troubleshooting"))
     {
 
         //    GuiHelper::PeakLevel(adjustVolumeManager->leftChannelGrade, "Adjust the volume of your input device through the Windows control panel to make the monitor amplitude fit with some headroom to spare. "
@@ -227,8 +243,6 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(int lastCheckedInputSamp
 
 
 
-        ImGui::Text(std::format("Instructions: Adjust volume of DUT and input device volumes.", lastCheckedInputSampleRate).c_str());
-        ImGui::Spacing();
         ImGui::Text(std::format("Input Sample Rate: {} Hz (recommended: 48000 Hz)", lastCheckedInputSampleRate).c_str());
         if (lastCheckedInputSampleRate > 48000)
         {

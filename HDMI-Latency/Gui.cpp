@@ -235,7 +235,7 @@ bool Gui::DoGui()
                 ImGui::Spacing();
                 ImGui::Spacing();
 
-                GuiHelper::AdjustVolumeInstructionsTroubleshooting(lastCheckedInputSampleRate, &TestConfiguration::OutputVolume);
+                GuiHelper::AdjustVolumeInstructionsTroubleshooting(lastCheckedInputSampleRate, &TestConfiguration::OutputVolume, (void*)resources.VolumeAdjustExampleTexture, resources.VolumeAdjustExampleTextureWidth, resources.VolumeAdjustExampleTextureHeight, DpiScale);
                 ImGui::Spacing();
                 
                 if (state == MeasurementToolGuiState::AdjustVolume)

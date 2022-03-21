@@ -16,6 +16,7 @@ HDMI_CABLE_MAP RCDATA "HDMI-Latency_cable-map.png"
 HDMI_EDID_MODE RCDATA "../Shared-Items/EDID-mode-TV.png"
 HDMI_HDV_MB01 RCDATA "../Shared-Items/AudioDevice_HDV-MB01.png"
 HDMI_WINDOWS_DISPLAY_SETTINGS RCDATA "../Shared-Items/AdvancedDisplaySettings.png"
+VOLUME_ADJUST_EXAMPLE RCDATA "../Shared-Items/VolumeAdjustementExample.png"
 FONT_REGULAR RCDATA "../Shared-Items/Fonts/Inter-Regular.ttf"
 FONT_BOLD RCDATA "../Shared-Items/Fonts/Inter-Bold.ttf"
 

@@ -22,5 +22,9 @@ public:
 	ID3D11ShaderResourceView* WindowsDisplaySettingsTexture = NULL;
 	int WindowsDisplaySettingsTextureWidth = 0;
 	int WindowsDisplaySettingsTextureHeight = 0;
+
+	ID3D11ShaderResourceView* VolumeAdjustExampleTexture = NULL;
+	int VolumeAdjustExampleTextureWidth = 0;
+	int VolumeAdjustExampleTextureHeight = 0;
 };
 

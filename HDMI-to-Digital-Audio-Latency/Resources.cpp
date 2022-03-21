@@ -13,4 +13,5 @@ Resources::Resources(HINSTANCE hInstance, ID3D11Device* g_pd3dDevice)
     ResourceLoader::LoadImage(hInstance, g_pd3dDevice, DEVICE_SHARCV1, &SHARCv1Texture, &SHARCv1TextureWidth, &SHARCv1TextureHeight);
     ResourceLoader::LoadImage(hInstance, g_pd3dDevice, HDMI_WINDOWS_DISPLAY_SETTINGS, &WindowsDisplaySettingsTexture, &WindowsDisplaySettingsTextureWidth, &WindowsDisplaySettingsTextureHeight);
     ResourceLoader::LoadImage(hInstance, g_pd3dDevice, HDMI_TO_DIGITAL_AUDIO_DEFINITION, &HdmiToDigitalAudioDefinitionTexture, &HdmiToDigitalAudioDefinitionTextureWidth, &HdmiToDigitalAudioDefinitionTextureHeight);
+    ResourceLoader::LoadImage(hInstance, g_pd3dDevice, VOLUME_ADJUST_EXAMPLE, &VolumeAdjustExampleTexture, &VolumeAdjustExampleTextureWidth, &VolumeAdjustExampleTextureHeight);
 }

@@ -34,5 +34,9 @@ public:
 	ID3D11ShaderResourceView* HdmiToDigitalAudioDefinitionTexture = NULL;
 	int HdmiToDigitalAudioDefinitionTextureWidth = 0;
 	int HdmiToDigitalAudioDefinitionTextureHeight = 0;
+
+	ID3D11ShaderResourceView* VolumeAdjustExampleTexture = NULL;
+	int VolumeAdjustExampleTextureWidth = 0;
+	int VolumeAdjustExampleTextureHeight = 0;
 };
 
