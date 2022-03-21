@@ -256,8 +256,10 @@ bool Gui::DoGui()
                         }
                     }
                     ImGui::SameLine();
-                    bool disabled = adjustVolumeManager->LeftVolumeAnalysis.Grade != AdjustVolumeManager::PeakLevelGrade::Good
-                        || adjustVolumeManager->RightVolumeAnalysis.Grade != AdjustVolumeManager::PeakLevelGrade::Good;
+                    bool disabled = (TestConfiguration::Ch1AutoThresholdDetection && adjustVolumeManager->LeftVolumeAnalysis.Grade != AdjustVolumeManager::PeakLevelGrade::Good)
+                        || (TestConfiguration::Ch2AutoThresholdDetection && adjustVolumeManager->RightVolumeAnalysis.Grade != AdjustVolumeManager::PeakLevelGrade::Good)
+                        || adjustVolumeManager->LeftVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Crosstalk
+                        || adjustVolumeManager->RightVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Crosstalk;
                     if (disabled)
                     {
                         ImGui::BeginDisabled();
