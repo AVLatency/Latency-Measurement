@@ -4,7 +4,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include "TestConfiguration.h"
-
+#include "RecordingAnalyzer.h"
 
 #define SAFE_RELEASE(punk)  \
               if ((punk) != NULL)  \
@@ -388,11 +388,11 @@ void AdjustVolumeManager::SetGrades()
 
 	if (LeftVolumeAnalysis.Grade != PeakLevelGrade::Crosstalk)
 	{
-		SetChannelGrade(LeftVolumeAnalysis);
+		SetChannelGrade(LeftVolumeAnalysis, UserLeftThreshold);
 	}
 	if (RightVolumeAnalysis.Grade != PeakLevelGrade::Crosstalk)
 	{
-		SetChannelGrade(RightVolumeAnalysis);
+		SetChannelGrade(RightVolumeAnalysis, UserRightThreshold);
 	}
 }
 
@@ -423,9 +423,23 @@ void AdjustVolumeManager::CheckCableCrosstalk(VolumeAnalysis& analysis, VolumeAn
 	}
 }
 
-void AdjustVolumeManager::SetChannelGrade(VolumeAnalysis& analysis)
+void AdjustVolumeManager::SetChannelGrade(VolumeAnalysis& analysis, const float& threshold)
 {
-	// TODO: simply check for ticks. If there's more than one, it's a no go.
+	// Get some info about the ticks that were generated and create the sample buffers
+	int outputSampleRate = generatedSamples->WaveFormat->nSamplesPerSec;
+	int inputSampleRate = input->waveFormat.Format.nSamplesPerSec;
+	int expectedTickFrequency = generatedSamples->GetTickFrequency(outputSampleRate);
+	int tickDurationInSamples = ceil((float)inputSampleRate / expectedTickFrequency);
+
+	auto ticks = RecordingAnalyzer::GetTicks(analysis.RawWaveSamples + analysis.RawFullViewStartIndex, analysis.RawFullViewLength, inputSampleRate, expectedTickFrequency, 2, threshold);
+	if (ticks.size() == 1)
+	{
+		analysis.Grade = PeakLevelGrade::Good;
+	}
+	else
+	{
+		analysis.Grade = PeakLevelGrade::Quiet;
+	}
 }
 
 void AdjustVolumeManager::Stop()

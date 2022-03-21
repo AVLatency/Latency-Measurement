@@ -81,6 +81,6 @@ private:
 	float* CreateLowFiSamples(float* allSamples, int sourceStartIndex, int sourceLength, int destinationLength);
 	void SetGrades();
 	void CheckCableCrosstalk(VolumeAnalysis& analysis, VolumeAnalysis& other, const float& threshold);
-	void SetChannelGrade(VolumeAnalysis& analysis);
+	void SetChannelGrade(VolumeAnalysis& analysis, const float& threshold);
 };
 
