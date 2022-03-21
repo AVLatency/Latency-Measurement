@@ -10,8 +10,8 @@
               if ((punk) != NULL)  \
                 { (punk)->Release(); (punk) = NULL; }
 
-AdjustVolumeManager::AdjustVolumeManager(const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, int targetTickMonitorSampleLength, int targetFullMonitorSampleLength)
-	: TargetTickMonitorSampleLength(targetTickMonitorSampleLength), TargetFullMonitorSampleLength(targetFullMonitorSampleLength)
+AdjustVolumeManager::AdjustVolumeManager(const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, int targetTickMonitorSampleLength, int targetFullMonitorSampleLength, const float& userLeftThreshold, const float& userRightThreshold)
+	: TargetTickMonitorSampleLength(targetTickMonitorSampleLength), TargetFullMonitorSampleLength(targetFullMonitorSampleLength), UserLeftThreshold(userLeftThreshold), UserRightThreshold(userRightThreshold)
 {
 	SetThreadExecutionState(ES_DISPLAY_REQUIRED); // Prevent display from turning off while running this tool.
 	working = true;
@@ -228,9 +228,10 @@ void AdjustVolumeManager::CopyBuffer(float* sourceBuffer, int sourceBufferLength
 		rightSourceBuffer[channelIndex] = sourceBuffer[i + 1];
 		channelIndex++;
 	}
-	int sampleRate = input->waveFormat.Format.nSamplesPerSec;
+
 	AnalyseChannel(LeftVolumeAnalysis, leftSourceBuffer, perChannelSourceBufferLength);
 	AnalyseChannel(RightVolumeAnalysis, rightSourceBuffer, perChannelSourceBufferLength);
+	SetGrades();
 }
 
 void AdjustVolumeManager::AnalyseChannel(VolumeAnalysis& analysis, float* recordedSamples, int recordedSamplesLength)
@@ -284,6 +285,7 @@ void AdjustVolumeManager::AnalyseChannel(VolumeAnalysis& analysis, float* record
 			largestEdge = highestMagnitude;
 		}
 	}
+	analysis.MaxEdgeIndex = largestEdgeIndex;
 	analysis.MaxEdgeMagnitude = allEdges[largestEdgeIndex];
 
 	// Here's a story that describes the worst case scenario for a tick:
@@ -315,7 +317,7 @@ void AdjustVolumeManager::AnalyseChannel(VolumeAnalysis& analysis, float* record
 	analysis.RawFullViewStartIndex = largestEdgeIndex - (analysis.RawFullViewLength / 2);
 	if (analysis.RawFullViewStartIndex < 0)
 	{
-		analysis.RawFullViewStartIndex = 0;
+	analysis.RawFullViewStartIndex = 0;
 	}
 	if (analysis.RawFullViewStartIndex + analysis.RawFullViewLength > recordedSamplesLength)
 	{
@@ -326,8 +328,6 @@ void AdjustVolumeManager::AnalyseChannel(VolumeAnalysis& analysis, float* record
 	analysis.TickMonitorSamples = CreateLowFiSamples(analysis.AllEdges, analysis.RawTickViewStartIndex, analysis.RawTickViewLength, analysis.TickMonitorSamplesLength);
 	analysis.FullMonitorSamplesLength = TargetFullMonitorSampleLength;
 	analysis.FullMonitorSamples = CreateLowFiSamples(analysis.AllEdges, analysis.RawFullViewStartIndex, analysis.RawFullViewLength, analysis.FullMonitorSamplesLength);
-
-	analysis.Grade = PeakLevelGrade::Good; // TODO: look for other ticks. if there are any, then it's quiet. Or, if it lines up with other channel, it means that it's crosstalk.
 }
 
 float* AdjustVolumeManager::CreateLowFiSamples(float* allSamples, int sourceStartIndex, int sourceLength, int destinationLength)
@@ -376,6 +376,56 @@ float* AdjustVolumeManager::CreateLowFiSamples(float* allSamples, int sourceStar
 //		throw "My math was wrong on array indices";
 //	}
 //}
+}
+
+void AdjustVolumeManager::SetGrades()
+{
+	LeftVolumeAnalysis.Grade = PeakLevelGrade::Good;
+	RightVolumeAnalysis.Grade = PeakLevelGrade::Good;
+
+	CheckCableCrosstalk(LeftVolumeAnalysis, RightVolumeAnalysis, UserLeftThreshold);
+	CheckCableCrosstalk(RightVolumeAnalysis, LeftVolumeAnalysis, UserRightThreshold);
+
+	if (LeftVolumeAnalysis.Grade != PeakLevelGrade::Crosstalk)
+	{
+		SetChannelGrade(LeftVolumeAnalysis);
+	}
+	if (RightVolumeAnalysis.Grade != PeakLevelGrade::Crosstalk)
+	{
+		SetChannelGrade(RightVolumeAnalysis);
+	}
+}
+
+void AdjustVolumeManager::CheckCableCrosstalk(VolumeAnalysis& analysis, VolumeAnalysis& other, const float& threshold)
+{
+	if (analysis.CableCrosstalkDetection)
+	{
+		// Get some info about the ticks that were generated and create the sample buffers
+		int outputSampleRate = generatedSamples->WaveFormat->nSamplesPerSec;
+		int inputSampleRate = input->waveFormat.Format.nSamplesPerSec;
+		int expectedTickFrequency = generatedSamples->GetTickFrequency(outputSampleRate);
+		int tickDurationInSamples = ceil((float)inputSampleRate / expectedTickFrequency);
+
+		// In some cases, the crosstalk's largest edge will happen a full cycle before the leargest edge of the
+		// source signal's largest edge. This happens when the source signal is clipping and noisy. When it is clean
+		// and not clipping, it's more like a half cycle before.
+		// In other cases, the crosstalk's largest edge will match the same sample as the largest edge of the source
+		// signal.
+		// In my preliminary tests, I haven't seen any cases where the crosstalk follows the source signal, which is the
+		// opposite of what I would have expected, so I've left in a cycle following the source just in case.
+		for (int i = max(0, other.MaxEdgeIndex - tickDurationInSamples); i < min(other.AllEdgesLength, other.MaxEdgeIndex + tickDurationInSamples); i++)
+		{
+			if (analysis.AllEdges[i] > threshold)
+			{
+				analysis.Grade = PeakLevelGrade::Crosstalk;
+			}
+		}
+	}
+}
+
+void AdjustVolumeManager::SetChannelGrade(VolumeAnalysis& analysis)
+{
+	// TODO: simply check for ticks. If there's more than one, it's a no go.
 }
 
 void AdjustVolumeManager::Stop()

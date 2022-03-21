@@ -906,7 +906,7 @@ void Gui::StartAjdustVolumeAudio()
     }
     if (adjustVolumeManager == nullptr)
     {
-        adjustVolumeManager = new AdjustVolumeManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex], DpiScale * 270, DpiScale * 250);
+        adjustVolumeManager = new AdjustVolumeManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex], DpiScale * 270, DpiScale * 250, TestConfiguration::Ch1DetectionThreshold, TestConfiguration::Ch2DetectionThreshold);
     }
 }
 

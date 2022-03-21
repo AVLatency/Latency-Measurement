@@ -23,6 +23,7 @@ public:
 
 		float* AllEdges = nullptr;
 		int AllEdgesLength = 0;
+		float MaxEdgeIndex = 0;
 		float MaxEdgeMagnitude = 0;
 
 		int RawTickViewStartIndex = 0;
@@ -52,8 +53,10 @@ public:
 	int TargetTickMonitorSampleLength;
 	int TargetFullMonitorSampleLength;
 	int TickMonitorCycles = 67; // exact number chosen because it shows lots of detail at 100% DpiScale.
+	const float& UserLeftThreshold;
+	const float& UserRightThreshold;
 
-	AdjustVolumeManager(const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, int targetTickMonitorSampleLength, int targetFullMonitorSampleLength);
+	AdjustVolumeManager(const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, int targetTickMonitorSampleLength, int targetFullMonitorSampleLength, const float& userLeftThreshold, const float& userRightThreshold);
 	~AdjustVolumeManager();
 	void Tick();
 	void Stop();
@@ -76,5 +79,8 @@ private:
 	void AnalyseChannel(VolumeAnalysis& analysis, float* recordedSamples, int recordedSamplesLength);
 
 	float* CreateLowFiSamples(float* allSamples, int sourceStartIndex, int sourceLength, int destinationLength);
+	void SetGrades();
+	void CheckCableCrosstalk(VolumeAnalysis& analysis, VolumeAnalysis& other, const float& threshold);
+	void SetChannelGrade(VolumeAnalysis& analysis);
 };
 

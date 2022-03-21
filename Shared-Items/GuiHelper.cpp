@@ -175,7 +175,7 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
     ImGui::Checkbox("Automatic Threshold Detection", useAutoThreshold);
     if (!*useAutoThreshold)
     {
-        ImGui::DragFloat("Manual Threshold", manualThreshold, 0.001, 0, 1.9, "%.3f", ImGuiSliderFlags_AlwaysClamp | ImGuiSliderFlags_Logarithmic);
+        ImGui::DragFloat("Manual Threshold", manualThreshold, 0.001, 0, 1.9, "%.4f", ImGuiSliderFlags_AlwaysClamp | ImGuiSliderFlags_Logarithmic);
     }
 
     ImGui::Checkbox("Cable Crosstalk Detection", cableCrosstalkDetection);
