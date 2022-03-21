@@ -38,9 +38,10 @@ bool Gui::DoGui()
 
     bool openAboutDialog = false;
     bool openEdidReminderDialog = false;
-    bool openSampleRateLowDialog = false;
     bool openMidTestFilesystemErrorDialog = false;
     bool openNoMesaurementsErrorDialog = false;
+    bool openDialogVolumeAdjustDisabledAutoThreshold = false;
+    bool openDialogVolumeAdjustDisabledCrosstalk = false;
     if (testManager != nullptr && testManager->ShouldShowFilesystemError && !testManager->HasShownFilesystemError)
     {
         openMidTestFilesystemErrorDialog = true;
@@ -190,15 +191,8 @@ bool Gui::DoGui()
                 if (ImGui::Button("Adjust Volumes"))
                 {
                     lastCheckedInputSampleRate = AudioEndpointHelper::GetInputMixFormatSampleRate(inputAudioEndpoints[inputDeviceIndex]);
-                    if (lastCheckedInputSampleRate < 48000)
-                    {
-                        openSampleRateLowDialog = true;
-                    }
-                    else
-                    {
-                        state = MeasurementToolGuiState::AdjustVolume;
-                        StartAjdustVolumeAudio();
-                    }
+                    state = MeasurementToolGuiState::AdjustVolume;
+                    StartAjdustVolumeAudio();
                 }
             }
 
@@ -210,80 +204,38 @@ bool Gui::DoGui()
 
             if (state >= MeasurementToolGuiState::AdjustVolume)
             {
-                ImGui::Spacing();
-                ImGui::PushFont(FontHelper::BoldFont);
-                ImGui::Text("Input: Left Channel (HDMI Audio Extractor)");
-                ImGui::PopFont();
-
-                int plotWidth = 310;
-                float columnWidth = (plotWidth + 10) * DpiScale;
-                ImVec2 plotDimensions(plotWidth* DpiScale, 100 * DpiScale);
-
-                if (ImGui::BeginTable("LeftChannelVolumeTable", 3, ImGuiTableFlags_SizingFixedFit))
+                bool previousAutoThreshold = TestConfiguration::Ch1AutoThresholdDetection;
+                bool previousCrossTalk = adjustVolumeManager->LeftVolumeAnalysis.CableCrosstalkDetection;
+                GuiHelper::AdjustVolumeDisplay("left channel volume", adjustVolumeManager->LeftVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, "Left Channel Input (HDMI Audio Extractor)", &TestConfiguration::Ch1AutoThresholdDetection, &TestConfiguration::Ch1DetectionThreshold, &adjustVolumeManager->LeftVolumeAnalysis.CableCrosstalkDetection);
+                if (!TestConfiguration::Ch1AutoThresholdDetection && previousAutoThreshold)
                 {
-                    ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, columnWidth);
-
-                    ImGui::TableNextRow();
-                    ImGui::TableNextColumn();
-                    ImGui::Text("Reference Image");
-                    if (adjustVolumeManager != nullptr && adjustVolumeManager->tickReferenceSamples != nullptr)
-                    {
-                        ImGui::PlotLines("", adjustVolumeManager->tickReferenceSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
-                    }
-                    ImGui::Spacing();
-
-                    ImGui::TableNextColumn();
-                    ImGui::Text("Monitor");
-                    if (adjustVolumeManager != nullptr && adjustVolumeManager->leftChannelTickMonitorSamples != nullptr)
-                    {
-                        ImGui::PlotLines("", adjustVolumeManager->leftChannelTickMonitorSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
-                    }
-                    ImGui::Spacing();
-
-                    ImGui::TableNextColumn();
-                    ImGui::Text("");
-                    GuiHelper::PeakLevel(adjustVolumeManager->leftChannelGrade, "Adjust the Output Volume and/or the volume of your input device through the Windows control panel to make the monitor amplitude fit with some headroom to spare."
-                        "You may need to turn down the Microphone Boost in the Levels section of Additional device properties.");
-
-                    ImGui::EndTable();
+                    openDialogVolumeAdjustDisabledAutoThreshold = true;
                 }
-
-                ImGui::Spacing();
-                ImGui::PushFont(FontHelper::BoldFont);
-                ImGui::Text("Input: Right Channel (ARC, eARC, or S/PDIF DAC)");
-                ImGui::PopFont();
-                
-                if (ImGui::BeginTable("LeftChannelVolumeTable", 3, ImGuiTableFlags_SizingFixedFit))
+                if (!adjustVolumeManager->LeftVolumeAnalysis.CableCrosstalkDetection && previousCrossTalk)
                 {
-                    ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, columnWidth);
-
-                    ImGui::TableNextRow();
-                    ImGui::TableNextColumn();
-                    ImGui::Text("Reference Image");
-                    if (adjustVolumeManager != nullptr && adjustVolumeManager->tickReferenceSamples != nullptr)
-                    {
-                        ImGui::PlotLines("", adjustVolumeManager->tickReferenceSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
-                    }
-                    ImGui::Spacing();
-
-                    ImGui::TableNextColumn();
-                    ImGui::Text("Monitor");
-                    if (adjustVolumeManager != nullptr && adjustVolumeManager->rightChannelTickMonitorSamples != nullptr)
-                    {
-                        ImGui::PlotLines("", adjustVolumeManager->rightChannelTickMonitorSamples, adjustVolumeManager->tickMonitorSamplesLength, 0, NULL, -1, 1, plotDimensions);
-                    }
-                    ImGui::Spacing();
-
-                    ImGui::TableNextColumn();
-                    ImGui::Text("");
-                    GuiHelper::PeakLevel(adjustVolumeManager->rightChannelGrade, "Adjust the Output Volume and/or the volume of your input device through the Windows control panel to make the monitor amplitude fit with some headroom to spare."
-                        "You may need to turn down the Microphone Boost in the Levels section of Additional device properties.");
-
-                    ImGui::EndTable();
+                    openDialogVolumeAdjustDisabledCrosstalk = true;
                 }
+                ImGui::Spacing();
+                ImGui::Spacing();
+                ImGui::Spacing();
 
-                ImGui::DragFloat("Output Volume", &TestConfiguration::OutputVolume, .001f, .1f, 1, "%.3f", ImGuiSliderFlags_AlwaysClamp);
-                ImGui::SameLine(); GuiHelper::HelpMarker("If the peak level is Loud you can turn this down instead of changing your input device volume.");
+                previousAutoThreshold = TestConfiguration::Ch2AutoThresholdDetection;
+                previousCrossTalk = adjustVolumeManager->RightVolumeAnalysis.CableCrosstalkDetection;
+                GuiHelper::AdjustVolumeDisplay("right channel volume", adjustVolumeManager->RightVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, "Right Channel Input (DUT)", &TestConfiguration::Ch2AutoThresholdDetection, &TestConfiguration::Ch2DetectionThreshold, &adjustVolumeManager->RightVolumeAnalysis.CableCrosstalkDetection);
+                if (!TestConfiguration::Ch2AutoThresholdDetection && previousAutoThreshold)
+                {
+                    openDialogVolumeAdjustDisabledAutoThreshold = true;
+                }
+                if (!adjustVolumeManager->RightVolumeAnalysis.CableCrosstalkDetection && previousCrossTalk)
+                {
+                    openDialogVolumeAdjustDisabledCrosstalk = true;
+                }
+                ImGui::Spacing();
+                ImGui::Spacing();
+                ImGui::Spacing();
+
+                GuiHelper::AdjustVolumeInstructionsTroubleshooting(lastCheckedInputSampleRate, &TestConfiguration::OutputVolume);
+                ImGui::Spacing();
 
                 if (state == MeasurementToolGuiState::AdjustVolume)
                 {
@@ -297,8 +249,10 @@ bool Gui::DoGui()
                         }
                     }
                     ImGui::SameLine();
-                    bool disabled = adjustVolumeManager->leftChannelGrade == AdjustVolumeManager::PeakLevelGrade::Quiet
-                        || adjustVolumeManager->rightChannelGrade == AdjustVolumeManager::PeakLevelGrade::Quiet;
+                    bool disabled = (TestConfiguration::Ch1AutoThresholdDetection && adjustVolumeManager->LeftVolumeAnalysis.Grade != AdjustVolumeManager::PeakLevelGrade::Good)
+                        || (TestConfiguration::Ch2AutoThresholdDetection && adjustVolumeManager->RightVolumeAnalysis.Grade != AdjustVolumeManager::PeakLevelGrade::Good)
+                        || adjustVolumeManager->LeftVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Crosstalk
+                        || adjustVolumeManager->RightVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Crosstalk;
                     if (disabled)
                     {
                         ImGui::BeginDisabled();
