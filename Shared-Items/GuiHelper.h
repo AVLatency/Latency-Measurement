@@ -13,8 +13,12 @@ public:
 	static void OptionallyBoldText(const char* text, bool bold);
 	static void AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManager::VolumeAnalysis& analysis, float DpiScale, float tickMonitorWidth, float fullMonitorWidth, const char* title, bool* useAutoThreshold, float* manualThreshold, bool* cableCrosstalkDetection);
 	static void PeakLevel(AdjustVolumeManager::PeakLevelGrade grade, const char* helpText);
+	static void AdjustVolumeInstructionsTroubleshooting(int lastCheckedInputSampleRate, float* outputVolume);
 	static void VerifiedHelp();
 	static void DearImGuiLegal();
 
 	static int CsvInputFilter(ImGuiInputTextCallbackData* data);
+
+	static void DialogVolumeAdjustDisabledAutoThreshold(bool openDialog, ImVec2 center);
+	static void DialogVolumeAdjustDisabledCrosstalk(bool openDialog, ImVec2 center);
 };

@@ -40,6 +40,8 @@ bool Gui::DoGui()
     bool openEdidReminderDialog = false;
     bool openMidTestFilesystemErrorDialog = false;
     bool openNoMesaurementsErrorDialog = false;
+    bool openDialogVolumeAdjustDisabledAutoThreshold = false;
+    bool openDialogVolumeAdjustDisabledCrosstalk = false;
     if (testManager != nullptr && testManager->ShouldShowFilesystemError && !testManager->HasShownFilesystemError)
     {
         openMidTestFilesystemErrorDialog = true;
@@ -203,49 +205,37 @@ bool Gui::DoGui()
 
             if (state >= MeasurementToolGuiState::AdjustVolume)
             {
+                bool previousAutoThreshold = TestConfiguration::Ch1AutoThresholdDetection;
+                bool previousCrossTalk = adjustVolumeManager->LeftVolumeAnalysis.CableCrosstalkDetection;
                 GuiHelper::AdjustVolumeDisplay("left channel volume", adjustVolumeManager->LeftVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, "Left Channel Input (HDMI Audio Extractor)", &TestConfiguration::Ch1AutoThresholdDetection, &TestConfiguration::Ch1DetectionThreshold, &adjustVolumeManager->LeftVolumeAnalysis.CableCrosstalkDetection);
+                if (!TestConfiguration::Ch1AutoThresholdDetection && previousAutoThreshold)
+                {
+                    openDialogVolumeAdjustDisabledAutoThreshold = true;
+                }
+                if (!adjustVolumeManager->LeftVolumeAnalysis.CableCrosstalkDetection && previousCrossTalk)
+                {
+                    openDialogVolumeAdjustDisabledCrosstalk = true;
+                }
                 ImGui::Spacing();
                 ImGui::Spacing();
                 ImGui::Spacing();
+
+                previousAutoThreshold = TestConfiguration::Ch2AutoThresholdDetection;
+                previousCrossTalk = adjustVolumeManager->RightVolumeAnalysis.CableCrosstalkDetection;
                 GuiHelper::AdjustVolumeDisplay("right channel volume", adjustVolumeManager->RightVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, "Right Channel Input (DUT)", &TestConfiguration::Ch2AutoThresholdDetection, &TestConfiguration::Ch2DetectionThreshold, &adjustVolumeManager->RightVolumeAnalysis.CableCrosstalkDetection);
-                ImGui::Spacing();
-                ImGui::Spacing();
-                ImGui::Spacing();
-
-                //    GuiHelper::PeakLevel(adjustVolumeManager->leftChannelGrade, "Adjust the volume of your input device through the Windows control panel to make the monitor amplitude fit with some headroom to spare. "
-                //        "You may need to turn down the Microphone Boost in the Levels section of Additional device properties.");
-
-                //        GuiHelper::PeakLevel(adjustVolumeManager->rightChannelGrade, "Adjust the output volume of your Device Under Test (DUT) to give a consistent normalized recording.\n\n"
-                //            "When the DUT is muted, this peak level should be \"Quiet\". If it is not, this likely means you are getting cable crosstalk and your measurements will incorrectly be 0 ms audio latency!\n\n"
-                //            "To solve the problem of cable crosstalk, try turning down the output volume in the Advanced Configuration or using a physical, inline volume control on your HDMI Audio Extractor output.");
-
-
-
-
-                ImGui::PushFont(FontHelper::HeaderFont);
-                ImGui::Text("Instructions and Troubleshooting");
-                ImGui::PopFont();
-                if (ImGui::TreeNode("Instructions and Troubleshooting"))
+                if (!TestConfiguration::Ch2AutoThresholdDetection && previousAutoThreshold)
                 {
-                    ImGui::Text(std::format("Instructions: Adjust volume of DUT and input device volumes.", lastCheckedInputSampleRate).c_str());
-                    ImGui::Spacing();
-                    ImGui::Text(std::format("Input Sample Rate: {} Hz (recommended: 48000 Hz)", lastCheckedInputSampleRate).c_str());
-                    if (lastCheckedInputSampleRate > 48000)
-                    {
-                        ImGui::Text(std::format("Higher sample rates may introduce high frequency noise.\n\n"
-                            "A sample rate of48000 Hz may work better with this tool.\n\n"
-                            "Use the Windows sound settings for your selected input device under\n\"Additional device properties\" to change the sample rate.", lastCheckedInputSampleRate).c_str());
-                    }
-
-                    ImGui::TreePop();
+                    openDialogVolumeAdjustDisabledAutoThreshold = true;
                 }
-                if (ImGui::TreeNode("Advanced Configuration"))
+                if (!adjustVolumeManager->RightVolumeAnalysis.CableCrosstalkDetection && previousCrossTalk)
                 {
-                    ImGui::DragFloat("Output Volume", &TestConfiguration::OutputVolume, .001f, .1f, 1, "%.3f", ImGuiSliderFlags_AlwaysClamp);
-                    ImGui::SameLine(); GuiHelper::HelpMarker("Should normally be left at 1. If you are experiencing cable crosstalk, you can try turning this volume down or using a physical, inline volume control on your HDMI Audio Extractor output.");
-                    ImGui::TreePop();
+                    openDialogVolumeAdjustDisabledCrosstalk = true;
                 }
+                ImGui::Spacing();
+                ImGui::Spacing();
+                ImGui::Spacing();
 
+                GuiHelper::AdjustVolumeInstructionsTroubleshooting(lastCheckedInputSampleRate, &TestConfiguration::OutputVolume);
                 ImGui::Spacing();
                 
                 if (state == MeasurementToolGuiState::AdjustVolume)
@@ -831,6 +821,9 @@ bool Gui::DoGui()
 
         ImGui::EndPopup();
     }
+
+    GuiHelper::DialogVolumeAdjustDisabledAutoThreshold(openDialogVolumeAdjustDisabledAutoThreshold, center);
+    GuiHelper::DialogVolumeAdjustDisabledCrosstalk(openDialogVolumeAdjustDisabledCrosstalk, center);
 
     ImGui::PopFont();
 

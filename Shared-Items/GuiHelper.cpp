@@ -208,7 +208,43 @@ void GuiHelper::PeakLevel(AdjustVolumeManager::PeakLevelGrade grade, const char*
         break;
     }
     ImGui::PopFont();
-    //ImGui::SameLine(); GuiHelper::HelpMarker(helpText);
+}
+
+void GuiHelper::AdjustVolumeInstructionsTroubleshooting(int lastCheckedInputSampleRate, float* outputVolume)
+{
+    ImGui::PushFont(FontHelper::HeaderFont);
+    ImGui::Text("Instructions and Troubleshooting");
+    ImGui::PopFont();
+    if (ImGui::TreeNode("Instructions and Troubleshooting"))
+    {
+
+        //    GuiHelper::PeakLevel(adjustVolumeManager->leftChannelGrade, "Adjust the volume of your input device through the Windows control panel to make the monitor amplitude fit with some headroom to spare. "
+        //        "You may need to turn down the Microphone Boost in the Levels section of Additional device properties.");
+
+        //        GuiHelper::PeakLevel(adjustVolumeManager->rightChannelGrade, "Adjust the output volume of your Device Under Test (DUT) to give a consistent normalized recording.\n\n"
+        //            "When the DUT is muted, this peak level should be \"Quiet\". If it is not, this likely means you are getting cable crosstalk and your measurements will incorrectly be 0 ms audio latency!\n\n"
+        //            "To solve the problem of cable crosstalk, try turning down the output volume in the Advanced Configuration or using a physical, inline volume control on your HDMI Audio Extractor output.");
+
+
+
+        ImGui::Text(std::format("Instructions: Adjust volume of DUT and input device volumes.", lastCheckedInputSampleRate).c_str());
+        ImGui::Spacing();
+        ImGui::Text(std::format("Input Sample Rate: {} Hz (recommended: 48000 Hz)", lastCheckedInputSampleRate).c_str());
+        if (lastCheckedInputSampleRate > 48000)
+        {
+            ImGui::Text(std::format("Higher sample rates may introduce high frequency noise.\n\n"
+                "A sample rate of48000 Hz may work better with this tool.\n\n"
+                "Use the Windows sound settings for your selected input device under\n\"Additional device properties\" to change the sample rate.", lastCheckedInputSampleRate).c_str());
+        }
+
+        ImGui::TreePop();
+    }
+    if (ImGui::TreeNode("Advanced Configuration"))
+    {
+        ImGui::DragFloat("Output Volume", outputVolume, .001f, .1f, 1, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::SameLine(); GuiHelper::HelpMarker("Should normally be left at 1. If you are experiencing cable crosstalk, you can try turning this volume down or using a physical, inline volume control on your HDMI Audio Extractor output.");
+        ImGui::TreePop();
+    }
 }
 
 void GuiHelper::DearImGuiLegal()
@@ -238,5 +274,57 @@ int GuiHelper::CsvInputFilter(ImGuiInputTextCallbackData * data)
     else
     {
         return 0;
+    }
+}
+
+void GuiHelper::DialogVolumeAdjustDisabledAutoThreshold(bool openDialog, ImVec2 center)
+{
+    const char* title = "Automatic Threshold Detection Disabled";
+    if (openDialog)
+    {
+        ImGui::OpenPopup(title);
+    }
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+    if (ImGui::BeginPopupModal(title, NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("Disabling automatic threshold detection is not recommended.\n\n"
+            "This should only be done when it is not possible to decrease background noise and/or increase the input volume\nlevel. Please follow the instructions in the \"Instructions and Troubleshooting\" section instead.");
+
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+
+        if (ImGui::Button("OK", ImVec2(120, 0)))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
+    }
+}
+
+void GuiHelper::DialogVolumeAdjustDisabledCrosstalk(bool openDialog, ImVec2 center)
+{
+    const char* title = "Cable Crosstalk Detection Disabled";
+    if (openDialog)
+    {
+        ImGui::OpenPopup(title);
+    }
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+    if (ImGui::BeginPopupModal(title, NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("Disalbing cable crosstalk detection may result in an incorrect 0 ms audio latency measurement!\n\n"
+            "Please follow the instructions in the \"Instructions and Troubleshooting\" section to safely disable crosstalk detection.");
+
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+
+        if (ImGui::Button("OK", ImVec2(120, 0)))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
     }
 }
