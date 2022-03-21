@@ -241,7 +241,11 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(int lastCheckedInputSamp
         //            "When the DUT is muted, this peak level should be \"Quiet\". If it is not, this likely means you are getting cable crosstalk and your measurements will incorrectly be 0 ms audio latency!\n\n"
         //            "To solve the problem of cable crosstalk, try turning down the output volume in the Advanced Configuration or using a physical, inline volume control on your HDMI Audio Extractor output.");
 
-
+        // Notes on determining if leftand right are wired the right way around
+        //      Maybe a small note about cable crosstalk
+        // Then notes on “if this is quiet / noisy”
+        //    turn up volume of DUT if quiet.Place mic close to speaker, etc
+        // consider adjusting these volumes instead : -DUT volume, -Input volume, -Distance from speaker to mic, -Use inline volume control on HDMI audio extractor
 
         ImGui::Text(std::format("Input Sample Rate: {} Hz (recommended: 48000 Hz)", lastCheckedInputSampleRate).c_str());
         if (lastCheckedInputSampleRate > 48000)
