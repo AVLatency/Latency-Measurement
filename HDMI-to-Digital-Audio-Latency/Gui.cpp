@@ -881,36 +881,6 @@ bool Gui::DoGui()
         ImGui::EndPopup();
     }
 
-    if (openSampleRateLowDialog)
-    {
-        ImGui::OpenPopup("Low Input Device Sample Rate");
-    }
-    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    if (ImGui::BeginPopupModal("Low Input Device Sample Rate", NULL, ImGuiWindowFlags_AlwaysAutoResize))
-    {
-        ImGui::Text(std::format("The current input device sample rate is only {} Hz, but a sample rate of\nat least 48000 Hz is recommended for this tool to work well.\n\n"
-            "Use the Windows sound settings for your selected input device under\n\"Additional device properties\" to change the sample rate.", lastCheckedInputSampleRate).c_str());
-
-        ImGui::Spacing();
-        ImGui::Separator();
-        ImGui::Spacing();
-
-        if (ImGui::Button("Ignore", ImVec2(120, 0)))
-        {
-            ImGui::CloseCurrentPopup();
-            state = MeasurementToolGuiState::AdjustVolume;
-            StartAjdustVolumeAudio();
-        }
-        ImGui::SameLine();
-        ImGui::SetItemDefaultFocus();
-        if (ImGui::Button("Cancel", ImVec2(120, 0)))
-        {
-            ImGui::CloseCurrentPopup();
-        }
-
-        ImGui::EndPopup();
-    }
-
     if (openNoMesaurementsErrorDialog)
     {
         ImGui::OpenPopup("No Valid Measurements");
@@ -932,6 +902,9 @@ bool Gui::DoGui()
 
         ImGui::EndPopup();
     }
+
+    GuiHelper::DialogVolumeAdjustDisabledAutoThreshold(openDialogVolumeAdjustDisabledAutoThreshold, center);
+    GuiHelper::DialogVolumeAdjustDisabledCrosstalk(openDialogVolumeAdjustDisabledCrosstalk, center);
 
     ImGui::PopFont();
 
@@ -982,7 +955,7 @@ void Gui::StartAjdustVolumeAudio()
     }
     if (adjustVolumeManager == nullptr)
     {
-        adjustVolumeManager = new AdjustVolumeManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex]);
+        adjustVolumeManager = new AdjustVolumeManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex], DpiScale * 270, DpiScale * 250, TestConfiguration::Ch1DetectionThreshold, TestConfiguration::Ch2DetectionThreshold);
     }
 }
 
