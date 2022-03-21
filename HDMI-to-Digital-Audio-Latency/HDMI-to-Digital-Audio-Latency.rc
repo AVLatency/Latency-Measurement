@@ -19,7 +19,7 @@ HDMI_WINDOWS_DISPLAY_SETTINGS RCDATA "../Shared-Items/AdvancedDisplaySettings.pn
 HDMI_TO_DIGITAL_AUDIO_DEFINITION RCDATA "HDMI-to-Digital-Audio-Latency_definition.png"
 DEVICE_CV121AD RCDATA "../Shared-Items/AudioDevice_CV121AD.jpg"
 DEVICE_SHARCV1 RCDATA "../Shared-Items/AudioDevice_SHARCv1.png"
-VOLUME_ADJUST_EXAMPLE RCDATA "../Shared-Items/VolumeAdjustementExample.png"
+VOLUME_ADJUST_EXAMPLE RCDATA "../Shared-Items/VolumeAdjustmentExample.png"
 FONT_REGULAR RCDATA "../Shared-Items/Fonts/Inter-Regular.ttf"
 FONT_BOLD RCDATA "../Shared-Items/Fonts/Inter-Bold.ttf"
 
