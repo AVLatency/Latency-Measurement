@@ -288,17 +288,16 @@ void AdjustVolumeManager::AnalyseChannel(VolumeAnalysis& analysis, float* record
 	analysis.MaxEdgeIndex = largestEdgeIndex;
 	analysis.MaxEdgeMagnitude = allEdges[largestEdgeIndex];
 
-	// Here's a story that describes the worst case scenario for a tick:
-	// - Largest edge is from high peak to low peak, but doubled because of echo
-	// - This results in a value of 1
-	// - The leading edge should still be detected. Without the echo, it's edge
-	//   magnitude would be 0.5 of the largest edge, but becaues of the echo
-	//   it's actually only 0.25 of the largest edge
-	// - Worst-case sampling of this leading edge would only reveal half of its
-	//   magnitude, which brings it down to 0.125 of the largest edge.
-	// - To give just a tad more wiggle-room, I've chosen to round down to 12%
-	//   of largest edge:
-	analysis.AutoThreshold = allEdges[largestEdgeIndex] * .12f;
+	// Auto threshold is chosen to detect the largest edges, and no others.
+	// Largest edge may have been sampled here with the ideal wave alignment (Nyquist stuff)
+	// but later during the test it may have been sampled with the worst case wave
+	// alignment. In the later, it would only be 50% of the magnitude of this initial
+	// sampling. This is why a threshold of 50% is chosen.
+	// This does NOT do a good job of accounting for echos. It's possible that echos might
+	// be causing this largest edge to be substantially larger than the initial edges in the
+	// tick cluster that preceed it. But for this case, the user can switch to manual edge
+	// detection mode to fine-tune the tool for use in this scenario.
+	analysis.AutoThreshold = allEdges[largestEdgeIndex] * .5f;
 
 	// Tick view start index and length
 	analysis.RawTickViewLength = TickMonitorCycles * tickDurationInSamples;

@@ -199,7 +199,12 @@ std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* 
                 }
             }
             int indexLowerBound = clusterStart.index;
-            // The actual peak for this high frequency edge might be a bit further along than we initially measured.
+            
+            // Now that we've found the first index of the cluster (the start of the first edge that passes the threshold)
+            // it's time to detect the peak that follows that edge, which might be a small bit further along.
+            // NOTE: This has a limitation that the peak may be the first or second peak in the tick signal! I haven't
+            // figured out a way to determine which it is, in a general case that works with weird echos as well.
+            // But because this is a simple solution, it's a small price to pay for something that's somewhat reliable.
             // Adjust this end point to be the actual peak of the wave:
             for (int j = clusterStart.endIndex; j < clusterStart.endIndex + halfTickDurationInSamples && j < recordedSamplesLength; j++)
             {
@@ -210,7 +215,8 @@ std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* 
                     clusterStart.endIndex = j;
                 }
             }
-            // replace the highest magnitude edge with the first edge from its cluster that ends at a peak
+
+            // replace the highest magnitude edge with the earliest peak that we were looking for
             largeEdges[i] = clusterStart;
 
             // 20 milliseconds after the highest magnitude. Don't worry about any smart detection of the end because
