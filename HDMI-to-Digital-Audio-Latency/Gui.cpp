@@ -40,7 +40,6 @@ bool Gui::DoGui()
     bool openEdidReminderDialog = false;
     bool openMidTestFilesystemErrorDialog = false;
     bool openNoMesaurementsErrorDialog = false;
-    bool openDialogVolumeAdjustDisabledAutoThreshold = false;
     bool openDialogVolumeAdjustDisabledCrosstalk = false;
     if (testManager != nullptr && testManager->ShouldShowFilesystemError && !testManager->HasShownFilesystemError)
     {
@@ -204,13 +203,8 @@ bool Gui::DoGui()
 
             if (state >= MeasurementToolGuiState::AdjustVolume)
             {
-                bool previousAutoThreshold = TestConfiguration::Ch1AutoThresholdDetection;
                 bool previousCrossTalk = adjustVolumeManager->LeftVolumeAnalysis.CableCrosstalkDetection;
                 GuiHelper::AdjustVolumeDisplay("left channel volume", adjustVolumeManager->LeftVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, "Left Channel Input (HDMI Audio Extractor)", &TestConfiguration::Ch1AutoThresholdDetection, &TestConfiguration::Ch1DetectionThreshold, &adjustVolumeManager->LeftVolumeAnalysis.CableCrosstalkDetection);
-                if (!TestConfiguration::Ch1AutoThresholdDetection && previousAutoThreshold)
-                {
-                    openDialogVolumeAdjustDisabledAutoThreshold = true;
-                }
                 if (!adjustVolumeManager->LeftVolumeAnalysis.CableCrosstalkDetection && previousCrossTalk)
                 {
                     openDialogVolumeAdjustDisabledCrosstalk = true;
@@ -219,13 +213,8 @@ bool Gui::DoGui()
                 ImGui::Spacing();
                 ImGui::Spacing();
 
-                previousAutoThreshold = TestConfiguration::Ch2AutoThresholdDetection;
                 previousCrossTalk = adjustVolumeManager->RightVolumeAnalysis.CableCrosstalkDetection;
                 GuiHelper::AdjustVolumeDisplay("right channel volume", adjustVolumeManager->RightVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, "Right Channel Input (DUT)", &TestConfiguration::Ch2AutoThresholdDetection, &TestConfiguration::Ch2DetectionThreshold, &adjustVolumeManager->RightVolumeAnalysis.CableCrosstalkDetection);
-                if (!TestConfiguration::Ch2AutoThresholdDetection && previousAutoThreshold)
-                {
-                    openDialogVolumeAdjustDisabledAutoThreshold = true;
-                }
                 if (!adjustVolumeManager->RightVolumeAnalysis.CableCrosstalkDetection && previousCrossTalk)
                 {
                     openDialogVolumeAdjustDisabledCrosstalk = true;
@@ -903,7 +892,6 @@ bool Gui::DoGui()
         ImGui::EndPopup();
     }
 
-    GuiHelper::DialogVolumeAdjustDisabledAutoThreshold(openDialogVolumeAdjustDisabledAutoThreshold, center);
     GuiHelper::DialogVolumeAdjustDisabledCrosstalk(openDialogVolumeAdjustDisabledCrosstalk, center);
 
     ImGui::PopFont();

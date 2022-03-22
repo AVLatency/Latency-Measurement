@@ -111,6 +111,7 @@ std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* 
     //      - echoy microphone recording where the highest tick peak might be in the middle of a noisy mess
     // - no ticks exist at all, but instead lots of low amplitude noise that could look like ticks
     // - cable crosstalk from a different channel that has a legitimate tick, but isn't actually a singal that's intended for this channel
+    // The solution to those scenarios is to heavily depend on a correclty configured threshold, handled by the AdjustVolumeManager.
 
     // Algorithm goes something like this:
     // 
@@ -118,6 +119,8 @@ std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* 
     // magnitude is greatest change over tickDurationInSamples / 2, which is the tick wave frequency we expect
     // sort each list of edges by magnitude. There will be clusters of large edges surrounding the largest edges
     // record the earliest edge from each cluster. This is the tick.
+    // Then find the peak that follows that earliest edge index. This may be the first or second peak
+    // of the original tick signal, but that's OK: it's a small time difference between the two.
 
     int tickDurationInSamples = ceil((float)sampleRate / expectedTickFrequency);
     int halfTickDurationInSamples = ceil((float)(sampleRate / 2) / expectedTickFrequency);

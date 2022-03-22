@@ -19,6 +19,5 @@ public:
 
 	static int CsvInputFilter(ImGuiInputTextCallbackData* data);
 
-	static void DialogVolumeAdjustDisabledAutoThreshold(bool openDialog, ImVec2 center);
 	static void DialogVolumeAdjustDisabledCrosstalk(bool openDialog, ImVec2 center);
 };

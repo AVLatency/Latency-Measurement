@@ -295,32 +295,6 @@ int GuiHelper::CsvInputFilter(ImGuiInputTextCallbackData * data)
     }
 }
 
-void GuiHelper::DialogVolumeAdjustDisabledAutoThreshold(bool openDialog, ImVec2 center)
-{
-    const char* title = "Automatic Threshold Detection Disabled";
-    if (openDialog)
-    {
-        ImGui::OpenPopup(title);
-    }
-    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    if (ImGui::BeginPopupModal(title, NULL, ImGuiWindowFlags_AlwaysAutoResize))
-    {
-        ImGui::Text("Disabling automatic threshold detection is not recommended.\n\n"
-            "This should only be done when it is not possible to decrease background noise and/or increase the input volume\nlevel. Please follow the instructions in the \"Instructions and Troubleshooting\" section instead.");
-
-        ImGui::Spacing();
-        ImGui::Separator();
-        ImGui::Spacing();
-
-        if (ImGui::Button("OK", ImVec2(120, 0)))
-        {
-            ImGui::CloseCurrentPopup();
-        }
-
-        ImGui::EndPopup();
-    }
-}
-
 void GuiHelper::DialogVolumeAdjustDisabledCrosstalk(bool openDialog, ImVec2 center)
 {
     const char* title = "Cable Crosstalk Detection Disabled";
@@ -331,8 +305,8 @@ void GuiHelper::DialogVolumeAdjustDisabledCrosstalk(bool openDialog, ImVec2 cent
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     if (ImGui::BeginPopupModal(title, NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("Disalbing cable crosstalk detection may result in an incorrect 0 ms audio latency measurement!\n\n"
-            "Please follow the instructions in the \"Instructions and Troubleshooting\" section to safely disable crosstalk detection.");
+        ImGui::Text("Cable crosstalk detection is an important accuracy feature in this tool:\nDisalbing it may result in an incorrect 0 ms audio latency measurement!\n\n"
+            "To address a cable crosstalk problem, try manually increasing the Threshold\ninstead. See the \"Instructions and Troubleshooting\" section for more details.");
 
         ImGui::Spacing();
         ImGui::Separator();
