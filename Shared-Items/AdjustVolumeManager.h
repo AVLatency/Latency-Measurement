@@ -55,6 +55,7 @@ public:
 	int TickMonitorCycles = 67; // exact number chosen because it shows lots of detail at 100% DpiScale.
 	const float& UserLeftThreshold;
 	const float& UserRightThreshold;
+	bool OverrideNoisyQuiet = false;
 
 	AdjustVolumeManager(const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, int targetTickMonitorSampleLength, int targetFullMonitorSampleLength, const float& userLeftThreshold, const float& userRightThreshold);
 	~AdjustVolumeManager();

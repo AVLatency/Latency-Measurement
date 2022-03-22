@@ -223,7 +223,7 @@ bool Gui::DoGui()
                 ImGui::Spacing();
                 ImGui::Spacing();
 
-                GuiHelper::AdjustVolumeInstructionsTroubleshooting(lastCheckedInputSampleRate, &TestConfiguration::OutputVolume, (void*)resources.VolumeAdjustExampleTexture, resources.VolumeAdjustExampleTextureWidth, resources.VolumeAdjustExampleTextureHeight, DpiScale);
+                GuiHelper::AdjustVolumeInstructionsTroubleshooting(lastCheckedInputSampleRate, &TestConfiguration::OutputVolume, &adjustVolumeManager->OverrideNoisyQuiet, (void*)resources.VolumeAdjustExampleTexture, resources.VolumeAdjustExampleTextureWidth, resources.VolumeAdjustExampleTextureHeight, DpiScale);
                 ImGui::Spacing();
 
                 if (state == MeasurementToolGuiState::AdjustVolume)
@@ -238,8 +238,8 @@ bool Gui::DoGui()
                         }
                     }
                     ImGui::SameLine();
-                    bool disabled = (TestConfiguration::Ch1AutoThresholdDetection && adjustVolumeManager->LeftVolumeAnalysis.Grade != AdjustVolumeManager::PeakLevelGrade::Good)
-                        || (TestConfiguration::Ch2AutoThresholdDetection && adjustVolumeManager->RightVolumeAnalysis.Grade != AdjustVolumeManager::PeakLevelGrade::Good)
+                    bool disabled = (!adjustVolumeManager->OverrideNoisyQuiet && adjustVolumeManager->LeftVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Quiet)
+                        || (!adjustVolumeManager->OverrideNoisyQuiet && adjustVolumeManager->RightVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Quiet)
                         || adjustVolumeManager->LeftVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Crosstalk
                         || adjustVolumeManager->RightVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Crosstalk;
                     if (disabled)
