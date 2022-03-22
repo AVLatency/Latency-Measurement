@@ -120,7 +120,7 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
         ImGui::PopStyleColor(); // ImGuiCol_PlotLines
         ImGui::PopStyleColor(); // ImGuiCol_FrameBg
 
-        HelpMarker("Peak audio level (visible range: 0.0 to 1.0)\n\nNote: Some audio devices are capable of fully capable of audio levels greater than 1.0.");
+        HelpMarker("Peak audio level (visible range: 0.0 to 1.0)\n\nNote: Some audio devices are capable of fully capable of audio levels greater than 1.0 without any clipping.");
         ImGui::SameLine();
         ImGui::SetCursorPosX(firstPlotXPos);
         ImGui::Text(std::format("Duration: {:.3} ms", analysis.RawTickViewLength * 1000.0f / analysis.SampleRate).c_str());
@@ -251,33 +251,36 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(int lastCheckedInputSamp
         ImGui::Text("How to Ensure Cable Wiring is Correct");
         ImGui::PopFont();
         ImGui::Indent();
-            ImGui::TextWrapped("The level meters on the left side of the \"Raw Wave View\" show the current volume of each channel. "
-                "These can be used to give immediate feedback on the audio input of each channel, which can help in determining if your wiring is correct. "
-                "Simply tap on the microphone or unplug and re-plug a device and watch for a change in this meter. "
+            ImGui::TextWrapped("The peak audio level on the left side of the \"Raw Wave View\" shows the current volume of the channel. "
+                "This can be used to give immediate feedback on the audio input of each channel, which can help in determining if your wiring is correct. "
+                "Simply tap on the microphone or unplug and re-plug the device and watch for a change in this peak audio level. "
                 "If your wiring is correct, changes to one channel should not affect the other.");
         ImGui::Unindent();
 
         ImGui::Spacing();
         ImGui::PushFont(FontHelper::BoldFont);
-        ImGui::Text("How to Fix \"Cable crosstalk detected\"");
+        ImGui::Text("How to Fix"); ImGui::SameLine(); ImGui::TextColored((ImVec4)ImColor::HSV(0, 0.5f, 1.0f), "Cable crosstalk detected");
         ImGui::PopFont();
         ImGui::Indent();
         ImGui::TextWrapped("Cable crosstalk is most often detected when one of the two channels is recieving no audio signal at all. "
             "When no audio signal is present, a very weak cable crosstalk signal is detected instead. "
-            "To address this, first make sure that your wiring is correct and that both channels are receiving audio input. "
-            "Next, try manually increasing the Threshold by disabling the \"Automatic threshold detection\" to bring the Threshold above the cable crosstalk signal. "
-            "Finally, if those two strategies do not resolve the issue, you may need to use an inline analog volume control on the line-level device to reduce its audio level and, in turn, reduce the cable crosstalk that it is causing.\n\n"
-            "NOTE: In cases that are very rare for digital audio, the audio signal for both channels may be very closely aligned. When this happens, you may need to disable cable crosstalk detection. "
+            "To address this:\n\n1) Make sure that your wiring is correct and that both channels are receiving audio input using the steps above.\n"
+            "2) Increase the signal to noise ratio by turning up the output volume of the DUT and/or positioning the microphone closer to the DUT's left speaker.\n"
+            "3) Try manually increasing the Threshold by disabling the \"Automatic threshold detection\" to bring the Threshold above the cable crosstalk signal.\n"
+            "4) If the previous three strategies do not resolve the issue, you may need to use an inline analog volume control on the line-level device to reduce its audio level and, in turn, reduce the cable crosstalk that it is causing.\n\n"
+            "NOTE: In cases that are very rare for digital audio, the audio signal for both channels may be very closely aligned, resulting in incorrectly detected cable crosstalk. When this happens, you may need to disable cable crosstalk detection. "
             "Before doing so, it is important to test a number of devices and become familiar with how this tool works and gain confidence in your wiring/microphone setup and audio levels.");
         ImGui::Unindent();
 
         ImGui::Spacing();
         ImGui::PushFont(FontHelper::BoldFont);
-        ImGui::Text("How to Fix \"Noisy / Quiet\"");
+        ImGui::Text("How to Fix"); ImGui::SameLine(); ImGui::TextColored((ImVec4)ImColor::HSV(0, 0.5f, 1.0f), "Noisy / Quiet");
         ImGui::PopFont();
         ImGui::Indent();
-            ImGui::TextWrapped("First ensure your cable wiring is correct using the steps above. Second, turn up the volume of the DUT and position the microphone closer to the DUT's left speaker to increase the signal to noise ratio. "
-                "You may also want to check your audio device volume / microphone boost settings.");
+            ImGui::TextWrapped("A Noisy / Quiet signal quality often happens when there is no audio signal present or the signal to noise ratio is too low. To address this:\n\n"
+                "1) Make sure that your wiring is correct and that both channels are receiving audio input using the steps above.\n"
+                "2) Increase the signal to noise ratio by turning up the output volume of the DUT and/or positioning the microphone closer to the DUT's left speaker.\n"
+                "3) Check your audio input device volume / microphone boost settings.");
         ImGui::Unindent();
 
         ImGui::TreePop();
@@ -287,7 +290,7 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(int lastCheckedInputSamp
         ImGui::DragFloat("Output Volume", outputVolume, .001f, .1f, 1, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::SameLine(); GuiHelper::HelpMarker("Should normally be left at 1. If you are experiencing cable crosstalk, you can try turning this volume down or using a physical, inline volume control.");
         ImGui::Checkbox("Override \"Noisy / Quiet\" Signal Quality", overrideNoisyQuiet);
-        ImGui::SameLine(); GuiHelper::HelpMarker("Generally, it is a better idea to manually increase the Threshold than to disable this feature.");
+        ImGui::SameLine(); GuiHelper::HelpMarker("Generally, it is a better idea to manually increase the Threshold than to override this feature. See the \"Detailed Instructions and Troubleshooting\" section for more details.");
         ImGui::TreePop();
     }
 }
@@ -333,7 +336,7 @@ void GuiHelper::DialogVolumeAdjustDisabledCrosstalk(bool openDialog, ImVec2 cent
     if (ImGui::BeginPopupModal(title, NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
         ImGui::Text("Cable crosstalk detection is an important accuracy feature in this tool:\nDisalbing it may result in an incorrect 0 ms audio latency measurement!\n\n"
-            "To address a cable crosstalk problem, try manually increasing the Threshold\ninstead. See the \"Instructions and Troubleshooting\" section for more details.");
+            "To address a cable crosstalk problem, try manually increasing the Threshold\ninstead. See the \"Detailed Instructions and Troubleshooting\" section for more details.");
 
         ImGui::Spacing();
         ImGui::Separator();
