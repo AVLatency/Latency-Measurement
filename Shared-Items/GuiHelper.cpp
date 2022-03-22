@@ -157,7 +157,7 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
         ImGui::PopStyleColor(); // ImGuiCol_PlotLines
         ImGui::PopStyleColor(); // ImGuiCol_FrameBg
 
-        HelpMarker("Largest magnitude high frequency edge (visible range: 0.0 to 2.0)\n\nNote: Some audio devices are capable of fully capable of edge magnitudes greater than 2.0.");
+        HelpMarker("Largest magnitude high frequency edge (visible range: 0.0 to 2.0)\n\nNote: Some audio devices are capable of fully capable of edge magnitudes greater than 2.0 without any clipping.");
         ImGui::SameLine();
         ImGui::SetCursorPosX(firstPlotXPos);
         float duration = analysis.RawTickViewLength == 0 || analysis.TickMonitorSamplesLength == 0 ? 0
@@ -214,7 +214,7 @@ void GuiHelper::PeakLevel(AdjustVolumeManager::PeakLevelGrade grade, const char*
     ImGui::PopFont();
 }
 
-void GuiHelper::AdjustVolumeInstructionsTroubleshooting(int lastCheckedInputSampleRate, float* outputVolume, bool* overrideNoisyQuiet, void* exampleTexture, int exampleTextureWidth, int exampleTextureHeight, float DpiScale)
+void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheckedInputSampleRate, float* outputVolume, bool* overrideNoisyQuiet, void* exampleTexture, int exampleTextureWidth, int exampleTextureHeight, float DpiScale)
 {
     ImGui::PushFont(FontHelper::HeaderFont);
     ImGui::Text("Instructions and Troubleshooting");
@@ -262,14 +262,15 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(int lastCheckedInputSamp
         ImGui::Text("How to Fix"); ImGui::SameLine(); ImGui::TextColored((ImVec4)ImColor::HSV(0, 0.5f, 1.0f), "Cable crosstalk detected");
         ImGui::PopFont();
         ImGui::Indent();
-        ImGui::TextWrapped("Cable crosstalk is most often detected when one of the two channels is recieving no audio signal at all. "
+        ImGui::TextWrapped(std::format("Cable crosstalk is most often detected when one of the two channels is recieving no audio signal at all. "
             "When no audio signal is present, a very weak cable crosstalk signal is detected instead. "
             "To address this:\n\n1) Make sure that your wiring is correct and that both channels are receiving audio input using the steps above.\n"
-            "2) Increase the signal to noise ratio by turning up the output volume of the DUT and/or positioning the microphone closer to the DUT's left speaker.\n"
+            "2) Increase the signal to noise ratio by turning up the output volume of the DUT{}.\n"
             "3) Try manually increasing the Threshold by disabling the \"Automatic threshold detection\" to bring the Threshold above the cable crosstalk signal.\n"
             "4) If the previous three strategies do not resolve the issue, you may need to use an inline analog volume control on the line-level device to reduce its audio level and, in turn, reduce the cable crosstalk that it is causing.\n\n"
             "NOTE: In cases that are very rare for digital audio, the audio signal for both channels may be very closely aligned, resulting in incorrectly detected cable crosstalk. When this happens, you may need to disable cable crosstalk detection. "
-            "Before doing so, it is important to test a number of devices and become familiar with how this tool works and gain confidence in your wiring/microphone setup and audio levels.");
+            "Before doing so, it is important to test a number of devices and become familiar with how this tool works and gain confidence in your wiring/microphone setup and audio levels.",
+            tool == Tool::HdmiToDigitalAudio ? "" : " and/or positioning the microphone closer to the DUT's left speaker").c_str());
         ImGui::Unindent();
 
         ImGui::Spacing();
@@ -277,10 +278,11 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(int lastCheckedInputSamp
         ImGui::Text("How to Fix"); ImGui::SameLine(); ImGui::TextColored((ImVec4)ImColor::HSV(0, 0.5f, 1.0f), "Noisy / Quiet");
         ImGui::PopFont();
         ImGui::Indent();
-            ImGui::TextWrapped("A Noisy / Quiet signal quality often happens when there is no audio signal present or the signal to noise ratio is too low. To address this:\n\n"
+            ImGui::TextWrapped(std::format("A Noisy / Quiet signal quality often happens when there is no audio signal present or the signal to noise ratio is too low. To address this:\n\n"
                 "1) Make sure that your wiring is correct and that both channels are receiving audio input using the steps above.\n"
-                "2) Increase the signal to noise ratio by turning up the output volume of the DUT and/or positioning the microphone closer to the DUT's left speaker.\n"
-                "3) Check your audio input device volume / microphone boost settings.");
+                "2) Increase the signal to noise ratio by turning up the output volume of the DUT{}.\n"
+                "3) Check your audio input device volume / microphone boost settings.",
+                tool == Tool::HdmiToDigitalAudio ? "" : " and/or positioning the microphone closer to the DUT's left speaker").c_str());
         ImGui::Unindent();
 
         ImGui::TreePop();

@@ -224,7 +224,7 @@ bool Gui::DoGui()
                 ImGui::Spacing();
                 ImGui::Spacing();
 
-                GuiHelper::AdjustVolumeInstructionsTroubleshooting(lastCheckedInputSampleRate, &TestConfiguration::OutputVolume, &adjustVolumeManager->OverrideNoisyQuiet, (void*)resources.VolumeAdjustExampleTexture, resources.VolumeAdjustExampleTextureWidth, resources.VolumeAdjustExampleTextureHeight, DpiScale);
+                GuiHelper::AdjustVolumeInstructionsTroubleshooting(GuiHelper::Tool::HdmiAudio, lastCheckedInputSampleRate, &TestConfiguration::OutputVolume, &adjustVolumeManager->OverrideNoisyQuiet, (void*)resources.VolumeAdjustExampleTexture, resources.VolumeAdjustExampleTextureWidth, resources.VolumeAdjustExampleTextureHeight, DpiScale);
                 ImGui::Spacing();
                 
                 if (state == MeasurementToolGuiState::AdjustVolume)
