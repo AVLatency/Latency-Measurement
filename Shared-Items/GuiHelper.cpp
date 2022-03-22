@@ -285,7 +285,7 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(int lastCheckedInputSamp
     if (ImGui::TreeNode("Advanced Configuration"))
     {
         ImGui::DragFloat("Output Volume", outputVolume, .001f, .1f, 1, "%.3f", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::SameLine(); GuiHelper::HelpMarker("Should normally be left at 1. If you are experiencing cable crosstalk, you can try turning this volume down or using a physical, inline volume control on your HDMI Audio Extractor output.");
+        ImGui::SameLine(); GuiHelper::HelpMarker("Should normally be left at 1. If you are experiencing cable crosstalk, you can try turning this volume down or using a physical, inline volume control.");
         ImGui::Checkbox("Override \"Noisy / Quiet\" Signal Quality", overrideNoisyQuiet);
         ImGui::SameLine(); GuiHelper::HelpMarker("Generally, it is a better idea to manually increase the Threshold than to disable this feature.");
         ImGui::TreePop();
