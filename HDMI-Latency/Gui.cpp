@@ -639,8 +639,6 @@ bool Gui::DoGui()
                     }
                     ImGui::EndChild();
 
-                    GuiHelper::FormatDescriptions();
-
                     ImGui::EndGroup();
                     ImGui::SameLine();
                     ImGui::BeginGroup();
@@ -666,9 +664,7 @@ bool Gui::DoGui()
                         }
                     }
                     ImGui::EndGroup();
-
                     ImGui::Spacing();
-
                     if (ImGui::TreeNode("Failed Formats"))
                     {
                         if (ImGui::BeginListBox("", ImVec2(ImVec2(350 * DpiScale, 10 * ImGui::GetTextLineHeightWithSpacing()))))
@@ -681,6 +677,9 @@ bool Gui::DoGui()
                         }
                         ImGui::TreePop();
                     }
+                    ImGui::Spacing();
+                    GuiHelper::FormatDescriptions();
+
                     ImGui::EndTabItem();
                 }
                 ImGui::EndTabBar();
