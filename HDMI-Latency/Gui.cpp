@@ -406,7 +406,7 @@ bool Gui::DoGui()
                 ImGui::SameLine(); GuiHelper::HelpMarker("The number of measurements for each of the selected audio formats. A higher number of measurements will give a more accurate average audio latency result, but will take longer to complete.");
                 if (ImGui::TreeNode("Advanced Configuration"))
                 {
-                    ImGui::DragFloat("Measurement Recording Length (s)", &TestConfiguration::RecordingLegnth, 0.1f, 0.6f, 10.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
+                    ImGui::DragFloat("Recording Length (seconds)", &TestConfiguration::RecordingLegnth, 0.1f, 0.6f, 10.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
                     ImGui::SameLine(); GuiHelper::HelpMarker("Increase the measurement recording length to measure higher audio latency. The default of 0.9 seconds enables measurements up to around 200 or 300 milliseconds, depending on input and output driver latency.");
 
                     ImGui::DragInt("Attempts Before Skipping a Format", &TestConfiguration::AttemptsBeforeFail, .05f, 1, 15, "%d",ImGuiSliderFlags_AlwaysClamp);

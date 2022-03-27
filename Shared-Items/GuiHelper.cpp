@@ -22,6 +22,7 @@ void GuiHelper::HelpMarker(const char* desc)
 void GuiHelper::FormatDescriptions()
 {
     ChannelDescriptions();
+    AMDSpeakersNote();
 }
 
 void GuiHelper::VerifiedHelp()
@@ -47,7 +48,20 @@ void GuiHelper::ChannelDescriptions()
             "FLC: Front Left of Center\n"
             "FRC: Front Right of Center\n"
             "LFE: Low Frequency Effect (subwoofer)\n"
-            "Default.Speakers: Speakers are chosen by the audio driver\n");
+            "Default.Speakers: Speakers are chosen by the audio driver");
+        ImGui::TreePop();
+    }
+}
+
+void GuiHelper::AMDSpeakersNote()
+{
+    if (ImGui::TreeNode("Note on AMD audio drivers"))
+    {
+        ImGui::TextWrapped("When using AMD audio drivers, speaker configurations will be ignored and the following will be used instead:\n\n"
+            "2ch: FL FR\n"
+            "4ch: FL FR RL RR\n"
+            "6ch: FL FR FC RL RR LFE\n"
+            "8ch: FL FR FC RL RR RLC RRC LFE\n");
         ImGui::TreePop();
     }
 }
