@@ -176,11 +176,12 @@ std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* 
             while (clusterStart.index > largeEdges[i].index - round(0.01 * sampleRate))
             {
                 int earliestIndex = clusterStart.index;
-                // Look back 3 full cycles at a time. If more than 3 cycles of the tick don't pass the
+                // Look back 10 full cycles at a time. If more than 10 cycles of the tick don't pass the
                 // detection threshold test, then we've found the start of this cluster.
-                // Using 3 cycles here isn't based off of anything in particular. Just sounds like a good amount
-                // to deal with crazy acoustics where echos are causing all types of weird wave effects
-                int earliestIndexToCheck = clusterStart.index - (tickDurationInSamples * 3);
+                // Using 10 cycles here is based off of some recordings where I found that 8 cyles was
+                // needed with an SM58 recording a PC monitor that had an upward facing speaker positioned
+                // around 2 feet away from the mic because of some echos cancelling out the ticks.
+                int earliestIndexToCheck = clusterStart.index - (tickDurationInSamples * 10);
                 for (int j = clusterStart.index - 1; j >= earliestIndexToCheck && j >= 0; j--)
                 {
                     if (allEdges[j].magnitude > threshold)
