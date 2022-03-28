@@ -5,8 +5,9 @@
 #include <math.h>
 #include "TestConfiguration.h"
 
-#define TICK_AMPLITUDE 1;
-#define CONSTANT_TONE_AMPLITUDE 0.002;
+#define WAKE_UP_TONE_AMPLITUDE 0.07
+#define CONSTANT_TONE_AMPLITUDE 0.002
+#define TICK_AMPLITUDE (1.0 - CONSTANT_TONE_AMPLITUDE)
 
 GeneratedSamples::GeneratedSamples(WAVEFORMATEX* waveFormat, WaveType type)
     : GeneratedSamples(waveFormat, Config(type) ) { }
@@ -73,7 +74,7 @@ void GeneratedSamples::GenerateLatencyMeasurementSamples()
     int tickFreq = GetTickFrequency(sampleRate);
 
     // Amplitudes
-    double wakeupToneAmp = 0.07;
+    double wakeupToneAmp = WAKE_UP_TONE_AMPLITUDE;
     double constantToneAmp = CONSTANT_TONE_AMPLITUDE;
     double tickAmp = TICK_AMPLITUDE;
 
@@ -84,8 +85,8 @@ void GeneratedSamples::GenerateLatencyMeasurementSamples()
     // Wake-up Constant tone generation
     for (int i = 0; i < samplesLength; i++)
     {
-        // Wake up tone is the entire startPadding, minus two cycles of the wake up tone's frequency:
-        if (i < (startPadding * sampleRate) - ((sampleRate / constantToneFreq) * 2))
+        // Wake up tone is the entire startPadding, minus five cycles of the wake up tone's frequency:
+        if (i < (startPadding * sampleRate) - ((sampleRate / constantToneFreq) * 5))
         {
             double time = (double)i / sampleRate;
             samples[i] = (float)(sin(M_PI * 2 * constantToneFreq * time) * wakeupToneAmp);
@@ -145,15 +146,12 @@ void GeneratedSamples::GenerateVolumeAdjustmentSamples()
         samples[i] = (float)sin(M_PI * 2 * constantToneFreq * time) * constantToneAmp;
     }
 
-    // Tick once per durationInSeconds
+    // Tick once per durationInSeconds on top of existing wave
     int tickSamplesLength = sampleRate / tickFreq;
-    for (int i = 0; i < samplesLength; i++)
+    for (int i = 0; i < tickSamplesLength && i < samplesLength; i++)
     {
-        if (i < tickSamplesLength)
-        {
-            double time = (double)i / sampleRate;
-            samples[i] = (float)sin(M_PI * 2 * tickFreq * time) * tickAmp;
-        }
+        double time = (double)i / sampleRate;
+        samples[i] += (float)sin(M_PI * 2 * tickFreq * time) * tickAmp;
     }
 }
 
