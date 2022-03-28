@@ -458,32 +458,9 @@ bool Gui::DoGui()
 
                 ImGui::Spacing();
                 ImGui::Text("");
-                ImGui::PushFont(FontHelper::BoldFont);
-                ImGui::Text("Test Configuration");
-                ImGui::PopFont();
 
-                ImGui::PushItemWidth(75 * DpiScale);
-                ImGui::DragInt("Number of Measurements", &TestConfiguration::NumMeasurements, .05f, 1, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
-                ImGui::SameLine(); GuiHelper::HelpMarker("The number of measurements for each of the selected audio formats. A higher number of measurements will give a more accurate average audio latency result, but will take longer to complete.");
-                if (ImGui::TreeNode("Advanced Configuration"))
-                {
-                    ImGui::DragFloat("Recording Length (seconds)", &TestConfiguration::RecordingLegnth, 0.1f, 0.6f, 10.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
-                    ImGui::SameLine(); GuiHelper::HelpMarker("Increase the measurement recording length to measure higher audio latency. The default of 0.9 seconds enables measurements up to around 200 or 300 milliseconds, depending on input and output driver latency.");
+                GuiHelper::TestConfiguration(DpiScale);
 
-                    ImGui::DragInt("Attempts Before Skipping a Format", &TestConfiguration::AttemptsBeforeFail, .05f, 1, 20, "%d", ImGuiSliderFlags_AlwaysClamp);
-                    ImGui::SameLine(); GuiHelper::HelpMarker("The number of measurement attempts for a specific format before this format is skipped altogether for the remainder of the test. Setting this number too low may cause formats to be incorrectly skipped when the DUT is simply taking time to wake up/sync to a new audio format.");
-
-                    ImGui::Checkbox("Save Individual Recording Results", &TestConfiguration::SaveIndividualRecordingResults);
-                    ImGui::SameLine(); GuiHelper::HelpMarker("Useful for debugging.");
-                    if (TestConfiguration::SaveIndividualRecordingResults)
-                    {
-                        ImGui::Indent(0);
-                        ImGui::Checkbox("Save Individual Recording WAV Files", &TestConfiguration::SaveIndividualWavFiles);
-                        ImGui::Unindent();
-                    }
-
-                    ImGui::TreePop();
-                }
                 ImGui::PopItemWidth();
                 ImGui::Spacing();
 

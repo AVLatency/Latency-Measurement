@@ -17,6 +17,7 @@ public:
 	static void AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManager::VolumeAnalysis& analysis, float DpiScale, float tickMonitorWidth, float fullMonitorWidth, const char* title, bool* useAutoThreshold, float* manualThreshold, bool* cableCrosstalkDetection);
 	static void PeakLevel(AdjustVolumeManager::PeakLevelGrade grade, const char* helpText);
 	static void AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheckedInputSampleRate, float* outputVolume, bool* overrideNoisyQuiet, void* exampleTexture, int exampleTextureWidth, int exampleTextureHeight, float DpiScale);
+	static void TestConfiguration(float DpiScale);
 	static void VerifiedHelp();
 	static void DearImGuiLegal();
 
