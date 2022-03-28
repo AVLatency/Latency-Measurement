@@ -268,7 +268,7 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheck
         ImGui::Indent();
             ImGui::TextWrapped("The peak audio level on the left side of the \"Raw Wave View\" shows the current volume of the channel. "
                 "This can be used to give immediate feedback on the audio input of each channel, which can help in determining if your wiring is correct. "
-                "Simply tap on the microphone or unplug and re-plug the device and watch for a change in this peak audio level. "
+                "Simply mute and unmute or unplug and re-plug the device and watch for a change in this peak audio level. "
                 "If your wiring is correct, changes to one channel should not affect the other.");
         ImGui::Unindent();
 
