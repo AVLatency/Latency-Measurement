@@ -5,8 +5,8 @@
 #include <math.h>
 #include "TestConfiguration.h"
 
-#define TICK_AMPLITUDE 0.6;
-#define CONSTANT_TONE_AMPLITUDE 0.001;
+#define TICK_AMPLITUDE 1;
+#define CONSTANT_TONE_AMPLITUDE 0.002;
 
 GeneratedSamples::GeneratedSamples(WAVEFORMATEX* waveFormat, WaveType type)
     : GeneratedSamples(waveFormat, Config(type) ) { }
@@ -73,7 +73,7 @@ void GeneratedSamples::GenerateLatencyMeasurementSamples()
     int tickFreq = GetTickFrequency(sampleRate);
 
     // Amplitudes
-    double wakeupToneAmp = 0.04;
+    double wakeupToneAmp = 0.07;
     double constantToneAmp = CONSTANT_TONE_AMPLITUDE;
     double tickAmp = TICK_AMPLITUDE;
 
