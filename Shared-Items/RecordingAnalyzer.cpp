@@ -77,7 +77,7 @@ RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const Gener
 
     // My tests have shown times where the third tick can be a full 5 samples off at 48kHz even though the recording is perfect. This is due to different audio clocks, etc.
     // But to be safe, add on a bit more wiggle room to deal with microphone recording nonsense (acoustics and physical effects, etc.).
-    int errorThresholdInSamples = round(10 * (inputSampleRate / 48000.0f)); // TODO: Blame on this and see how it's changed. Maybe this isn't needed anymore(?) but probably is because I don't ever know if I'm getting the leading edge or the large edge.
+    int errorThresholdInSamples = round(10 * (inputSampleRate / 48000.0f));
 
     int samplesExpectedFrom1to2 = round(config.patternTick2RelTime * inputSampleRate);
     int actualSamplesFrom1to2 = result.SamplesToTick2 - result.SamplesToTick1;
