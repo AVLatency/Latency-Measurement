@@ -269,7 +269,7 @@ void AdjustVolumeManager::AnalyseChannel(VolumeAnalysis& analysis, float* record
 		// It's possible that more change happens over a slightly longer period of time, but this is not important
 		// because the bulk of the change will still happen over this time, which will cause it to exceed the
 		// TestConfiguration::DetectionThreshold, which is all that matters.
-		for (int j = i; j < recordedSamplesLength && j - i < halfTickDurationInSamples; j++)
+		for (int j = i + 1; j - i <= halfTickDurationInSamples && j < recordedSamplesLength; j++)
 		{
 			float thisMagnitude = abs(recordedSamples[i] - recordedSamples[j]);
 			if (thisMagnitude > highestMagnitude)

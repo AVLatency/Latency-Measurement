@@ -77,7 +77,7 @@ RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const Gener
 
     // My tests have shown times where the third tick can be a full 5 samples off at 48kHz even though the recording is perfect. This is due to different audio clocks, etc.
     // But to be safe, add on a bit more wiggle room to deal with microphone recording nonsense (acoustics and physical effects, etc.).
-    int errorThresholdInSamples = round(10 * (inputSampleRate / 48000.0f));
+    int errorThresholdInSamples = round(10 * (inputSampleRate / 48000.0f)); // TODO: Blame on this and see how it's changed. Maybe this isn't needed anymore(?) but probably is because I don't ever know if I'm getting the leading edge or the large edge.
 
     int samplesExpectedFrom1to2 = round(config.patternTick2RelTime * inputSampleRate);
     int actualSamplesFrom1to2 = result.SamplesToTick2 - result.SamplesToTick1;
@@ -113,6 +113,89 @@ std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* 
     // - cable crosstalk from a different channel that has a legitimate tick, but isn't actually a singal that's intended for this channel
     // The solution to those scenarios is to heavily depend on a correclty configured threshold, handled by the AdjustVolumeManager.
 
+    int tickDurationInSamples = ceil((float)sampleRate / expectedTickFrequency);
+    int halfTickDurationInSamples = ceil((float)(sampleRate / 2) / expectedTickFrequency);
+
+    vector<TickPosition> largeEdges; // This is the result that we return
+    if (numTicks < 1)
+    {
+        return largeEdges;
+    }
+
+    for (int i = 0; i < recordedSamplesLength; i++)
+    {
+        float highestMagnitude = 0;
+        int highestMagnitudeIndex = i;
+        // The highest change in magnitude for a tick will occur over halfTickDurationInSamples, give or take
+        // It's possible that more change happens over a slightly longer period of time, but this is not important
+        // because the bulk of the change will still happen over this time, which will cause it to exceed the
+        // TestConfiguration::DetectionThreshold, which is all that matters.
+        for (int j = i + 1; j - i <= halfTickDurationInSamples && j < recordedSamplesLength; j++)
+        {
+            float thisMagnitude = abs(recordedSamples[i] - recordedSamples[j]);
+            if (thisMagnitude > highestMagnitude)
+            {
+                highestMagnitude = thisMagnitude;
+                highestMagnitudeIndex = j;
+            }
+        }
+
+        // It is important that the DetectionThreshold is configured to filter cable crosstalk.
+        if (highestMagnitude > threshold)
+        {
+            TickPosition pos;
+            pos.index = i;
+            pos.magnitude = highestMagnitude;
+            pos.endIndex = highestMagnitudeIndex;
+
+            int originalEndIndex = pos.endIndex;
+
+            // Now it's time to detect the peak that follows this edge, which might be a small bit further along.
+            // NOTE: This has a limitation that the peak may be the first or second peak in the tick signal! I haven't
+            // figured out a way to determine which it is, in a general case that works with weird echos as well.
+            // But because this is a simple solution, it's a small price to pay for something that's somewhat reliable.
+            // Adjust this end point to be the actual peak of the wave:
+            for (int j = originalEndIndex + 1; j <= originalEndIndex + halfTickDurationInSamples && j < recordedSamplesLength; j++)
+            {
+                float newMagnitude = abs(recordedSamples[pos.index] - recordedSamples[j]);
+                if (pos.magnitude < newMagnitude)
+                {
+                    // magnitude is increasing, this is closer to the peak than the originalEndIndex
+                    pos.magnitude = newMagnitude;
+                    pos.endIndex = j;
+                }
+                else
+                {
+                    // magnitude has started decreasing, which means we've passed the peak
+                    break;
+                }
+            }
+
+            largeEdges.push_back(pos);
+
+            if (largeEdges.size() == numTicks)
+            {
+                break;
+            }
+
+            // Skip the next 20 milliseconds of echoes and noise caused by the tick.
+            // 20 ms is a nice spot because we're expecting tick 2 to arrive 30 ms after tick 1 (see GeneratedSamples::patternTick2RelTime)
+            i += round(0.020 * sampleRate);
+        }
+    }
+
+    return largeEdges;
+
+
+
+
+    // This is an alternative algorithm that tries to filter out background noise that is greater than the detection threshold
+    // but is less than the top three tick magnitudes. This alternative algorithm is currently not used because it has problems
+    // dealing with echoes where the peak magnitude is a culmination of echoes and the start of the tick precedes it with silence
+    // between the two peaks. The time when this algorithm has advantages is rare and will be dealt with by simply checking if
+    // the ticks are in the correct positions relative to each other.
+    
+    /*
     // Algorithm goes something like this:
     // 
     // look for all rising and falling edges, recording magnitude
@@ -135,7 +218,7 @@ std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* 
         // It's possible that more change happens over a slightly longer period of time, but this is not important
         // because the bulk of the change will still happen over this time, which will cause it to exceed the
         // TestConfiguration::DetectionThreshold, which is all that matters.
-        for (int j = i; j < recordedSamplesLength && j - i < halfTickDurationInSamples; j++)
+        for (int j = i + 1; j - i <= halfTickDurationInSamples && j < recordedSamplesLength; j++)
         {
             float thisMagnitude = abs(recordedSamples[i] - recordedSamples[j]);
             if (thisMagnitude > highestMagnitude)
@@ -210,13 +293,19 @@ std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* 
             // figured out a way to determine which it is, in a general case that works with weird echos as well.
             // But because this is a simple solution, it's a small price to pay for something that's somewhat reliable.
             // Adjust this end point to be the actual peak of the wave:
-            for (int j = clusterStart.endIndex; j < clusterStart.endIndex + halfTickDurationInSamples && j < recordedSamplesLength; j++)
+            for (int j = originalEndIndex + 1; j <= originalEndIndex + halfTickDurationInSamples && j < recordedSamplesLength; j++)
             {
-                float newMagnitude = abs(recordedSamples[clusterStart.index] - recordedSamples[j]);
-                if (clusterStart.magnitude < newMagnitude)
+                float newMagnitude = abs(recordedSamples[pos.index] - recordedSamples[j]);
+                if (pos.magnitude < newMagnitude)
                 {
-                    clusterStart.magnitude = newMagnitude;
-                    clusterStart.endIndex = j;
+                    // magnitude is increasing, this is closer to the peak than the originalEndIndex
+                    pos.magnitude = newMagnitude;
+                    pos.endIndex = j;
+                }
+                else
+                {
+                    // magnitude has started decreasing, which means we've passed the peak
+                    break;
                 }
             }
 
@@ -248,6 +337,7 @@ std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* 
     delete[] allEdges;
 
     return largeEdges;
+    */
 }
 
 std::vector<AveragedResult> RecordingAnalyzer::AnalyzeResults(std::vector<RecordingResult> results, time_t tTime, const AudioEndpoint& outputEndpoint)
