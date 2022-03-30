@@ -308,6 +308,13 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheck
         ImGui::SameLine(); GuiHelper::HelpMarker("Generally, it is a better idea to manually increase the Threshold than to override this feature. See the \"Detailed Instructions and Troubleshooting\" section for more details.");
         ImGui::DragFloat("Output Volume", outputVolume, .001f, .1f, 1, "%.2f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::SameLine(); GuiHelper::HelpMarker("Default: 0.75. There is usually no reason to change this. Increasing this may cause substantial cable crosstalk.");
+
+#ifdef _DEBUG
+        // TODO: remove this once I've settled on an amplitude I'm happy with. This doesn't actually adjust anything in real-time because the audio tone is set to repeat.
+        ImGui::DragFloat("Lead-In Tone Amplitude", &TestConfiguration::LeadInToneAmplitude, 0.001, 0.002, 1, "%.4f", ImGuiSliderFlags_AlwaysClamp | ImGuiSliderFlags_Logarithmic);
+        ImGui::SameLine(); GuiHelper::HelpMarker("Default: 0.07. This lead-in tone is used to stop dynamic normalization that exists in some onboard microphone inputs. If your input audio device does not have any dynamic normalization (such as a professional audio interface), you can turn this down to make the audio patterns less annoying to listen to.");
+#endif
+
         ImGui::TreePop();
     }
 }

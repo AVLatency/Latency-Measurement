@@ -80,13 +80,27 @@ void GeneratedSamples::GenerateLatencyMeasurementSamples()
     samplesLength = (int)(tickTimesInSamples[tickTimesInSamplesLength - 1] + endPadding * sampleRate);
     samples = new float[samplesLength];
 
-    // Wake-up Constant tone generation
+    // lead-in and constant tone generation
     for (int i = 0; i < samplesLength; i++)
     {
-        // Wake up AND keep the audio device awake through the ticks
-        // (HDV-MB01 goes to sleep after two ticks at 192 kHz)
+        float amplitude;
+        if (i < (startPadding * sampleRate) - ((sampleRate / constantToneFreq) * 4))
+        {
+            // Lead-in tone is the entire startPadding, minus four cycles of the tone's frequency.
+            // The purpose of this tone is to fight against dynamic normalization that occurs in
+            // some input audio devices, such as onboard microphones. Professional audio devices
+            // and many onboard microphone inputs don't need this at all.
+            amplitude = max(TestConfiguration::LeadInToneAmplitude, constantToneAmp);
+        }
+        else
+        {
+            // A constant tone is played throughout, just to keep the audio device awake
+            // (HDV-MB01 goes to sleep after two ticks at 192 kHz)
+            amplitude = constantToneAmp;
+        }
+
         double time = (double)i / sampleRate;
-        samples[i] = (float)(sin(M_PI * 2 * constantToneFreq * time) * constantToneAmp);
+        samples[i] = (float)(sin(M_PI * 2 * constantToneFreq * time) * amplitude);
     }
 
     // Tick:
@@ -128,11 +142,27 @@ void GeneratedSamples::GenerateVolumeAdjustmentSamples()
     samplesLength = (int)(durationSeconds * sampleRate);
     samples = new float[samplesLength];
 
-    // Constant tone is needed to wake up some audio devices, for example my Sony reciever
+    // lead-in and constant tone generation
     for (int i = 0; i < samplesLength; i++)
     {
+        float amplitude;
+        if (i < samplesLength / 2)
+        {
+            // Lead-in tone is the entire startPadding, minus four cycles of the tone's frequency.
+            // The purpose of this tone is to fight against dynamic normalization that occurs in
+            // some input audio devices, such as onboard microphones. Professional audio devices
+            // and many onboard microphone inputs don't need this at all.
+            amplitude = max(TestConfiguration::LeadInToneAmplitude, constantToneAmp);
+        }
+        else
+        {
+            // A constant tone is played throughout, just to keep the audio device awake
+            // (HDV-MB01 goes to sleep after two ticks at 192 kHz)
+            amplitude = constantToneAmp;
+        }
+
         double time = (double)i / sampleRate;
-        samples[i] = (float)sin(M_PI * 2 * constantToneFreq * time) * constantToneAmp;
+        samples[i] = (float)(sin(M_PI * 2 * constantToneFreq * time) * amplitude);
     }
 
     // Tick once per durationInSeconds on top of existing wave
@@ -140,7 +170,8 @@ void GeneratedSamples::GenerateVolumeAdjustmentSamples()
     for (int i = 0; i < tickSamplesLength && i < samplesLength; i++)
     {
         double time = (double)i / sampleRate;
-        samples[i] += (float)sin(M_PI * 2 * tickFreq * time) * tickAmp;
+        // Tick happsn 4 constant tone cyles after the lead-in tone ends, just like in the measurement pattern
+        samples[i + (samplesLength / 2) + ((sampleRate / constantToneFreq) * 4)] += (float)sin(M_PI * 2 * tickFreq * time) * tickAmp;
     }
 }
 

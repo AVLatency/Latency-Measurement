@@ -51,7 +51,7 @@ public:
 	/// <summary>
 	/// This constant tone is played throughout to keep the audio device awake.
 	/// </summary>
-	double constantToneFreq = 300;
+	int constantToneFreq = 300;
 
 	GeneratedSamples(WAVEFORMATEX* waveFormat, WaveType type);
 	GeneratedSamples(WAVEFORMATEX* waveFormat, Config config);

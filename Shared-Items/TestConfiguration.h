@@ -11,6 +11,7 @@ public:
 	/// </summary>
 	static float RecordingLegnth;
 	static float OutputVolume;
+	static float LeadInToneAmplitude;
 
 	static bool Ch1AutoThresholdDetection;
 	/// <summary>
