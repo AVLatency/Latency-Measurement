@@ -46,7 +46,8 @@ RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& gene
         && result.Channel2.ValidResult)
     {
         bool detectedCrosstalk = false;
-        int tickDurationInSamples = ceil((float)inputSampleRate / GeneratedSamples::GetTickFrequency(generatedSamples.WaveFormat->nSamplesPerSec));
+        double expectedTickFrequency = GeneratedSamples::GetTickFrequency(generatedSamples.WaveFormat->nSamplesPerSec);
+        int tickDurationInSamples = ceil(inputSampleRate / expectedTickFrequency);
 
         // This detection method matches the crosstalk detection in AdjustVolumeManager::CheckCableCrosstalk
         if (abs(result.Channel1.SamplesToTick1 - result.Channel2.SamplesToTick1) <= tickDurationInSamples)
@@ -143,7 +144,7 @@ RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const Gener
     return result;
 }
 
-std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* recordedSamples, int recordedSamplesLength, int sampleRate, int expectedTickFrequency, int numTicks, float threshold)
+std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* recordedSamples, int recordedSamplesLength, int sampleRate, double expectedTickFrequency, int numTicks, float threshold)
 {
     // Needs to work with the following scenarios:
     // - Legitimate ticks exist in the sample set
@@ -153,8 +154,8 @@ std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* 
     // - cable crosstalk from a different channel that has a legitimate tick, but isn't actually a singal that's intended for this channel
     // The solution to those scenarios is to heavily depend on a correclty configured threshold, handled by the AdjustVolumeManager.
 
-    int tickDurationInSamples = ceil((float)sampleRate / expectedTickFrequency);
-    int halfTickDurationInSamples = ceil((float)(sampleRate / 2) / expectedTickFrequency);
+    int tickDurationInSamples = ceil(sampleRate / expectedTickFrequency);
+    int halfTickDurationInSamples = ceil((sampleRate / 2) / expectedTickFrequency);
 
     vector<TickPosition> largeEdges; // This is the result that we return
     if (numTicks < 1)
@@ -245,8 +246,8 @@ std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* 
     // Then find the peak that follows that earliest edge index. This may be the first or second peak
     // of the original tick signal, but that's OK: it's a small time difference between the two.
 
-    int tickDurationInSamples = ceil((float)sampleRate / expectedTickFrequency);
-    int halfTickDurationInSamples = ceil((float)(sampleRate / 2) / expectedTickFrequency);
+    int tickDurationInSamples = ceil(sampleRate / expectedTickFrequency);
+    int halfTickDurationInSamples = ceil((sampleRate / 2) / expectedTickFrequency);
 
     TickPosition* allEdges = new TickPosition[recordedSamplesLength];
     vector<TickPosition> largeEdges;

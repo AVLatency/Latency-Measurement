@@ -50,6 +50,7 @@ public:
 	double patternTick3RelTime = 0.08;
 	/// <summary>
 	/// This constant tone is played throughout to keep the audio device awake.
+	/// 300 Hz is a nice number because it divides into 44100 and 48000
 	/// </summary>
 	int constantToneFreq = 300;
 
@@ -59,7 +60,7 @@ public:
 
 	double TestWaveDurationInSeconds() const;
 
-	static int GetTickFrequency(int sampleRate);
+	static double GetTickFrequency(int sampleRate);
 
 private:
 	void GenerateLatencyMeasurementSamples();

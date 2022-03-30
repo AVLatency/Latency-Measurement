@@ -51,9 +51,10 @@ double GeneratedSamples::TestWaveDurationInSeconds() const
     return samplesLength / (double)WaveFormat->nSamplesPerSec;
 }
 
-int GeneratedSamples::GetTickFrequency(int sampleRate)
+double GeneratedSamples::GetTickFrequency(int sampleRate)
 {
-    return sampleRate == 44100 ? (44100 / 4) : (48000 / 4);
+    int divider = TestConfiguration::LowFreqPitch ? 8 : 4;
+    return sampleRate == 44100 ? ((double)44100 / divider) : (48000 / divider);
 }
 
 void GeneratedSamples::GenerateLatencyMeasurementSamples()
@@ -70,7 +71,7 @@ void GeneratedSamples::GenerateLatencyMeasurementSamples()
     double endPadding = max(TestConfiguration::RecordingLegnth - startPadding - patternTick3RelTime, 0.1);
 
     // Frequencies
-    int tickFreq = GetTickFrequency(sampleRate);
+    double tickFreq = GetTickFrequency(sampleRate);
 
     // Amplitudes
     double constantToneAmp = CONSTANT_TONE_AMPLITUDE;
@@ -104,7 +105,7 @@ void GeneratedSamples::GenerateLatencyMeasurementSamples()
     }
 
     // Tick:
-    int tickSamplesLength = sampleRate / tickFreq;
+    int tickSamplesLength = round(sampleRate / tickFreq);
     float* tickSamples = new float[tickSamplesLength];
     for (int i = 0; i < tickSamplesLength; i++)
     {
@@ -132,7 +133,7 @@ void GeneratedSamples::GenerateVolumeAdjustmentSamples()
     double durationSeconds = 0.1f;
 
     // Frequencies
-    int tickFreq = GetTickFrequency(sampleRate);
+    double tickFreq = GetTickFrequency(sampleRate);
 
     // Amplitudes
     double tickAmp = TICK_AMPLITUDE;
@@ -166,7 +167,7 @@ void GeneratedSamples::GenerateVolumeAdjustmentSamples()
     }
 
     // Tick once per durationInSeconds on top of existing wave
-    int tickSamplesLength = sampleRate / tickFreq;
+    int tickSamplesLength = round(sampleRate / tickFreq);
     for (int i = 0; i < tickSamplesLength && i < samplesLength; i++)
     {
         double time = (double)i / sampleRate;

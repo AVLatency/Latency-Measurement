@@ -191,7 +191,7 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
 
     ImGui::Checkbox("Automatic Threshold Detection", useAutoThreshold);
     ImGui::SameLine();
-    HelpMarker("Automatically sets the audio pattern detection threshold to half of the largest edge magnitude. Disable this feature to increase the threshold when there is loud cable crosstalk or background noise.");
+    HelpMarker("Automatically sets the audio pattern detection threshold to a portion of the largest edge magnitude.\n\nDisable this feature to increase the threshold when there is loud cable crosstalk or background noise or decrease the threshold when using professional audio equipment in a quiet environment with lots of echoes.");
     if (!*useAutoThreshold)
     {
         ImGui::DragFloat("Manual Threshold", manualThreshold, 0.001, 0, 1.9, "%.4f", ImGuiSliderFlags_AlwaysClamp | ImGuiSliderFlags_Logarithmic);
@@ -313,6 +313,8 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheck
         // TODO: remove this once I've settled on an amplitude I'm happy with. This doesn't actually adjust anything in real-time because the audio tone is set to repeat.
         ImGui::DragFloat("Lead-In Tone Amplitude", &TestConfiguration::LeadInToneAmplitude, 0.001, 0.002, 1, "%.4f", ImGuiSliderFlags_AlwaysClamp | ImGuiSliderFlags_Logarithmic);
         ImGui::SameLine(); GuiHelper::HelpMarker("Default: 0.07. This lead-in tone is used to stop dynamic normalization that exists in some onboard microphone inputs. If your input audio device does not have any dynamic normalization (such as a professional audio interface), you can turn this down to make the audio patterns less annoying to listen to.");
+
+        ImGui::Checkbox("Low Freqency Pitch", &TestConfiguration::LowFreqPitch);
 #endif
 
         ImGui::TreePop();

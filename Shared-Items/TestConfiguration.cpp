@@ -13,6 +13,7 @@ int TestConfiguration::NumMeasurements = 10;
 float TestConfiguration::RecordingLegnth = 0.9;
 float TestConfiguration::OutputVolume = 0.75f;
 float TestConfiguration::LeadInToneAmplitude = 0.07;
+bool TestConfiguration::LowFreqPitch = true;
 
 bool TestConfiguration::Ch1AutoThresholdDetection = true;
 float TestConfiguration::Ch1DetectionThreshold = 0.05f * 2.0f;

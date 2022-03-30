@@ -12,6 +12,7 @@ public:
 	static float RecordingLegnth;
 	static float OutputVolume;
 	static float LeadInToneAmplitude;
+	static bool LowFreqPitch;
 
 	static bool Ch1AutoThresholdDetection;
 	/// <summary>
