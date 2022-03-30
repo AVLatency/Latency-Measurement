@@ -13,6 +13,10 @@
 AdjustVolumeManager::AdjustVolumeManager(const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, int targetTickMonitorSampleLength, int targetFullMonitorSampleLength, const float& userLeftThreshold, const float& userRightThreshold)
 	: TargetTickMonitorSampleLength(targetTickMonitorSampleLength), TargetFullMonitorSampleLength(targetFullMonitorSampleLength), UserLeftThreshold(userLeftThreshold), UserRightThreshold(userRightThreshold)
 {
+	// Always restart these when starting up volume adjustment. These should normally not be disabled.
+	TestConfiguration::Ch1CableCrosstalkDetection = true;
+	TestConfiguration::Ch2CableCrosstalkDetection = true;
+
 	SetThreadExecutionState(ES_DISPLAY_REQUIRED); // Prevent display from turning off while running this tool.
 	working = true;
 
@@ -382,8 +386,14 @@ void AdjustVolumeManager::SetGrades()
 	LeftVolumeAnalysis.Grade = PeakLevelGrade::Good;
 	RightVolumeAnalysis.Grade = PeakLevelGrade::Good;
 
-	CheckCableCrosstalk(LeftVolumeAnalysis, RightVolumeAnalysis, UserLeftThreshold);
-	CheckCableCrosstalk(RightVolumeAnalysis, LeftVolumeAnalysis, UserRightThreshold);
+	if (TestConfiguration::Ch1CableCrosstalkDetection)
+	{
+		CheckCableCrosstalk(LeftVolumeAnalysis, RightVolumeAnalysis, UserLeftThreshold);
+	}
+	if (TestConfiguration::Ch2CableCrosstalkDetection)
+	{
+		CheckCableCrosstalk(RightVolumeAnalysis, LeftVolumeAnalysis, UserRightThreshold);
+	}
 
 	if (LeftVolumeAnalysis.Grade != PeakLevelGrade::Crosstalk)
 	{
@@ -397,27 +407,26 @@ void AdjustVolumeManager::SetGrades()
 
 void AdjustVolumeManager::CheckCableCrosstalk(VolumeAnalysis& analysis, VolumeAnalysis& other, const float& threshold)
 {
-	if (analysis.CableCrosstalkDetection)
-	{
-		// Get some info about the ticks that were generated and create the sample buffers
-		int outputSampleRate = generatedSamples->WaveFormat->nSamplesPerSec;
-		int inputSampleRate = input->waveFormat.Format.nSamplesPerSec;
-		int expectedTickFrequency = generatedSamples->GetTickFrequency(outputSampleRate);
-		int tickDurationInSamples = ceil((float)inputSampleRate / expectedTickFrequency);
+	// Get some info about the ticks that were generated and create the sample buffers
+	int outputSampleRate = generatedSamples->WaveFormat->nSamplesPerSec;
+	int inputSampleRate = input->waveFormat.Format.nSamplesPerSec;
+	int expectedTickFrequency = generatedSamples->GetTickFrequency(outputSampleRate);
+	int tickDurationInSamples = ceil((float)inputSampleRate / expectedTickFrequency);
 
-		// In some cases, the crosstalk's largest edge will happen a full cycle before the leargest edge of the
-		// source signal's largest edge. This happens when the source signal is clipping and noisy. When it is clean
-		// and not clipping, it's more like a half cycle before.
-		// In other cases, the crosstalk's largest edge will match the same sample as the largest edge of the source
-		// signal.
-		// In my preliminary tests, I haven't seen any cases where the crosstalk follows the source signal, which is the
-		// opposite of what I would have expected, so I've left in a cycle following the source just in case.
-		for (int i = max(0, other.MaxEdgeIndex - tickDurationInSamples); i < min(other.AllEdgesLength, other.MaxEdgeIndex + tickDurationInSamples); i++)
+	// I've seen the following scenarios play out with a 12 kHz tick (4 samples at 48 kHz):
+	// In some cases, the crosstalk's largest edge will happen a full cycle before the leargest edge of the
+	// source signal's largest edge. This happens when the source signal is clipping and noisy. When it is clean
+	// and not clipping, it's more like a half cycle before.
+	// In other cases, the crosstalk's largest edge will match the same sample as the largest edge of the source
+	// signal.
+	// And finally the crosstalk's largest edge will sometimes happen a full cylce plus one sample after the the source.
+
+	// NOTE: If this is changed, then RecordingAnalyzer::AnalyzeRecording should also be updated to match!!!
+	for (int i = max(0, other.MaxEdgeIndex - tickDurationInSamples); i < min(other.AllEdgesLength, other.MaxEdgeIndex + tickDurationInSamples + 1); i++)
+	{
+		if (analysis.AllEdges[i] > threshold)
 		{
-			if (analysis.AllEdges[i] > threshold)
-			{
-				analysis.Grade = PeakLevelGrade::Crosstalk;
-			}
+			analysis.Grade = PeakLevelGrade::Crosstalk;
 		}
 	}
 }

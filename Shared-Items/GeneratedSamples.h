@@ -49,7 +49,7 @@ public:
 	/// </summary>
 	double patternTick3RelTime = 0.08;
 	/// <summary>
-	/// This constant tone is played throughout to wake up and keep the audio device awake.
+	/// This constant tone is played throughout to keep the audio device awake.
 	/// </summary>
 	double constantToneFreq = 300;
 

@@ -37,6 +37,46 @@ RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& gene
     result.Channel1 = AnalyzeSingleChannel(generatedSamples, ch1RecordedSamples, channelSamplesLength, inputSampleRate, TestConfiguration::Ch1DetectionThreshold);
     result.Channel2 = AnalyzeSingleChannel(generatedSamples, ch2RecordedSamples, channelSamplesLength, inputSampleRate, TestConfiguration::Ch2DetectionThreshold);
 
+    // It's possible that something has changed since the adjust volume manager was used and cable crosstalk signals are now
+    // exceeding the threshold that was previously configured. For this reason, check to make sure these aren't crosstalk
+    // signals. This can also happen when the input audio device has dynamic normalization, which is the case with some
+    // onboard microphone inputs.
+    if ((TestConfiguration::Ch1CableCrosstalkDetection || TestConfiguration::Ch2CableCrosstalkDetection)
+        && result.Channel1.ValidResult
+        && result.Channel2.ValidResult)
+    {
+        bool detectedCrosstalk = false;
+        int tickDurationInSamples = ceil((float)inputSampleRate / GeneratedSamples::GetTickFrequency(generatedSamples.WaveFormat->nSamplesPerSec));
+
+        // This detection method matches the crosstalk detection in AdjustVolumeManager::CheckCableCrosstalk
+        if (abs(result.Channel1.SamplesToTick1 - result.Channel2.SamplesToTick1) <= tickDurationInSamples)
+        {
+            detectedCrosstalk = true;
+        }
+        if (abs(result.Channel1.SamplesToTick2 - result.Channel2.SamplesToTick2) <= tickDurationInSamples)
+        {
+            detectedCrosstalk = true;
+        }
+        if (abs(result.Channel1.SamplesToTick3 - result.Channel2.SamplesToTick3) <= tickDurationInSamples)
+        {
+            detectedCrosstalk = true;
+        }
+
+        if (detectedCrosstalk)
+        {
+            if (TestConfiguration::Ch1CableCrosstalkDetection)
+            {
+                result.Channel1.ValidResult = false;
+                result.Channel1.InvalidReason = "Cable crosstalk detected.";
+            }
+            if (TestConfiguration::Ch2CableCrosstalkDetection)
+            {
+                result.Channel2.ValidResult = false;
+                result.Channel2.InvalidReason = "Cable crosstalk detected.";
+            }
+        }
+    }
+
     delete[] ch1RecordedSamples;
     delete[] ch2RecordedSamples;
     return result;

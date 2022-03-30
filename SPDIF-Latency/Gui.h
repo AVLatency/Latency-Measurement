@@ -42,6 +42,6 @@ private:
 
 	void RefreshAudioEndpoints();
 
-	void StartAjdustVolumeAudio();
+	void StartAdjustVolume();
 	void StartTest();
 };

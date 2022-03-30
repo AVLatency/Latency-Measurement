@@ -13,8 +13,6 @@ public:
 	struct VolumeAnalysis
 	{
 	public:
-		bool CableCrosstalkDetection = true;
-
 		int SampleRate = 0;
 
 		float* RawWaveSamples = nullptr;

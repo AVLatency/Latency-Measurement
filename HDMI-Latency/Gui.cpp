@@ -192,7 +192,7 @@ bool Gui::DoGui()
                 {
                     lastCheckedInputSampleRate = AudioEndpointHelper::GetInputMixFormatSampleRate(inputAudioEndpoints[inputDeviceIndex]);
                     state = MeasurementToolGuiState::AdjustVolume;
-                    StartAjdustVolumeAudio();
+                    StartAdjustVolume();
                 }
             }
 
@@ -204,9 +204,9 @@ bool Gui::DoGui()
 
             if (state >= MeasurementToolGuiState::AdjustVolume)
             {
-                bool previousCrossTalk = adjustVolumeManager->LeftVolumeAnalysis.CableCrosstalkDetection;
-                GuiHelper::AdjustVolumeDisplay("left channel volume", adjustVolumeManager->LeftVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, "Left Channel Input (HDMI Audio Extractor)", &TestConfiguration::Ch1AutoThresholdDetection, &TestConfiguration::Ch1DetectionThreshold, &adjustVolumeManager->LeftVolumeAnalysis.CableCrosstalkDetection);
-                if (!adjustVolumeManager->LeftVolumeAnalysis.CableCrosstalkDetection && previousCrossTalk)
+                bool previousCrossTalk = TestConfiguration::Ch1CableCrosstalkDetection;
+                GuiHelper::AdjustVolumeDisplay("left channel volume", adjustVolumeManager->LeftVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, "Left Channel Input (HDMI Audio Extractor)", &TestConfiguration::Ch1AutoThresholdDetection, &TestConfiguration::Ch1DetectionThreshold, &TestConfiguration::Ch1CableCrosstalkDetection);
+                if (!TestConfiguration::Ch1CableCrosstalkDetection && previousCrossTalk)
                 {
                     openDialogVolumeAdjustDisabledCrosstalk = true;
                 }
@@ -214,9 +214,9 @@ bool Gui::DoGui()
                 ImGui::Spacing();
                 ImGui::Spacing();
 
-                previousCrossTalk = adjustVolumeManager->RightVolumeAnalysis.CableCrosstalkDetection;
-                GuiHelper::AdjustVolumeDisplay("right channel volume", adjustVolumeManager->RightVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, "Right Channel Input (DUT)", &TestConfiguration::Ch2AutoThresholdDetection, &TestConfiguration::Ch2DetectionThreshold, &adjustVolumeManager->RightVolumeAnalysis.CableCrosstalkDetection);
-                if (!adjustVolumeManager->RightVolumeAnalysis.CableCrosstalkDetection && previousCrossTalk)
+                previousCrossTalk = TestConfiguration::Ch2CableCrosstalkDetection;
+                GuiHelper::AdjustVolumeDisplay("right channel volume", adjustVolumeManager->RightVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, "Right Channel Input (DUT)", &TestConfiguration::Ch2AutoThresholdDetection, &TestConfiguration::Ch2DetectionThreshold, &TestConfiguration::Ch2CableCrosstalkDetection);
+                if (!TestConfiguration::Ch2CableCrosstalkDetection && previousCrossTalk)
                 {
                     openDialogVolumeAdjustDisabledCrosstalk = true;
                 }
@@ -831,7 +831,7 @@ void Gui::RefreshAudioEndpoints()
     inputDeviceIndex = 0;
 }
 
-void Gui::StartAjdustVolumeAudio()
+void Gui::StartAdjustVolume()
 {
     // Save the old one if it's still in the middle of working. Otherwise, make a new one.
     if (adjustVolumeManager != nullptr && !adjustVolumeManager->working)
