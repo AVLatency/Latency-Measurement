@@ -17,4 +17,10 @@ public:
     float RelMillisecondsToTick3() const { return (SamplesToTick3 - SamplesToTick1) / (float)RecordingSampleRate * 1000.0f; };
 
     float DetectionThreshold = 0;
+
+    // While "SampelsToTick" above represent the peak, these are the start of the edge
+    // that leads to the peak:
+    int SamplesToIndex1 = 0;
+    int SamplesToIndex2 = 0;
+    int SamplesToIndex3 = 0;
 };

@@ -78,6 +78,129 @@ RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& gene
         }
     }
 
+    // The following code was used during development to determine the proximity threshold that should be used for detecting cable crosstalk:
+    /*
+    if (result.Channel1.ValidResult && result.Channel2.ValidResult)
+    {
+        // Get some info about the ticks that were generated and create the sample buffers
+        int outputSampleRate = generatedSamples.WaveFormat->nSamplesPerSec;
+        int inputSampleRate = input.waveFormat.Format.nSamplesPerSec;
+        double expectedTickFrequency = GeneratedSamples::GetTickFrequency(outputSampleRate);
+        int tickDurationInSamples = ceil(inputSampleRate / expectedTickFrequency);
+        int halfTickDurationInSamples = ceil((inputSampleRate / 2) / expectedTickFrequency);
+
+        int recordedSamplesLength = channelSamplesLength;
+
+        float* ch1AllEdges = new float[recordedSamplesLength];
+        float* recordedSamples = ch1RecordedSamples;
+        for (int i = 0; i < recordedSamplesLength; i++)
+        {
+            float highestMagnitude = 0;
+            // The highest change in magnitude for a tick will occur over halfTickDurationInSamples, give or take
+            // It's possible that more change happens over a slightly longer period of time, but this is not important
+            // because the bulk of the change will still happen over this time, which will cause it to exceed the
+            // TestConfiguration::DetectionThreshold, which is all that matters.
+            for (int j = i + 1; j - i <= halfTickDurationInSamples && j < recordedSamplesLength; j++)
+            {
+                float thisMagnitude = abs(recordedSamples[i] - recordedSamples[j]);
+                if (thisMagnitude > highestMagnitude)
+                {
+                    highestMagnitude = thisMagnitude;
+                }
+            }
+            ch1AllEdges[i] = highestMagnitude;
+        }
+
+        float* ch2AllEdges = new float[recordedSamplesLength];
+        recordedSamples = ch2RecordedSamples;
+        for (int i = 0; i < recordedSamplesLength; i++)
+        {
+            float highestMagnitude = 0;
+            // The highest change in magnitude for a tick will occur over halfTickDurationInSamples, give or take
+            // It's possible that more change happens over a slightly longer period of time, but this is not important
+            // because the bulk of the change will still happen over this time, which will cause it to exceed the
+            // TestConfiguration::DetectionThreshold, which is all that matters.
+            for (int j = i + 1; j - i <= halfTickDurationInSamples && j < recordedSamplesLength; j++)
+            {
+                float thisMagnitude = abs(recordedSamples[i] - recordedSamples[j]);
+                if (thisMagnitude > highestMagnitude)
+                {
+                    highestMagnitude = thisMagnitude;
+                }
+            }
+            ch2AllEdges[i] = highestMagnitude;
+        }
+
+        int samplesBetweenHighest1 = 0;
+        int samplesBetweenHighest2 = 0;
+        int samplesBetweenHighest3 = 0;
+        for (int i = 0; i < 3; i++)
+        {
+            int samplesToSearch = 0.001 * input.waveFormat.Format.nSamplesPerSec;
+
+            int target;
+            switch (i)
+            {
+                case 0:
+                    target = result.Channel1.SamplesToTick1;
+                    break;
+                case 1:
+                    target = result.Channel1.SamplesToTick2;
+                    break;
+                default:
+                    target = result.Channel1.SamplesToTick3;
+                    break;
+            }
+
+            float highestLeft = 0;
+            int highestLeftIndex = 0;
+            for (int j = target - samplesToSearch; j < target + samplesToSearch; j++)
+            {
+                if (ch1AllEdges[j] > highestLeft)
+                {
+                    highestLeft = ch1AllEdges[j];
+                    highestLeftIndex = j;
+                }
+            }
+
+            float highestRight = 0;
+            int highestRightIndex = 0;
+            for (int j = target - samplesToSearch; j < target + samplesToSearch; j++)
+            {
+                if (ch1AllEdges[j] > highestRight)
+                {
+                    highestRight = ch1AllEdges[j];
+                    highestRightIndex = j;
+                }
+            }
+
+            switch (i)
+            {
+            case 0:
+                samplesBetweenHighest1 = highestLeftIndex - highestRightIndex;
+                break;
+            case 1:
+                samplesBetweenHighest2 = highestLeftIndex - highestRightIndex;
+                break;
+            default:
+                samplesBetweenHighest3 = highestLeftIndex - highestRightIndex;
+                break;
+            }
+        }
+
+        result.Channel2.InvalidReason = std::format("Between highest 1:\",\"{}\",\"Between highest 2:\",\"{}\",\"Between highest 3:\",\"{}\",\"Between ticks 1:\",\"{}\",\"Between ticks 2:\",\"{}\",\"Between ticks 3:\",\"{}\",\"Between start index 1:\",\"{}\",\"Between start index 2:\",\"{}\",\"Between start index 3:\",\"{}",
+            samplesBetweenHighest1,
+            samplesBetweenHighest2,
+            samplesBetweenHighest3,
+            result.Channel1.SamplesToTick1 - result.Channel2.SamplesToTick1,
+            result.Channel1.SamplesToTick2 - result.Channel2.SamplesToTick2,
+            result.Channel1.SamplesToTick3 - result.Channel2.SamplesToTick3,
+            result.Channel1.SamplesToIndex1 - result.Channel2.SamplesToIndex1,
+            result.Channel1.SamplesToIndex2 - result.Channel2.SamplesToIndex2,
+            result.Channel1.SamplesToIndex3 - result.Channel2.SamplesToIndex3);
+    }
+    */
+
     delete[] ch1RecordedSamples;
     delete[] ch2RecordedSamples;
     return result;
@@ -113,6 +236,10 @@ RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const Gener
     result.SamplesToTick1 = possibleTickPositions[0].endIndex;
     result.SamplesToTick2 = possibleTickPositions[1].endIndex;
     result.SamplesToTick3 = possibleTickPositions[2].endIndex;
+
+    result.SamplesToIndex1 = possibleTickPositions[0].index;
+    result.SamplesToIndex2 = possibleTickPositions[1].index;
+    result.SamplesToIndex3 = possibleTickPositions[2].index;
 
     // Finally, check to see if the ticks we detected were where we expected them to be:
 
