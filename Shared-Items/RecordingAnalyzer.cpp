@@ -79,6 +79,7 @@ RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& gene
     }
 
     // The following code was used during development to determine the proximity threshold that should be used for detecting cable crosstalk:
+    /*
     if (result.Channel1.ValidResult && result.Channel2.ValidResult)
     {
         // Get some info about the ticks that were generated and create the sample buffers
@@ -217,7 +218,8 @@ RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& gene
             result.Channel1.SamplesToIndex2 - result.Channel2.SamplesToIndex2,
             result.Channel1.SamplesToIndex3 - result.Channel2.SamplesToIndex3);
     }
-    
+    */
+
 
     delete[] ch1RecordedSamples;
     delete[] ch2RecordedSamples;
