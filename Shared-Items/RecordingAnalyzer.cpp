@@ -79,7 +79,6 @@ RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& gene
     }
 
     // The following code was used during development to determine the proximity threshold that should be used for detecting cable crosstalk:
-    /*
     if (result.Channel1.ValidResult && result.Channel2.ValidResult)
     {
         // Get some info about the ticks that were generated and create the sample buffers
@@ -134,6 +133,9 @@ RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& gene
         int samplesBetweenHighest1 = 0;
         int samplesBetweenHighest2 = 0;
         int samplesBetweenHighest3 = 0;
+        int furthestSamplesToPassThreshold1 = 0;
+        int furthestSamplesToPassThreshold2 = 0;
+        int furthestSamplesToPassThreshold3 = 0;
         for (int i = 0; i < 3; i++)
         {
             int samplesToSearch = 0.001 * input.waveFormat.Format.nSamplesPerSec;
@@ -141,15 +143,15 @@ RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& gene
             int target;
             switch (i)
             {
-                case 0:
-                    target = result.Channel1.SamplesToTick1;
-                    break;
-                case 1:
-                    target = result.Channel1.SamplesToTick2;
-                    break;
-                default:
-                    target = result.Channel1.SamplesToTick3;
-                    break;
+            case 0:
+                target = result.Channel1.SamplesToTick1;
+                break;
+            case 1:
+                target = result.Channel1.SamplesToTick2;
+                break;
+            default:
+                target = result.Channel1.SamplesToTick3;
+                break;
             }
 
             float highestLeft = 0;
@@ -165,33 +167,49 @@ RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& gene
 
             float highestRight = 0;
             int highestRightIndex = 0;
+            int furthestRightIndex = highestLeftIndex; // The furthest that passes threshold. Furthest from the highest on ch1, like in volume adjustment
             for (int j = target - samplesToSearch; j < target + samplesToSearch; j++)
             {
-                if (ch1AllEdges[j] > highestRight)
+                if (ch2AllEdges[j] > highestRight)
                 {
-                    highestRight = ch1AllEdges[j];
+                    highestRight = ch2AllEdges[j];
                     highestRightIndex = j;
                 }
+                if (ch2AllEdges[j] > TestConfiguration::Ch2DetectionThreshold)
+                {
+                    if (abs(highestLeftIndex - furthestRightIndex) < abs(highestLeftIndex - j))
+                    {
+                        furthestRightIndex = j;
+                    }
+                }
             }
+
+            int furthestRightDelta = highestLeftIndex - furthestRightIndex;
 
             switch (i)
             {
             case 0:
                 samplesBetweenHighest1 = highestLeftIndex - highestRightIndex;
+                furthestSamplesToPassThreshold1 = furthestRightDelta;
                 break;
             case 1:
                 samplesBetweenHighest2 = highestLeftIndex - highestRightIndex;
+                furthestSamplesToPassThreshold2 = furthestRightDelta;
                 break;
             default:
                 samplesBetweenHighest3 = highestLeftIndex - highestRightIndex;
+                furthestSamplesToPassThreshold3 = furthestRightDelta;
                 break;
             }
         }
 
-        result.Channel2.InvalidReason = std::format("Between highest 1:\",\"{}\",\"Between highest 2:\",\"{}\",\"Between highest 3:\",\"{}\",\"Between ticks 1:\",\"{}\",\"Between ticks 2:\",\"{}\",\"Between ticks 3:\",\"{}\",\"Between start index 1:\",\"{}\",\"Between start index 2:\",\"{}\",\"Between start index 3:\",\"{}",
+        result.Channel2.InvalidReason = std::format("Between highest 1:\",\"{}\",\"Between highest 2:\",\"{}\",\"Between highest 3:\",\"{}\",\"\",\"Furthest to Pass Threshold 1:\",\"{}\",\"Furthest to Pass Threshold 2:\",\"{}\",\"Furthest to Pass Threshold 3:\",\"{}\",\"\",\"Between ticks 1:\",\"{}\",\"Between ticks 2:\",\"{}\",\"Between ticks 3:\",\"{}\",\"\",\"Between start index 1:\",\"{}\",\"Between start index 2:\",\"{}\",\"Between start index 3:\",\"{}",
             samplesBetweenHighest1,
             samplesBetweenHighest2,
             samplesBetweenHighest3,
+            furthestSamplesToPassThreshold1,
+            furthestSamplesToPassThreshold2,
+            furthestSamplesToPassThreshold3,
             result.Channel1.SamplesToTick1 - result.Channel2.SamplesToTick1,
             result.Channel1.SamplesToTick2 - result.Channel2.SamplesToTick2,
             result.Channel1.SamplesToTick3 - result.Channel2.SamplesToTick3,
@@ -199,7 +217,7 @@ RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& gene
             result.Channel1.SamplesToIndex2 - result.Channel2.SamplesToIndex2,
             result.Channel1.SamplesToIndex3 - result.Channel2.SamplesToIndex3);
     }
-    */
+    
 
     delete[] ch1RecordedSamples;
     delete[] ch2RecordedSamples;
