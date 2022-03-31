@@ -226,6 +226,28 @@ RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& gene
 
 RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const GeneratedSamples& config, float* recordedSamples, int recordedSamplesLength, int inputSampleRate, float threshold)
 {
+    int audioStartIndex = 0;
+    for (int i = 0; i < recordedSamplesLength; i++)
+    {
+        if (recordedSamples[i] != 0.0f)
+        {
+            audioStartIndex = i;
+            break;
+        }
+    }
+
+    // Some audio input devices will have a pop at the very start of the audio. 
+    // It's usually about 5 samples long at 48 kHz. So we'll get rid of the first 10 samples at 48 kHz to be safe.
+    // Get rid of this by lerping to the start value:
+    int lerpEnd = audioStartIndex + ((10 * inputSampleRate) / 48000);
+    if (lerpEnd < recordedSamplesLength)
+    {
+        for (int i = audioStartIndex; i < lerpEnd && i < recordedSamplesLength; i++)
+        {
+            recordedSamples[i] = lerp(0, recordedSamples[lerpEnd], ((float)(i - audioStartIndex)) / ((float)(lerpEnd - audioStartIndex)));
+        }
+    }
+
     RecordingSingleChannelResult result;
     result.RecordingSampleRate = inputSampleRate;
     result.DetectionThreshold = threshold;
