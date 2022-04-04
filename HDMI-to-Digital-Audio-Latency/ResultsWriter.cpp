@@ -63,10 +63,16 @@ void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstre
         detailedResultsStream << "Ch 1 Samples to Tick 1,";
         detailedResultsStream << "Ch 1 Samples to Tick 2,";
         detailedResultsStream << "Ch 1 Samples to Tick 3,";
+        detailedResultsStream << "Ch 1 Samples to Earliest 1,";
+        detailedResultsStream << "Ch 1 Samples to Earliest 2,";
+        detailedResultsStream << "Ch 1 Samples to Earliest 3,";
         detailedResultsStream << "Ch 2 Detection Threshold,";
         detailedResultsStream << "Ch 2 Samples to Tick 1,";
         detailedResultsStream << "Ch 2 Samples to Tick 2,";
         detailedResultsStream << "Ch 2 Samples to Tick 3,";
+        detailedResultsStream << "Ch 2 Samples to Earliest 1,";
+        detailedResultsStream << "Ch 2 Samples to Earliest 2,";
+        detailedResultsStream << "Ch 2 Samples to Earliest 3,";
         detailedResultsStream << "Ch 1 Invalid Reason,";
         detailedResultsStream << "Ch 2 Invalid Reason" << std::endl;
     }
@@ -126,10 +132,16 @@ void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstre
     detailedResultsStream << "\"" << result.Channel1.SamplesToTick1 << "\","; //"Ch 1 Samples to Tick 1,";
     detailedResultsStream << "\"" << result.Channel1.SamplesToTick2 << "\","; //"Ch 1 Samples to Tick 2,";
     detailedResultsStream << "\"" << result.Channel1.SamplesToTick3 << "\","; //"Ch 1 Samples to Tick 3,";
+    detailedResultsStream << "\"" << result.Channel1.SamplesToIndex1 << "\","; //"Ch 1 Samples to Earliest 1,";
+    detailedResultsStream << "\"" << result.Channel1.SamplesToIndex2 << "\","; //"Ch 1 Samples to Earliest 2,";
+    detailedResultsStream << "\"" << result.Channel1.SamplesToIndex3 << "\","; //"Ch 1 Samples to Earliest 3,";
     detailedResultsStream << "\"" << result.Channel2.DetectionThreshold << "\","; //"Ch 2 Detection Threshold,";
     detailedResultsStream << "\"" << result.Channel2.SamplesToTick1 << "\","; //"Ch 2 Samples to Tick 1,";
     detailedResultsStream << "\"" << result.Channel2.SamplesToTick2 << "\","; //"Ch 2 Samples to Tick 2,";
     detailedResultsStream << "\"" << result.Channel2.SamplesToTick3 << "\","; //"Ch 2 Samples to Tick 3,";
+    detailedResultsStream << "\"" << result.Channel2.SamplesToIndex1 << "\","; //"Ch 2 Samples to Earliest 1,";
+    detailedResultsStream << "\"" << result.Channel2.SamplesToIndex2 << "\","; //"Ch 2 Samples to Earliest 2,";
+    detailedResultsStream << "\"" << result.Channel2.SamplesToIndex3 << "\","; //"Ch 2 Samples to Earliest 3,";
     detailedResultsStream << "\"" << result.Channel1.InvalidReason << "\","; //"Ch 1 Invalid Reason,";
     detailedResultsStream << "\"" << result.Channel2.InvalidReason << "\"" << std::endl; //"Ch 2 Invalid Reason";
 }
