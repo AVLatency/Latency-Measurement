@@ -135,7 +135,7 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
         ImGui::PopStyleColor(); // ImGuiCol_PlotLines
         ImGui::PopStyleColor(); // ImGuiCol_FrameBg
 
-        HelpMarker("Peak audio level (visible range: 0.0 to 1.0)\n\nNote: Some audio devices are capable of fully capable of audio levels greater than 1.0 without any clipping.");
+        HelpMarker("Peak audio level (visible range: 0.0 to 1.0)\n\nNote: Some audio devices are capable of fully capable of audio levels greater than 1.0 without any clipping. Use the short duration Raw Wave View to determine if clipping is occuring with a high audio level.");
         ImGui::SameLine();
         ImGui::SetCursorPosX(firstPlotXPos);
         ImGui::Text(std::format("Duration: {:.3} ms", analysis.RawTickViewLength * 1000.0f / analysis.SampleRate).c_str());
@@ -172,21 +172,21 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
         ImGui::PopStyleColor(); // ImGuiCol_PlotLines
         ImGui::PopStyleColor(); // ImGuiCol_FrameBg
 
-        HelpMarker("Largest magnitude high frequency edge (visible range: 0.0 to 2.0)\n\nNote: Some audio devices are capable of fully capable of edge magnitudes greater than 2.0 without any clipping.");
+        HelpMarker("Peak magnitude high frequency edge (visible range: 0.0 to 2.0)\n\nNote: Some audio devices are capable of fully capable of edge magnitudes greater than 2.0 without any clipping. Use the short duration Raw Wave View to determine if clipping is occuring with a high audio level.");
         ImGui::SameLine();
         ImGui::SetCursorPosX(firstPlotXPos);
         float duration = analysis.RawTickViewLength == 0 || analysis.TickMonitorSamplesLength == 0 ? 0
             : analysis.TickMonitorSamplesLength * 1000.0f / (((float)analysis.TickMonitorSamplesLength / analysis.RawTickViewLength) * analysis.SampleRate);
         ImGui::Text(std::format("Duration: {:.3} ms", duration).c_str());
         ImGui::SameLine();
-        HelpMarker("X axis: Time\nY axis: Normalized magnitude of edges of high frequencies (> ~11 kHz)");
+        HelpMarker("X axis: Time\nY axis: Normalized magnitude of edges of high frequencies (> ~5.5 kHz)");
         ImGui::SameLine();
         ImGui::SetCursorPosX(secondPlotXPos);
         duration = analysis.RawFullViewLength == 0 || analysis.FullMonitorSamplesLength == 0 ? 0
             : analysis.FullMonitorSamplesLength * 1000.0f / (((float)analysis.FullMonitorSamplesLength / analysis.RawFullViewLength) * analysis.SampleRate);
         ImGui::Text(std::format("Duration: {:.3} ms", duration).c_str());
         ImGui::SameLine();
-        HelpMarker("X axis: Time\nY axis: Normalized magnitude of edges of high frequencies (> ~11 kHz)");
+        HelpMarker("X axis: Time\nY axis: Normalized magnitude of edges of high frequencies (> ~5.5 kHz)");
     }
 
     ImGui::Checkbox("Automatic Threshold Detection", useAutoThreshold);

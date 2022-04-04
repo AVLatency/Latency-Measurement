@@ -12,6 +12,8 @@ bool TestConfiguration::SaveIndividualWavFiles = IS_DEBUG;
 int TestConfiguration::NumMeasurements = 10;
 float TestConfiguration::RecordingLegnth = 0.9;
 float TestConfiguration::OutputVolume = 0.75f;
+// This LeadInToneAmplitude value corrects an issue found with a specific mic input.
+// This is not based on extensive testing and could possibly be reduced(?)
 float TestConfiguration::LeadInToneAmplitude = 0.07;
 bool TestConfiguration::LowFreqPitch = true;
 
