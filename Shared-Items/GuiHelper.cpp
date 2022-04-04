@@ -102,6 +102,8 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
     ImVec2 tickPlotSize = ImVec2(tickMonitorWidth, plotHeight);
     ImVec2 fullPlotSize = ImVec2(fullMonitorWidth, plotHeight);
     float plotVerticalScale = max(analysis.MaxEdgeMagnitude, *manualThreshold);
+    float clipMarkHeight = 5 * DpiScale;
+    float clipMarkWidth = 15.5 * DpiScale;
 
     ImGui::Spacing();
     ImGui::PushFont(FontHelper::HeaderFont);
@@ -112,8 +114,16 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
     if (ImGui::CollapsingHeader("Raw Wave View"))
     {
         float zeroValues[2]{ 0, 0 };
-        auto plotYPos = ImGui::GetCursorPosY();
+        auto topLeftPos = ImGui::GetCursorPos();
+        const ImVec2 topLeftScreenPos = ImGui::GetCursorScreenPos();
+
         ImGui::PlotHistogram("", &analysis.RawWavePeak, 1, 0, NULL, 0, 1, ImVec2(20 * DpiScale, plotHeight));
+        
+        if (analysis.RawWavePeak > 0.95)
+        {
+            ImGui::GetWindowDrawList()->AddRectFilled(ImVec2(topLeftScreenPos.x + 4 * DpiScale, topLeftScreenPos.y), ImVec2(topLeftScreenPos.x + clipMarkWidth, topLeftScreenPos.y + clipMarkHeight), ImColor::HSV(0, 1.0f, 1.0f));
+        }
+
         ImGui::SameLine();
         auto firstPlotXPos = ImGui::GetCursorPosX();
         ImGui::PushStyleColor(ImGuiCol_PlotLines, ImVec4(0.61f, 0.61f, 0.61f, 0.50f));
@@ -127,7 +137,7 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
 
         ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0));
         ImGui::PushStyleColor(ImGuiCol_PlotLines, ImGui::GetColorU32(ImGuiCol_PlotHistogram));
-        ImGui::SetCursorPosY(plotYPos);
+        ImGui::SetCursorPosY(topLeftPos.y);
         ImGui::SetCursorPosX(firstPlotXPos);
         ImGui::PlotLines("", analysis.RawWaveSamples + analysis.RawTickViewStartIndex, analysis.RawTickViewLength, 0, NULL, -1 * analysis.RawWavePeak, analysis.RawWavePeak, tickPlotSize);
         ImGui::SameLine();
@@ -150,8 +160,16 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
     ImGui::Spacing();
     if (ImGui::CollapsingHeader("High Frequency Edges", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        auto plotYPos = ImGui::GetCursorPosY();
+        auto topLeftPos = ImGui::GetCursorPos();
+        const ImVec2 topLeftScreenPos = ImGui::GetCursorScreenPos();
+
         ImGui::PlotHistogram("", &analysis.MaxEdgeMagnitude, 1, 0, NULL, 0, 2, ImVec2(20 * DpiScale, plotHeight));
+
+        if (analysis.MaxEdgeMagnitude > 1.9)
+        {
+            ImGui::GetWindowDrawList()->AddRectFilled(ImVec2(topLeftScreenPos.x + 4 * DpiScale, topLeftScreenPos.y), ImVec2(topLeftScreenPos.x + clipMarkWidth, topLeftScreenPos.y + clipMarkHeight), ImColor::HSV(0, 1.0f, 1.0f));
+        }
+
         ImGui::SameLine();
         auto firstPlotXPos = ImGui::GetCursorPosX();
         ImGui::PushStyleColor(ImGuiCol_PlotHistogramHovered, ImGui::GetColorU32(ImGuiCol_PlotHistogram));
@@ -164,7 +182,7 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
         float thresholdValues[2]{ *manualThreshold, *manualThreshold };
         ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0));
         ImGui::PushStyleColor(ImGuiCol_PlotLines, ImGui::GetColorU32(ImGuiCol_Text));
-        ImGui::SetCursorPosY(plotYPos);
+        ImGui::SetCursorPosY(topLeftPos.y);
         ImGui::SetCursorPosX(firstPlotXPos);
         ImGui::PlotLines("", thresholdValues, 2, 0, NULL, 0, plotVerticalScale, tickPlotSize);
         ImGui::SameLine();
