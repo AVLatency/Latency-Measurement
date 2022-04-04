@@ -44,6 +44,7 @@ public:
 	WasapiInput* input = nullptr;
 
 	bool working = false;
+	bool paused = false;
 
 	VolumeAnalysis LeftVolumeAnalysis;
 	VolumeAnalysis RightVolumeAnalysis;
@@ -58,6 +59,7 @@ public:
 	AdjustVolumeManager(const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, int targetTickMonitorSampleLength, int targetFullMonitorSampleLength, const float& userLeftThreshold, const float& userRightThreshold);
 	~AdjustVolumeManager();
 	void Tick();
+	void TogglePause();
 	void Stop();
 
 private:

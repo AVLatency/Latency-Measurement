@@ -239,7 +239,13 @@ bool Gui::DoGui()
                         }
                     }
                     ImGui::SameLine();
-                    bool disabled = (!adjustVolumeManager->OverrideNoisyQuiet && adjustVolumeManager->LeftVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Quiet)
+                    if (ImGui::Button(adjustVolumeManager->paused ? "Unpause" : "Pause"))
+                    {
+                        adjustVolumeManager->TogglePause();
+                    }
+                    ImGui::SameLine();
+                    bool disabled = adjustVolumeManager->paused
+                        || (!adjustVolumeManager->OverrideNoisyQuiet && adjustVolumeManager->LeftVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Quiet)
                         || (!adjustVolumeManager->OverrideNoisyQuiet && adjustVolumeManager->RightVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Quiet)
                         || adjustVolumeManager->LeftVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Crosstalk
                         || adjustVolumeManager->RightVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Crosstalk;

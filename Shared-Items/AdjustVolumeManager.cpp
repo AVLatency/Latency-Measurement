@@ -221,21 +221,24 @@ void AdjustVolumeManager::Tick()
 
 void AdjustVolumeManager::CopyBuffer(float* sourceBuffer, int sourceBufferLength)
 {
-	int perChannelSourceBufferLength = sourceBufferLength / input->recordedAudioNumChannels;
-	// Making math a lot simpler by copying to one sample array per recorded channel:
-	float* leftSourceBuffer = new float[perChannelSourceBufferLength];
-	float* rightSourceBuffer = new float[perChannelSourceBufferLength];
-	int channelIndex = 0;
-	for (int i = 0; i < sourceBufferLength; i += input->recordedAudioNumChannels)
+	if (!paused)
 	{
-		leftSourceBuffer[channelIndex] = sourceBuffer[i];
-		rightSourceBuffer[channelIndex] = sourceBuffer[i + 1];
-		channelIndex++;
-	}
+		int perChannelSourceBufferLength = sourceBufferLength / input->recordedAudioNumChannels;
+		// Making math a lot simpler by copying to one sample array per recorded channel:
+		float* leftSourceBuffer = new float[perChannelSourceBufferLength];
+		float* rightSourceBuffer = new float[perChannelSourceBufferLength];
+		int channelIndex = 0;
+		for (int i = 0; i < sourceBufferLength; i += input->recordedAudioNumChannels)
+		{
+			leftSourceBuffer[channelIndex] = sourceBuffer[i];
+			rightSourceBuffer[channelIndex] = sourceBuffer[i + 1];
+			channelIndex++;
+		}
 
-	AnalyseChannel(LeftVolumeAnalysis, leftSourceBuffer, perChannelSourceBufferLength);
-	AnalyseChannel(RightVolumeAnalysis, rightSourceBuffer, perChannelSourceBufferLength);
-	SetGrades();
+		AnalyseChannel(LeftVolumeAnalysis, leftSourceBuffer, perChannelSourceBufferLength);
+		AnalyseChannel(RightVolumeAnalysis, rightSourceBuffer, perChannelSourceBufferLength);
+		SetGrades();
+	}
 }
 
 void AdjustVolumeManager::AnalyseChannel(VolumeAnalysis& analysis, float* recordedSamples, int recordedSamplesLength)
@@ -448,6 +451,12 @@ void AdjustVolumeManager::SetChannelGrade(VolumeAnalysis& analysis, const float&
 	{
 		analysis.Grade = PeakLevelGrade::Quiet;
 	}
+}
+
+void AdjustVolumeManager::TogglePause()
+{
+	paused = !paused;
+	output->Mute = paused;
 }
 
 void AdjustVolumeManager::Stop()

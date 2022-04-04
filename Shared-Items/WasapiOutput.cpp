@@ -228,7 +228,7 @@ HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flag
         return S_OK;
     }
 
-    float volume = TestConfiguration::OutputVolume;
+    float volume = Mute ? 0 : TestConfiguration::OutputVolume;
     WORD numChannels = waveFormat->nChannels;
     if (GetFormatID() == WAVE_FORMAT_IEEE_FLOAT && waveFormat->wBitsPerSample == 32)
     {
