@@ -13,7 +13,7 @@ public:
 	// Number of retries after failure, per recording
 	int NumberOfRetries = 3;
 
-	// Default value eliminates risk of measuring cable crosstalk. Set lower if using a mic with line in, etc.
+	// Default value eliminates risk of measuring crosstalk. Set lower if using a mic with line in, etc.
 	float DetectionThresholdMultiplier = 1.0f;
 };
 

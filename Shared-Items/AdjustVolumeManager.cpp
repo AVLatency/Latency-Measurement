@@ -418,7 +418,7 @@ void AdjustVolumeManager::CheckCableCrosstalk(VolumeAnalysis& analysis, VolumeAn
 	int tickDurationInSamples = ceil(inputSampleRate / expectedTickFrequency);
 
 	// This is a different method of checking for crosstalk than what is used in RecordingAnalyzer::AnalyzeRecording.
-	// Experiements with cable crosstalk on a few different microphone inputs show that the distance from the largest
+	// Experiements with crosstalk on a few different microphone inputs show that the distance from the largest
 	// edge on one channel is never more than a tick duration, regardless of sample rates.
 	// Experiements were performed with no clipping on the audio signals and a 6 kHz tick recorded at 48 kHz and 192 kHz and
 	// an automatic threshold of 0.35 times the highest magnitude edge.

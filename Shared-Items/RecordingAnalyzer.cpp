@@ -37,7 +37,7 @@ RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& gene
     result.Channel1 = AnalyzeSingleChannel(generatedSamples, ch1RecordedSamples, channelSamplesLength, inputSampleRate, TestConfiguration::Ch1DetectionThreshold);
     result.Channel2 = AnalyzeSingleChannel(generatedSamples, ch2RecordedSamples, channelSamplesLength, inputSampleRate, TestConfiguration::Ch2DetectionThreshold);
 
-    // It's possible that something has changed since the adjust volume manager was used and cable crosstalk signals are now
+    // It's possible that something has changed since the adjust volume manager was used and crosstalk signals are now
     // exceeding the threshold that was previously configured. For this reason, check to make sure these aren't crosstalk
     // signals. This can also happen when the input audio device has dynamic normalization, which is the case with some
     // onboard microphone inputs.
@@ -50,7 +50,7 @@ RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& gene
         int halfTickDurationInSamples = ceil((inputSampleRate / 2) / expectedTickFrequency);
 
         // This is a different method of checking for crosstalk than what is used in AdjustVolumeManager::CheckCableCrosstalk.
-        // Experiements with cable crosstalk on a few different microphone inputs show that the distance between
+        // Experiements with crosstalk on a few different microphone inputs show that the distance between
         // tick peaks is never more than half a tick duration, regardless of sample rates.
         // Experiements were performed with no clipping on the audio signals and a 6 kHz tick recorded at 48 kHz and 192 kHz and
         // an automatic threshold of 0.35 times the highest magnitude edge.
@@ -72,17 +72,17 @@ RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& gene
             if (TestConfiguration::Ch1CableCrosstalkDetection)
             {
                 result.Channel1.ValidResult = false;
-                result.Channel1.InvalidReason = "Cable crosstalk detected.";
+                result.Channel1.InvalidReason = "Crosstalk detected.";
             }
             if (TestConfiguration::Ch2CableCrosstalkDetection)
             {
                 result.Channel2.ValidResult = false;
-                result.Channel2.InvalidReason = "Cable crosstalk detected.";
+                result.Channel2.InvalidReason = "Crosstalk detected.";
             }
         }
     }
 
-    // The following code was used during development to determine the proximity threshold that should be used for detecting cable crosstalk:
+    // The following code was used during development to determine the proximity threshold that should be used for detecting crosstalk:
     /*
     if (result.Channel1.ValidResult && result.Channel2.ValidResult)
     {
@@ -324,7 +324,7 @@ std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* 
     //      - clean direct line recording
     //      - echoy microphone recording where the highest tick peak might be in the middle of a noisy mess
     // - no ticks exist at all, but instead lots of low amplitude noise that could look like ticks
-    // - cable crosstalk from a different channel that has a legitimate tick, but isn't actually a singal that's intended for this channel
+    // - crosstalk from a different channel that has a legitimate tick, but isn't actually a singal that's intended for this channel
     // The solution to those scenarios is to heavily depend on a correclty configured threshold, handled by the AdjustVolumeManager.
 
     int tickDurationInSamples = ceil(sampleRate / expectedTickFrequency);
@@ -354,7 +354,7 @@ std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* 
             }
         }
 
-        // It is important that the DetectionThreshold is configured to filter cable crosstalk.
+        // It is important that the DetectionThreshold is configured to filter crosstalk.
         if (highestMagnitude > threshold)
         {
             TickPosition pos;
@@ -445,7 +445,7 @@ std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* 
         allEdges[i].magnitude = highestMagnitude;
         allEdges[i].endIndex = highestMagnitudeIndex;
 
-        // It is important that the DetectionThreshold is configured to filter cable crosstalk.
+        // It is important that the DetectionThreshold is configured to filter crosstalk.
         // It may also filter the majority of edges when there are no legitimate ticks in this sample set,
         // but this is more valuable as an optimization because the later code will validate the tick
         // positions based on their expected positions, so noise will usually never result in a valid measurement.
