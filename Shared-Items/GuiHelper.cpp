@@ -145,7 +145,7 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
         ImGui::PopStyleColor(); // ImGuiCol_PlotLines
         ImGui::PopStyleColor(); // ImGuiCol_FrameBg
 
-        HelpMarker("Peak audio level (visible range: 0.0 to 1.0)\n\nNote: Some audio devices are capable of fully capable of audio levels greater than 1.0 without any clipping. Use the short duration Raw Wave View to determine if clipping is occuring with a high audio level.");
+        HelpMarker("Peak audio level (visible range: 0.0 to 1.0)\n\nNote: Some audio devices are capable of fully capable of audio levels greater than 1.0 without any clipping. Use the Raw Wave View to determine if clipping is occuring with a high audio level.");
         ImGui::SameLine();
         ImGui::SetCursorPosX(firstPlotXPos);
         ImGui::Text(std::format("Duration: {:.3} ms", analysis.RawTickViewLength * 1000.0f / analysis.SampleRate).c_str());
@@ -190,7 +190,7 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
         ImGui::PopStyleColor(); // ImGuiCol_PlotLines
         ImGui::PopStyleColor(); // ImGuiCol_FrameBg
 
-        HelpMarker("Peak magnitude high frequency edge (visible range: 0.0 to 2.0)\n\nNote: Some audio devices are capable of fully capable of edge magnitudes greater than 2.0 without any clipping. Use the short duration Raw Wave View to determine if clipping is occuring with a high audio level.");
+        HelpMarker("Peak magnitude high frequency edge (visible range: 0.0 to 2.0)\n\nNote: Some audio devices are capable of fully capable of edge magnitudes greater than 2.0 without any clipping. Use the Raw Wave View to determine if clipping is occuring with a high audio level.");
         ImGui::SameLine();
         ImGui::SetCursorPosX(firstPlotXPos);
         float duration = analysis.RawTickViewLength == 0 || analysis.TickMonitorSamplesLength == 0 ? 0
@@ -277,6 +277,19 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheck
             ImGui::SameLine();
             HelpMarker("An input device sample rate of 44100 Hz or higher is recommended. A 48000 Hz sample rate often performs best because it will filter out high frequency noise that may be captured with higher sample rates. This sample rate can be configured in the Windows control panel.");
         ImGui::Unindent();
+
+        ImGui::Spacing();
+        ImGui::PushFont(FontHelper::BoldFont);
+        ImGui::Text("Best Practices");
+        ImGui::PopFont();
+        ImGui::Indent();
+        ImGui::TextWrapped("- Disable the microphone boost and all sound effects and audio enhancements for your input device through the Advanced / Additional device properties in the Windows control panel.\n"
+            "- Set the input device volume to around 25 percent as a starting point.\n"
+            "- Set the input device sample rate to 48 kHz.\n"
+            "- If using a microphone, point the microphone directly at the left speaker of the DUT and position the microphone as close as possible.\n"
+            "- Turn up the output volume of the DUT.\n"
+            "- Clipping: Although audio clipping will not affect the accuracy of measurements, some onboard microphone inputs have dynamic normalization that becomes problematic with high input volumes. Use the Raw Wave View to inspect the waveform for clipping to ensure your volume level is not too high.");
+        ImGui::Unindent();
         
         ImGui::Spacing();
         ImGui::PushFont(FontHelper::BoldFont);
@@ -294,7 +307,7 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheck
         ImGui::Text("How to Fix"); ImGui::SameLine(); ImGui::TextColored((ImVec4)ImColor::HSV(0, 0.5f, 1.0f), "Crosstalk detected");
         ImGui::PopFont();
         ImGui::Indent();
-        ImGui::TextWrapped(std::format("Crosstalk is most often detected when one of the two channels is recieving no audio signal at all. "
+        ImGui::TextWrapped(std::format("Crosstalk is most often detected when one of the two channels is receiving no audio signal at all. "
             "When no audio signal is present, a very weak crosstalk signal is detected instead. "
             "To address this:\n\n1) Make sure that your wiring is correct and that both channels are receiving audio input using the steps above.\n"
             "2) Increase the signal to noise ratio by turning up the output volume of the DUT{}.\n"
@@ -325,14 +338,6 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheck
         ImGui::SameLine(); GuiHelper::HelpMarker("Generally, it is a better idea to manually increase the Threshold than to override this feature. See the \"Detailed Instructions and Troubleshooting\" section for more details.");
         ImGui::DragFloat("Output Volume", outputVolume, .001f, .1f, 1, "%.2f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::SameLine(); GuiHelper::HelpMarker("Default: 0.75. There is usually no reason to change this. Increasing this may cause substantial crosstalk.");
-
-#ifdef _DEBUG
-        // TODO: remove this once I've settled on an amplitude I'm happy with. This doesn't actually adjust anything in real-time because the audio tone is set to repeat.
-        ImGui::DragFloat("Lead-In Tone Amplitude", &TestConfiguration::LeadInToneAmplitude, 0.001, 0.002, 1, "%.4f", ImGuiSliderFlags_AlwaysClamp | ImGuiSliderFlags_Logarithmic);
-        ImGui::SameLine(); GuiHelper::HelpMarker("Default: 0.07. This lead-in tone is used to stop dynamic normalization that exists in some onboard microphone inputs. If your input audio device does not have any dynamic normalization (such as a professional audio interface), you can turn this down to make the audio patterns less annoying to listen to.");
-
-        ImGui::Checkbox("Low Freqency Pitch", &TestConfiguration::LowFreqPitch);
-#endif
 
         ImGui::TreePop();
     }
