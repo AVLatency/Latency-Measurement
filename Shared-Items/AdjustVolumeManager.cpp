@@ -417,15 +417,11 @@ void AdjustVolumeManager::CheckCableCrosstalk(VolumeAnalysis& analysis, VolumeAn
 	double expectedTickFrequency = generatedSamples->GetTickFrequency(outputSampleRate);
 	int tickDurationInSamples = ceil(inputSampleRate / expectedTickFrequency);
 
-	// I've seen the following scenarios play out with a 12 kHz tick (4 samples at 48 kHz):
-	// In some cases, the crosstalk's largest edge will happen a full cycle before the leargest edge of the
-	// source signal's largest edge. This happens when the source signal is clipping and noisy. When it is clean
-	// and not clipping, it's more like a half cycle before.
-	// In other cases, the crosstalk's largest edge will match the same sample as the largest edge of the source
-	// signal.
-	// And finally the crosstalk's largest edge will sometimes happen a full cylce plus one sample after the the source.
-
-	// NOTE: If this is changed, then RecordingAnalyzer::AnalyzeRecording should also be updated to match!!!
+	// This is a different method of checking for crosstalk than what is used in RecordingAnalyzer::AnalyzeRecording.
+	// Experiements with cable crosstalk on a few different microphone inputs show that the distance from the largest
+	// edge on one channel is never more than a tick duration, regardless of sample rates.
+	// Experiements were performed with no clipping on the audio signals and a 6 kHz tick recorded at 48 kHz and 192 kHz and
+	// an automatic threshold of 0.35 times the highest magnitude edge.
 	for (int i = max(0, other.MaxEdgeIndex - tickDurationInSamples); i < min(other.AllEdgesLength, other.MaxEdgeIndex + tickDurationInSamples + 1); i++)
 	{
 		if (analysis.AllEdges[i] > threshold)

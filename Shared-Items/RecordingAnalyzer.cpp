@@ -47,18 +47,22 @@ RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& gene
     {
         bool detectedCrosstalk = false;
         double expectedTickFrequency = GeneratedSamples::GetTickFrequency(generatedSamples.WaveFormat->nSamplesPerSec);
-        int tickDurationInSamples = ceil(inputSampleRate / expectedTickFrequency);
+        int halfTickDurationInSamples = ceil((inputSampleRate / 2) / expectedTickFrequency);
 
-        // This detection method matches the crosstalk detection in AdjustVolumeManager::CheckCableCrosstalk
-        if (abs(result.Channel1.SamplesToTick1 - result.Channel2.SamplesToTick1) <= tickDurationInSamples)
+        // This is a different method of checking for crosstalk than what is used in AdjustVolumeManager::CheckCableCrosstalk.
+        // Experiements with cable crosstalk on a few different microphone inputs show that the distance between
+        // tick peaks is never more than half a tick duration, regardless of sample rates.
+        // Experiements were performed with no clipping on the audio signals and a 6 kHz tick recorded at 48 kHz and 192 kHz and
+        // an automatic threshold of 0.35 times the highest magnitude edge.
+        if (abs(result.Channel1.SamplesToTick1 - result.Channel2.SamplesToTick1) <= halfTickDurationInSamples)
         {
             detectedCrosstalk = true;
         }
-        if (abs(result.Channel1.SamplesToTick2 - result.Channel2.SamplesToTick2) <= tickDurationInSamples)
+        if (abs(result.Channel1.SamplesToTick2 - result.Channel2.SamplesToTick2) <= halfTickDurationInSamples)
         {
             detectedCrosstalk = true;
         }
-        if (abs(result.Channel1.SamplesToTick3 - result.Channel2.SamplesToTick3) <= tickDurationInSamples)
+        if (abs(result.Channel1.SamplesToTick3 - result.Channel2.SamplesToTick3) <= halfTickDurationInSamples)
         {
             detectedCrosstalk = true;
         }
