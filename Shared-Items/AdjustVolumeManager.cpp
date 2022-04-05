@@ -295,20 +295,7 @@ void AdjustVolumeManager::AnalyseChannel(VolumeAnalysis& analysis, float* record
 	analysis.MaxEdgeIndex = largestEdgeIndex;
 	analysis.MaxEdgeMagnitude = allEdges[largestEdgeIndex];
 
-	// Auto threshold is chosen to detect the largest edges, and no others.
-	// Largest edge may have been sampled here with the ideal wave alignment (Nyquist stuff)
-	// but later during the test it may have been sampled with the worst case wave
-	// alignment. In the later, it would only be 75% of the magnitude of this initial
-	// sampling. Because we're looking for the first edge, it is expected to be 0.5 of the largest
-	// magnitude. This would mean a threshold of 0.375 (75% of 0.5). But a bit of wiggle room
-	// is given because this first peak is probably not as high as the second peak, so I've gone
-	// with a 0.35 auto threshold.
-	// This does NOT do a good job of accounting for echos. It's possible that echos might
-	// be causing this largest edge to be substantially larger than the initial edges in the
-	// tick cluster that preceed it. But for this case, the user can switch to manual edge
-	// detection mode to fine-tune the tool for use in this scenario. Regardless, the 0.35 will
-	// still account for some of these echoes.
-	analysis.AutoThreshold = allEdges[largestEdgeIndex] * (TestConfiguration::LowFreqPitch ? 0.35 : 0.5f);
+	analysis.AutoThreshold = allEdges[largestEdgeIndex] * TestConfiguration::AutoThresholdMultiplier;
 
 	// Tick view start index and length
 	analysis.RawTickViewLength = TickMonitorCycles * tickDurationInSamples;

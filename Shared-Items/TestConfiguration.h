@@ -13,6 +13,7 @@ public:
 	static float OutputVolume;
 	static float LeadInToneAmplitude;
 	static bool LowFreqPitch;
+	static float AutoThresholdMultiplier;
 
 	static bool Ch1AutoThresholdDetection;
 	/// <summary>

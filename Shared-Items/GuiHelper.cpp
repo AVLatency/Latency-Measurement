@@ -31,6 +31,8 @@ void GuiHelper::DeveloperOptions()
 
         ImGui::Checkbox("Low Freqency Pitch", &TestConfiguration::LowFreqPitch);
 
+        ImGui::DragFloat("Auto Threshold Multiplier", &TestConfiguration::AutoThresholdMultiplier, 0.001, 0.001, .9, "%.4f", ImGuiSliderFlags_AlwaysClamp);
+
         ImGui::TreePop();
     }
 #endif
