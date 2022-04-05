@@ -9,6 +9,7 @@ public:
 	enum struct Tool { HdmiAudio, SpdifAudio, HdmiToDigitalAudio };
 
 	static void HelpMarker(const char* desc);
+	static void DeveloperOptions();
 	static void FormatDescriptions();
 	static void ChannelDescriptions();
 	static void AMDSpeakersNote();

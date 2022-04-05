@@ -113,14 +113,6 @@ bool Gui::DoGui()
             ImGui::SameLine(); GuiHelper::HelpMarker("Click \"Next\" once you've connected all of the cables to get started!");
             ImGui::Spacing();
 
-#ifdef _DEBUG
-            // TODO: remove this once I've settled on an amplitude I'm happy with. This doesn't actually adjust anything in real-time because the audio tone is set to repeat.
-            ImGui::DragFloat("Lead-In Tone Amplitude", &TestConfiguration::LeadInToneAmplitude, 0.001, 0.002, 1, "%.4f", ImGuiSliderFlags_AlwaysClamp | ImGuiSliderFlags_Logarithmic);
-            ImGui::SameLine(); GuiHelper::HelpMarker("Default: 0.07. This lead-in tone is used to stop dynamic normalization that exists in some onboard microphone inputs. If your input audio device does not have any dynamic normalization (such as a professional audio interface), you can turn this down to make the audio patterns less annoying to listen to.");
-
-            ImGui::Checkbox("Low Freqency Pitch", &TestConfiguration::LowFreqPitch);
-#endif
-
             if (ImGui::Button("Next"))
             {
                 RefreshAudioEndpoints();
@@ -128,6 +120,8 @@ bool Gui::DoGui()
             }
 
             ImGui::Spacing();
+
+            GuiHelper::DeveloperOptions();
         }
             break;
         case MeasurementToolGuiState::SelectAudioDevices:

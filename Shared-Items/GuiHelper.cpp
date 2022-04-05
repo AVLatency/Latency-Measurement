@@ -20,6 +20,22 @@ void GuiHelper::HelpMarker(const char* desc)
     }
 }
 
+void GuiHelper::DeveloperOptions()
+{
+#ifdef _DEBUG
+    if (ImGui::TreeNode("Developer Debug Options"))
+    {
+        // TODO: remove this once I've settled on an amplitude I'm happy with. This doesn't actually adjust anything in real-time because the audio tone is set to repeat.
+        ImGui::DragFloat("Lead-In Tone Amplitude", &TestConfiguration::LeadInToneAmplitude, 0.001, 0.002, 1, "%.4f", ImGuiSliderFlags_AlwaysClamp | ImGuiSliderFlags_Logarithmic);
+        ImGui::SameLine(); GuiHelper::HelpMarker("Default: 0.07. This lead-in tone is used to stop dynamic normalization that exists in some onboard microphone inputs. If your input audio device does not have any dynamic normalization (such as a professional audio interface), you can turn this down to make the audio patterns less annoying to listen to.");
+
+        ImGui::Checkbox("Low Freqency Pitch", &TestConfiguration::LowFreqPitch);
+
+        ImGui::TreePop();
+    }
+#endif
+}
+
 void GuiHelper::FormatDescriptions()
 {
     ChannelDescriptions();
