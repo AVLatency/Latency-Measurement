@@ -68,14 +68,7 @@ bool Gui::DoGui()
     }
 
     ImGui::Text("Cable Diagram:");
-    ImGui::SameLine(); GuiHelper::HelpMarker(
-        "Before starting you must connect your audio device and cables as described in this diagram.\n\n"
-        "To record audio output from the Device Under Test (DUT) you can use a microphone or directly connect to the headphone or speaker output of the DUT.\n\n"
-        "- Microphone: Make sure to position the mic as close as possible to the speaker because sound travels measurably slow. Position the mic close to the tweeter if there are separate speaker components.\n"
-        "- DUT headphone output: Note that speaker and headphone output can sometimes have different latency.\n"
-        "- Directly connect to DUT speaker output: Start the volume low as some amplifiers may be capable of high voltage outputs that could damage your audio input device.\n\n"
-        "Your \"Audio Device\" must be capabile of analog audio output AND HDMI audio output at the same time. The time offset between analog audio output and HDMI audio output (the \"output offset\") must be known. A list of capable devices can be found on the GitHub wiki.\n\n"
-        "GitHub Wiki: github.com/AVLatency/Latency-Measurement/wiki");
+    ImGui::SameLine(); GuiHelper::HelpMarker(std::format("Before starting you must connect your audio devices and cables as described in this diagram.\n\n{}", GuiHelper::CableHelpText(GuiHelper::Tool::HdmiAudio)).c_str());
     float cableMapScale = 0.55 * Gui::DpiScale;
     ImGui::Image((void*)resources.CableMapTexture, ImVec2(resources.CableMapTextureWidth * cableMapScale, resources.CableMapTextureHeight * cableMapScale));
 

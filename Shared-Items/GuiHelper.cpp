@@ -265,6 +265,34 @@ void GuiHelper::PeakLevel(AdjustVolumeManager::PeakLevelGrade grade, const char*
     ImGui::PopFont();
 }
 
+std::string GuiHelper::CableHelpText(Tool tool)
+{
+    switch (tool)
+    {
+    case GuiHelper::Tool::SpdifAudio:
+        return "To record audio output from the Device Under Test (DUT) you can use a microphone or directly connect to the headphone or speaker output of the DUT.\n\n"
+            "- Microphone: Make sure to position the mic as close as possible to the speaker because sound travels measurably slow. Position the mic close to the tweeter if there are separate speaker components.\n"
+            "- DUT headphone output: Note that speaker and headphone output can sometimes have different latency on some devices.\n"
+            "- Directly connect to DUT speaker output: Start the volume low as some amplifiers may be capable of high voltage outputs that could damage your audio input device.\n\n"
+            "Your \"Audio Device\" must be capable of analog audio output *and* S/PDIF audio output at the same time. The time offset between analog audio output and S/PDIF audio output (the \"output offset\") must be known. A list of capable devices can be found on the GitHub wiki.\n\n"
+            "GitHub Wiki: github.com/AVLatency/Latency-Measurement/wiki";
+        break;
+    case GuiHelper::Tool::HdmiToDigitalAudio:
+        return "For your HDMI Audio Extractor, the time offset between analog audio output and HDMI audio output must be known.For your ARC, eARC, or S / PDIF DAC, the digital to analog latency must be known.A list of capable devices can be found on the GitHub wiki.\n\n"
+            "GitHub Wiki: github.com/AVLatency/Latency-Measurement/wiki";
+        break;
+    case GuiHelper::Tool::HdmiAudio:
+    default:
+        return "To record audio output from the Device Under Test (DUT) you can use a microphone or directly connect to the headphone or speaker output of the DUT.\n\n"
+            "- Microphone: Make sure to position the mic as close as possible to the speaker because sound travels measurably slow. Position the mic close to the tweeter if there are separate speaker components.\n"
+            "- DUT headphone output: Note that speaker and headphone output can sometimes have different latency on some devices.\n"
+            "- Directly connect to DUT speaker output: Start the volume low as some amplifiers may be capable of high voltage outputs that could damage your audio input device.\n\n"
+            "Your \"HDMI Audio Extractor\" must be capable of analog audio output *and* HDMI audio output at the same time. The time offset between analog audio output and HDMI audio output (the \"output offset\") must be known. A list of capable devices can be found on the GitHub wiki.\n\n"
+            "GitHub Wiki: github.com/AVLatency/Latency-Measurement/wiki";
+        break;
+    }
+}
+
 void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheckedInputSampleRate, float* outputVolume, bool* overrideNoisyQuiet, void* exampleTexture, int exampleTextureWidth, int exampleTextureHeight, float DpiScale)
 {
     ImGui::PushFont(FontHelper::HeaderFont);
@@ -283,6 +311,28 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheck
         ImGui::Text(std::format("The following is a screenshot of correctly adjusted volume levels:", lastCheckedInputSampleRate).c_str());
         float exampleTextureScale = 0.95 * DpiScale;
         ImGui::Image(exampleTexture, ImVec2(exampleTextureWidth * exampleTextureScale, exampleTextureHeight * exampleTextureScale));
+        ImGui::TreePop();
+    }
+    if (ImGui::TreeNode("Wiring and Cable Setup"))
+    {
+        ImGui::PushFont(FontHelper::BoldFont);
+        ImGui::Text("Initial Cable Setup");
+        ImGui::PopFont();
+        ImGui::Indent();
+        ImGui::TextWrapped(std::format("Connect your audio devices and cables as described in the diagram at the top of this window.\n\n{}", GuiHelper::CableHelpText(tool)).c_str());
+        ImGui::Unindent();
+
+        ImGui::Spacing();
+        ImGui::PushFont(FontHelper::BoldFont);
+        ImGui::Text("How to Ensure Cable Wiring is Correct");
+        ImGui::PopFont();
+        ImGui::Indent();
+        ImGui::TextWrapped("The peak audio level on the left side of the \"Raw Wave View\" shows the current volume of the channel. "
+            "This can be used to give immediate feedback on the audio input of each channel, which can help in determining if your wiring is correct. "
+            "Simply mute and unmute or unplug and re-plug the device and watch for a change in this peak audio level. "
+            "If your wiring is correct, changes to one channel should not affect the other.");
+        ImGui::Unindent();
+
         ImGui::TreePop();
     }
     if (ImGui::TreeNode("Detailed Instructions and Troubleshooting"))
@@ -308,17 +358,6 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheck
             "- Turn up the output volume of the DUT.\n"
             "- Clipping: Although audio clipping will not affect the accuracy of measurements, some onboard microphone inputs have dynamic normalization that becomes problematic with high input volumes. Use the Raw Wave View to inspect the waveform for clipping to ensure your volume level is not too high.");
         ImGui::Unindent();
-        
-        ImGui::Spacing();
-        ImGui::PushFont(FontHelper::BoldFont);
-        ImGui::Text("How to Ensure Cable Wiring is Correct");
-        ImGui::PopFont();
-        ImGui::Indent();
-            ImGui::TextWrapped("The peak audio level on the left side of the \"Raw Wave View\" shows the current volume of the channel. "
-                "This can be used to give immediate feedback on the audio input of each channel, which can help in determining if your wiring is correct. "
-                "Simply mute and unmute or unplug and re-plug the device and watch for a change in this peak audio level. "
-                "If your wiring is correct, changes to one channel should not affect the other.");
-        ImGui::Unindent();
 
         ImGui::Spacing();
         ImGui::PushFont(FontHelper::BoldFont);
@@ -327,7 +366,7 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheck
         ImGui::Indent();
         ImGui::TextWrapped(std::format("Crosstalk is most often detected when one of the two channels is receiving no audio signal at all. "
             "When no audio signal is present, a very weak crosstalk signal is detected instead. "
-            "To address this:\n\n1) Make sure that your wiring is correct and that both channels are receiving audio input using the steps above.\n"
+            "To address this:\n\n1) Make sure that your wiring is correct and that both channels are receiving audio input using the above \"Wiring and Cable Setup\" instructions.\n"
             "2) Increase the signal to noise ratio by turning up the output volume of the DUT{}.\n"
             "3) Try manually increasing the Threshold by disabling the \"Automatic threshold detection\" to bring the Threshold above the crosstalk signal.\n"
             "4) If the previous three strategies do not resolve the issue, you may need to use an inline analog volume control on the line-level device to reduce its audio level and, in turn, reduce the crosstalk that it is causing.\n\n"
@@ -342,9 +381,9 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheck
         ImGui::PopFont();
         ImGui::Indent();
             ImGui::TextWrapped(std::format("A Noisy / Quiet signal quality often happens when there is no audio signal present or the signal to noise ratio is too low. To address this:\n\n"
-                "1) Make sure that your wiring is correct and that both channels are receiving audio input using the steps above.\n"
+                "1) Make sure that your wiring is correct and that both channels are receiving audio input using the above \"Wiring and Cable Setup\" instructions.\n"
                 "2) Increase the signal to noise ratio by turning up the output volume of the DUT{}.\n"
-                "3) Check your audio input device volume / microphone boost settings.",
+                "3) Follow the \"Best Practices\" listed above.",
                 tool == Tool::HdmiToDigitalAudio ? "" : " and/or positioning the microphone closer to the DUT's left speaker").c_str());
         ImGui::Unindent();
 

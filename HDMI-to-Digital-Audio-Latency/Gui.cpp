@@ -68,10 +68,7 @@ bool Gui::DoGui()
     }
 
     ImGui::Text("Cable Diagram:");
-    ImGui::SameLine(); GuiHelper::HelpMarker(
-        "Before starting you must connect your audio devices and cables as described in this diagram.\n\n"
-        "For your HDMI Audio Extractor, the time offset between analog audio output and HDMI audio output must be known. For your ARC, eARC, or S/PDIF DAC, the digital to analog latency must be known. A list of capable devices can be found on the GitHub wiki.\n\n"
-        "GitHub Wiki: github.com/AVLatency/Latency-Measurement/wiki");
+    ImGui::SameLine(); GuiHelper::HelpMarker(std::format("Before starting you must connect your audio devices and cables as described in this diagram.\n\n{}", GuiHelper::CableHelpText(GuiHelper::Tool::HdmiToDigitalAudio)).c_str());
     float cableMapScale = 0.55 * Gui::DpiScale;
     ImGui::Image((void*)resources.CableMapTexture, ImVec2(resources.CableMapTextureWidth * cableMapScale, resources.CableMapTextureHeight * cableMapScale));
 
