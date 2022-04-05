@@ -293,7 +293,7 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheck
         ImGui::Indent();
             ImGui::Text(std::format("{} Hz", lastCheckedInputSampleRate).c_str());
             ImGui::SameLine();
-            HelpMarker("An input device sample rate of 44100 Hz or higher is recommended. A 48000 Hz sample rate often performs best because it will filter out high frequency noise that may be captured with higher sample rates. This sample rate can be configured in the Windows control panel.");
+            HelpMarker("An input device sample rate of 44100 Hz or higher is recommended. A 48000 Hz sample rate often performs best because it will filter out high frequency noise that may be captured with higher sample rates. This sample rate can be configured in the Windows Settings app.");
         ImGui::Unindent();
 
         ImGui::Spacing();
@@ -301,7 +301,7 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheck
         ImGui::Text("Best Practices");
         ImGui::PopFont();
         ImGui::Indent();
-        ImGui::TextWrapped("- Disable the microphone boost and all sound effects and audio enhancements for your input device through the Advanced / Additional device properties in the Windows control panel.\n"
+        ImGui::TextWrapped("- Disable the microphone boost and all sound effects and audio enhancements for your input device through the Advanced / Additional device properties in the Windows Settings app.\n"
             "- Set the input device volume to around 25 percent as a starting point.\n"
             "- Set the input device sample rate to 48 kHz.\n"
             "- If using a microphone, point the microphone directly at the left speaker of the DUT and position the microphone as close as possible.\n"
