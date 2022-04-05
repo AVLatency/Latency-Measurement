@@ -421,26 +421,27 @@ void GuiHelper::TestConfiguration(float DpiScale)
     ImGui::SameLine(); GuiHelper::HelpMarker("The number of measurements for each of the selected audio formats. A higher number of measurements will give a more accurate average audio latency result, but will take longer to complete.");
     if (ImGui::TreeNode("Advanced Configuration"))
     {
-        ImGui::DragFloat("Recording Length (seconds)", &TestConfiguration::RecordingLegnth, 0.1f, 0.6f, 10.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::SameLine(); GuiHelper::HelpMarker("Increase the measurement recording length to measure higher audio latency. The default of 0.9 seconds enables measurements up to around 200 or 300 milliseconds, depending on input and output driver latency.");
-
-        ImGui::DragInt("Initial Ignored Time (ms)", &TestConfiguration::InitialIgnoreLength, .05f, 1, 400, "%d", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::SameLine(); GuiHelper::HelpMarker("This is the time from the start of the recording that will be ignored. This addresses interruption of measurements caused by pops and clicks at the start of playback. Default: 10 milliseconds.");
-
         ImGui::DragInt("Attempts Before Skipping a Format", &TestConfiguration::AttemptsBeforeFail, .05f, 1, 20, "%d", ImGuiSliderFlags_AlwaysClamp);
         ImGui::SameLine(); GuiHelper::HelpMarker("The number of measurement attempts for a specific format before this format is skipped altogether for the remainder of the test. Setting this number too low may cause formats to be incorrectly skipped when the DUT is simply taking time to wake up/sync to a new audio format.");
 
-        ImGui::Checkbox("Insert Format Switch Tone", &TestConfiguration::InsertFormatSwitch);
-        ImGui::SameLine(); GuiHelper::HelpMarker("When only one sample rate is being measured per pass, this feature will insert an audio tone at a different sample rate to force the DUT to resync between passes. This is necessary to determine the range of audio latency that the DUT exhibits for a given audio format. Disabling this will likely result in an incorrectly low audio latency variance.");
+        ImGui::DragFloat("Recording Length (seconds)", &TestConfiguration::RecordingLegnth, 0.1f, 0.6f, 10.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::SameLine(); GuiHelper::HelpMarker("Increase the measurement recording length to measure higher audio latency. The default of 0.9 seconds enables measurements up to around 200 or 300 milliseconds, depending on input and output driver latency.");
 
         ImGui::Checkbox("Save Individual Recording Results", &TestConfiguration::SaveIndividualRecordingResults);
-        ImGui::SameLine(); GuiHelper::HelpMarker("Useful for debugging.");
+        ImGui::SameLine(); GuiHelper::HelpMarker("Saves detailed individual measurement results in a CSV file for each format that is measured. Useful for debugging.");
         if (TestConfiguration::SaveIndividualRecordingResults)
         {
             ImGui::Indent(0);
             ImGui::Checkbox("Save Individual Recording WAV Files", &TestConfiguration::SaveIndividualWavFiles);
+            ImGui::SameLine(); GuiHelper::HelpMarker("Saves .WAV files for each format that is measured. Use software such as Audacity to inspect these recordings. Useful for debugging.\n\nNote: Software such as Audacity may not correctly display waveforms with peaks larger than +/- 1.0. Use the Raw Wave View of the \"Adjust Volumes\" step to correctly determine if clipping is occurring.");
             ImGui::Unindent();
         }
+
+        ImGui::DragInt("Initial Ignored Time (ms)", &TestConfiguration::InitialIgnoreLength, .05f, 1, 400, "%d", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::SameLine(); GuiHelper::HelpMarker("This is the time from the start of the recording that will be ignored. This addresses interruption of measurements caused by pops and clicks at the start of playback. Default: 10 milliseconds.");
+
+        ImGui::Checkbox("Format Switch Tone", &TestConfiguration::InsertFormatSwitch);
+        ImGui::SameLine(); GuiHelper::HelpMarker("When only one sample rate is being measured per pass, this feature will insert an audio tone at a different sample rate to force the DUT to resync between passes. This is necessary to determine the range of audio latency that the DUT exhibits for a given audio format. Disabling this will likely result in an incorrectly low audio latency variance.");
 
         ImGui::TreePop();
     }
