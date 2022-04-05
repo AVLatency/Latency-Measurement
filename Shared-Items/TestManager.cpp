@@ -73,7 +73,7 @@ void TestManager::StartTest()
 		}
 
 		// Inject a dummy format when we're down to a single recording to force the HDMI Audio Device to re-sync to a new signal format
-		if (!StopRequested && TotalRecordingsPerPass == 1)
+		if (TestConfiguration::InsertFormatSwitch && !StopRequested && TotalRecordingsPerPass == 1)
 		{
 			bool formatSwitchResult = PlayFormatSwitch(lastPlayedFormat);
 			if (!formatSwitchResult)

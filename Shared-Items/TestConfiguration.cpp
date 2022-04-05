@@ -42,3 +42,4 @@ float TestConfiguration::Ch2DetectionThreshold = 0.05f * 2.0f;
 bool TestConfiguration::Ch2CableCrosstalkDetection = true;
 
 int TestConfiguration::AttemptsBeforeFail = 6;
+bool TestConfiguration::InsertFormatSwitch = true;

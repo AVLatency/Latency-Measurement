@@ -32,4 +32,5 @@ public:
 	static bool Ch2CableCrosstalkDetection;
 
 	static int AttemptsBeforeFail;
+	static bool InsertFormatSwitch;
 };

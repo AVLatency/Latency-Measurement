@@ -378,6 +378,9 @@ void GuiHelper::TestConfiguration(float DpiScale)
         ImGui::DragInt("Attempts Before Skipping a Format", &TestConfiguration::AttemptsBeforeFail, .05f, 1, 20, "%d", ImGuiSliderFlags_AlwaysClamp);
         ImGui::SameLine(); GuiHelper::HelpMarker("The number of measurement attempts for a specific format before this format is skipped altogether for the remainder of the test. Setting this number too low may cause formats to be incorrectly skipped when the DUT is simply taking time to wake up/sync to a new audio format.");
 
+        ImGui::Checkbox("Insert Format Switch Tone", &TestConfiguration::InsertFormatSwitch);
+        ImGui::SameLine(); GuiHelper::HelpMarker("When only one sample rate is being measured per pass, this feature will insert an audio tone at a different sample rate to force the DUT to resync between passes. This is necessary to determine the range of audio latency that the DUT exhibits for a given audio format. Disabling this will likely result in an incorrectly low audio latency variance.");
+
         ImGui::Checkbox("Save Individual Recording Results", &TestConfiguration::SaveIndividualRecordingResults);
         ImGui::SameLine(); GuiHelper::HelpMarker("Useful for debugging.");
         if (TestConfiguration::SaveIndividualRecordingResults)
