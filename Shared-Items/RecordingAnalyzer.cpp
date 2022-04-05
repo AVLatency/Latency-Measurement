@@ -242,10 +242,15 @@ RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const Gener
         }
     }
 
-    // Some audio input devices will have a pop at the very start of the audio. 
-    // It's usually about 5 samples long at 48 kHz. So we'll get rid of the first 10 samples at 48 kHz to be safe.
+    // Some audio input devices will have a pop at the very start of the audio.
+    // It's sometimes up to 20 samples past the start at 48 kHz. So we'll get rid of the first 40 samples at 48 kHz to be safe.
     // Get rid of this by lerping to the start value:
-    int lerpEnd = audioStartIndex + ((10 * inputSampleRate) / 48000);
+    int micStartPopIndex = audioStartIndex + ((40 * inputSampleRate) / 48000);
+    // Some DUTs will ouptut a pop at the start of playback. Ignore these pops:
+    int ignoredIndex = (TestConfiguration::InitialIgnoreLength / 1000.0f) * inputSampleRate;
+
+    int lerpEnd = max(micStartPopIndex, ignoredIndex);
+
     if (lerpEnd < recordedSamplesLength)
     {
         for (int i = audioStartIndex; i < lerpEnd && i < recordedSamplesLength; i++)

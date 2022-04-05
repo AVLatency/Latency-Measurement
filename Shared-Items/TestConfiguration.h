@@ -10,6 +10,10 @@ public:
 	/// In seconds
 	/// </summary>
 	static float RecordingLegnth;
+	/// <summary>
+	/// In milliseconds. This is the time during the start of the recording that will be ignored.
+	/// </summary>
+	static int InitialIgnoreLength;
 	static float OutputVolume;
 	static float LeadInToneAmplitude;
 	static bool LowFreqPitch;

@@ -424,6 +424,9 @@ void GuiHelper::TestConfiguration(float DpiScale)
         ImGui::DragFloat("Recording Length (seconds)", &TestConfiguration::RecordingLegnth, 0.1f, 0.6f, 10.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::SameLine(); GuiHelper::HelpMarker("Increase the measurement recording length to measure higher audio latency. The default of 0.9 seconds enables measurements up to around 200 or 300 milliseconds, depending on input and output driver latency.");
 
+        ImGui::DragInt("Initial Ignored Time (ms)", &TestConfiguration::InitialIgnoreLength, .05f, 1, 400, "%d", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::SameLine(); GuiHelper::HelpMarker("This is the time from the start of the recording that will be ignored. This addresses interruption of measurements caused by pops and clicks at the start of playback. Default: 10 milliseconds.");
+
         ImGui::DragInt("Attempts Before Skipping a Format", &TestConfiguration::AttemptsBeforeFail, .05f, 1, 20, "%d", ImGuiSliderFlags_AlwaysClamp);
         ImGui::SameLine(); GuiHelper::HelpMarker("The number of measurement attempts for a specific format before this format is skipped altogether for the remainder of the test. Setting this number too low may cause formats to be incorrectly skipped when the DUT is simply taking time to wake up/sync to a new audio format.");
 
