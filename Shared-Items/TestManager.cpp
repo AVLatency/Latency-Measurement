@@ -48,11 +48,17 @@ void TestManager::StartTest()
 	TotalPasses = TestConfiguration::NumMeasurements > 0 ? TestConfiguration::NumMeasurements : 1;
 	TotalRecordingsPerPass = SelectedFormats.size() > 0 ? SelectedFormats.size() : 1;
 
+
 	for (int i = 0; i < TestConfiguration::NumMeasurements; i++)
 	{
 		PassCount = i;
 		RecordingCount = 0;
 		AudioFormat* lastPlayedFormat = nullptr;
+
+		// for determining if a format switch tone is necessary:
+		int firstSampleRate = -1;
+		bool switchedSampleRates = false;
+
 		for (AudioFormat* audioFormat : SelectedFormats)
 		{
 			if (!StopRequested && std::find(FailedFormats.begin(), FailedFormats.end(), audioFormat) == FailedFormats.end())
@@ -64,16 +70,23 @@ void TestManager::StartTest()
 				}
 				RecordingCount++;
 				lastPlayedFormat = audioFormat;
+				if (firstSampleRate == -1)
+				{
+					firstSampleRate = audioFormat->WaveFormat->nSamplesPerSec;
+				}
+				else
+				{
+					if (firstSampleRate != audioFormat->WaveFormat->nSamplesPerSec)
+					{
+						switchedSampleRates = true;
+					}
+				}
 			}
 		}
-		int temp = RecordingCount;
-		if (temp != TotalRecordingsPerPass)
-		{
-			TotalRecordingsPerPass = temp;
-		}
+		TotalRecordingsPerPass = RecordingCount;
 
 		// Inject a dummy format when we're down to a single recording to force the HDMI Audio Device to re-sync to a new signal format
-		if (TestConfiguration::InsertFormatSwitch && !StopRequested && TotalRecordingsPerPass == 1)
+		if (TestConfiguration::InsertFormatSwitch && !switchedSampleRates && !StopRequested)
 		{
 			bool formatSwitchResult = PlayFormatSwitch(lastPlayedFormat);
 			if (!formatSwitchResult)
