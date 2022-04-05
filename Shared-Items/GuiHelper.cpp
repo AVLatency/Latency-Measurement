@@ -271,7 +271,7 @@ std::string GuiHelper::CableHelpText(Tool tool)
     {
     case GuiHelper::Tool::SpdifAudio:
         return "To record audio output from the Device Under Test (DUT) you can use a microphone or directly connect to the headphone or speaker output of the DUT.\n\n"
-            "- Microphone: Make sure to position the mic as close as possible to the speaker because sound travels measurably slow. Position the mic close to the tweeter if there are separate speaker components.\n"
+            "- Microphone: Make sure to position the mic as close as possible to the speaker because sound travels measurably slow. Position the mic close to the tweeter if there are separate speaker components. When recording with a mic, the Mic port must be used on computers that have separate Line In and Mic ports.\n"
             "- DUT headphone output: Note that speaker and headphone output can sometimes have different latency on some devices.\n"
             "- Directly connect to DUT speaker output: Start the volume low as some amplifiers may be capable of high voltage outputs that could damage your audio input device.\n\n"
             "Your \"Audio Device\" must be capable of analog audio output *and* S/PDIF audio output at the same time. The time offset between analog audio output and S/PDIF audio output (the \"output offset\") must be known. A list of capable devices can be found on the GitHub wiki.\n\n"
@@ -284,7 +284,7 @@ std::string GuiHelper::CableHelpText(Tool tool)
     case GuiHelper::Tool::HdmiAudio:
     default:
         return "To record audio output from the Device Under Test (DUT) you can use a microphone or directly connect to the headphone or speaker output of the DUT.\n\n"
-            "- Microphone: Make sure to position the mic as close as possible to the speaker because sound travels measurably slow. Position the mic close to the tweeter if there are separate speaker components.\n"
+            "- Microphone: Make sure to position the mic as close as possible to the speaker because sound travels measurably slow. Position the mic close to the tweeter if there are separate speaker components. When recording with a mic, the Mic port must be used on computers that have separate Line In and Mic ports.\n"
             "- DUT headphone output: Note that speaker and headphone output can sometimes have different latency on some devices.\n"
             "- Directly connect to DUT speaker output: Start the volume low as some amplifiers may be capable of high voltage outputs that could damage your audio input device.\n\n"
             "Your \"HDMI Audio Extractor\" must be capable of analog audio output *and* HDMI audio output at the same time. The time offset between analog audio output and HDMI audio output (the \"output offset\") must be known. A list of capable devices can be found on the GitHub wiki.\n\n"
@@ -311,6 +311,7 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheck
         ImGui::Text(std::format("The following is a screenshot of correctly adjusted volume levels:", lastCheckedInputSampleRate).c_str());
         float exampleTextureScale = 0.95 * DpiScale;
         ImGui::Image(exampleTexture, ImVec2(exampleTextureWidth * exampleTextureScale, exampleTextureHeight * exampleTextureScale));
+        ImGui::Spacing();
         ImGui::TreePop();
     }
     if (ImGui::TreeNode("Wiring and Cable Setup"))
@@ -333,6 +334,9 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheck
             "If your wiring is correct, changes to one channel should not affect the other.");
         ImGui::Unindent();
 
+        ImGui::Spacing();
+        ImGui::Spacing();
+        ImGui::Spacing();
         ImGui::TreePop();
     }
     if (ImGui::TreeNode("Detailed Instructions and Troubleshooting"))
@@ -387,6 +391,9 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheck
                 tool == Tool::HdmiToDigitalAudio ? "" : " and/or positioning the microphone closer to the DUT's left speaker").c_str());
         ImGui::Unindent();
 
+        ImGui::Spacing();
+        ImGui::Spacing();
+        ImGui::Spacing();
         ImGui::TreePop();
     }
     if (ImGui::TreeNode("Advanced Configuration"))
@@ -396,6 +403,9 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheck
         ImGui::DragFloat("Output Volume", outputVolume, .001f, .1f, 1, "%.2f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::SameLine(); GuiHelper::HelpMarker("Default: 0.75. There is usually no reason to change this. Increasing this may cause substantial crosstalk.");
 
+        ImGui::Spacing();
+        ImGui::Spacing();
+        ImGui::Spacing();
         ImGui::TreePop();
     }
 }
