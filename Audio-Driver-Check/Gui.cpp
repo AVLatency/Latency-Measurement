@@ -166,7 +166,8 @@ bool Gui::DoGui()
                 "Latency Measurement Volume Adjustment Pattern", // 3
                 blipStr.c_str(), // 4
                 OnOffToneStr.c_str(), // 5
-                "Visually Identifiable Pattern"}; // 6
+                "Visually Identifiable Pattern", // 6
+                "Format Switch Tone" }; // 7
             int waveTypeComboCurrentItem = 0;
 
             switch (waveType)
@@ -188,6 +189,9 @@ bool Gui::DoGui()
                 break;
             case GeneratedSamples::WaveType::TestPattern_VisuallyIdentifiable:
                 waveTypeComboCurrentItem = 6;
+                break;
+            case GeneratedSamples::WaveType::FormatSwitch:
+                waveTypeComboCurrentItem = 7;
                 break;
             case GeneratedSamples::WaveType::TestPattern_TonePlusHighFreq:
             default:
@@ -224,6 +228,9 @@ bool Gui::DoGui()
                 break;
             case 6:
                 waveType = GeneratedSamples::WaveType::TestPattern_VisuallyIdentifiable;
+                break;
+            case 7:
+                waveType = GeneratedSamples::WaveType::FormatSwitch;
                 break;
             case 0:
             default:

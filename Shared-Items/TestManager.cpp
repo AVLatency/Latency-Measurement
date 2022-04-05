@@ -217,7 +217,7 @@ bool TestManager::PlayFormatSwitch(AudioFormat* lastPlayedFormat)
 		return false;
 	}
 
-	GeneratedSamples* generatedSamples = new GeneratedSamples(waveFormat, GeneratedSamples::WaveType::LatencyMeasurement);
+	GeneratedSamples* generatedSamples = new GeneratedSamples(waveFormat, GeneratedSamples::WaveType::FormatSwitch);
 	WasapiOutput* output = new WasapiOutput(outputEndpoint, false, true, generatedSamples->samples, generatedSamples->samplesLength, waveFormat);
 	std::thread outputThread{ [output] { output->StartPlayback(); } };
 	outputThread.join();

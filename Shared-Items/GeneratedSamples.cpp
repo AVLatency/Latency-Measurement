@@ -19,6 +19,9 @@ GeneratedSamples::GeneratedSamples(WAVEFORMATEX* waveFormat, WaveType type)
     case GeneratedSamples::WaveType::VolumeAdjustment:
         GenerateVolumeAdjustmentSamples();
         break;
+    case GeneratedSamples::WaveType::FormatSwitch:
+        GenerateFormatSwitchSamples();
+        break;
     case GeneratedSamples::WaveType::TestPattern_TonePlusHighFreq:
         GenerateTestPattern_TonePlusHighFreqSamples();
         break;
@@ -173,6 +176,27 @@ void GeneratedSamples::GenerateVolumeAdjustmentSamples()
         double time = (double)i / sampleRate;
         // Tick happsn 4 constant tone cyles after the lead-in tone ends, just like in the measurement pattern
         samples[i + (samplesLength / 2) + ((sampleRate / constantToneFreq) * 4)] += (float)sin(M_PI * 2 * tickFreq * time) * tickAmp;
+    }
+}
+
+void GeneratedSamples::GenerateFormatSwitchSamples()
+{
+    int sampleRate = WaveFormat->nSamplesPerSec;
+
+    // Timing
+    double durationSeconds = 1.0f;
+
+    // Wave generation:
+    samplesLength = (int)(durationSeconds * sampleRate);
+    samples = new float[samplesLength];
+
+    // Play the lead-in tone for the full duration
+    for (int i = 0; i < samplesLength; i++)
+    {
+        float amplitude = max(TestConfiguration::LeadInToneAmplitude, CONSTANT_TONE_AMPLITUDE);
+
+        double time = (double)i / sampleRate;
+        samples[i] = (float)(sin(M_PI * 2 * constantToneFreq * time) * amplitude);
     }
 }
 
