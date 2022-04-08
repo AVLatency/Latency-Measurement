@@ -177,8 +177,8 @@ bool Gui::DoGui()
                     }
                     ImGui::EndCombo();
                 }
-                ImGui::SameLine(); GuiHelper::HelpMarker("You can use either a line in or mic input on your computer.\n\n"
-                    "This input device must be configured to have at least two channels. At least 48 kHz 16 bit is recommended for this tool to work well.");
+                ImGui::SameLine(); GuiHelper::HelpMarker("Select your stereo analog input device, such as the Line In port of your computer.\n\n"
+                    "At least 44.1 kHz 16 bit is recommended.");
 
                 ImGui::Spacing();
                 if (ImGui::Button("Back"))
@@ -237,7 +237,13 @@ bool Gui::DoGui()
                         }
                     }
                     ImGui::SameLine();
-                    bool disabled = (!adjustVolumeManager->OverrideNoisyQuiet && adjustVolumeManager->LeftVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Quiet)
+                    if (ImGui::Button(adjustVolumeManager->paused ? "Resume" : "Pause"))
+                    {
+                        adjustVolumeManager->TogglePause();
+                    }
+                    ImGui::SameLine();
+                    bool disabled = adjustVolumeManager->paused
+                        || (!adjustVolumeManager->OverrideNoisyQuiet && adjustVolumeManager->LeftVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Quiet)
                         || (!adjustVolumeManager->OverrideNoisyQuiet && adjustVolumeManager->RightVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Quiet)
                         || adjustVolumeManager->LeftVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Crosstalk
                         || adjustVolumeManager->RightVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Crosstalk;

@@ -278,7 +278,7 @@ std::string GuiHelper::CableHelpText(Tool tool)
             "GitHub Wiki: github.com/AVLatency/Latency-Measurement/wiki";
         break;
     case GuiHelper::Tool::HdmiToDigitalAudio:
-        return "For your HDMI Audio Extractor, the time offset between analog audio output and HDMI audio output must be known.For your ARC, eARC, or S / PDIF DAC, the digital to analog latency must be known.A list of capable devices can be found on the GitHub wiki.\n\n"
+        return "For your HDMI Audio Extractor, the time offset between analog audio output and HDMI audio output must be known. For your ARC, eARC, or S / PDIF DAC, the digital to analog latency must be known. A list of capable devices can be found on the GitHub wiki.\n\n"
             "GitHub Wiki: github.com/AVLatency/Latency-Measurement/wiki";
         break;
     case GuiHelper::Tool::HdmiAudio:
@@ -428,12 +428,12 @@ void GuiHelper::TestConfiguration(float DpiScale)
         ImGui::SameLine(); GuiHelper::HelpMarker("Increase the measurement recording length to measure higher audio latency. The default of 0.9 seconds enables measurements up to around 200 or 300 milliseconds, depending on input and output driver latency.");
 
         ImGui::Checkbox("Save Individual Recording Results", &TestConfiguration::SaveIndividualRecordingResults);
-        ImGui::SameLine(); GuiHelper::HelpMarker("Saves detailed individual measurement results in a CSV file for each format that is measured. Useful for debugging.");
+        ImGui::SameLine(); GuiHelper::HelpMarker("Saves detailed individual measurement results in a CSV file for each format that is measured. Useful for troubleshooting.");
         if (TestConfiguration::SaveIndividualRecordingResults)
         {
             ImGui::Indent(0);
             ImGui::Checkbox("Save Individual Recording WAV Files", &TestConfiguration::SaveIndividualWavFiles);
-            ImGui::SameLine(); GuiHelper::HelpMarker("Saves .WAV files for each format that is measured. Use software such as Audacity to inspect these recordings. Useful for debugging.\n\nNote: Software such as Audacity may not correctly display waveforms with peaks larger than +/- 1.0. Use the Raw Wave View of the \"Adjust Volumes\" step to correctly determine if clipping is occurring.");
+            ImGui::SameLine(); GuiHelper::HelpMarker("Saves .WAV files for each format that is measured. Use software such as Audacity to inspect these recordings. Useful for troubleshooting.\n\nNote: Software such as Audacity may not correctly display waveforms with peaks larger than +/- 1.0. Use the Raw Wave View of the \"Adjust Volumes\" step to correctly determine if clipping is occurring.");
             ImGui::Unindent();
         }
 

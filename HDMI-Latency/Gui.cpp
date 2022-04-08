@@ -174,8 +174,8 @@ bool Gui::DoGui()
                     }
                     ImGui::EndCombo();
                 }
-                ImGui::SameLine(); GuiHelper::HelpMarker("You can use either a line in or mic input on your computer, but when using certain microphones you may find the mic input works better.\n\n"
-                    "This input device must be configured to have at least two channels. At least 48 kHz 16 bit is recommended for this tool to work well.");
+                ImGui::SameLine(); GuiHelper::HelpMarker("Select your stereo analog input device. When recording with a microphone, the Mic port must be used on computers that have separate Line In and Mic ports.\n\n"
+                    "At least 44.1 kHz 16 bit is recommended.");
 
                 ImGui::Spacing();
                 if (ImGui::Button("Back"))
@@ -234,7 +234,7 @@ bool Gui::DoGui()
                         }
                     }
                     ImGui::SameLine();
-                    if (ImGui::Button(adjustVolumeManager->paused ? "Unpause" : "Pause"))
+                    if (ImGui::Button(adjustVolumeManager->paused ? "Resume" : "Pause"))
                     {
                         adjustVolumeManager->TogglePause();
                     }
