@@ -754,7 +754,7 @@ bool Gui::DoGui()
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     if (ImGui::BeginPopupModal("Reminder: EDID Mode", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("If using an HDMI audio extractor as your Dual-Out Reference Device, set its EDID mode to match the EDID of your DUT.");
+        ImGui::Text("If you are using an HDMI audio extractor as your Dual-Out Reference\nDevice, set its EDID mode to match the EDID of your DUT.");
         ImGui::Spacing();
 
         float imageScale = 0.6 * Gui::DpiScale;
