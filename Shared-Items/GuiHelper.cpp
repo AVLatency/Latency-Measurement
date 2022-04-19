@@ -274,12 +274,12 @@ std::string GuiHelper::CableHelpText(Tool tool)
             "- Microphone: Make sure to position the mic as close as possible to the speaker because sound travels measurably slow. Position the mic close to the tweeter if there are separate speaker components. When recording with a mic, the Mic port must be used on computers that have separate Line In and Mic ports.\n"
             "- DUT headphone output: Note that speaker and headphone output can sometimes have different latency on some devices.\n"
             "- Directly connect to DUT speaker output: Start the volume low as some amplifiers may be capable of high voltage outputs that could damage your audio input device.\n\n"
-            "Your \"Audio Device\" must be capable of analog audio output *and* S/PDIF audio output at the same time. The time offset between analog audio output and S/PDIF audio output (the \"output offset\") must be known. A list of capable devices can be found on the GitHub wiki.\n\n"
-            "GitHub Wiki: github.com/AVLatency/Latency-Measurement/wiki";
+            "Your \"Dual-Out Reference Device\" must be capable of analog audio output *and* S/PDIF audio output at the same time. The time offset between analog audio output and S/PDIF audio output (the \"output offset\") must be known. Recommended devices can be found on the AV Latency.com Toolkit webpage.\n\n"
+            "AV Latency.com Toolkit Webpage: avlatency.com/tools/av-latency-com-toolkit";
         break;
     case GuiHelper::Tool::HdmiToDigitalAudio:
-        return "For your HDMI Audio Extractor, the time offset between analog audio output and HDMI audio output must be known. For your ARC, eARC, or S / PDIF DAC, the digital to analog latency must be known. A list of capable devices can be found on the GitHub wiki.\n\n"
-            "GitHub Wiki: github.com/AVLatency/Latency-Measurement/wiki";
+        return "For your Dual-Out Reference Device, the time offset between analog audio output and HDMI audio output must be known. For your Reference DAC, the digital to analog latency must be known. Recommended devices can be found on the AV Latency.com Toolkit webpage.\n\n"
+            "AV Latency.com Toolkit Webpage: avlatency.com/tools/av-latency-com-toolkit";
         break;
     case GuiHelper::Tool::HdmiAudio:
     default:
@@ -287,8 +287,8 @@ std::string GuiHelper::CableHelpText(Tool tool)
             "- Microphone: Make sure to position the mic as close as possible to the speaker because sound travels measurably slow. Position the mic close to the tweeter if there are separate speaker components. When recording with a mic, the Mic port must be used on computers that have separate Line In and Mic ports.\n"
             "- DUT headphone output: Note that speaker and headphone output can sometimes have different latency on some devices.\n"
             "- Directly connect to DUT speaker output: Start the volume low as some amplifiers may be capable of high voltage outputs that could damage your audio input device.\n\n"
-            "Your \"HDMI Audio Extractor\" must be capable of analog audio output *and* HDMI audio output at the same time. The time offset between analog audio output and HDMI audio output (the \"output offset\") must be known. A list of capable devices can be found on the GitHub wiki.\n\n"
-            "GitHub Wiki: github.com/AVLatency/Latency-Measurement/wiki";
+            "Your \"Dual-Out Reference Device\" must be capable of analog audio output *and* HDMI audio output at the same time. The time offset between analog audio output and HDMI audio output (the \"output offset\") must be known. Recommended devices can be found on the AV Latency.com Toolkit webpage.\n\n"
+            "AV Latency.com Toolkit Webpage: avlatency.com/tools/av-latency-com-toolkit";
         break;
     }
 }
@@ -357,8 +357,8 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheck
         ImGui::Indent();
         ImGui::TextWrapped("- Disable the microphone boost and all sound effects and audio enhancements for your input device through the Advanced / Additional device properties in the Windows Settings app.\n"
             "- Set the input device volume to around 25 percent as a starting point.\n"
-            "- Set the input device sample rate to 48 kHz.\n"
-            "- If using a microphone, point the microphone directly at the left speaker of the DUT and position the microphone as close as possible.\n"
+            "- Set the input device sample rate to 48 kHz to filter out high frequency noise.\n"
+            "- If using a microphone, point the microphone directly at the left speaker of the DUT and position the microphone as close as possible. Position the mic close to the tweeter if there are separate speaker components.\n"
             "- Turn up the output volume of the DUT.\n"
             "- Clipping: Although audio clipping will not affect the accuracy of measurements, some onboard microphone inputs have dynamic normalization that becomes problematic with high input volumes. Use the Raw Wave View to inspect the waveform for clipping to ensure your volume level is not too high.");
         ImGui::Unindent();
@@ -374,7 +374,7 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheck
             "2) Increase the signal to noise ratio by turning up the output volume of the DUT{}.\n"
             "3) Try manually increasing the Threshold by disabling the \"Automatic threshold detection\" to bring the Threshold above the crosstalk signal.\n"
             "4) If the previous three strategies do not resolve the issue, you may need to use an inline analog volume control on the line-level device to reduce its audio level and, in turn, reduce the crosstalk that it is causing.\n\n"
-            "NOTE: In cases that are very rare for digital audio, the audio signal for both channels may be very closely aligned, resulting in incorrectly detected crosstalk. When this happens, you may need to disable crosstalk detection. "
+            "NOTE: In cases that are very rare for digital audio, the audio signal from both outputs may be very closely aligned, resulting in incorrectly detected crosstalk. When this happens, you may need to disable crosstalk detection. "
             "Before doing so, it is important to test a number of devices and become familiar with how this tool works and gain confidence in your wiring/microphone setup and audio levels.",
             tool == Tool::HdmiToDigitalAudio ? "" : " and/or positioning the microphone closer to the DUT's left speaker").c_str());
         ImGui::Unindent();

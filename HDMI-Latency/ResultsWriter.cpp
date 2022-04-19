@@ -40,7 +40,7 @@ void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstre
         detailedResultsStream << "Notes 4,";
         detailedResultsStream << ",";
         detailedResultsStream << "Raw Offset (ms),";
-        detailedResultsStream << "HDMI Audio Extractor,";
+        detailedResultsStream << "Dual-Out Reference Device,";
         detailedResultsStream << "Recording Method,";
         detailedResultsStream << "Output Offset Profile,";
         detailedResultsStream << "Output Offset Profile Value (ms),";
@@ -107,7 +107,7 @@ void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstre
     detailedResultsStream << "\"" << TestNotes::Notes.Notes4 << "\",";
     detailedResultsStream << "\"" << "\",";
     detailedResultsStream << "\"" << result.Offset() << "\","; //"Raw Offset (ms),";
-    detailedResultsStream << "\"" << TestNotes::Notes.HDMIAudioDevice << "\","; //"HDMI Audio Extractor,";
+    detailedResultsStream << "\"" << TestNotes::Notes.HDMIAudioDevice << "\","; //"Dual-Out Reference Device,";
     detailedResultsStream << "\"" << TestNotes::Notes.RecordingMethod() << "\","; //"Recording Method,";
     detailedResultsStream << "\"" << result.OutputOffsetProfileName << "\","; //"Output Offset Profile,";
     detailedResultsStream << "\"" << result.OutputOffsetFromProfile << "\","; //"Output Offset Profile Value (ms),";
@@ -179,7 +179,7 @@ void ResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& result
         resultsStream << "Notes 3,";
         resultsStream << "Notes 4,";
         resultsStream << ",";
-        resultsStream << "HDMI Audio Extractor,";
+        resultsStream << "Dual-Out Reference Device,";
         resultsStream << "Recording Method,";
         resultsStream << "Output Offset Profile,";
         resultsStream << "Output Offset Profile Value (ms),";
@@ -220,7 +220,7 @@ void ResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& result
     resultsStream << "\"" << TestNotes::Notes.Notes3 << "\",";
     resultsStream << "\"" << TestNotes::Notes.Notes4 << "\",";
     resultsStream << "\"" << "\",";
-    resultsStream << "\"" << TestNotes::Notes.HDMIAudioDevice << "\","; //"HDMI Audio Extractor,";
+    resultsStream << "\"" << TestNotes::Notes.HDMIAudioDevice << "\","; //"Dual-Out Reference Device,";
     resultsStream << "\"" << TestNotes::Notes.RecordingMethod() << "\","; //"Recording Method,";
     resultsStream << "\"" << result.OutputOffsetProfileName << "\","; //"Output Offset Profile,";
     resultsStream << "\"" << result.OutputOffsetFromProfile << "\","; //"Output Offset Profile Value (ms),";

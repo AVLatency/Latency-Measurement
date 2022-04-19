@@ -40,12 +40,12 @@ void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstre
         detailedResultsStream << "Notes 4,";
         detailedResultsStream << ",";
         detailedResultsStream << "Raw Offset (ms),";
-        detailedResultsStream << "HDMI Audio Extractor,";
+        detailedResultsStream << "Dual-Out Reference Device,";
         detailedResultsStream << "Output Offset Profile,";
         detailedResultsStream << "Output Offset Profile Value (ms),";
-        detailedResultsStream << "DAC,";
-        detailedResultsStream << "DAC Latency Profile,";
-        detailedResultsStream << "DAC Latency Value (ms),";
+        detailedResultsStream << "Reference DAC,";
+        detailedResultsStream << "Reference DAC Latency Profile,";
+        detailedResultsStream << "Reference DAC Latency Value (ms),";
         detailedResultsStream << ",";
         detailedResultsStream << "Audio Output Device,";
         detailedResultsStream << "Audio Input Device,";
@@ -109,7 +109,7 @@ void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstre
     detailedResultsStream << "\"" << TestNotes::Notes.Notes4 << "\",";
     detailedResultsStream << "\"" << "\",";
     detailedResultsStream << "\"" << result.Offset() << "\","; //"Raw Offset (ms),";
-    detailedResultsStream << "\"" << TestNotes::Notes.HDMIAudioDevice << "\","; //"HDMI Audio Extractor,";
+    detailedResultsStream << "\"" << TestNotes::Notes.HDMIAudioDevice << "\","; //"Dual-Out Reference Device,";
     detailedResultsStream << "\"" << result.OutputOffsetProfileName << "\","; //"Output Offset Profile,";
     detailedResultsStream << "\"" << result.OutputOffsetFromProfile << "\","; //"Output Offset Profile Value (ms),";
     detailedResultsStream << "\"" << TestNotes::Notes.DAC << "\","; //"DAC,";
@@ -183,12 +183,12 @@ void ResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& result
         resultsStream << "Notes 3,";
         resultsStream << "Notes 4,";
         resultsStream << ",";
-        resultsStream << "HDMI Audio Extractor,";
+        resultsStream << "Dual-Out Reference Device,";
         resultsStream << "Output Offset Profile,";
         resultsStream << "Output Offset Profile Value (ms),";
-        resultsStream << "DAC,";
-        resultsStream << "DAC Latency Profile,";
-        resultsStream << "DAC Latency Value (ms),";
+        resultsStream << "Reference DAC,";
+        resultsStream << "Reference DAC Latency Profile,";
+        resultsStream << "Reference DAC Latency Value (ms),";
         resultsStream << ",";
         resultsStream << "Audio Output Device" << std::endl;
     }
@@ -226,7 +226,7 @@ void ResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& result
     resultsStream << "\"" << TestNotes::Notes.Notes3 << "\",";
     resultsStream << "\"" << TestNotes::Notes.Notes4 << "\",";
     resultsStream << "\"" << "\",";
-    resultsStream << "\"" << TestNotes::Notes.HDMIAudioDevice << "\","; //"HDMI Audio Extractor,";
+    resultsStream << "\"" << TestNotes::Notes.HDMIAudioDevice << "\","; //"Dual-Out Reference Device,";
     resultsStream << "\"" << result.OutputOffsetProfileName << "\","; //"Output Offset Profile,";
     resultsStream << "\"" << result.OutputOffsetFromProfile << "\","; //"Output Offset Profile Value (ms),";
     resultsStream << "\"" << TestNotes::Notes.DAC << "\","; //"DAC,";

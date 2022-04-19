@@ -132,14 +132,19 @@ bool Gui::DoGui()
                 ImGui::BeginDisabled();
             }
 
+            ImGui::Spacing();
             if (ImGui::Button("Refresh Audio Devices"))
             {
                 RefreshAudioEndpoints();
             }
 
-            if (outputAudioEndpoints.size() < 1 || inputAudioEndpoints.size() < 1)
+            if (outputAudioEndpoints.size() < 1)
             {
-                ImGui::Text("Error: cannot find an input or output audio device.");
+                ImGui::Text("Error: cannot find an output audio device.");
+            }
+            else if (inputAudioEndpoints.size() < 1)
+            {
+                ImGui::Text("Error: cannot find an input audio device.");
             }
             else
             {
@@ -200,7 +205,7 @@ bool Gui::DoGui()
             if (state >= MeasurementToolGuiState::AdjustVolume)
             {
                 bool previousCrossTalk = TestConfiguration::Ch1CableCrosstalkDetection;
-                GuiHelper::AdjustVolumeDisplay("left channel volume", adjustVolumeManager->LeftVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, "Left Channel Input (HDMI Audio Extractor)", &TestConfiguration::Ch1AutoThresholdDetection, &TestConfiguration::Ch1DetectionThreshold, &TestConfiguration::Ch1CableCrosstalkDetection);
+                GuiHelper::AdjustVolumeDisplay("left channel volume", adjustVolumeManager->LeftVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, "Left Channel Input (Analog Out of Dual-Out Reference Device)", &TestConfiguration::Ch1AutoThresholdDetection, &TestConfiguration::Ch1DetectionThreshold, &TestConfiguration::Ch1CableCrosstalkDetection);
                 if (!TestConfiguration::Ch1CableCrosstalkDetection && previousCrossTalk)
                 {
                     openDialogVolumeAdjustDisabledCrosstalk = true;
@@ -210,7 +215,7 @@ bool Gui::DoGui()
                 ImGui::Spacing();
 
                 previousCrossTalk = TestConfiguration::Ch2CableCrosstalkDetection;
-                GuiHelper::AdjustVolumeDisplay("right channel volume", adjustVolumeManager->RightVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, "Right Channel Input (DUT)", &TestConfiguration::Ch2AutoThresholdDetection, &TestConfiguration::Ch2DetectionThreshold, &TestConfiguration::Ch2CableCrosstalkDetection);
+                GuiHelper::AdjustVolumeDisplay("right channel volume", adjustVolumeManager->RightVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, "Right Channel Input (Output of DUT)", &TestConfiguration::Ch2AutoThresholdDetection, &TestConfiguration::Ch2DetectionThreshold, &TestConfiguration::Ch2CableCrosstalkDetection);
                 if (!TestConfiguration::Ch2CableCrosstalkDetection && previousCrossTalk)
                 {
                     openDialogVolumeAdjustDisabledCrosstalk = true;
@@ -301,13 +306,13 @@ bool Gui::DoGui()
 
                 ImGui::TableNextColumn();
                 ImGui::PushFont(FontHelper::BoldFont);
-                ImGui::Text("HDMI Audio Extractor");
+                ImGui::Text("Dual-Out Reference Device");
                 ImGui::PopFont();
-                ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the time offset between the analog output and the HDMI output of the HDMI Audio Extractor for different audio formats.");
+                ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the time offset between the analog output and the HDMI output of the Dual-Out Reference Device for different audio formats.");
                 ImGui::Spacing();
 
 
-                if (ImGui::BeginListBox("", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing())))
+                if (ImGui::BeginListBox("Dual-Out Reference Device", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing())))
                 {
                     for (int n = 0; n < HdmiOutputOffsetProfiles::Profiles.size(); n++)
                     {
@@ -346,9 +351,9 @@ bool Gui::DoGui()
                     ImGui::PushFont(FontHelper::BoldFont);
                     ImGui::Text("WARNING:");
                     ImGui::PopFont();
-                    ImGui::TextWrapped("Using an HDMI Audio Extractor that is not on this list may result in inaccurate measurements! This is because the offset between its different audio outputs will not be accounted for in the reported measurements.");
+                    ImGui::TextWrapped("Using a Dual-Out Reference Device that is not on this list may result in inaccurate measurements! This is because the offset between its different audio outputs will not be accounted for in the reported measurements.");
                     ImGui::Spacing();
-                    ImGui::TextWrapped("If you have another HDMI Audio Extractor that is suitable for use with this tool, "
+                    ImGui::TextWrapped("If you have another device that is suitable for use with this tool, "
                         "please let me know by email to allen"/* spam bot protection */"@"/* spam bot protection */"avlatency.com and I might be able to add support for this device.");
                 }
 
@@ -416,12 +421,12 @@ bool Gui::DoGui()
                 {
                     ImGui::BeginDisabled();
                     strcpy_s(TestNotes::Notes.HDMIAudioDevice, HdmiOutputOffsetProfiles::CurrentProfile()->Name.c_str());
-                    ImGui::InputText("HDMI Audio Extractor", TestNotes::Notes.HDMIAudioDevice, IM_ARRAYSIZE(TestNotes::Notes.HDMIAudioDevice));
+                    ImGui::InputText("Dual-Out Reference Device", TestNotes::Notes.HDMIAudioDevice, IM_ARRAYSIZE(TestNotes::Notes.HDMIAudioDevice));
                     ImGui::EndDisabled();
                 }
                 else
                 {
-                    ImGui::InputText("HDMI Audio Extractor", TestNotes::Notes.HDMIAudioDevice, IM_ARRAYSIZE(TestNotes::Notes.HDMIAudioDevice), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
+                    ImGui::InputText("Dual-Out Reference Device", TestNotes::Notes.HDMIAudioDevice, IM_ARRAYSIZE(TestNotes::Notes.HDMIAudioDevice), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
                 }
                 GuiHelper::OtherCombo("Recording Method", "Recording Method (Other)", &TestNotes::Notes.RecordingMethodIndex, TestNotes::Notes.RecordingMethodOptions, IM_ARRAYSIZE(TestNotes::Notes.RecordingMethodOptions), TestNotes::Notes.RecordingMethodOther, IM_ARRAYSIZE(TestNotes::Notes.RecordingMethodOther));
 
@@ -749,7 +754,7 @@ bool Gui::DoGui()
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     if (ImGui::BeginPopupModal("Reminder: EDID Mode", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("Set the EDID mode of your HDMI Audio Extractor to match the EDID of your DUT.");
+        ImGui::Text("If using an HDMI audio extractor as your Dual-Out Reference Device, set its EDID mode to match the EDID of your DUT.");
         ImGui::Spacing();
 
         float imageScale = 0.6 * Gui::DpiScale;
