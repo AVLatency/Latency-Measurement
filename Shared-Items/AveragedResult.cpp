@@ -29,7 +29,7 @@ float AveragedResult::MinLatency() const
 
 float AveragedResult::MaxLatency() const
 {
-	float max = FLT_MIN;
+	float max = -FLT_MAX;
 	for (float offset : Offsets)
 	{
 		if (offset > max)
