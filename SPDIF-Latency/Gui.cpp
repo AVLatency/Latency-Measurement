@@ -214,9 +214,6 @@ bool Gui::DoGui()
                 {
                     openDialogVolumeAdjustDisabledCrosstalk = true;
                 }
-                ImGui::Spacing();
-                ImGui::Spacing();
-                ImGui::Spacing();
 
                 previousCrossTalk = TestConfiguration::Ch2CableCrosstalkDetection;
                 GuiHelper::AdjustVolumeDisplay("right channel volume", adjustVolumeManager->RightVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, "Right Channel Input (Output of DUT)", &TestConfiguration::Ch2AutoThresholdDetection, &TestConfiguration::Ch2DetectionThreshold, &TestConfiguration::Ch2CableCrosstalkDetection, setAdjustVolumeDefaultState);
@@ -224,9 +221,6 @@ bool Gui::DoGui()
                 {
                     openDialogVolumeAdjustDisabledCrosstalk = true;
                 }
-                ImGui::Spacing();
-                ImGui::Spacing();
-                ImGui::Spacing();
 
                 GuiHelper::AdjustVolumeInstructionsTroubleshooting(GuiHelper::Tool::SpdifAudio, lastCheckedInputSampleRate, &TestConfiguration::OutputVolume, &adjustVolumeManager->OverrideNoisyQuiet, (void*)resources.VolumeAdjustExampleTexture, resources.VolumeAdjustExampleTextureWidth, resources.VolumeAdjustExampleTextureHeight, DpiScale);
                 ImGui::Spacing();

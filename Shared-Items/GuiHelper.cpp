@@ -109,6 +109,10 @@ void GuiHelper::OptionallyBoldText(const char* text, bool bold)
 
 void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManager::VolumeAnalysis& analysis, float DpiScale, float tickMonitorWidth, float fullMonitorWidth, const char* title, bool* useAutoThreshold, float* manualThreshold, bool* cableCrosstalkDetection, bool setDefaultState)
 {
+    ImGui::Spacing();
+    ImGui::Spacing();
+    ImGui::Spacing();
+
     if (*useAutoThreshold)
     {
         *manualThreshold = analysis.AutoThreshold;
@@ -122,8 +126,6 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
     float plotVerticalScale = max(analysis.MaxEdgeMagnitude, *manualThreshold);
     float clipMarkHeight = 5 * DpiScale;
     float clipMarkWidth = 15.5 * DpiScale;
-
-    ImGui::Spacing();
     ImGui::PushFont(FontHelper::HeaderFont);
     ImGui::Text(title);
     ImGui::PopFont();
@@ -304,6 +306,10 @@ std::string GuiHelper::CableHelpText(Tool tool)
 
 void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheckedInputSampleRate, float* outputVolume, bool* overrideNoisyQuiet, void* exampleTexture, int exampleTextureWidth, int exampleTextureHeight, float DpiScale)
 {
+    ImGui::Spacing();
+    ImGui::Spacing();
+    ImGui::Spacing();
+
     ImGui::PushFont(FontHelper::HeaderFont);
     ImGui::Text("Instructions and Troubleshooting");
     ImGui::PopFont();
@@ -312,7 +318,15 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheck
     ImGui::PushFont(FontHelper::BoldFont);
     ImGui::Text("Basic Instructions:");
     ImGui::PopFont();
-    ImGui::Text("Adjust microphone placement, output volume of the DUT, and input device volume to make the Signal Quality for both channels OK.");
+    ImGui::Text("- Verify device and cable setup using visual feedback from this tool.");
+    if (tool == Tool::HdmiToDigitalAudio)
+    {
+        ImGui::Text("- Adjust output volume of the DUT and input device volume to make the Signal Quality for both channels OK.");
+    }
+    else
+    {
+        ImGui::Text("- Adjust microphone placement, output volume of the DUT, and input device volume to make the Signal Quality for both channels OK.");
+    }
     ImGui::Spacing();
 
     if (ImGui::TreeNode("Example"))
@@ -380,9 +394,10 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheck
         ImGui::TextWrapped(std::format("Crosstalk is most often detected when one of the two channels is receiving no audio signal at all. "
             "When no audio signal is present, a very weak crosstalk signal is detected instead. "
             "To address this:\n\n1) Make sure that your wiring is correct and that both channels are receiving audio input using the above \"Wiring and Cable Setup\" instructions.\n"
-            "2) Increase the signal to noise ratio by turning up the output volume of the DUT{}.\n"
-            "3) Try manually increasing the Threshold by disabling the \"Automatic threshold detection\" to bring the Threshold above the crosstalk signal.\n"
-            "4) If the previous three strategies do not resolve the issue, you may need to use an inline analog volume control on the line-level device to reduce its audio level and, in turn, reduce the crosstalk that it is causing.\n\n"
+            "2) Double check your input and output device selection.\n"
+            "3) Increase the signal to noise ratio by turning up the output volume of the DUT{}.\n"
+            "4) Try manually increasing the Threshold by disabling the \"Automatic threshold detection\" to bring the Threshold above the crosstalk signal.\n"
+            "5) If the previous three strategies do not resolve the issue, you may need to use an inline analog volume control on the line-level device to reduce its audio level and, in turn, reduce the crosstalk that it is causing.\n\n"
             "NOTE: In cases that are very rare for digital audio, the audio signal from both outputs may be very closely aligned, resulting in incorrectly detected crosstalk. When this happens, you may need to disable crosstalk detection. "
             "Before doing so, it is important to test a number of devices and become familiar with how this tool works and gain confidence in your wiring/microphone setup and audio levels.",
             tool == Tool::HdmiToDigitalAudio ? "" : " and/or positioning the microphone closer to the DUT's left speaker").c_str());
@@ -395,8 +410,9 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheck
         ImGui::Indent();
             ImGui::TextWrapped(std::format("A Noisy / Quiet signal quality often happens when there is no audio signal present or the signal to noise ratio is too low. To address this:\n\n"
                 "1) Make sure that your wiring is correct and that both channels are receiving audio input using the above \"Wiring and Cable Setup\" instructions.\n"
-                "2) Increase the signal to noise ratio by turning up the output volume of the DUT{}.\n"
-                "3) Follow the \"Best Practices\" listed above.",
+                "2) Double check your input and output device selection.\n"
+                "3) Increase the signal to noise ratio by turning up the output volume of the DUT{}.\n"
+                "4) Follow the \"Best Practices\" listed above.",
                 tool == Tool::HdmiToDigitalAudio ? "" : " and/or positioning the microphone closer to the DUT's left speaker").c_str());
         ImGui::Unindent();
 
