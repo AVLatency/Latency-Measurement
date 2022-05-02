@@ -107,7 +107,7 @@ void GuiHelper::OptionallyBoldText(const char* text, bool bold)
     }
 }
 
-void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManager::VolumeAnalysis& analysis, float DpiScale, float tickMonitorWidth, float fullMonitorWidth, const char* title, bool* useAutoThreshold, float* manualThreshold, bool* cableCrosstalkDetection)
+void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManager::VolumeAnalysis& analysis, float DpiScale, float tickMonitorWidth, float fullMonitorWidth, const char* title, bool* useAutoThreshold, float* manualThreshold, bool* cableCrosstalkDetection, bool setDefaultState)
 {
     if (*useAutoThreshold)
     {
@@ -129,6 +129,10 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
     ImGui::PopFont();
     GuiHelper::PeakLevel(analysis.Grade, "");
 
+    if (setDefaultState)
+    {
+        ImGui::SetNextTreeNodeOpen(false);
+    }
     if (ImGui::CollapsingHeader("Raw Wave View"))
     {
         float zeroValues[2]{ 0, 0 };
@@ -176,6 +180,11 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
         HelpMarker("X axis: Time\nY axis: Normalized audio level (visual aliasing and distortion may occur in this low-fidelity waveform view)");
     }
     ImGui::Spacing();
+
+    if (setDefaultState)
+    {
+        ImGui::SetNextTreeNodeOpen(true);
+    }
     if (ImGui::CollapsingHeader("High Frequency Edges", ImGuiTreeNodeFlags_DefaultOpen))
     {
         auto topLeftPos = ImGui::GetCursorPos();

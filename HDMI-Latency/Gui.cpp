@@ -48,6 +48,8 @@ bool Gui::DoGui()
         testManager->HasShownFilesystemError = true;
     }
 
+    bool setAdjustVolumeDefaultState = false;
+
     // Menu Bar
     if (ImGui::BeginMenuBar())
     {
@@ -192,6 +194,7 @@ bool Gui::DoGui()
                 {
                     lastCheckedInputSampleRate = AudioEndpointHelper::GetInputMixFormatSampleRate(inputAudioEndpoints[inputDeviceIndex]);
                     state = MeasurementToolGuiState::AdjustVolume;
+                    setAdjustVolumeDefaultState = true;
                     StartAdjustVolume();
                 }
             }
@@ -205,7 +208,7 @@ bool Gui::DoGui()
             if (state >= MeasurementToolGuiState::AdjustVolume)
             {
                 bool previousCrossTalk = TestConfiguration::Ch1CableCrosstalkDetection;
-                GuiHelper::AdjustVolumeDisplay("left channel volume", adjustVolumeManager->LeftVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, "Left Channel Input (Analog Out of Dual-Out Reference Device)", &TestConfiguration::Ch1AutoThresholdDetection, &TestConfiguration::Ch1DetectionThreshold, &TestConfiguration::Ch1CableCrosstalkDetection);
+                GuiHelper::AdjustVolumeDisplay("left channel volume", adjustVolumeManager->LeftVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, "Left Channel Input (Analog Out of Dual-Out Reference Device)", &TestConfiguration::Ch1AutoThresholdDetection, &TestConfiguration::Ch1DetectionThreshold, &TestConfiguration::Ch1CableCrosstalkDetection, setAdjustVolumeDefaultState);
                 if (!TestConfiguration::Ch1CableCrosstalkDetection && previousCrossTalk)
                 {
                     openDialogVolumeAdjustDisabledCrosstalk = true;
@@ -215,7 +218,7 @@ bool Gui::DoGui()
                 ImGui::Spacing();
 
                 previousCrossTalk = TestConfiguration::Ch2CableCrosstalkDetection;
-                GuiHelper::AdjustVolumeDisplay("right channel volume", adjustVolumeManager->RightVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, "Right Channel Input (Output of DUT)", &TestConfiguration::Ch2AutoThresholdDetection, &TestConfiguration::Ch2DetectionThreshold, &TestConfiguration::Ch2CableCrosstalkDetection);
+                GuiHelper::AdjustVolumeDisplay("right channel volume", adjustVolumeManager->RightVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, "Right Channel Input (Output of DUT)", &TestConfiguration::Ch2AutoThresholdDetection, &TestConfiguration::Ch2DetectionThreshold, &TestConfiguration::Ch2CableCrosstalkDetection, setAdjustVolumeDefaultState);
                 if (!TestConfiguration::Ch2CableCrosstalkDetection && previousCrossTalk)
                 {
                     openDialogVolumeAdjustDisabledCrosstalk = true;
