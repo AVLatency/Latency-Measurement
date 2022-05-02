@@ -99,15 +99,20 @@ bool Gui::DoGui()
         {
         case MeasurementToolGuiState::GettingStarted:
         {
-
+            ImGui::Spacing();
             ImGui::Text("Welcome to the AV Latency.com HDMI latency measurement tool!");
             ImGui::Spacing();
             ImGui::Text("Before starting, please connect your cables as described in the diagram above.");
             ImGui::Spacing();
             ImGui::Text("You can find help text by hovering your mouse over these:");
-            ImGui::SameLine(); GuiHelper::HelpMarker("Click \"Next\" once you've connected all of the cables to get started!");
+            ImGui::SameLine(); GuiHelper::HelpMarker("You can visit the AV Latency.com Toolkit Webpage to view a demonstration video and find out more about how to use this tool.\n\nClick \"Next\" once you've connected all of the cables to get started!");
             ImGui::Spacing();
 
+            if (ImGui::Button("AV Latency.com Toolkit Webpage"))
+            {
+                ShellExecuteA(NULL, "open", "https://avlatency.com/tools/av-latency-com-toolkit/", NULL, NULL, SW_SHOWNORMAL);
+            }
+            ImGui::SameLine();
             if (ImGui::Button("Next"))
             {
                 openEdidReminderDialog = true;
@@ -543,7 +548,7 @@ bool Gui::DoGui()
             ImGui::Text(testManager->TestFileString.c_str());
             if (ImGui::Button("Open Results Folder"))
             {
-                ShellExecuteA(NULL, "explore", StringHelper::GetRootPath(APP_FOLDER).c_str(), NULL, NULL, SW_SHOWDEFAULT);
+                ShellExecuteA(NULL, "explore", StringHelper::GetRootPath(APP_FOLDER).c_str(), NULL, NULL, SW_SHOWNORMAL);
             }
             ImGui::Spacing();
 
