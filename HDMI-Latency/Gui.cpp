@@ -244,26 +244,33 @@ bool Gui::DoGui()
                         adjustVolumeManager->TogglePause();
                     }
                     ImGui::SameLine();
-                    bool disabled = adjustVolumeManager->paused
-                        || (!adjustVolumeManager->OverrideNoisyQuiet && adjustVolumeManager->LeftVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Quiet)
-                        || (!adjustVolumeManager->OverrideNoisyQuiet && adjustVolumeManager->RightVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Quiet)
-                        || adjustVolumeManager->LeftVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Crosstalk
-                        || adjustVolumeManager->RightVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Crosstalk;
-                    if (disabled)
+                    if (adjustVolumeManager->paused)
                     {
-                        ImGui::BeginDisabled();
+                        ImGui::Text("(Note: Output audio device remains in use while paused.)");
                     }
-                    if (ImGui::Button("Finish"))
+                    else
                     {
-                        state = MeasurementToolGuiState::FinishingAdjustVolume;
-                        if (adjustVolumeManager != nullptr)
+                        bool disabled = adjustVolumeManager->paused
+                            || (!adjustVolumeManager->OverrideNoisyQuiet && adjustVolumeManager->LeftVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Quiet)
+                            || (!adjustVolumeManager->OverrideNoisyQuiet && adjustVolumeManager->RightVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Quiet)
+                            || adjustVolumeManager->LeftVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Crosstalk
+                            || adjustVolumeManager->RightVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Crosstalk;
+                        if (disabled)
                         {
-                            adjustVolumeManager->Stop();
+                            ImGui::BeginDisabled();
                         }
-                    }
-                    if (disabled)
-                    {
-                        ImGui::EndDisabled();
+                        if (ImGui::Button("Finish"))
+                        {
+                            state = MeasurementToolGuiState::FinishingAdjustVolume;
+                            if (adjustVolumeManager != nullptr)
+                            {
+                                adjustVolumeManager->Stop();
+                            }
+                        }
+                        if (disabled)
+                        {
+                            ImGui::EndDisabled();
+                        }
                     }
                     ImGui::Spacing();
                 }
