@@ -33,6 +33,7 @@ void DacLatencyProfiles::InitializeProfiles()
 	None.Name = "Other";
 	None.Latency = 0;
 	None.InputType = DacLatencyProfile::DacInputType::Unknown;
+	None.isNoLatency = true;
 	Profiles.push_back(&None);
 }
 

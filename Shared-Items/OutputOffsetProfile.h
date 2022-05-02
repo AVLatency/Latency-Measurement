@@ -30,5 +30,7 @@ public:
 	bool (*FormatFilter)(WAVEFORMATEX*);
 
 	OutputOffset GetOffsetFromWaveFormat(WAVEFORMATEX* waveFormat);
+
+	bool isNoOffset = false; // Flag to help things like the TestManager know if this is the "None" offset profile.
 };
 

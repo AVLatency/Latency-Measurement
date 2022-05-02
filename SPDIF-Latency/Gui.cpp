@@ -38,9 +38,15 @@ bool Gui::DoGui()
 
     bool openAboutDialog = false;
     bool openEdidReminderDialog = false;
+    bool openNegativeLatencyErrorDialog = false;
     bool openMidTestFilesystemErrorDialog = false;
     bool openNoMesaurementsErrorDialog = false;
     bool openDialogVolumeAdjustDisabledCrosstalk = false;
+    if (testManager != nullptr && testManager->ShouldShowNegativeLatencyError && !testManager->HasShownNegativeLatencyError)
+    {
+        openNegativeLatencyErrorDialog = true;
+        testManager->HasShownNegativeLatencyError = true;
+    }
     if (testManager != nullptr && testManager->ShouldShowFilesystemError && !testManager->HasShownFilesystemError)
     {
         openMidTestFilesystemErrorDialog = true;
@@ -751,6 +757,7 @@ bool Gui::DoGui()
     }
 
     GuiHelper::DialogVolumeAdjustDisabledCrosstalk(openDialogVolumeAdjustDisabledCrosstalk, center);
+    GuiHelper::DialogNegativeLatency(openNegativeLatencyErrorDialog, center);
 
     ImGui::PopFont();
 

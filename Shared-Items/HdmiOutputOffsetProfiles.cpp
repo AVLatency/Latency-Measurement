@@ -12,6 +12,7 @@ void HdmiOutputOffsetProfiles::InitializeProfiles()
 	Profiles.push_back(HDV_MB01);
 
 	None = new OutputOffsetProfile("Other", None_GetOffset, AudioEndpoint::HdmiFormatsFilter);
+	None->isNoOffset = true;
 	Profiles.push_back(None);
 }
 

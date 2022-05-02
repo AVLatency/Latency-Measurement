@@ -20,6 +20,7 @@ void SpdifOutputOffsetProfiles::InitializeProfiles()
 	Profiles.push_back(LiNKFOR_USB_DAC);
 
 	None = new OutputOffsetProfile("Other", None_GetOffset, AudioEndpoint::AllFormatsFilter);
+	None->isNoOffset = true;
 	Profiles.push_back(None);
 }
 

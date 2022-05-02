@@ -527,3 +527,31 @@ void GuiHelper::DialogVolumeAdjustDisabledCrosstalk(bool openDialog, ImVec2 cent
         ImGui::EndPopup();
     }
 }
+
+void GuiHelper::DialogNegativeLatency(bool openDialog, ImVec2 center)
+{
+    const char* title = "Error: Incorrect Cable Wiring";
+    if (openDialog)
+    {
+        ImGui::OpenPopup(title);
+    }
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+    if (ImGui::BeginPopupModal(title, NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("Calculations have resulted in a negative latency value, which is impossible.\n"
+            "This suggests that your left and right input channels are wired backwards.\n\n"
+            "Please go back to the \"Adjust Volumes\" step and ensure your left and right\n"
+            "input channels are wired the right away around.");
+
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+
+        if (ImGui::Button("OK", ImVec2(120, 0)))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
+    }
+}

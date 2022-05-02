@@ -25,6 +25,9 @@ public:
 	bool ShouldShowFilesystemError = false;
 	bool HasShownFilesystemError = false;
 
+	bool ShouldShowNegativeLatencyError = false;
+	bool HasShownNegativeLatencyError = false;
+
 	std::vector<AudioFormat*> SelectedFormats;
 	std::vector<AudioFormat*> FailedFormats;
 

@@ -17,5 +17,7 @@ public:
 	std::string Name;
 	float Latency = 0; // in milliseconds
 	DacInputType InputType;
+
+	bool isNoLatency = false; // Flag to help things like the TestManager know if this is the "None" latency profile.
 };
 

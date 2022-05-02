@@ -26,4 +26,5 @@ public:
 	static int CsvInputFilter(ImGuiInputTextCallbackData* data);
 
 	static void DialogVolumeAdjustDisabledCrosstalk(bool openDialog, ImVec2 center);
+	static void DialogNegativeLatency(bool openDialog, ImVec2 center);
 };

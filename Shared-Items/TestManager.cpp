@@ -92,13 +92,28 @@ void TestManager::StartTest()
 			if (!formatSwitchResult)
 			{
 				// something has gone very wrong, so bail early since there's no point in doing the same test over and over without switching formats.
-				StopRequested = true; 
+				StopRequested = true;
 			}
 		}
 	}
 
 	AveragedResults = RecordingAnalyzer::AnalyzeResults(Results, Time, outputEndpoint);
 	PopulateSummaryResults();
+
+	if (outputOffsetProfile->isNoOffset)
+	{
+		// in this case, it's fine if there is a negative latency, because the output offset profile for the daul-out device is unknown.
+	}
+	else
+	{
+		for (auto result : AveragedResults)
+		{
+			if (result.AverageLatency() <= -0.5)
+			{
+				ShouldShowNegativeLatencyError = true;
+			}
+		}
+	}
 
 	try
 	{
