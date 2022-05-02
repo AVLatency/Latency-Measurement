@@ -189,7 +189,7 @@ bool Gui::DoGui()
                     state = MeasurementToolGuiState::GettingStarted;
                 }
                 ImGui::SameLine();
-                if (ImGui::Button("Adjust Volumes"))
+                if (ImGui::Button("Next"))
                 {
                     lastCheckedInputSampleRate = AudioEndpointHelper::GetInputMixFormatSampleRate(inputAudioEndpoints[inputDeviceIndex]);
                     state = MeasurementToolGuiState::AdjustVolume;
