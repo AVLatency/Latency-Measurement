@@ -297,8 +297,8 @@ bool Gui::DoGui()
                     }
                     else if (WasapiOutput::GetFormatID(waveFormat) == WAVE_FORMAT_IEEE_FLOAT && waveFormat->wBitsPerSample == 32)
                     {
-                        highSampleBits = std::format("{:032b}", 1.0f * TestConfiguration::OutputVolume);
-                        lowSampleBits = std::format("{:032b}", -1.0f * TestConfiguration::OutputVolume);
+                        highSampleBits = std::vformat("{:032b}", std::make_format_args(1.0f * TestConfiguration::OutputVolume));
+                        lowSampleBits = std::vformat("{:032b}", std::make_format_args (- 1.0f * TestConfiguration::OutputVolume));
                     }
 
                     std::replace(lowSampleBits.begin(), lowSampleBits.end(), '-', '1');
