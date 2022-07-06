@@ -666,7 +666,7 @@ bool Gui::DoGui()
                     if (ImGui::TreeNode("Failed Formats"))
                     {
                         ImGui::PushTextWrapPos(650 * DpiScale);
-                        ImGui::TextWrapped(std::format("At some point during the test, {} consecutive measurements were invalid for the following formats. To prevent this from happening, try increasing the \"Attempts Before Skipping a Format\" under the Advanced Configuration of the Measurement Config.", TestConfiguration::AttemptsBeforeFail).c_str());
+                        ImGui::TextWrapped(std::format("At some point during the test, {} consecutive measurements were invalid for the following formats. To prevent this from happening, try increasing the \"Lead-in Duration\" under the Advanced Configuration of the Measurement Config.", TestConfiguration::AttemptsBeforeFail).c_str());
                         ImGui::PopTextWrapPos();
                         if (ImGui::BeginListBox("", ImVec2(ImVec2(350 * DpiScale, 10 * ImGui::GetTextLineHeightWithSpacing()))))
                         {

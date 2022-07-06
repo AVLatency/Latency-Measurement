@@ -65,7 +65,7 @@ void GeneratedSamples::GenerateLatencyMeasurementSamples()
     int sampleRate = WaveFormat->nSamplesPerSec;
 
     // Timing
-    double startPadding = 0.4;
+    double startPadding = TestConfiguration::LeadInDuration;
     double tickTimes[] = { startPadding, startPadding + patternTick2RelTime, startPadding + patternTick3RelTime };
     int tickTimesInSamples[] = {
         round(tickTimes[0] * sampleRate),

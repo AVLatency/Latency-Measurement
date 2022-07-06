@@ -15,6 +15,7 @@ public:
 	/// </summary>
 	static int InitialIgnoreLength;
 	static float OutputVolume;
+	static float LeadInDuration;
 	static float LeadInToneAmplitude;
 	static bool LowFreqPitch;
 	static float AutoThresholdMultiplier;
