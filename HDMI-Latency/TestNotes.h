@@ -8,7 +8,7 @@ public:
 	bool HDMIAudioDeviceUseOutputOffsetProfile = true;
 	char HDMIAudioDevice[128] = "";
 	int RecordingMethodIndex = 0;
-	const char* RecordingMethodOptions[4] = { "", "Microphone	", "Direct Connection", "Other" };
+	const char* RecordingMethodOptions[4] = { "", "Microphone", "Direct Connection", "Other" };
 	char RecordingMethodOther[128] = "";
 	const char* RecordingMethod()
 	{
