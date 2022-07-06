@@ -19,7 +19,7 @@ std::string StringHelper::GetTimeString(time_t ttime, bool filenameSafe)
 {
     tm* localTime = localtime(&ttime);
     std::string formatString = filenameSafe ? "{}-{:02}-{:02} {:02}.{:02}.{:02}" : "{}-{:02}-{:02} {:02}:{:02}:{:02}";
-    return std::format(formatString, 1900 + localTime->tm_year, 1 + localTime->tm_mon, localTime->tm_mday, localTime->tm_hour, localTime->tm_min, localTime->tm_sec);
+    return std::vformat(formatString, std::make_format_args(1900 + localTime->tm_year, 1 + localTime->tm_mon, localTime->tm_mday, localTime->tm_hour, localTime->tm_min, localTime->tm_sec));
 }
 
 std::string StringHelper::GetRootPath(std::string appSubDirectory)
