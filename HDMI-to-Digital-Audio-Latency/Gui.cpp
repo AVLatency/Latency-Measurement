@@ -77,7 +77,7 @@ bool Gui::DoGui()
     }
 
     ImGui::Text("Cable Diagram:");
-    ImGui::SameLine(); GuiHelper::HelpMarker(std::format("Before starting you must connect your audio devices and cables as described in this diagram.\n\n{}", GuiHelper::CableHelpText(GuiHelper::Tool::HdmiToDigitalAudio)).c_str());
+    ImGui::SameLine(); GuiHelper::HelpMarker(std::format("Before starting you must connect your audio devices and cables as described in this diagram.\n\n{}", GuiHelper::CableHelpText(GuiHelper::Tool::HdmiToDigitalAudio, OutputOffsetProfile::OutputType::Hdmi)).c_str());
     float cableMapScale = 0.55 * Gui::DpiScale;
     ImGui::Image((void*)resources.CableMapTexture, ImVec2(resources.CableMapTextureWidth * cableMapScale, resources.CableMapTextureHeight * cableMapScale));
 
@@ -349,7 +349,7 @@ bool Gui::DoGui()
                     openDialogVolumeAdjustDisabledCrosstalk = true;
                 }
 
-                GuiHelper::AdjustVolumeInstructionsTroubleshooting(GuiHelper::Tool::HdmiToDigitalAudio, lastCheckedInputSampleRate, &TestConfiguration::OutputVolume, &adjustVolumeManager->OverrideNoisyQuiet, (void*)resources.VolumeAdjustExampleTexture, resources.VolumeAdjustExampleTextureWidth, resources.VolumeAdjustExampleTextureHeight, DpiScale);
+                GuiHelper::AdjustVolumeInstructionsTroubleshooting(GuiHelper::Tool::HdmiToDigitalAudio, OutputOffsetProfile::OutputType::Hdmi, lastCheckedInputSampleRate, &TestConfiguration::OutputVolume, &adjustVolumeManager->OverrideNoisyQuiet, (void*)resources.VolumeAdjustExampleTexture, resources.VolumeAdjustExampleTextureWidth, resources.VolumeAdjustExampleTextureHeight, DpiScale);
                 ImGui::Spacing();
 
                 if (state == MeasurementToolGuiState::AdjustVolume)

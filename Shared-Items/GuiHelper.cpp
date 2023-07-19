@@ -279,35 +279,39 @@ void GuiHelper::PeakLevel(AdjustVolumeManager::PeakLevelGrade grade, const char*
     ImGui::PopFont();
 }
 
-std::string GuiHelper::CableHelpText(Tool tool)
+std::string GuiHelper::CableHelpText(Tool tool, OutputOffsetProfile::OutputType outType)
 {
-    switch (tool)
+    if (tool == GuiHelper::Tool::HdmiToDigitalAudio)
     {
-    case GuiHelper::Tool::SpdifAudio:
-        return "To record audio output from the Device Under Test (DUT) you can use a microphone or directly connect to the headphone or speaker output of the DUT.\n\n"
-            "- Microphone: Make sure to position the mic as close as possible to the speaker because sound travels measurably slow. Position the mic close to the tweeter if there are separate speaker components. When recording with a mic, the Mic port must be used on computers that have separate Line In and Mic ports.\n"
-            "- DUT headphone output: Note that speaker and headphone output can sometimes have different latency on some devices.\n"
-            "- Directly connect to DUT speaker output: Start the volume low as some amplifiers may be capable of high voltage outputs that could damage your audio input device.\n\n"
-            "Your \"Dual-Out Reference Device\" must be capable of analog audio output *and* S/PDIF audio output at the same time. The time offset between analog audio output and S/PDIF audio output (the \"output offset\") must be known. Recommended devices can be found on the AV Latency.com Toolkit webpage.\n\n"
-            "AV Latency.com Toolkit Webpage: avlatency.com/tools/av-latency-com-toolkit";
-        break;
-    case GuiHelper::Tool::HdmiToDigitalAudio:
         return "For your Dual-Out Reference Device, the time offset between analog audio output and HDMI audio output must be known. For your Reference DAC, the digital to analog latency must be known. Recommended devices can be found on the AV Latency.com Toolkit webpage.\n\n"
             "AV Latency.com Toolkit Webpage: avlatency.com/tools/av-latency-com-toolkit";
-        break;
-    case GuiHelper::Tool::HdmiAudio:
-    default:
-        return "To record audio output from the Device Under Test (DUT) you can use a microphone or directly connect to the headphone or speaker output of the DUT.\n\n"
-            "- Microphone: Make sure to position the mic as close as possible to the speaker because sound travels measurably slow. Position the mic close to the tweeter if there are separate speaker components. When recording with a mic, the Mic port must be used on computers that have separate Line In and Mic ports.\n"
-            "- DUT headphone output: Note that speaker and headphone output can sometimes have different latency on some devices.\n"
-            "- Directly connect to DUT speaker output: Start the volume low as some amplifiers may be capable of high voltage outputs that could damage your audio input device.\n\n"
-            "Your \"Dual-Out Reference Device\" must be capable of analog audio output *and* HDMI audio output at the same time. The time offset between analog audio output and HDMI audio output (the \"output offset\") must be known. Recommended devices can be found on the AV Latency.com Toolkit webpage.\n\n"
-            "AV Latency.com Toolkit Webpage: avlatency.com/tools/av-latency-com-toolkit";
-        break;
+    }
+    else
+    {
+        switch (outType)
+        {
+        case OutputOffsetProfile::OutputType::Spdif:
+            return "To record audio output from the Device Under Test (DUT) you can use a microphone or directly connect to the headphone or speaker output of the DUT.\n\n"
+                "- Microphone: Make sure to position the mic as close as possible to the speaker because sound travels measurably slow. Position the mic close to the tweeter if there are separate speaker components. When recording with a mic, the Mic port must be used on computers that have separate Line In and Mic ports.\n"
+                "- DUT headphone output: Note that speaker and headphone output can sometimes have different latency on some devices.\n"
+                "- Directly connect to DUT speaker output: Start the volume low as some amplifiers may be capable of high voltage outputs that could damage your audio input device.\n\n"
+                "Your \"Dual-Out Reference Device\" must be capable of analog audio output *and* S/PDIF audio output at the same time. The time offset between analog audio output and S/PDIF audio output (the \"output offset\") must be known. Recommended devices can be found on the AV Latency.com Toolkit webpage.\n\n"
+                "AV Latency.com Toolkit Webpage: avlatency.com/tools/av-latency-com-toolkit";
+            break;
+        case OutputOffsetProfile::OutputType::Hdmi:
+        default:
+            return "To record audio output from the Device Under Test (DUT) you can use a microphone or directly connect to the headphone or speaker output of the DUT.\n\n"
+                "- Microphone: Make sure to position the mic as close as possible to the speaker because sound travels measurably slow. Position the mic close to the tweeter if there are separate speaker components. When recording with a mic, the Mic port must be used on computers that have separate Line In and Mic ports.\n"
+                "- DUT headphone output: Note that speaker and headphone output can sometimes have different latency on some devices.\n"
+                "- Directly connect to DUT speaker output: Start the volume low as some amplifiers may be capable of high voltage outputs that could damage your audio input device.\n\n"
+                "Your \"Dual-Out Reference Device\" must be capable of analog audio output *and* HDMI audio output at the same time. The time offset between analog audio output and HDMI audio output (the \"output offset\") must be known. Recommended devices can be found on the AV Latency.com Toolkit webpage.\n\n"
+                "AV Latency.com Toolkit Webpage: avlatency.com/tools/av-latency-com-toolkit";
+            break;
+        }
     }
 }
 
-void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheckedInputSampleRate, float* outputVolume, bool* overrideNoisyQuiet, void* exampleTexture, int exampleTextureWidth, int exampleTextureHeight, float DpiScale)
+void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, OutputOffsetProfile::OutputType outType, int lastCheckedInputSampleRate, float* outputVolume, bool* overrideNoisyQuiet, void* exampleTexture, int exampleTextureWidth, int exampleTextureHeight, float DpiScale)
 {
     ImGui::Spacing();
     ImGui::Spacing();
@@ -322,7 +326,7 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheck
     ImGui::Text("Basic Instructions:");
     ImGui::PopFont();
     ImGui::Text("- Verify device and cable setup using visual feedback from this tool.");
-    if (tool == Tool::HdmiToDigitalAudio)
+    if (tool == Tool::AudioLatency && outType == OutputOffsetProfile::OutputType::Hdmi)
     {
         ImGui::Text("- Adjust output volume of the DUT and input device volume to make the Signal Quality for both channels OK.");
     }
@@ -346,7 +350,7 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, int lastCheck
         ImGui::Text("Initial Cable Setup");
         ImGui::PopFont();
         ImGui::Indent();
-        ImGui::TextWrapped(std::format("Connect your audio devices and cables as described in the diagram at the top of this window.\n\n{}", GuiHelper::CableHelpText(tool)).c_str());
+        ImGui::TextWrapped(std::format("Connect your audio devices and cables as described in the diagram at the top of this window.\n\n{}", GuiHelper::CableHelpText(tool, outType)).c_str());
         ImGui::Unindent();
 
         ImGui::Spacing();
