@@ -338,7 +338,7 @@ bool Gui::DoGui()
                         {
                             SpdifOutputOffsetProfiles::SelectedProfileIndex = n;
                             outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, false, true, SpdifOutputOffsetProfiles::CurrentProfile()->FormatFilter);
-                            if (SpdifOutputOffsetProfiles::CurrentProfile() == SpdifOutputOffsetProfiles::None)
+                            if (SpdifOutputOffsetProfiles::CurrentProfile() == SpdifOutputOffsetProfiles::Spdif_None)
                             {
                                 strcpy_s(TestNotes::Notes.HDMIAudioDevice, "");
                             }
@@ -353,7 +353,7 @@ bool Gui::DoGui()
                 }
                 ImGui::Spacing();
 
-                if (SpdifOutputOffsetProfiles::Profiles[SpdifOutputOffsetProfiles::SelectedProfileIndex] == SpdifOutputOffsetProfiles::HDV_MB01)
+                if (SpdifOutputOffsetProfiles::Profiles[SpdifOutputOffsetProfiles::SelectedProfileIndex] == SpdifOutputOffsetProfiles::Spdif_HDV_MB01)
                 {
                     float imageScale = 0.45 * Gui::DpiScale;
                     ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
@@ -378,7 +378,7 @@ bool Gui::DoGui()
                         ImGui::TreePop();
                     }
                 }
-                else if (SpdifOutputOffsetProfiles::Profiles[SpdifOutputOffsetProfiles::SelectedProfileIndex] == SpdifOutputOffsetProfiles::None)
+                else if (SpdifOutputOffsetProfiles::Profiles[SpdifOutputOffsetProfiles::SelectedProfileIndex] == SpdifOutputOffsetProfiles::Spdif_None)
                 {
                     ImGui::PushFont(FontHelper::BoldFont);
                     ImGui::Text("WARNING:");
@@ -450,7 +450,7 @@ bool Gui::DoGui()
                 ImGui::SameLine(); GuiHelper::HelpMarker("These notes will be included in the .csv spreadsheet result files that are saved in the folder that this app was launched from.");
                 ImGui::Spacing();
 
-                TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile = SpdifOutputOffsetProfiles::CurrentProfile() != SpdifOutputOffsetProfiles::None;
+                TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile = SpdifOutputOffsetProfiles::CurrentProfile() != SpdifOutputOffsetProfiles::Spdif_None;
                 if (TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile)
                 {
                     ImGui::BeginDisabled();

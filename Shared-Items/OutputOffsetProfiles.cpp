@@ -1,27 +1,27 @@
-#include "HdmiOutputOffsetProfiles.h"
+#include "OutputOffsetProfiles.h"
 
-OutputOffsetProfile* HdmiOutputOffsetProfiles::HDV_MB01 = NULL;
-OutputOffsetProfile* HdmiOutputOffsetProfiles::None = NULL;
+OutputOffsetProfile* OutputOffsetProfiles::Hdmi_HDV_MB01 = NULL;
+OutputOffsetProfile* OutputOffsetProfiles::Hdmi_None = NULL;
 
-std::vector<OutputOffsetProfile*> HdmiOutputOffsetProfiles::Profiles;
-int HdmiOutputOffsetProfiles::SelectedProfileIndex = 0;
+std::vector<OutputOffsetProfile*> OutputOffsetProfiles::Profiles;
+int OutputOffsetProfiles::SelectedProfileIndex = 0;
 
-void HdmiOutputOffsetProfiles::InitializeProfiles()
+void OutputOffsetProfiles::InitializeProfiles()
 {
-	HDV_MB01 = new OutputOffsetProfile("HDV-MB01", HDV_MB01_GetOffset, AudioEndpoint::HdmiFormatsFilter);
-	Profiles.push_back(HDV_MB01);
+	Hdmi_HDV_MB01 = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Hdmi, "HDV-MB01", Hdmi_HDV_MB01_GetOffset, AudioEndpoint::HdmiFormatsFilter);
+	Profiles.push_back(Hdmi_HDV_MB01);
 
-	None = new OutputOffsetProfile("Other", None_GetOffset, AudioEndpoint::HdmiFormatsFilter);
-	None->isNoOffset = true;
-	Profiles.push_back(None);
+	Hdmi_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Hdmi, "Other", Hdmi_None_GetOffset, AudioEndpoint::HdmiFormatsFilter);
+	Hdmi_None->isNoOffset = true;
+	Profiles.push_back(Hdmi_None);
 }
 
-OutputOffsetProfile* HdmiOutputOffsetProfiles::CurrentProfile()
+OutputOffsetProfile* OutputOffsetProfiles::CurrentProfile()
 {
 	return Profiles[SelectedProfileIndex];
 }
 
-OutputOffsetProfile::OutputOffset HdmiOutputOffsetProfiles::HDV_MB01_GetOffset(int numChannels, int sampleRate, int bitDepth)
+OutputOffsetProfile::OutputOffset OutputOffsetProfiles::Hdmi_HDV_MB01_GetOffset(int numChannels, int sampleRate, int bitDepth)
 {
 	OutputOffsetProfile::OutputOffset result;
 
@@ -51,7 +51,7 @@ OutputOffsetProfile::OutputOffset HdmiOutputOffsetProfiles::HDV_MB01_GetOffset(i
 	return result;
 }
 
-OutputOffsetProfile::OutputOffset HdmiOutputOffsetProfiles::None_GetOffset(int numChannels, int sampleRate, int bitDepth)
+OutputOffsetProfile::OutputOffset OutputOffsetProfiles::Hdmi_None_GetOffset(int numChannels, int sampleRate, int bitDepth)
 {
 	OutputOffsetProfile::OutputOffset result;
 	return result;

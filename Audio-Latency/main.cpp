@@ -10,7 +10,7 @@
 #include "FontHelper.h"
 #include "resource.h"
 #include <shellscalingapi.h>
-#include "HdmiOutputOffsetProfiles.h"
+#include "OutputOffsetProfiles.h"
 #include "FilesystemCheck.h"
 #include "Defines.h"
 #include "DacLatencyProfiles.h"
@@ -98,7 +98,7 @@ int main(int, char**)
     FontHelper::LoadFonts(wc.hInstance, io, FONT_REGULAR, FONT_BOLD, Gui::DpiScale);
     style.ScaleAllSizes(Gui::DpiScale);
 
-    HdmiOutputOffsetProfiles::InitializeProfiles();
+    OutputOffsetProfiles::InitializeProfiles();
     DacLatencyProfiles::InitializeProfiles();
     Resources resources(wc.hInstance, g_pd3dDevice);
     Gui gui(resources);

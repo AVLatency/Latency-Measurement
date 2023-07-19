@@ -1,27 +1,27 @@
 #include "SpdifOutputOffsetProfiles.h"
 
-OutputOffsetProfile* SpdifOutputOffsetProfiles::HDV_MB01;
-OutputOffsetProfile* SpdifOutputOffsetProfiles::AYSA11;
-OutputOffsetProfile* SpdifOutputOffsetProfiles::LiNKFOR_USB_DAC;
-OutputOffsetProfile* SpdifOutputOffsetProfiles::None;
+OutputOffsetProfile* SpdifOutputOffsetProfiles::Spdif_HDV_MB01;
+OutputOffsetProfile* SpdifOutputOffsetProfiles::Spdif_AYSA11;
+OutputOffsetProfile* SpdifOutputOffsetProfiles::Spdif_LiNKFOR_USB_DAC;
+OutputOffsetProfile* SpdifOutputOffsetProfiles::Spdif_None;
 
 std::vector<OutputOffsetProfile*> SpdifOutputOffsetProfiles::Profiles;
 int SpdifOutputOffsetProfiles::SelectedProfileIndex = 0;
 
 void SpdifOutputOffsetProfiles::InitializeProfiles()
 {
-	HDV_MB01 = new OutputOffsetProfile("HDV-MB01", HDV_MB01_GetOffset, CommonSpdifFormatFilter);
-	Profiles.push_back(HDV_MB01);
+	Spdif_HDV_MB01 = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Spdif, "HDV-MB01", Spdif_HDV_MB01_GetOffset, CommonSpdifFormatFilter);
+	Profiles.push_back(Spdif_HDV_MB01);
 
-	AYSA11 = new OutputOffsetProfile("AYSA11", AYSA11_GetOffset, CommonSpdifFormatFilter);
-	Profiles.push_back(AYSA11);
+	Spdif_AYSA11 = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Spdif, "AYSA11", Spdif_AYSA11_GetOffset, CommonSpdifFormatFilter);
+	Profiles.push_back(Spdif_AYSA11);
 
-	LiNKFOR_USB_DAC = new OutputOffsetProfile("LiNKFOR USB DAC", LiNKFOR_USB_DAC_GetOffset, CommonSpdifFormatFilter);
-	Profiles.push_back(LiNKFOR_USB_DAC);
+	Spdif_LiNKFOR_USB_DAC = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Spdif, "LiNKFOR USB DAC", Spdif_LiNKFOR_USB_DAC_GetOffset, CommonSpdifFormatFilter);
+	Profiles.push_back(Spdif_LiNKFOR_USB_DAC);
 
-	None = new OutputOffsetProfile("Other", None_GetOffset, AudioEndpoint::AllFormatsFilter);
-	None->isNoOffset = true;
-	Profiles.push_back(None);
+	Spdif_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Spdif, "Other", Spdif_None_GetOffset, AudioEndpoint::AllFormatsFilter);
+	Spdif_None->isNoOffset = true;
+	Profiles.push_back(Spdif_None);
 }
 
 OutputOffsetProfile* SpdifOutputOffsetProfiles::CurrentProfile()
@@ -48,7 +48,7 @@ bool SpdifOutputOffsetProfiles::CommonSpdifFormatFilter(WAVEFORMATEX* waveFormat
 	return result;
 }
 
-OutputOffsetProfile::OutputOffset SpdifOutputOffsetProfiles::HDV_MB01_GetOffset(int numChannels, int sampleRate, int bitDepth)
+OutputOffsetProfile::OutputOffset SpdifOutputOffsetProfiles::Spdif_HDV_MB01_GetOffset(int numChannels, int sampleRate, int bitDepth)
 {
 	OutputOffsetProfile::OutputOffset result;
 
@@ -61,7 +61,7 @@ OutputOffsetProfile::OutputOffset SpdifOutputOffsetProfiles::HDV_MB01_GetOffset(
 	return result;
 }
 
-OutputOffsetProfile::OutputOffset SpdifOutputOffsetProfiles::AYSA11_GetOffset(int numChannels, int sampleRate, int bitDepth)
+OutputOffsetProfile::OutputOffset SpdifOutputOffsetProfiles::Spdif_AYSA11_GetOffset(int numChannels, int sampleRate, int bitDepth)
 {
 	OutputOffsetProfile::OutputOffset result;
 
@@ -74,7 +74,7 @@ OutputOffsetProfile::OutputOffset SpdifOutputOffsetProfiles::AYSA11_GetOffset(in
 	return result;
 }
 
-OutputOffsetProfile::OutputOffset SpdifOutputOffsetProfiles::LiNKFOR_USB_DAC_GetOffset(int numChannels, int sampleRate, int bitDepth)
+OutputOffsetProfile::OutputOffset SpdifOutputOffsetProfiles::Spdif_LiNKFOR_USB_DAC_GetOffset(int numChannels, int sampleRate, int bitDepth)
 {
 	OutputOffsetProfile::OutputOffset result;
 
@@ -85,7 +85,7 @@ OutputOffsetProfile::OutputOffset SpdifOutputOffsetProfiles::LiNKFOR_USB_DAC_Get
 	return result;
 }
 
-OutputOffsetProfile::OutputOffset SpdifOutputOffsetProfiles::None_GetOffset(int numChannels, int sampleRate, int bitDepth)
+OutputOffsetProfile::OutputOffset SpdifOutputOffsetProfiles::Spdif_None_GetOffset(int numChannels, int sampleRate, int bitDepth)
 {
 	OutputOffsetProfile::OutputOffset result;
 	return result;

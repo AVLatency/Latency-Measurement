@@ -7,6 +7,13 @@
 class OutputOffsetProfile
 {
 public:
+	enum struct OutputType
+	{
+		None = 0,
+		Hdmi,
+		Spdif
+	};
+
 	struct OutputOffset
 	{
 		float value = 0; // in milliseconds, positive value means that analog leads digital, negative value means digital leads analog.
@@ -18,7 +25,9 @@ public:
 		void SetValue(float value);
 	};
 	
-	OutputOffsetProfile(std::string name, OutputOffset (*getOffsetFunc)(int numChannels, int sampleRate, int bitDepth), bool (*formatFilter)(WAVEFORMATEX*));
+	OutputOffsetProfile(OutputType type, std::string name, OutputOffset (*getOffsetFunc)(int numChannels, int sampleRate, int bitDepth), bool (*formatFilter)(WAVEFORMATEX*));
+
+	OutputType OutType = OutputType::None;
 
 	std::string Name;
 	OutputOffset(*GetOffset)(int numChannels, int sampleRate, int bitDepth);

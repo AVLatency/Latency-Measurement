@@ -7,7 +7,7 @@
 #include "TestConfiguration.h"
 #include "ResultsWriter.h"
 #include "shellapi.h"
-#include "HdmiOutputOffsetProfiles.h"
+#include "OutputOffsetProfiles.h"
 #include "DacLatencyProfiles.h"
 #include "Defines.h"
 #include "GuiHelper.h"
@@ -131,13 +131,13 @@ bool Gui::DoGui()
 
             if (ImGui::BeginListBox("Dual-Out Reference Device", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing())))
             {
-                for (int n = 0; n < HdmiOutputOffsetProfiles::Profiles.size(); n++)
+                for (int n = 0; n < OutputOffsetProfiles::Profiles.size(); n++)
                 {
-                    const bool is_selected = (HdmiOutputOffsetProfiles::SelectedProfileIndex == n);
-                    if (ImGui::Selectable(HdmiOutputOffsetProfiles::Profiles[n]->Name.c_str(), is_selected))
+                    const bool is_selected = (OutputOffsetProfiles::SelectedProfileIndex == n);
+                    if (ImGui::Selectable(OutputOffsetProfiles::Profiles[n]->Name.c_str(), is_selected))
                     {
-                        HdmiOutputOffsetProfiles::SelectedProfileIndex = n;
-                        if (HdmiOutputOffsetProfiles::CurrentProfile() == HdmiOutputOffsetProfiles::None)
+                        OutputOffsetProfiles::SelectedProfileIndex = n;
+                        if (OutputOffsetProfiles::CurrentProfile() == OutputOffsetProfiles::Hdmi_None)
                         {
                             strcpy_s(TestNotes::Notes.HDMIAudioDevice, "");
                         }
@@ -152,7 +152,7 @@ bool Gui::DoGui()
             }
             ImGui::Spacing();
 
-            if (HdmiOutputOffsetProfiles::Profiles[HdmiOutputOffsetProfiles::SelectedProfileIndex] == HdmiOutputOffsetProfiles::HDV_MB01)
+            if (OutputOffsetProfiles::Profiles[OutputOffsetProfiles::SelectedProfileIndex] == OutputOffsetProfiles::Hdmi_HDV_MB01)
             {
                 float imageScale = 0.45 * Gui::DpiScale;
                 ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
@@ -162,7 +162,7 @@ bool Gui::DoGui()
                     "- Monoprice Blackbird 24278\n"
                     "- OREI HDA - 912\n");
             }
-            else if (HdmiOutputOffsetProfiles::Profiles[HdmiOutputOffsetProfiles::SelectedProfileIndex] == HdmiOutputOffsetProfiles::None)
+            else if (OutputOffsetProfiles::Profiles[OutputOffsetProfiles::SelectedProfileIndex] == OutputOffsetProfiles::Hdmi_None)
             {
                 ImGui::PushFont(FontHelper::BoldFont);
                 ImGui::Text("WARNING:");
@@ -409,7 +409,7 @@ bool Gui::DoGui()
                 else if (state == MeasurementToolGuiState::FinishingAdjustVolume)
                 {
                     state = MeasurementToolGuiState::MeasurementConfig;
-                    outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, true, true, HdmiOutputOffsetProfiles::CurrentProfile()->FormatFilter);
+                    outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, true, true, OutputOffsetProfiles::CurrentProfile()->FormatFilter);
                     strcpy_s(TestNotes::Notes.DutModel, outputAudioEndpoints[outputDeviceIndex].Name.c_str());
                     SetDutOutputType();
                 }
@@ -494,11 +494,11 @@ bool Gui::DoGui()
                 ImGui::SameLine(); GuiHelper::HelpMarker("These notes will be included in the .csv spreadsheet result files that are saved in the folder that this app was launched from.");
                 ImGui::Spacing();
 
-                TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile = HdmiOutputOffsetProfiles::CurrentProfile() != HdmiOutputOffsetProfiles::None;
+                TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile = OutputOffsetProfiles::CurrentProfile() != OutputOffsetProfiles::Hdmi_None;
                 if (TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile)
                 {
                     ImGui::BeginDisabled();
-                    strcpy_s(TestNotes::Notes.HDMIAudioDevice, HdmiOutputOffsetProfiles::CurrentProfile()->Name.c_str());
+                    strcpy_s(TestNotes::Notes.HDMIAudioDevice, OutputOffsetProfiles::CurrentProfile()->Name.c_str());
                     ImGui::InputText("Dual-Out Reference Device", TestNotes::Notes.HDMIAudioDevice, IM_ARRAYSIZE(TestNotes::Notes.HDMIAudioDevice));
                     ImGui::EndDisabled();
                 }
@@ -972,7 +972,7 @@ void Gui::StartTest()
         std::string fileString = StringHelper::GetFilenameSafeString(std::format("{} {}", TestNotes::Notes.DutModel, TestNotes::Notes.DutOutputType()));
         fileString = fileString.substr(0, 80); // 80 is a magic number that will keep path lengths reasonable without needing to do a lot of Windows API programming.
 
-        testManager = new TestManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex], selectedFormats, fileString, APP_FOLDER, (IResultsWriter&)ResultsWriter::Writer, HdmiOutputOffsetProfiles::CurrentProfile(), DacLatencyProfiles::CurrentProfile());
+        testManager = new TestManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex], selectedFormats, fileString, APP_FOLDER, (IResultsWriter&)ResultsWriter::Writer, OutputOffsetProfiles::CurrentProfile(), DacLatencyProfiles::CurrentProfile());
     }
 }
 

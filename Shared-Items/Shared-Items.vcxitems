@@ -25,7 +25,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)FontHelper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)GeneratedSamples.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)GuiHelper.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)HdmiOutputOffsetProfiles.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)OutputOffsetProfiles.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)MeasurementToolGuiState.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)IResultsWriter.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)OutputOffsetProfile.h" />
@@ -53,7 +53,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)FilesystemCheck.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)FontHelper.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)GeneratedSamples.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)HdmiOutputOffsetProfiles.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)OutputOffsetProfiles.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)IResultsWriter.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)GuiHelper.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)OutputOffsetProfile.cpp" />
