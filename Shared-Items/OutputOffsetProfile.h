@@ -11,7 +11,8 @@ public:
 	{
 		None = 0,
 		Hdmi,
-		Spdif
+		Spdif,
+		ENUM_LENGTH
 	};
 
 	struct OutputOffset
@@ -24,6 +25,8 @@ public:
 		/// </summary>
 		void SetValue(float value);
 	};
+
+	static std::string OutputTypeName(OutputOffsetProfile::OutputType outputType);
 	
 	OutputOffsetProfile(OutputType type, std::string name, OutputOffset (*getOffsetFunc)(int numChannels, int sampleRate, int bitDepth), bool (*formatFilter)(WAVEFORMATEX*));
 

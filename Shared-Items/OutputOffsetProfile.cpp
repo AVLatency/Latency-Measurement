@@ -6,6 +6,22 @@ void OutputOffsetProfile::OutputOffset::SetValue(float value)
 	verified = true;
 }
 
+
+std::string OutputOffsetProfile::OutputTypeName(OutputOffsetProfile::OutputType outputType)
+{
+	switch (outputType)
+	{
+	case OutputOffsetProfile::OutputType::Hdmi:
+		return "HDMI";
+		break;
+	case OutputOffsetProfile::OutputType::Spdif:
+		return "S/PDIF";
+		break;
+	default:
+		return "";
+	}
+}
+
 OutputOffsetProfile::OutputOffsetProfile(OutputType type, std::string name, OutputOffset(*getOffsetFunc)(int numChannels, int sampleRate, int bitDepth), bool (*formatFilter)(WAVEFORMATEX*))
 	: OutType(type), Name(name), GetOffset(getOffsetFunc), FormatFilter(formatFilter)
 {

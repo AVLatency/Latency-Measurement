@@ -7,6 +7,7 @@
 #include "AdjustVolumeManager.h"
 #include "imgui.h"
 #include "TestManager.h"
+#include "OutputOffsetProfile.h"
 
 class Gui
 {
@@ -28,6 +29,8 @@ private:
 
 	Resources& resources;
 	MeasurementToolGuiState state = MeasurementToolGuiState::GettingStarted;
+	
+	int outputTypeIndex = 0;
 	int outputDeviceIndex = 0;
 	int inputDeviceIndex = 0;
 	std::vector<AudioEndpoint> outputAudioEndpoints; // TODO: refs and pointers to these are used here and there, which isn't safe.

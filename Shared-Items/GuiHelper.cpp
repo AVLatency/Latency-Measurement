@@ -24,6 +24,8 @@ void GuiHelper::HelpMarker(const char* desc)
 void GuiHelper::DeveloperOptions()
 {
 #ifdef _DEBUG
+    ImGui::Spacing();
+
     if (ImGui::TreeNode("Developer Debug Options"))
     {
         // TODO: remove this once I've settled on an amplitude I'm happy with. This doesn't actually adjust anything in real-time because the audio tone is set to repeat.
