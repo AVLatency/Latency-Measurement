@@ -9,6 +9,17 @@
 class OutputOffsetProfiles
 {
 public:
+	/// <summary>
+	/// Represents a subset of the available output offset profiles.
+	/// Generally this is used to filter the profiles to only
+	/// include profiles with a specific OutputType.
+	/// </summary>
+	struct ProfilesSubset
+	{
+		int SubsetSelectedIndex = 0;
+		std::vector<int> ProfileIndeces;
+	};
+
 	static OutputOffsetProfile* Hdmi_HDV_MB01;
 	static OutputOffsetProfile* Hdmi_None;
 
@@ -19,6 +30,12 @@ public:
 
 	static std::vector<OutputOffsetProfile*> Profiles;
 	static int SelectedProfileIndex;
+
+	/// <summary>
+	/// These subsets include only a specific OutputType that map
+	/// to the index of the master Profiles vector.
+	/// </summary>
+	static std::map<OutputOffsetProfile::OutputType, ProfilesSubset*> Subsets;
 
 	static void InitializeProfiles();
 

@@ -131,6 +131,11 @@ bool Gui::DoGui()
                     if (ImGui::Selectable(OutputOffsetProfile::OutputTypeName((OutputOffsetProfile::OutputType)i).c_str(), is_selected))
                     {
                         outputTypeIndex = i;
+                        if (outputTypeIndex != (int)OutputOffsetProfile::OutputType::None)
+                        {
+                            OutputOffsetProfiles::ProfilesSubset* profileSubset = OutputOffsetProfiles::Subsets[(OutputOffsetProfile::OutputType)outputTypeIndex];
+                            OutputOffsetProfiles::SelectedProfileIndex = profileSubset->ProfileIndeces[profileSubset->SubsetSelectedIndex];
+                        }
                     }
                     // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
                     if (is_selected)
@@ -149,12 +154,14 @@ bool Gui::DoGui()
 
                 if (ImGui::BeginListBox("Dual-Out Reference Device", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing())))
                 {
-                    for (int n = 0; n < OutputOffsetProfiles::Profiles.size(); n++)
+                    OutputOffsetProfiles::ProfilesSubset* profileSubset = OutputOffsetProfiles::Subsets[(OutputOffsetProfile::OutputType)outputTypeIndex];
+                    for (int n = 0; n < profileSubset->ProfileIndeces.size(); n++)
                     {
-                        const bool is_selected = (OutputOffsetProfiles::SelectedProfileIndex == n);
-                        if (ImGui::Selectable(OutputOffsetProfiles::Profiles[n]->Name.c_str(), is_selected))
+                        const bool is_selected = (profileSubset->SubsetSelectedIndex == n);
+                        if (ImGui::Selectable(OutputOffsetProfiles::Profiles[profileSubset->ProfileIndeces[n]]->Name.c_str(), is_selected))
                         {
-                            OutputOffsetProfiles::SelectedProfileIndex = n;
+                            profileSubset->SubsetSelectedIndex = n;
+                            OutputOffsetProfiles::SelectedProfileIndex = profileSubset->ProfileIndeces[profileSubset->SubsetSelectedIndex];
                             if (OutputOffsetProfiles::CurrentProfile() == OutputOffsetProfiles::Hdmi_None)
                             {
                                 strcpy_s(TestNotes::Notes.HDMIAudioDevice, "");
@@ -180,7 +187,8 @@ bool Gui::DoGui()
                         "- Monoprice Blackbird 24278\n"
                         "- OREI HDA - 912\n");
                 }
-                else if (OutputOffsetProfiles::Profiles[OutputOffsetProfiles::SelectedProfileIndex] == OutputOffsetProfiles::Hdmi_None)
+                else if (OutputOffsetProfiles::Profiles[OutputOffsetProfiles::SelectedProfileIndex] == OutputOffsetProfiles::Hdmi_None
+                    || OutputOffsetProfiles::Profiles[OutputOffsetProfiles::SelectedProfileIndex] == OutputOffsetProfiles::Spdif_None)
                 {
                     ImGui::PushFont(FontHelper::BoldFont);
                     ImGui::Text("WARNING:");

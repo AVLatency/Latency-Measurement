@@ -11,8 +11,11 @@ OutputOffsetProfile* OutputOffsetProfiles::Spdif_None = NULL;
 std::vector<OutputOffsetProfile*> OutputOffsetProfiles::Profiles;
 int OutputOffsetProfiles::SelectedProfileIndex = 0;
 
+std::map<OutputOffsetProfile::OutputType, OutputOffsetProfiles::ProfilesSubset*> OutputOffsetProfiles::Subsets;
+
 void OutputOffsetProfiles::InitializeProfiles()
 {
+	// HDMI
 	Hdmi_HDV_MB01 = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Hdmi, "HDV-MB01", Hdmi_HDV_MB01_GetOffset, AudioEndpoint::HdmiFormatsFilter);
 	Profiles.push_back(Hdmi_HDV_MB01);
 
@@ -20,7 +23,7 @@ void OutputOffsetProfiles::InitializeProfiles()
 	Hdmi_None->isNoOffset = true;
 	Profiles.push_back(Hdmi_None);
 
-
+	// S/PDIF
 	Spdif_HDV_MB01 = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Spdif, "HDV-MB01", Spdif_HDV_MB01_GetOffset, CommonSpdifFormatFilter);
 	Profiles.push_back(Spdif_HDV_MB01);
 
@@ -33,6 +36,16 @@ void OutputOffsetProfiles::InitializeProfiles()
 	Spdif_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Spdif, "Other", Spdif_None_GetOffset, AudioEndpoint::AllFormatsFilter);
 	Spdif_None->isNoOffset = true;
 	Profiles.push_back(Spdif_None);
+
+	// Set up subset lists for the GUIs
+	for (int i = 0; i < Profiles.size(); i++)
+	{
+		if (!Subsets.contains(Profiles[i]->OutType))
+		{
+			Subsets[Profiles[i]->OutType] = new ProfilesSubset();
+		}
+		Subsets[Profiles[i]->OutType]->ProfileIndeces.push_back(i);
+	}
 }
 
 OutputOffsetProfile* OutputOffsetProfiles::CurrentProfile()

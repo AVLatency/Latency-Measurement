@@ -131,12 +131,14 @@ bool Gui::DoGui()
 
             if (ImGui::BeginListBox("Dual-Out Reference Device", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing())))
             {
-                for (int n = 0; n < OutputOffsetProfiles::Profiles.size(); n++)
+                OutputOffsetProfiles::ProfilesSubset* profileSubset = OutputOffsetProfiles::Subsets[OutputOffsetProfile::OutputType::Hdmi];
+                for (int n = 0; n < profileSubset->ProfileIndeces.size(); n++)
                 {
-                    const bool is_selected = (OutputOffsetProfiles::SelectedProfileIndex == n);
-                    if (ImGui::Selectable(OutputOffsetProfiles::Profiles[n]->Name.c_str(), is_selected))
+                    const bool is_selected = (profileSubset->SubsetSelectedIndex == n);
+                    if (ImGui::Selectable(OutputOffsetProfiles::Profiles[profileSubset->ProfileIndeces[n]]->Name.c_str(), is_selected))
                     {
-                        OutputOffsetProfiles::SelectedProfileIndex = n;
+                        profileSubset->SubsetSelectedIndex = n;
+                        OutputOffsetProfiles::SelectedProfileIndex = profileSubset->ProfileIndeces[profileSubset->SubsetSelectedIndex];
                         if (OutputOffsetProfiles::CurrentProfile() == OutputOffsetProfiles::Hdmi_None)
                         {
                             strcpy_s(TestNotes::Notes.HDMIAudioDevice, "");
