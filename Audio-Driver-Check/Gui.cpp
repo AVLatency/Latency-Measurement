@@ -6,6 +6,10 @@
 #include "shellapi.h"
 #include "TestConfiguration.h"
 #include "GuiHelper.h"
+#include <format>
+#include <algorithm>
+#include <fstream> // For std::endl
+#include <sstream>
 
 float Gui::DpiScale = 1.0f;
 bool Gui::DpiScaleChanged = false;

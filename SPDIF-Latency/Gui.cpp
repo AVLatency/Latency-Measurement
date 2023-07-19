@@ -11,6 +11,7 @@
 #include "Defines.h"
 #include "GuiHelper.h"
 #include "DacLatencyProfiles.h"
+#include <format>
 
 float Gui::DpiScale = 1.0f;
 bool Gui::DpiScaleChanged = false;
