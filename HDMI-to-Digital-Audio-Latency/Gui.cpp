@@ -122,7 +122,118 @@ bool Gui::DoGui()
             {
                 ShellExecuteA(NULL, "open", "https://avlatency.com/tools/av-latency-com-toolkit/", NULL, NULL, SW_SHOWNORMAL);
             }
-            ImGui::SameLine();
+
+            ImGui::PushFont(FontHelper::BoldFont);
+            ImGui::Text("Dual-Out Reference Device");
+            ImGui::PopFont();
+            ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the time offset between the analog output and the HDMI output of the Dual-Out Reference Device for different audio formats.");
+            ImGui::Spacing();
+
+            if (ImGui::BeginListBox("Dual-Out Reference Device", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing())))
+            {
+                for (int n = 0; n < HdmiOutputOffsetProfiles::Profiles.size(); n++)
+                {
+                    const bool is_selected = (HdmiOutputOffsetProfiles::SelectedProfileIndex == n);
+                    if (ImGui::Selectable(HdmiOutputOffsetProfiles::Profiles[n]->Name.c_str(), is_selected))
+                    {
+                        HdmiOutputOffsetProfiles::SelectedProfileIndex = n;
+                        if (HdmiOutputOffsetProfiles::CurrentProfile() == HdmiOutputOffsetProfiles::None)
+                        {
+                            strcpy_s(TestNotes::Notes.HDMIAudioDevice, "");
+                        }
+                    }
+                    // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                    if (is_selected)
+                    {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+                ImGui::EndListBox();
+            }
+            ImGui::Spacing();
+
+            if (HdmiOutputOffsetProfiles::Profiles[HdmiOutputOffsetProfiles::SelectedProfileIndex] == HdmiOutputOffsetProfiles::HDV_MB01)
+            {
+                float imageScale = 0.45 * Gui::DpiScale;
+                ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
+                ImGui::TextWrapped("The HDV-MB01 is sold under these names:");
+                ImGui::Spacing();
+                ImGui::TextWrapped("- J-Tech Digital JTD18G - H5CH\n"
+                    "- Monoprice Blackbird 24278\n"
+                    "- OREI HDA - 912\n");
+            }
+            else if (HdmiOutputOffsetProfiles::Profiles[HdmiOutputOffsetProfiles::SelectedProfileIndex] == HdmiOutputOffsetProfiles::None)
+            {
+                ImGui::PushFont(FontHelper::BoldFont);
+                ImGui::Text("WARNING:");
+                ImGui::PopFont();
+                ImGui::TextWrapped("Using a Dual-Out Reference Device that is not on this list may result in inaccurate measurements! This is because the offset between its different audio outputs will not be accounted for in the reported measurements.");
+                ImGui::Spacing();
+                ImGui::TextWrapped("If you have another device that is suitable for use with this tool, "
+                    "please let me know by email to allen"/* spam bot protection */"@"/* spam bot protection */"avlatency.com and I might be able to add support for this device.");
+            }
+
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            ImGui::PushFont(FontHelper::BoldFont);
+            ImGui::Text("Reference DAC");
+            ImGui::PopFont();
+            ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the amount of time between the digital audio signal entering the DAC's input to the analog output of the DAC. Only DACs that have similar latency for all audio formats are compatable with this tool.");
+            ImGui::Spacing();
+
+            if (ImGui::BeginListBox("Reference DAC", ImVec2(-FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing())))
+            {
+                for (int n = 0; n < DacLatencyProfiles::Profiles.size(); n++)
+                {
+                    const bool is_selected = (DacLatencyProfiles::SelectedProfileIndex == n);
+                    if (ImGui::Selectable(DacLatencyProfiles::Profiles[n]->Name.c_str(), is_selected))
+                    {
+                        DacLatencyProfiles::SelectedProfileIndex = n;
+                        if (DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::None)
+                        {
+                            strcpy_s(TestNotes::Notes.DAC, "");
+                        }
+                        SetDutOutputType();
+                    }
+                    // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                    if (is_selected)
+                    {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+                ImGui::EndListBox();
+            }
+            ImGui::Spacing();
+
+            if (DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::CV121AD_ARC
+                || DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::CV121AD_SPDIF_COAX
+                || DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::CV121AD_SPDIF_OPTICAL)
+            {
+                float imageScale = 0.30 * Gui::DpiScale;
+                ImGui::Image((void*)resources.CV121ADTexture, ImVec2(resources.CV121ADTextureWidth * imageScale, resources.CV121ADTextureHeight * imageScale));
+                ImGui::TextWrapped("The CV121AD is sold under these names:");
+                ImGui::Spacing();
+                ImGui::TextWrapped("- MYPIN 192KHz DAC Converter Multifunction Audio Converter");
+            }
+            else if (DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::SHARCV1_EARC)
+            {
+                float imageScale = 0.6 * Gui::DpiScale;
+                ImGui::Image((void*)resources.SHARCv1Texture, ImVec2(resources.SHARCv1TextureWidth * imageScale, resources.SHARCv1TextureHeight * imageScale));
+                ImGui::TextWrapped("The SHARC v1 is produced and sold by Thenaudio.");
+            }
+            else if (DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::None)
+            {
+                ImGui::PushFont(FontHelper::BoldFont);
+                ImGui::Text("WARNING:");
+                ImGui::PopFont();
+                ImGui::TextWrapped("Using a DAC that is not on this list may result in inaccurate measurements! This is because the DAC's audio latency will not be accounted for in the reported measurements.");
+                ImGui::Spacing();
+                ImGui::TextWrapped("If you have another DAC that is suitable for use with this tool, "
+                    "please let me know by email to allen"/* spam bot protection */"@"/* spam bot protection */"avlatency.com and I might be able to add support for this device.");
+            }
+
             if (ImGui::Button("Next"))
             {
                 openEdidReminderDialog = true;
@@ -317,125 +428,11 @@ bool Gui::DoGui()
 
             ImGui::Spacing();
             float lastColumnCursorPosition = 0;
-            if (ImGui::BeginTable("MeasurementConfig", 3))
+            if (ImGui::BeginTable("MeasurementConfig", 2))
             {
-                ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, 200 * DpiScale);
-                ImGui::TableSetupColumn("column2", ImGuiTableColumnFlags_WidthFixed, 370 * DpiScale);
+                ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, 370 * DpiScale);
 
                 ImGui::TableNextRow();
-
-                ImGui::TableNextColumn();
-                ImGui::PushFont(FontHelper::BoldFont);
-                ImGui::Text("Dual-Out Reference Device");
-                ImGui::PopFont();
-                ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the time offset between the analog output and the HDMI output of the Dual-Out Reference Device for different audio formats.");
-                ImGui::Spacing();
-
-                if (ImGui::BeginListBox("Dual-Out Reference Device", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing())))
-                {
-                    for (int n = 0; n < HdmiOutputOffsetProfiles::Profiles.size(); n++)
-                    {
-                        const bool is_selected = (HdmiOutputOffsetProfiles::SelectedProfileIndex == n);
-                        if (ImGui::Selectable(HdmiOutputOffsetProfiles::Profiles[n]->Name.c_str(), is_selected))
-                        {
-                            HdmiOutputOffsetProfiles::SelectedProfileIndex = n;
-                            outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, true, true, HdmiOutputOffsetProfiles::CurrentProfile()->FormatFilter);
-                            if (HdmiOutputOffsetProfiles::CurrentProfile() == HdmiOutputOffsetProfiles::None)
-                            {
-                                strcpy_s(TestNotes::Notes.HDMIAudioDevice, "");
-                            }
-                        }
-                        // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-                        if (is_selected)
-                        {
-                            ImGui::SetItemDefaultFocus();
-                        }
-                    }
-                    ImGui::EndListBox();
-                }
-                ImGui::Spacing();
-
-                if (HdmiOutputOffsetProfiles::Profiles[HdmiOutputOffsetProfiles::SelectedProfileIndex] == HdmiOutputOffsetProfiles::HDV_MB01)
-                {
-                    float imageScale = 0.45 * Gui::DpiScale;
-                    ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
-                    ImGui::TextWrapped("The HDV-MB01 is sold under these names:");
-                    ImGui::Spacing();
-                    ImGui::TextWrapped("- J-Tech Digital JTD18G - H5CH\n"
-                        "- Monoprice Blackbird 24278\n"
-                        "- OREI HDA - 912\n");
-                }
-                else if (HdmiOutputOffsetProfiles::Profiles[HdmiOutputOffsetProfiles::SelectedProfileIndex] == HdmiOutputOffsetProfiles::None)
-                {
-                    ImGui::PushFont(FontHelper::BoldFont);
-                    ImGui::Text("WARNING:");
-                    ImGui::PopFont();
-                    ImGui::TextWrapped("Using a Dual-Out Reference Device that is not on this list may result in inaccurate measurements! This is because the offset between its different audio outputs will not be accounted for in the reported measurements.");
-                    ImGui::Spacing();
-                    ImGui::TextWrapped("If you have another device that is suitable for use with this tool, "
-                        "please let me know by email to allen"/* spam bot protection */"@"/* spam bot protection */"avlatency.com and I might be able to add support for this device.");
-                }
-
-                ImGui::Spacing();
-                ImGui::Separator();
-                ImGui::Spacing();
-
-                ImGui::PushFont(FontHelper::BoldFont);
-                ImGui::Text("Reference DAC");
-                ImGui::PopFont();
-                ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the amount of time between the digital audio signal entering the DAC's input to the analog output of the DAC. Only DACs that have similar latency for all audio formats are compatable with this tool.");
-                ImGui::Spacing();
-
-                if (ImGui::BeginListBox("Reference DAC", ImVec2(-FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing())))
-                {
-                    for (int n = 0; n < DacLatencyProfiles::Profiles.size(); n++)
-                    {
-                        const bool is_selected = (DacLatencyProfiles::SelectedProfileIndex == n);
-                        if (ImGui::Selectable(DacLatencyProfiles::Profiles[n]->Name.c_str(), is_selected))
-                        {
-                            DacLatencyProfiles::SelectedProfileIndex = n;
-                            if (DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::None)
-                            {
-                                strcpy_s(TestNotes::Notes.DAC, "");
-                            }
-                            SetDutOutputType();
-                        }
-                        // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-                        if (is_selected)
-                        {
-                            ImGui::SetItemDefaultFocus();
-                        }
-                    }
-                    ImGui::EndListBox();
-                }
-                ImGui::Spacing();
-
-                if (DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::CV121AD_ARC
-                    || DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::CV121AD_SPDIF_COAX
-                    || DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::CV121AD_SPDIF_OPTICAL)
-                {
-                    float imageScale = 0.30 * Gui::DpiScale;
-                    ImGui::Image((void*)resources.CV121ADTexture, ImVec2(resources.CV121ADTextureWidth * imageScale, resources.CV121ADTextureHeight * imageScale));
-                    ImGui::TextWrapped("The CV121AD is sold under these names:");
-                    ImGui::Spacing();
-                    ImGui::TextWrapped("- MYPIN 192KHz DAC Converter Multifunction Audio Converter");
-                }
-                else if (DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::SHARCV1_EARC)
-                {
-                    float imageScale = 0.6 * Gui::DpiScale;
-                    ImGui::Image((void*)resources.SHARCv1Texture, ImVec2(resources.SHARCv1TextureWidth * imageScale, resources.SHARCv1TextureHeight * imageScale));
-                    ImGui::TextWrapped("The SHARC v1 is produced and sold by Thenaudio.");
-                }
-                else if (DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::None)
-                {
-                    ImGui::PushFont(FontHelper::BoldFont);
-                    ImGui::Text("WARNING:");
-                    ImGui::PopFont();
-                    ImGui::TextWrapped("Using a DAC that is not on this list may result in inaccurate measurements! This is because the DAC's audio latency will not be accounted for in the reported measurements.");
-                    ImGui::Spacing();
-                    ImGui::TextWrapped("If you have another DAC that is suitable for use with this tool, "
-                        "please let me know by email to allen"/* spam bot protection */"@"/* spam bot protection */"avlatency.com and I might be able to add support for this device.");
-                }
 
                 ImGui::TableNextColumn();
                 ImGui::PushFont(FontHelper::BoldFont);
