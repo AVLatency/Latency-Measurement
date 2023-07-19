@@ -61,7 +61,7 @@ packages/
 # Resource cache files
 *.aps
 
-/HDMI-Latency/HDMI Audio Latency Results
+/Audio-Latency/Audio Latency Results
 /SPDIF-Latency/SPDIF Latency Results
 imgui.ini
 /HDMI-to-Digital-Audio-Latency/HDMI Audio Passthrough Latency Results

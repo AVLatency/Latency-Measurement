@@ -67,6 +67,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="HDMI-Latency.rc" />
+    <ResourceCompile Include="Audio-Latency.rc" />
   </ItemGroup>
 </Project>

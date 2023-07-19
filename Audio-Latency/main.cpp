@@ -44,9 +44,9 @@ int main(int, char**)
     const auto mon = ::MonitorFromRect(&r, MONITOR_DEFAULTTOPRIMARY);
     Gui::DpiScale = ImGui_ImplWin32_GetDpiScaleForMonitor(mon);
 
-    WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, _T("AV Latency.com HDMI Latency"), NULL };
+    WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, _T("AV Latency.com Latency"), NULL };
     ::RegisterClassEx(&wc);
-    HWND hwnd = ::CreateWindow(wc.lpszClassName, _T("AV Latency.com HDMI Audio Latency"), WS_OVERLAPPEDWINDOW, r.left, r.top, windowWidth * Gui::DpiScale, windowHeight * Gui::DpiScale, NULL, NULL, wc.hInstance, NULL);
+    HWND hwnd = ::CreateWindow(wc.lpszClassName, _T("AV Latency.com Audio Latency"), WS_OVERLAPPEDWINDOW, r.left, r.top, windowWidth * Gui::DpiScale, windowHeight * Gui::DpiScale, NULL, NULL, wc.hInstance, NULL);
 
     // Initialize Direct3D
     if (!CreateDeviceD3D(hwnd))

@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by HDMI-Latency.rc
+// Used by Audio-Latency.rc
 //
 #define HDMI_CABLE_MAP 300
 #define HDMI_EDID_MODE 301
