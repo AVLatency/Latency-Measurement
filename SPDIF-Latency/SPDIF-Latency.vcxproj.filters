@@ -29,7 +29,6 @@
     <ClInclude Include="Resources.h" />
     <ClInclude Include="TestNotes.h" />
     <ClInclude Include="ResultsWriter.h" />
-    <ClInclude Include="SpdifOutputOffsetProfiles.h" />
     <ClInclude Include="Defines.h" />
   </ItemGroup>
   <ItemGroup>
@@ -61,7 +60,6 @@
     <ClCompile Include="Resources.cpp" />
     <ClCompile Include="TestNotes.cpp" />
     <ClCompile Include="ResultsWriter.cpp" />
-    <ClCompile Include="SpdifOutputOffsetProfiles.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\imgui\misc\debuggers\imgui.natvis">

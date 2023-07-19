@@ -7,7 +7,7 @@
 #include "TestConfiguration.h"
 #include "ResultsWriter.h"
 #include "shellapi.h"
-#include "SpdifOutputOffsetProfiles.h"
+#include "OutputOffsetProfiles.h"
 #include "Defines.h"
 #include "GuiHelper.h"
 #include "DacLatencyProfiles.h"
@@ -296,7 +296,7 @@ bool Gui::DoGui()
                 else if (state == MeasurementToolGuiState::FinishingAdjustVolume)
                 {
                     state = MeasurementToolGuiState::MeasurementConfig;
-                    outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, false, true, SpdifOutputOffsetProfiles::CurrentProfile()->FormatFilter);
+                    outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, false, true, OutputOffsetProfiles::CurrentProfile()->FormatFilter);
                     strcpy_s(TestNotes::Notes.DutModel, outputAudioEndpoints[outputDeviceIndex].Name.c_str());
                 }
             }
@@ -331,14 +331,14 @@ bool Gui::DoGui()
 
                 if (ImGui::BeginListBox("Dual-Out Reference Device", ImVec2(-FLT_MIN, 4 * ImGui::GetTextLineHeightWithSpacing())))
                 {
-                    for (int n = 0; n < SpdifOutputOffsetProfiles::Profiles.size(); n++)
+                    for (int n = 0; n < OutputOffsetProfiles::Profiles.size(); n++)
                     {
-                        const bool is_selected = (SpdifOutputOffsetProfiles::SelectedProfileIndex == n);
-                        if (ImGui::Selectable(SpdifOutputOffsetProfiles::Profiles[n]->Name.c_str(), is_selected))
+                        const bool is_selected = (OutputOffsetProfiles::SelectedProfileIndex == n);
+                        if (ImGui::Selectable(OutputOffsetProfiles::Profiles[n]->Name.c_str(), is_selected))
                         {
-                            SpdifOutputOffsetProfiles::SelectedProfileIndex = n;
-                            outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, false, true, SpdifOutputOffsetProfiles::CurrentProfile()->FormatFilter);
-                            if (SpdifOutputOffsetProfiles::CurrentProfile() == SpdifOutputOffsetProfiles::Spdif_None)
+                            OutputOffsetProfiles::SelectedProfileIndex = n;
+                            outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, false, true, OutputOffsetProfiles::CurrentProfile()->FormatFilter);
+                            if (OutputOffsetProfiles::CurrentProfile() == OutputOffsetProfiles::Spdif_None)
                             {
                                 strcpy_s(TestNotes::Notes.HDMIAudioDevice, "");
                             }
@@ -353,7 +353,7 @@ bool Gui::DoGui()
                 }
                 ImGui::Spacing();
 
-                if (SpdifOutputOffsetProfiles::Profiles[SpdifOutputOffsetProfiles::SelectedProfileIndex] == SpdifOutputOffsetProfiles::Spdif_HDV_MB01)
+                if (OutputOffsetProfiles::Profiles[OutputOffsetProfiles::SelectedProfileIndex] == OutputOffsetProfiles::Spdif_HDV_MB01)
                 {
                     float imageScale = 0.45 * Gui::DpiScale;
                     ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
@@ -378,7 +378,7 @@ bool Gui::DoGui()
                         ImGui::TreePop();
                     }
                 }
-                else if (SpdifOutputOffsetProfiles::Profiles[SpdifOutputOffsetProfiles::SelectedProfileIndex] == SpdifOutputOffsetProfiles::Spdif_None)
+                else if (OutputOffsetProfiles::Profiles[OutputOffsetProfiles::SelectedProfileIndex] == OutputOffsetProfiles::Spdif_None)
                 {
                     ImGui::PushFont(FontHelper::BoldFont);
                     ImGui::Text("WARNING:");
@@ -450,11 +450,11 @@ bool Gui::DoGui()
                 ImGui::SameLine(); GuiHelper::HelpMarker("These notes will be included in the .csv spreadsheet result files that are saved in the folder that this app was launched from.");
                 ImGui::Spacing();
 
-                TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile = SpdifOutputOffsetProfiles::CurrentProfile() != SpdifOutputOffsetProfiles::Spdif_None;
+                TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile = OutputOffsetProfiles::CurrentProfile() != OutputOffsetProfiles::Spdif_None;
                 if (TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile)
                 {
                     ImGui::BeginDisabled();
-                    strcpy_s(TestNotes::Notes.HDMIAudioDevice, SpdifOutputOffsetProfiles::CurrentProfile()->Name.c_str());
+                    strcpy_s(TestNotes::Notes.HDMIAudioDevice, OutputOffsetProfiles::CurrentProfile()->Name.c_str());
                     ImGui::InputText("Dual-Out Reference Device", TestNotes::Notes.HDMIAudioDevice, IM_ARRAYSIZE(TestNotes::Notes.HDMIAudioDevice));
                     ImGui::EndDisabled();
                 }
@@ -835,6 +835,6 @@ void Gui::StartTest()
         std::string fileString = StringHelper::GetFilenameSafeString(std::format("{} {}", TestNotes::Notes.DutModel, TestNotes::Notes.DutOutputType()));
         fileString = fileString.substr(0, 80); // 80 is a magic number that will keep path lengths reasonable without needing to do a lot of Windows API programming.
 
-        testManager = new TestManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex], selectedFormats, fileString, APP_FOLDER, (IResultsWriter&)ResultsWriter::Writer, SpdifOutputOffsetProfiles::CurrentProfile(), &DacLatencyProfiles::None);
+        testManager = new TestManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex], selectedFormats, fileString, APP_FOLDER, (IResultsWriter&)ResultsWriter::Writer, OutputOffsetProfiles::CurrentProfile(), &DacLatencyProfiles::None);
     }
 }
