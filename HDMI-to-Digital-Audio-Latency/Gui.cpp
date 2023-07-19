@@ -110,7 +110,7 @@ bool Gui::DoGui()
             float scale = 0.55 * Gui::DpiScale;
             ImGui::Image((void*)resources.HdmiToDigitalAudioDefinitionTexture , ImVec2(resources.HdmiToDigitalAudioDefinitionTextureWidth * scale, resources.HdmiToDigitalAudioDefinitionTextureHeight * scale));
 
-            ImGui::Text("Welcome to the AV Latency.com HDMI to ARC, eARC, or S/PDIF Latency measurement tool!");
+            ImGui::Text("Welcome to the AV Latency.com HDMI Audio Passthrough Latency measurement tool!");
             ImGui::Spacing();
             ImGui::Text("Before starting, please connect your cables as described in the diagram above.");
             ImGui::Spacing();
@@ -833,7 +833,7 @@ bool Gui::DoGui()
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     if (ImGui::BeginPopupModal("About", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("AV Latency.com HDMI to ARC, eARC, or S/PDIF Latency Measurement Tool\n\nFind out more about audio/video latency, input lag, and lip sync error at avlatency.com\nFind out more about this tool at github.com/AVLatency/Latency-Measurement");
+        ImGui::Text("AV Latency.com HDMI Audio Passthrough Latency Measurement Tool\n\nFind out more about audio/video latency, input lag, and lip sync error at avlatency.com\nFind out more about this tool at github.com/AVLatency/Latency-Measurement");
         
         ImGui::Spacing();
         GuiHelper::DearImGuiLegal();

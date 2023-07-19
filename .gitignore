@@ -64,4 +64,4 @@ packages/
 /HDMI-Latency/HDMI Audio Latency Results
 /SPDIF-Latency/SPDIF Latency Results
 imgui.ini
-/HDMI-to-Digital-Audio-Latency/HDMI to ARC, eARC, or SPDIF Latency Results
+/HDMI-to-Digital-Audio-Latency/HDMI Audio Passthrough Latency Results
