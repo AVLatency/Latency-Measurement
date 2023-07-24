@@ -44,7 +44,7 @@ void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstre
     writeHeader ? detailedResultsStream << "Notes 4," : detailedResultsStream << "\"" << TestNotes::Notes.Notes4 << "\",";
     writeHeader ? detailedResultsStream << "," : detailedResultsStream << "\"" << "\",";
     writeHeader ? detailedResultsStream << "Raw Offset (ms)," : detailedResultsStream << "\"" << result.Offset() << "\",";
-    writeHeader ? detailedResultsStream << "Dual-Out Reference Device," : detailedResultsStream << "\"" << TestNotes::Notes.HDMIAudioDevice << "\",";
+    writeHeader ? detailedResultsStream << "Dual-Out Reference Device," : detailedResultsStream << "\"" << TestNotes::Notes.DaulOutRefDevice << "\",";
     writeHeader ? detailedResultsStream << "Recording Method," : detailedResultsStream << "\"" << TestNotes::Notes.RecordingMethod() << "\",";
     writeHeader ? detailedResultsStream << "Output Offset Profile," : detailedResultsStream << "\"" << result.OffsetProfile->Name << "\",";
     writeHeader ? detailedResultsStream << "Output Offset Profile Value (ms)," : detailedResultsStream << "\"" << result.OutputOffsetFromProfile << "\",";
@@ -127,7 +127,7 @@ void ResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& result
     writeHeader ? resultsStream << "Notes 3," : resultsStream << "\"" << TestNotes::Notes.Notes3 << "\",";
     writeHeader ? resultsStream << "Notes 4," : resultsStream << "\"" << TestNotes::Notes.Notes4 << "\",";
     writeHeader ? resultsStream << "," : resultsStream << "\"" << "\",";
-    writeHeader ? resultsStream << "Dual-Out Reference Device," : resultsStream << "\"" << TestNotes::Notes.HDMIAudioDevice << "\",";
+    writeHeader ? resultsStream << "Dual-Out Reference Device," : resultsStream << "\"" << TestNotes::Notes.DaulOutRefDevice << "\",";
     writeHeader ? resultsStream << "Recording Method," : resultsStream << "\"" << TestNotes::Notes.RecordingMethod() << "\",";
     writeHeader ? resultsStream << "Output Offset Profile," : resultsStream << "\"" << result.OffsetProfile->Name << "\",";
     writeHeader ? resultsStream << "Output Offset Profile Value (ms)," : resultsStream << "\"" << result.OutputOffsetFromProfile << "\",";

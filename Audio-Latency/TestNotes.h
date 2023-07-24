@@ -5,14 +5,8 @@ class TestNotes
 public:
 	static TestNotes Notes;
 
-	/// <summary>
-	/// TODO: Rename to DaulOutRefDeviceUseOutputOffsetProfile
-	/// </summary>
-	bool HDMIAudioDeviceUseOutputOffsetProfile = true;
-	/// <summary>
-	/// TODO: Rename to DaulOutRefDevice
-	/// </summary>
-	char HDMIAudioDevice[128] = "";
+	bool DaulOutRefDeviceUseOutputOffsetProfile = true;
+	char DaulOutRefDevice[128] = "";
 	int RecordingMethodIndex = 0;
 	const char* RecordingMethodOptions[4] = { "", "Microphone", "Direct Connection", "Other" };
 	char RecordingMethodOther[128] = "";

@@ -5,8 +5,8 @@ class TestNotes
 public:
 	static TestNotes Notes;
 
-	bool HDMIAudioDeviceUseOutputOffsetProfile = true;
-	char HDMIAudioDevice[128] = "";
+	bool DaulOutRefDeviceUseOutputOffsetProfile = true;
+	char DaulOutRefDevice[128] = "";
 	bool DACUseLatencyProfile = true;
 	char DAC[128] = "";
 

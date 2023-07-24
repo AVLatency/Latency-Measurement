@@ -203,7 +203,7 @@ bool Gui::DoGui()
                                 OutputOffsetProfiles::SelectedProfileIndex = profileSubset->ProfileIndeces[profileSubset->SubsetSelectedIndex];
                                 if (OutputOffsetProfiles::CurrentProfile()->isNoOffset)
                                 {
-                                    strcpy_s(TestNotes::Notes.HDMIAudioDevice, "");
+                                    strcpy_s(TestNotes::Notes.DaulOutRefDevice, "");
                                 }
                             }
                             // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
@@ -564,17 +564,17 @@ bool Gui::DoGui()
                 ImGui::SameLine(); GuiHelper::HelpMarker("These notes will be included in the .csv spreadsheet result files that are saved in the folder that this app was launched from.");
                 ImGui::Spacing();
 
-                TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile = !OutputOffsetProfiles::CurrentProfile()->isNoOffset;
-                if (TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile)
+                TestNotes::Notes.DaulOutRefDeviceUseOutputOffsetProfile = !OutputOffsetProfiles::CurrentProfile()->isNoOffset;
+                if (TestNotes::Notes.DaulOutRefDeviceUseOutputOffsetProfile)
                 {
                     ImGui::BeginDisabled();
-                    strcpy_s(TestNotes::Notes.HDMIAudioDevice, OutputOffsetProfiles::CurrentProfile()->Name.c_str());
-                    ImGui::InputText("Dual-Out Reference Device", TestNotes::Notes.HDMIAudioDevice, IM_ARRAYSIZE(TestNotes::Notes.HDMIAudioDevice));
+                    strcpy_s(TestNotes::Notes.DaulOutRefDevice, OutputOffsetProfiles::CurrentProfile()->Name.c_str());
+                    ImGui::InputText("Dual-Out Reference Device", TestNotes::Notes.DaulOutRefDevice, IM_ARRAYSIZE(TestNotes::Notes.DaulOutRefDevice));
                     ImGui::EndDisabled();
                 }
                 else
                 {
-                    ImGui::InputText("Dual-Out Reference Device", TestNotes::Notes.HDMIAudioDevice, IM_ARRAYSIZE(TestNotes::Notes.HDMIAudioDevice), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
+                    ImGui::InputText("Dual-Out Reference Device", TestNotes::Notes.DaulOutRefDevice, IM_ARRAYSIZE(TestNotes::Notes.DaulOutRefDevice), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
                 }
                 GuiHelper::OtherCombo("Recording Method", "Recording Method (Other)", &TestNotes::Notes.RecordingMethodIndex, TestNotes::Notes.RecordingMethodOptions, IM_ARRAYSIZE(TestNotes::Notes.RecordingMethodOptions), TestNotes::Notes.RecordingMethodOther, IM_ARRAYSIZE(TestNotes::Notes.RecordingMethodOther));
 
