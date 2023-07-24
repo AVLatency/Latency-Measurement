@@ -3,6 +3,7 @@
 #include <ctime>
 #include "AudioFormat.h"
 #include "AudioEndpoint.h"
+#include "OutputOffsetProfile.h"
 
 struct AveragedResult
 {
@@ -16,8 +17,14 @@ public:
     /// </summary>
     std::vector<float> Offsets;
 
-    std::string OutputOffsetProfileName;
+    OutputOffsetProfile* OffsetProfile;
+    /// <summary>
+    /// The actual offset value used during the test that generated this RecordingResult
+    /// </summary>
     float OutputOffsetFromProfile;
+    /// <summary>
+    /// If the actual offset value used during the test was verified
+    /// </summary>
     bool Verified;
     std::string ReferenceDacName;
     /// <summary>
@@ -33,7 +40,7 @@ public:
     float MinLatency() const;
     float MaxLatency() const;
 
-    AveragedResult(time_t time, const AudioFormat* format, const AudioEndpoint& outputEndpoint, std::string outputOffsetProfileName, float outputOffsetFromProfile, bool verified, std::string referenceDacName, float referenceDacLatency)
-        : Time(time), Format(format), OutputEndpoint(outputEndpoint), OutputOffsetProfileName(outputOffsetProfileName), OutputOffsetFromProfile(outputOffsetFromProfile), Verified(verified), ReferenceDacName(referenceDacName), ReferenceDacLatency(referenceDacLatency) {};
+    AveragedResult(time_t time, const AudioFormat* format, const AudioEndpoint& outputEndpoint, OutputOffsetProfile* outputOffsetProfile, float outputOffsetFromProfile, bool verified, std::string referenceDacName, float referenceDacLatency)
+        : Time(time), Format(format), OutputEndpoint(outputEndpoint), OffsetProfile(outputOffsetProfile), OutputOffsetFromProfile(outputOffsetFromProfile), Verified(verified), ReferenceDacName(referenceDacName), ReferenceDacLatency(referenceDacLatency) {};
 };
 

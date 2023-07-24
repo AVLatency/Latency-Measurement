@@ -45,6 +45,7 @@ private:
 
 	void RefreshAudioEndpoints();
 
+	void StartSelectAudioDevices();
 	void StartAdjustVolume();
 	void StartTest();
 };

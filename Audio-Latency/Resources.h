@@ -7,9 +7,13 @@ public:
 	Resources(HINSTANCE hInstance, ID3D11Device* g_pd3dDevice);
 
 	// Resources
-	ID3D11ShaderResourceView* CableMapTexture = NULL;
-	int CableMapTextureWidth = 0;
-	int CableMapTextureHeight = 0;
+	ID3D11ShaderResourceView* HdmiCableMapTexture = NULL;
+	int HdmiCableMapTextureWidth = 0;
+	int HdmiCableMapTextureHeight = 0;
+
+	ID3D11ShaderResourceView* SpdifCableMapTexture = NULL;
+	int SpdifCableMapTextureWidth = 0;
+	int SpdifCableMapTextureHeight = 0;
 
 	ID3D11ShaderResourceView* EDIDModeTexture = NULL;
 	int EDIDModeTextureWidth = 0;

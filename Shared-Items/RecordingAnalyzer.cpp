@@ -18,7 +18,7 @@ const std::string RecordingAnalyzer::invalidRecordingsFilename{ "Invalid-Individ
 RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& generatedSamples, const WasapiInput& input, AudioFormat* format, OutputOffsetProfile* currentProfile, DacLatencyProfile* referenceDacLatency)
 {
     OutputOffsetProfile::OutputOffset offset = currentProfile->GetOffsetFromWaveFormat(format->WaveFormat);
-    RecordingResult result(format, currentProfile->Name, offset.value, offset.verified, referenceDacLatency->Name, referenceDacLatency->Latency);
+    RecordingResult result(format, currentProfile, offset.value, offset.verified, referenceDacLatency->Name, referenceDacLatency->Latency);
 
     // Extract individual channels for analysis
     int inputSampleRate = input.waveFormat.Format.nSamplesPerSec;
@@ -580,7 +580,7 @@ std::vector<AveragedResult> RecordingAnalyzer::AnalyzeResults(std::vector<Record
 
             if (!alreadyHasAvgResult)
             {
-                AveragedResult avgResult(tTime, recordingResult.Format, outputEndpoint, recordingResult.OutputOffsetProfileName, recordingResult.OutputOffsetFromProfile, recordingResult.Verified, recordingResult.ReferenceDacName, recordingResult.ReferenceDacLatency);
+                AveragedResult avgResult(tTime, recordingResult.Format, outputEndpoint, recordingResult.OffsetProfile, recordingResult.OutputOffsetFromProfile, recordingResult.Verified, recordingResult.ReferenceDacName, recordingResult.ReferenceDacLatency);
                 avgResult.Offsets.push_back(recordingResult.Offset());
                 averagedResults.push_back(avgResult);
             }

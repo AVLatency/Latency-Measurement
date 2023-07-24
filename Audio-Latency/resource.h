@@ -2,11 +2,15 @@
 // Microsoft Visual C++ generated include file.
 // Used by Audio-Latency.rc
 //
-#define HDMI_CABLE_MAP 300
-#define HDMI_EDID_MODE 301
-#define HDMI_HDV_MB01 302
-#define HDMI_WINDOWS_DISPLAY_SETTINGS 303
-#define VOLUME_ADJUST_EXAMPLE 307
+#define HDMI_EDID_MODE 300
+#define HDMI_WINDOWS_DISPLAY_SETTINGS 301
+#define VOLUME_ADJUST_EXAMPLE 302
+
+#define HDMI_CABLE_MAP 320
+#define SPDIF_CABLE_MAP 321
+
+#define HDMI_HDV_MB01 340
+
 #define FONT_REGULAR 401
 #define FONT_BOLD 402
 

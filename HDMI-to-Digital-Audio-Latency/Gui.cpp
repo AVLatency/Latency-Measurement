@@ -736,7 +736,7 @@ bool Gui::DoGui()
                             ImGui::Text(std::format("Max {} Latency: {} ms", audioLatencyType, avgResult.MaxLatency()).c_str());
                             ImGui::Text(std::format("Valid Measurements: {}", avgResult.Offsets.size()).c_str());
                             ImGui::Spacing();
-                            ImGui::Text(std::format("Output Offset Profile: {}", avgResult.OutputOffsetProfileName).c_str());
+                            ImGui::Text(std::format("Output Offset Profile: {}", avgResult.OffsetProfile->Name).c_str());
                             ImGui::Text(std::format("Output Offset Value: {} ms", avgResult.OutputOffsetFromProfile).c_str());
                             ImGui::Text(std::format("Verified Accuracy: {}", avgResult.Verified ? "Yes" : "No").c_str());
                             GuiHelper::VerifiedHelp();

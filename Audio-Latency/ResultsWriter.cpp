@@ -18,7 +18,10 @@ void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstre
         detailedResultsStream << "DUT Model,";
         detailedResultsStream << "DUT Firmware Version,";
         detailedResultsStream << "DUT Output Type,";
-        detailedResultsStream << "DUT Video Mode,";
+        if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi)
+        {
+            detailedResultsStream << "DUT Video Mode,";
+        }
         detailedResultsStream << "DUT Audio Settings,";
         detailedResultsStream << "DUT Other Settings,";
         detailedResultsStream << ",";
@@ -28,12 +31,15 @@ void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstre
         detailedResultsStream << "Audio Bit Depth,";
         detailedResultsStream << "Audio Speakers Description,";
         detailedResultsStream << ",";
-        detailedResultsStream << "Video Resolution,";
-        detailedResultsStream << "Video Refresh Rate,";
-        detailedResultsStream << "Video Bit Depth,";
-        detailedResultsStream << "Video Color Format,";
-        detailedResultsStream << "Video Color Space,";
-        detailedResultsStream << ",";
+        if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi)
+        {
+            detailedResultsStream << "Video Resolution,";
+            detailedResultsStream << "Video Refresh Rate,";
+            detailedResultsStream << "Video Bit Depth,";
+            detailedResultsStream << "Video Color Format,";
+            detailedResultsStream << "Video Color Space,";
+            detailedResultsStream << ",";
+        }
         detailedResultsStream << "Notes 1,";
         detailedResultsStream << "Notes 2,";
         detailedResultsStream << "Notes 3,";
@@ -85,7 +91,10 @@ void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstre
     detailedResultsStream << "\"" << TestNotes::Notes.DutModel << "\","; //"DUT Model,";
     detailedResultsStream << "\"" << TestNotes::Notes.DutFirmwareVersion << "\","; //"DUT Firmware Version,";
     detailedResultsStream << "\"" << TestNotes::Notes.DutOutputType() << "\","; //"DUT,";
-    detailedResultsStream << "\"" << TestNotes::Notes.DutVideoMode << "\","; //"DUT Video Mode,";
+    if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi)
+    {
+        detailedResultsStream << "\"" << TestNotes::Notes.DutVideoMode << "\","; //"DUT Video Mode,";
+    }
     detailedResultsStream << "\"" << TestNotes::Notes.DutAudioSettings << "\",";
     detailedResultsStream << "\"" << TestNotes::Notes.DutOtherSettings << "\",";
     detailedResultsStream << "\"" << "\",";
@@ -95,12 +104,15 @@ void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstre
     detailedResultsStream << "\"" << result.Format->WaveFormat->wBitsPerSample << "\",";
     detailedResultsStream << "\"" << AudioFormat::GetChannelInfoString(result.Format->WaveFormat) << "\",";
     detailedResultsStream << "\"" << "\",";
-    detailedResultsStream << "\"" << TestNotes::Notes.VideoRes() << "\",";
-    detailedResultsStream << "\"" << TestNotes::Notes.VideoRefreshRate << "\",";
-    detailedResultsStream << "\"" << TestNotes::Notes.VideoBitDepth << "\",";
-    detailedResultsStream << "\"" << TestNotes::Notes.VideoColorFormat << "\",";
-    detailedResultsStream << "\"" << TestNotes::Notes.VideoColorSpace() << "\",";
-    detailedResultsStream << "\"" << "\",";
+    if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi)
+    {
+        detailedResultsStream << "\"" << TestNotes::Notes.VideoRes() << "\",";
+        detailedResultsStream << "\"" << TestNotes::Notes.VideoRefreshRate << "\",";
+        detailedResultsStream << "\"" << TestNotes::Notes.VideoBitDepth << "\",";
+        detailedResultsStream << "\"" << TestNotes::Notes.VideoColorFormat << "\",";
+        detailedResultsStream << "\"" << TestNotes::Notes.VideoColorSpace() << "\",";
+        detailedResultsStream << "\"" << "\",";
+    }
     detailedResultsStream << "\"" << TestNotes::Notes.Notes1 << "\",";
     detailedResultsStream << "\"" << TestNotes::Notes.Notes2 << "\",";
     detailedResultsStream << "\"" << TestNotes::Notes.Notes3 << "\",";
@@ -109,7 +121,7 @@ void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstre
     detailedResultsStream << "\"" << result.Offset() << "\","; //"Raw Offset (ms),";
     detailedResultsStream << "\"" << TestNotes::Notes.HDMIAudioDevice << "\","; //"Dual-Out Reference Device,";
     detailedResultsStream << "\"" << TestNotes::Notes.RecordingMethod() << "\","; //"Recording Method,";
-    detailedResultsStream << "\"" << result.OutputOffsetProfileName << "\","; //"Output Offset Profile,";
+    detailedResultsStream << "\"" << result.OffsetProfile->Name << "\","; //"Output Offset Profile,";
     detailedResultsStream << "\"" << result.OutputOffsetFromProfile << "\","; //"Output Offset Profile Value (ms),";
     detailedResultsStream << "\"" << "\",";
     detailedResultsStream << "\"" << outputEndpoint.Name << " (" << outputEndpoint.ID << ")" << "\","; //"Audio output device,";
@@ -158,7 +170,10 @@ void ResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& result
         resultsStream << "DUT Model,";
         resultsStream << "DUT Firmware Version,";
         resultsStream << "DUT Output Type,";
-        resultsStream << "DUT Video Mode,";
+        if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi)
+        {
+            resultsStream << "DUT Video Mode,";
+        }
         resultsStream << "DUT Audio Settings,";
         resultsStream << "DUT Other Settings,";
         resultsStream << ",";
@@ -168,12 +183,15 @@ void ResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& result
         resultsStream << "Audio Bit Depth,";
         resultsStream << "Audio Speakers Description,";
         resultsStream << ",";
-        resultsStream << "Video Resolution,";
-        resultsStream << "Video Refresh Rate,";
-        resultsStream << "Video Bit Depth,";
-        resultsStream << "Video Color Format,";
-        resultsStream << "Video Color Space,";
-        resultsStream << ",";
+        if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi)
+        {
+            resultsStream << "Video Resolution,";
+            resultsStream << "Video Refresh Rate,";
+            resultsStream << "Video Bit Depth,";
+            resultsStream << "Video Color Format,";
+            resultsStream << "Video Color Space,";
+            resultsStream << ",";
+        }
         resultsStream << "Notes 1,";
         resultsStream << "Notes 2,";
         resultsStream << "Notes 3,";
@@ -199,7 +217,10 @@ void ResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& result
     resultsStream << "\"" << TestNotes::Notes.DutModel << "\","; //"DUT Model,";
     resultsStream << "\"" << TestNotes::Notes.DutFirmwareVersion << "\","; //"DUT Firmware Version,";
     resultsStream << "\"" << TestNotes::Notes.DutOutputType() << "\","; //"DUT,";
-    resultsStream << "\"" << TestNotes::Notes.DutVideoMode << "\","; //"DUT Video Mode,";
+    if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi)
+    {
+        resultsStream << "\"" << TestNotes::Notes.DutVideoMode << "\","; //"DUT Video Mode,";
+    }
     resultsStream << "\"" << TestNotes::Notes.DutAudioSettings << "\",";
     resultsStream << "\"" << TestNotes::Notes.DutOtherSettings << "\",";
     resultsStream << "\"" << "\",";
@@ -209,12 +230,15 @@ void ResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& result
     resultsStream << "\"" << result.Format->WaveFormat->wBitsPerSample << "\",";
     resultsStream << "\"" << AudioFormat::GetChannelInfoString(result.Format->WaveFormat) << "\",";
     resultsStream << "\"" << "\",";
-    resultsStream << "\"" << TestNotes::Notes.VideoRes() << "\",";
-    resultsStream << "\"" << TestNotes::Notes.VideoRefreshRate << "\",";
-    resultsStream << "\"" << TestNotes::Notes.VideoBitDepth << "\",";
-    resultsStream << "\"" << TestNotes::Notes.VideoColorFormat << "\",";
-    resultsStream << "\"" << TestNotes::Notes.VideoColorSpace() << "\",";
-    resultsStream << "\"" << "\",";
+    if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi)
+    {
+        resultsStream << "\"" << TestNotes::Notes.VideoRes() << "\",";
+        resultsStream << "\"" << TestNotes::Notes.VideoRefreshRate << "\",";
+        resultsStream << "\"" << TestNotes::Notes.VideoBitDepth << "\",";
+        resultsStream << "\"" << TestNotes::Notes.VideoColorFormat << "\",";
+        resultsStream << "\"" << TestNotes::Notes.VideoColorSpace() << "\",";
+        resultsStream << "\"" << "\",";
+    }
     resultsStream << "\"" << TestNotes::Notes.Notes1 << "\",";
     resultsStream << "\"" << TestNotes::Notes.Notes2 << "\",";
     resultsStream << "\"" << TestNotes::Notes.Notes3 << "\",";
@@ -222,7 +246,7 @@ void ResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& result
     resultsStream << "\"" << "\",";
     resultsStream << "\"" << TestNotes::Notes.HDMIAudioDevice << "\","; //"Dual-Out Reference Device,";
     resultsStream << "\"" << TestNotes::Notes.RecordingMethod() << "\","; //"Recording Method,";
-    resultsStream << "\"" << result.OutputOffsetProfileName << "\","; //"Output Offset Profile,";
+    resultsStream << "\"" << result.OffsetProfile->Name << "\","; //"Output Offset Profile,";
     resultsStream << "\"" << result.OutputOffsetFromProfile << "\","; //"Output Offset Profile Value (ms),";
     resultsStream << "\"" << "\",";
     resultsStream << "\"" << result.OutputEndpoint.Name << " (" << result.OutputEndpoint.ID << ")" << "\"" << std::endl; //"Audio output device,";

@@ -110,7 +110,7 @@ void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstre
     detailedResultsStream << "\"" << "\",";
     detailedResultsStream << "\"" << result.Offset() << "\","; //"Raw Offset (ms),";
     detailedResultsStream << "\"" << TestNotes::Notes.HDMIAudioDevice << "\","; //"Dual-Out Reference Device,";
-    detailedResultsStream << "\"" << result.OutputOffsetProfileName << "\","; //"Output Offset Profile,";
+    detailedResultsStream << "\"" << result.OffsetProfile->Name << "\","; //"Output Offset Profile,";
     detailedResultsStream << "\"" << result.OutputOffsetFromProfile << "\","; //"Output Offset Profile Value (ms),";
     detailedResultsStream << "\"" << TestNotes::Notes.DAC << "\","; //"DAC,";
     detailedResultsStream << "\"" << result.ReferenceDacName << "\","; //"DAC Latency Profile,";
@@ -227,7 +227,7 @@ void ResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& result
     resultsStream << "\"" << TestNotes::Notes.Notes4 << "\",";
     resultsStream << "\"" << "\",";
     resultsStream << "\"" << TestNotes::Notes.HDMIAudioDevice << "\","; //"Dual-Out Reference Device,";
-    resultsStream << "\"" << result.OutputOffsetProfileName << "\","; //"Output Offset Profile,";
+    resultsStream << "\"" << result.OffsetProfile->Name << "\","; //"Output Offset Profile,";
     resultsStream << "\"" << result.OutputOffsetFromProfile << "\","; //"Output Offset Profile Value (ms),";
     resultsStream << "\"" << TestNotes::Notes.DAC << "\","; //"DAC,";
     resultsStream << "\"" << result.ReferenceDacName << "\","; //"DAC Latency Profile,";

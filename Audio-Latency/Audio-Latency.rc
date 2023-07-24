@@ -13,6 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 HDMI_CABLE_MAP RCDATA "HDMI-Latency_cable-map.png"
+SPDIF_CABLE_MAP RCDATA "SPDIF-Latency_cable-map.png"
 HDMI_EDID_MODE RCDATA "../Shared-Items/EDID-mode-TV.png"
 HDMI_HDV_MB01 RCDATA "../Shared-Items/AudioDevice_HDV-MB01.png"
 HDMI_WINDOWS_DISPLAY_SETTINGS RCDATA "../Shared-Items/AdvancedDisplaySettings.png"

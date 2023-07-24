@@ -3,6 +3,7 @@
 #include <string>
 #include <ctime>
 #include "StringHelper.h"
+#include "OutputOffsetProfile.h"
 
 struct RecordingResult
 {
@@ -13,8 +14,14 @@ public:
     RecordingSingleChannelResult Channel1;
     RecordingSingleChannelResult Channel2;
 
-    std::string OutputOffsetProfileName;
+    OutputOffsetProfile* OffsetProfile;
+    /// <summary>
+    /// The actual offset value used during the test that generated this RecordingResult
+    /// </summary>
     float OutputOffsetFromProfile;
+    /// <summary>
+    /// If the actual offset value used during the test was verified
+    /// </summary>
     bool Verified;
     std::string ReferenceDacName;
     /// <summary>
@@ -23,8 +30,8 @@ public:
     /// </summary>
     float ReferenceDacLatency;
 
-    RecordingResult(AudioFormat* format, std::string outputOffsetProfileName, float outputOffsetFromProfile, bool verified, std::string referenceDacName, float referenceDacLatency)
-        : GUID(StringHelper::GetGuidString()), Time(time(0)), Format(format), OutputOffsetProfileName(outputOffsetProfileName), OutputOffsetFromProfile(outputOffsetFromProfile), Verified(verified), ReferenceDacName(referenceDacName), ReferenceDacLatency(referenceDacLatency) {}
+    RecordingResult(AudioFormat* format, OutputOffsetProfile* outputOffsetProfile, float outputOffsetFromProfile, bool verified, std::string referenceDacName, float referenceDacLatency)
+        : GUID(StringHelper::GetGuidString()), Time(time(0)), Format(format), OffsetProfile(outputOffsetProfile), OutputOffsetFromProfile(outputOffsetFromProfile), Verified(verified), ReferenceDacName(referenceDacName), ReferenceDacLatency(referenceDacLatency) {}
 
     void SetRecordingSampleRate(int value) { Channel1.RecordingSampleRate = value; Channel2.RecordingSampleRate = value; }
     float Offset() const { return Channel2.MillisecondsToTick1() - Channel1.MillisecondsToTick1(); }

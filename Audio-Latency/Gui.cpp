@@ -79,7 +79,16 @@ bool Gui::DoGui()
     ImGui::Text("Cable Diagram:");
     ImGui::SameLine(); GuiHelper::HelpMarker(std::format("Before starting you must connect your audio devices and cables as described in this diagram.\n\n{}", GuiHelper::CableHelpText(GuiHelper::Tool::AudioLatency, (OutputOffsetProfile::OutputType)outputTypeIndex)).c_str());
     float cableMapScale = 0.55 * Gui::DpiScale;
-    ImGui::Image((void*)resources.CableMapTexture, ImVec2(resources.CableMapTextureWidth * cableMapScale, resources.CableMapTextureHeight * cableMapScale));
+    switch (OutputOffsetProfiles::CurrentProfile()->OutType)
+    {
+    case OutputOffsetProfile::OutputType::Spdif:
+        ImGui::Image((void*)resources.SpdifCableMapTexture, ImVec2(resources.SpdifCableMapTextureWidth * cableMapScale, resources.SpdifCableMapTextureHeight * cableMapScale));
+        break;
+    case OutputOffsetProfile::OutputType::Hdmi:
+    default:
+        ImGui::Image((void*)resources.HdmiCableMapTexture, ImVec2(resources.HdmiCableMapTextureWidth * cableMapScale, resources.HdmiCableMapTextureHeight * cableMapScale));
+        break;
+    }
 
     if (ImGui::BeginTable("MainViewTopLevelTable", 2, ImGuiTableFlags_Borders, ImVec2(1234 * DpiScale, 0)))
     {
@@ -187,6 +196,31 @@ bool Gui::DoGui()
                         "- Monoprice Blackbird 24278\n"
                         "- OREI HDA - 912\n");
                 }
+                else if (OutputOffsetProfiles::Profiles[OutputOffsetProfiles::SelectedProfileIndex] == OutputOffsetProfiles::Spdif_HDV_MB01)
+                {
+                    float imageScale = 0.45 * Gui::DpiScale;
+                    ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
+                    ImGui::TextWrapped("The HDV-MB01 is sold under these names:");
+                    ImGui::Spacing();
+                    ImGui::TextWrapped("- J-Tech Digital JTD18G - H5CH\n"
+                        "- Monoprice Blackbird 24278\n"
+                        "- OREI HDA - 912\n");
+
+                    if (ImGui::TreeNode("Supported Formats"))
+                    {
+                        ImGui::TextWrapped("With the right HDMI audio drivers and the right EDID information provided by the HDMI device connected to the HDV-MB01, the following formats are supported by this device:\n\n"
+                            "2ch-44.1kHz-16bit\n"
+                            "2ch-44.1kHz-24bit\n"
+                            "2ch-48kHz-16bit\n"
+                            "2ch-48kHz-24bit\n"
+                            "2ch-96kHz-16bit\n"
+                            "2ch-96kHz-24bit\n"
+                            "2ch-192kHz-16bit\n"
+                            "2ch-192kHz-24bit\n");
+
+                        ImGui::TreePop();
+                    }
+                }
                 else if (OutputOffsetProfiles::Profiles[OutputOffsetProfiles::SelectedProfileIndex] == OutputOffsetProfiles::Hdmi_None
                     || OutputOffsetProfiles::Profiles[OutputOffsetProfiles::SelectedProfileIndex] == OutputOffsetProfiles::Spdif_None)
                 {
@@ -201,7 +235,14 @@ bool Gui::DoGui()
 
                 if (ImGui::Button("Next"))
                 {
-                    openEdidReminderDialog = true;
+                    if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi)
+                    {
+                        openEdidReminderDialog = true;
+                    }
+                    else
+                    {
+                        StartSelectAudioDevices();
+                    }
                 }
 
                 GuiHelper::DeveloperOptions();
@@ -257,7 +298,15 @@ bool Gui::DoGui()
                     }
                     ImGui::EndCombo();
                 }
-                ImGui::SameLine(); GuiHelper::HelpMarker("Select your HDMI audio output.");
+                ImGui::SameLine();
+                if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi)
+                {
+                    GuiHelper::HelpMarker("Select your HDMI audio output.");
+                }
+                else
+                {
+                    GuiHelper::HelpMarker("Select your audio output.");
+                }
                 if (ImGui::BeginCombo("Input Device", inputAudioEndpoints[inputDeviceIndex].Name.c_str()))
                 {
                     for (int i = 0; i < inputAudioEndpoints.size(); i++)
@@ -375,7 +424,8 @@ bool Gui::DoGui()
                 else if (state == MeasurementToolGuiState::FinishingAdjustVolume)
                 {
                     state = MeasurementToolGuiState::MeasurementConfig;
-                    outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, true, true, OutputOffsetProfiles::CurrentProfile()->FormatFilter);
+                    bool includeSurroundAsDefault = OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi;
+                    outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, includeSurroundAsDefault, true, OutputOffsetProfiles::CurrentProfile()->FormatFilter);
                     strcpy_s(TestNotes::Notes.DutModel, outputAudioEndpoints[outputDeviceIndex].Name.c_str());
                 }
             }
@@ -401,8 +451,18 @@ bool Gui::DoGui()
 
                 ImGui::TableNextColumn();
                 ImGui::PushFont(FontHelper::BoldFont);
-                ImGui::Text("HDMI Audio Formats (LPCM)");
-                ImGui::PopFont();
+                if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi)
+                {
+                    ImGui::Text("HDMI Audio Formats (LPCM)");
+                    ImGui::PopFont();
+                }
+                else
+                {
+                    ImGui::Text("Windows Audio Formats (LPCM)");
+                    ImGui::PopFont();
+                    ImGui::SameLine(); GuiHelper::HelpMarker("This is the Windows audio format that will be used to send audio to the audio driver."
+                        " The final S/PDIF format may be slightly different. For example, 16 bit audio may be sent as 20 bit audio via S/PDIF or the speaker assignment may be disregarded.");
+                }
                 ImGui::Spacing();
 
                 std::vector<AudioFormat>& supportedFormats = outputAudioEndpoints[outputDeviceIndex].SupportedFormats;
@@ -413,7 +473,8 @@ bool Gui::DoGui()
                     {
                         format.UserSelected = false;
                     }
-                    outputAudioEndpoints[outputDeviceIndex].SetDefaultFormats(true, true);
+                    bool includeSurroundAsDefault = OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi;
+                    outputAudioEndpoints[outputDeviceIndex].SetDefaultFormats(includeSurroundAsDefault, true);
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("Select All"))
@@ -458,7 +519,9 @@ bool Gui::DoGui()
                 ImGui::SameLine(); GuiHelper::HelpMarker("These notes will be included in the .csv spreadsheet result files that are saved in the folder that this app was launched from.");
                 ImGui::Spacing();
 
-                TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile = OutputOffsetProfiles::CurrentProfile() != OutputOffsetProfiles::Hdmi_None;
+                TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile =
+                    OutputOffsetProfiles::CurrentProfile() != OutputOffsetProfiles::Hdmi_None
+                    && OutputOffsetProfiles::CurrentProfile() != OutputOffsetProfiles::Spdif_None;
                 if (TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile)
                 {
                     ImGui::BeginDisabled();
@@ -478,33 +541,39 @@ bool Gui::DoGui()
                 ImGui::InputText("Model", TestNotes::Notes.DutModel, IM_ARRAYSIZE(TestNotes::Notes.DutModel), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
                 ImGui::InputText("Firmware Version", TestNotes::Notes.DutFirmwareVersion, IM_ARRAYSIZE(TestNotes::Notes.DutFirmwareVersion), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
                 GuiHelper::OtherCombo("Output Type", "Output Type (Other)", &TestNotes::Notes.DutOutputTypeIndex, TestNotes::Notes.DutOutputTypeOptions, IM_ARRAYSIZE(TestNotes::Notes.DutOutputTypeOptions), TestNotes::Notes.DutOutputTypeOther, IM_ARRAYSIZE(TestNotes::Notes.DutOutputTypeOther));
-                ImGui::InputText("Video Mode", TestNotes::Notes.DutVideoMode, IM_ARRAYSIZE(TestNotes::Notes.DutVideoMode), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
+                if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi)
+                {
+                    ImGui::InputText("Video Mode", TestNotes::Notes.DutVideoMode, IM_ARRAYSIZE(TestNotes::Notes.DutVideoMode), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
+                }
                 ImGui::InputText("Audio Settings", TestNotes::Notes.DutAudioSettings, IM_ARRAYSIZE(TestNotes::Notes.DutAudioSettings), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
                 ImGui::InputText("Other Settings", TestNotes::Notes.DutOtherSettings, IM_ARRAYSIZE(TestNotes::Notes.DutOtherSettings), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
                 ImGui::Spacing();
 
-                ImGui::PushFont(FontHelper::BoldFont);
-                ImGui::Text("Video Signal");
-                ImGui::SameLine(); ImGui::TextDisabled("(?)");
-                ImGui::PopFont();
-                if (ImGui::IsItemHovered())
+                if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi)
                 {
-                    ImGui::BeginTooltip();
-                    ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-                    ImGui::TextUnformatted("Video signal information can be found in the Windows Advanced Display Settings.");
+                    ImGui::PushFont(FontHelper::BoldFont);
+                    ImGui::Text("Video Signal");
+                    ImGui::SameLine(); ImGui::TextDisabled("(?)");
+                    ImGui::PopFont();
+                    if (ImGui::IsItemHovered())
+                    {
+                        ImGui::BeginTooltip();
+                        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                        ImGui::TextUnformatted("Video signal information can be found in the Windows Advanced Display Settings.");
+                        ImGui::Spacing();
+                        ImGui::TextUnformatted("Example:");
+                        float imageScale = 0.7 * Gui::DpiScale;
+                        ImGui::Image((void*)resources.WindowsDisplaySettingsTexture, ImVec2(resources.WindowsDisplaySettingsTextureWidth * imageScale, resources.WindowsDisplaySettingsTextureHeight * imageScale));
+                        ImGui::PopTextWrapPos();
+                        ImGui::EndTooltip();
+                    }
+                    GuiHelper::OtherCombo("Signal Resolution", "Signal Resolution (Other)", &TestNotes::Notes.VideoResIndex, TestNotes::Notes.VideoResOptions, IM_ARRAYSIZE(TestNotes::Notes.VideoResOptions), TestNotes::Notes.VideoResolutionOther, IM_ARRAYSIZE(TestNotes::Notes.VideoResolutionOther));
+                    ImGui::InputText("Refresh Rate", TestNotes::Notes.VideoRefreshRate, IM_ARRAYSIZE(TestNotes::Notes.VideoRefreshRate), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
+                    ImGui::InputText("Bit Depth", TestNotes::Notes.VideoBitDepth, IM_ARRAYSIZE(TestNotes::Notes.VideoBitDepth), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
+                    ImGui::InputText("Color Format", TestNotes::Notes.VideoColorFormat, IM_ARRAYSIZE(TestNotes::Notes.VideoColorFormat), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
+                    GuiHelper::OtherCombo("Color Space", "Color Space (Other)", &TestNotes::Notes.VideoColorSpaceIndex, TestNotes::Notes.VideoColorSpaceOptions, IM_ARRAYSIZE(TestNotes::Notes.VideoColorSpaceOptions), TestNotes::Notes.VideoColorSpaceOther, IM_ARRAYSIZE(TestNotes::Notes.VideoColorSpaceOther));
                     ImGui::Spacing();
-                    ImGui::TextUnformatted("Example:");
-                    float imageScale = 0.7 * Gui::DpiScale;
-                    ImGui::Image((void*)resources.WindowsDisplaySettingsTexture, ImVec2(resources.WindowsDisplaySettingsTextureWidth * imageScale, resources.WindowsDisplaySettingsTextureHeight * imageScale));
-                    ImGui::PopTextWrapPos();
-                    ImGui::EndTooltip();
                 }
-                GuiHelper::OtherCombo("Signal Resolution", "Signal Resolution (Other)", &TestNotes::Notes.VideoResIndex, TestNotes::Notes.VideoResOptions, IM_ARRAYSIZE(TestNotes::Notes.VideoResOptions), TestNotes::Notes.VideoResolutionOther, IM_ARRAYSIZE(TestNotes::Notes.VideoResolutionOther));
-                ImGui::InputText("Refresh Rate", TestNotes::Notes.VideoRefreshRate, IM_ARRAYSIZE(TestNotes::Notes.VideoRefreshRate), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
-                ImGui::InputText("Bit Depth", TestNotes::Notes.VideoBitDepth, IM_ARRAYSIZE(TestNotes::Notes.VideoBitDepth), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
-                ImGui::InputText("Color Format", TestNotes::Notes.VideoColorFormat, IM_ARRAYSIZE(TestNotes::Notes.VideoColorFormat), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
-                GuiHelper::OtherCombo("Color Space", "Color Space (Other)", &TestNotes::Notes.VideoColorSpaceIndex, TestNotes::Notes.VideoColorSpaceOptions, IM_ARRAYSIZE(TestNotes::Notes.VideoColorSpaceOptions), TestNotes::Notes.VideoColorSpaceOther, IM_ARRAYSIZE(TestNotes::Notes.VideoColorSpaceOther));
-                ImGui::Spacing();
 
                 ImGui::PushFont(FontHelper::BoldFont);
                 ImGui::Text("Additional Notes");
@@ -619,16 +688,19 @@ bool Gui::DoGui()
                     ImGui::Text(std::format("Stereo Audio Latency: {}", stereoLatency).c_str());
                     ImGui::PopFont();
                     ImGui::Text(stereoFormat.c_str());
-                    ImGui::Spacing();
-                    ImGui::PushFont(FontHelper::HeaderFont);
-                    ImGui::Text(std::format("5.1 Audio Latency: {}", fiveOneLatency).c_str());
-                    ImGui::PopFont();
-                    ImGui::Text(fiveOneFormat.c_str());
-                    ImGui::Spacing();
-                    ImGui::PushFont(FontHelper::HeaderFont);
-                    ImGui::Text(std::format("7.1 Audio Latency: {}", sevenOneLatency).c_str());
-                    ImGui::PopFont();
-                    ImGui::Text(sevenOneFormat.c_str());
+                    if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi)
+                    {
+                        ImGui::Spacing();
+                        ImGui::PushFont(FontHelper::HeaderFont);
+                        ImGui::Text(std::format("5.1 Audio Latency: {}", fiveOneLatency).c_str());
+                        ImGui::PopFont();
+                        ImGui::Text(fiveOneFormat.c_str());
+                        ImGui::Spacing();
+                        ImGui::PushFont(FontHelper::HeaderFont);
+                        ImGui::Text(std::format("7.1 Audio Latency: {}", sevenOneLatency).c_str());
+                        ImGui::PopFont();
+                        ImGui::Text(sevenOneFormat.c_str());
+                    }
 
                     ImGui::EndTabItem();
                 }
@@ -680,7 +752,7 @@ bool Gui::DoGui()
                             ImGui::Text(std::format("Max Audio Latency: {} ms", avgResult.MaxLatency()).c_str());
                             ImGui::Text(std::format("Valid Measurements: {}", avgResult.Offsets.size()).c_str());
                             ImGui::Spacing();
-                            ImGui::Text(std::format("Output Offset Profile: {}", avgResult.OutputOffsetProfileName).c_str());
+                            ImGui::Text(std::format("Output Offset Profile: {}", avgResult.OffsetProfile->Name).c_str());
                             ImGui::Text(std::format("Output Offset Value: {} ms", avgResult.OutputOffsetFromProfile).c_str());
                             ImGui::Text(std::format("Verified Accuracy: {}", avgResult.Verified ? "Yes" : "No").c_str());
                             GuiHelper::VerifiedHelp();
@@ -808,8 +880,7 @@ bool Gui::DoGui()
         ImGui::SetItemDefaultFocus();
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {
-            RefreshAudioEndpoints();
-            state = MeasurementToolGuiState::SelectAudioDevices;
+            StartSelectAudioDevices();
             ImGui::CloseCurrentPopup();
         }
 
@@ -878,6 +949,12 @@ void Gui::RefreshAudioEndpoints()
     inputAudioEndpoints = AudioEndpointHelper::GetAudioEndPoints(eCapture);
     outputDeviceIndex = 0;
     inputDeviceIndex = 0;
+}
+
+void Gui::StartSelectAudioDevices()
+{
+    RefreshAudioEndpoints();
+    state = MeasurementToolGuiState::SelectAudioDevices;
 }
 
 void Gui::StartAdjustVolume()
