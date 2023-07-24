@@ -6,248 +6,138 @@ ResultsWriter ResultsWriter::Writer;
 
 void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstream& detailedResultsStream, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result, std::string inputFormat)
 {
+    writeHeader ? detailedResultsStream << "Time," : detailedResultsStream << "\"" << StringHelper::GetTimeString(result.Time, false) << "\",";
+    writeHeader ? detailedResultsStream << "Audio Format," : detailedResultsStream << "\"" << result.Format->FormatString << "\",";
+    writeHeader ? detailedResultsStream << "Recording," : detailedResultsStream << "\"" << result.GUID << ".wav\",";
+    writeHeader ? detailedResultsStream << "," : detailedResultsStream << "\"" << "\",";
+    writeHeader ? detailedResultsStream << "Audio Latency (ms)," : detailedResultsStream << "\"" << result.AudioLatency() << "\",";
+    writeHeader ? detailedResultsStream << "Verified," : detailedResultsStream << "\"" << (result.Verified ? "Yes" : "No") << "\",";
+    writeHeader ? detailedResultsStream << "," : detailedResultsStream << "\"" << "\",";
+    writeHeader ? detailedResultsStream << "DUT Model," : detailedResultsStream << "\"" << TestNotes::Notes.DutModel << "\",";
+    writeHeader ? detailedResultsStream << "DUT Firmware Version," : detailedResultsStream << "\"" << TestNotes::Notes.DutFirmwareVersion << "\",";
+    writeHeader ? detailedResultsStream << "DUT Output Type," : detailedResultsStream << "\"" << TestNotes::Notes.DutOutputType() << "\",";
+    if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi)
+    {
+        writeHeader ? detailedResultsStream << "DUT Video Mode," : detailedResultsStream << "\"" << TestNotes::Notes.DutVideoMode << "\",";
+    }
+    writeHeader ? detailedResultsStream << "DUT Audio Settings," : detailedResultsStream << "\"" << TestNotes::Notes.DutAudioSettings << "\",";
+    writeHeader ? detailedResultsStream << "DUT Other Settings," : detailedResultsStream << "\"" << TestNotes::Notes.DutOtherSettings << "\",";
+    writeHeader ? detailedResultsStream << "," : detailedResultsStream << "\"" << "\",";
+    writeHeader ? detailedResultsStream << "Audio Format," : detailedResultsStream << "\"" << AudioFormat::GetAudioDataFormatString(result.Format->WaveFormat) << "\",";
+    writeHeader ? detailedResultsStream << "Audio Channels," : detailedResultsStream << "\"" << result.Format->WaveFormat->nChannels << "\",";
+    writeHeader ? detailedResultsStream << "Audio Sample Rate," : detailedResultsStream << "\"" << result.Format->WaveFormat->nSamplesPerSec << "\",";
+    writeHeader ? detailedResultsStream << "Audio Bit Depth," : detailedResultsStream << "\"" << result.Format->WaveFormat->wBitsPerSample << "\",";
+    writeHeader ? detailedResultsStream << "Audio Speakers Description," : detailedResultsStream << "\"" << AudioFormat::GetChannelInfoString(result.Format->WaveFormat) << "\",";
+    writeHeader ? detailedResultsStream << "," : detailedResultsStream << "\"" << "\",";
+    if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi)
+    {
+        writeHeader ? detailedResultsStream << "Video Resolution," : detailedResultsStream << "\"" << TestNotes::Notes.VideoRes() << "\",";
+        writeHeader ? detailedResultsStream << "Video Refresh Rate," : detailedResultsStream << "\"" << TestNotes::Notes.VideoRefreshRate << "\",";
+        writeHeader ? detailedResultsStream << "Video Bit Depth," : detailedResultsStream << "\"" << TestNotes::Notes.VideoBitDepth << "\",";
+        writeHeader ? detailedResultsStream << "Video Color Format," : detailedResultsStream << "\"" << TestNotes::Notes.VideoColorFormat << "\",";
+        writeHeader ? detailedResultsStream << "Video Color Space," : detailedResultsStream << "\"" << TestNotes::Notes.VideoColorSpace() << "\",";
+        writeHeader ? detailedResultsStream << "," : detailedResultsStream << "\"" << "\",";
+    }
+    writeHeader ? detailedResultsStream << "Notes 1," : detailedResultsStream << "\"" << TestNotes::Notes.Notes1 << "\",";
+    writeHeader ? detailedResultsStream << "Notes 2," : detailedResultsStream << "\"" << TestNotes::Notes.Notes2 << "\",";
+    writeHeader ? detailedResultsStream << "Notes 3," : detailedResultsStream << "\"" << TestNotes::Notes.Notes3 << "\",";
+    writeHeader ? detailedResultsStream << "Notes 4," : detailedResultsStream << "\"" << TestNotes::Notes.Notes4 << "\",";
+    writeHeader ? detailedResultsStream << "," : detailedResultsStream << "\"" << "\",";
+    writeHeader ? detailedResultsStream << "Raw Offset (ms)," : detailedResultsStream << "\"" << result.Offset() << "\",";
+    writeHeader ? detailedResultsStream << "Dual-Out Reference Device," : detailedResultsStream << "\"" << TestNotes::Notes.HDMIAudioDevice << "\",";
+    writeHeader ? detailedResultsStream << "Recording Method," : detailedResultsStream << "\"" << TestNotes::Notes.RecordingMethod() << "\",";
+    writeHeader ? detailedResultsStream << "Output Offset Profile," : detailedResultsStream << "\"" << result.OffsetProfile->Name << "\",";
+    writeHeader ? detailedResultsStream << "Output Offset Profile Value (ms)," : detailedResultsStream << "\"" << result.OutputOffsetFromProfile << "\",";
+    writeHeader ? detailedResultsStream << "," : detailedResultsStream << "\"" << "\",";
+    writeHeader ? detailedResultsStream << "Audio Output Device," : detailedResultsStream << "\"" << outputEndpoint.Name << " (" << outputEndpoint.ID << ")" << "\",";
+    writeHeader ? detailedResultsStream << "Audio Input Device," : detailedResultsStream << "\"" << inputEndpoint.Name << " (" << inputEndpoint.ID << ")" << "\",";
+    writeHeader ? detailedResultsStream << "Audio Input Format," : detailedResultsStream << "\"" << inputFormat << "\",";
+    writeHeader ? detailedResultsStream << "," : detailedResultsStream << "\"" << "\",";
+    writeHeader ? detailedResultsStream << "DEBUG INFO FOLLOWS -->," : detailedResultsStream << "\"" << "DEBUG INFO FOLLOWS -->" << "\",";
+    writeHeader ? detailedResultsStream << "," : detailedResultsStream << "\"" << "\",";
+    writeHeader ? detailedResultsStream << "Ch 1 Milliseconds to Tick 1," : detailedResultsStream << "\"" << result.Channel1.MillisecondsToTick1() << "\",";
+    writeHeader ? detailedResultsStream << "Ch 2 Milliseconds to Tick 1," : detailedResultsStream << "\"" << result.Channel2.MillisecondsToTick1() << "\",";
+    writeHeader ? detailedResultsStream << "Ch 1 Rel Milliseconds to Tick 2," : detailedResultsStream << "\"" << result.Channel1.RelMillisecondsToTick2() << "\",";
+    writeHeader ? detailedResultsStream << "Ch 2 Rel Milliseconds to Tick 2," : detailedResultsStream << "\"" << result.Channel2.RelMillisecondsToTick2() << "\",";
+    writeHeader ? detailedResultsStream << "Ch 1 Rel Milliseconds to Tick 3," : detailedResultsStream << "\"" << result.Channel1.RelMillisecondsToTick3() << "\",";
+    writeHeader ? detailedResultsStream << "Ch 2 Rel Milliseconds to Tick 3," : detailedResultsStream << "\"" << result.Channel2.RelMillisecondsToTick3() << "\",";
+    writeHeader ? detailedResultsStream << "Ch 1 Detection Threshold," : detailedResultsStream << "\"" << result.Channel1.DetectionThreshold << "\",";
+    writeHeader ? detailedResultsStream << "Ch 1 Samples to Tick 1," : detailedResultsStream << "\"" << result.Channel1.SamplesToTick1 << "\",";
+    writeHeader ? detailedResultsStream << "Ch 1 Samples to Tick 2," : detailedResultsStream << "\"" << result.Channel1.SamplesToTick2 << "\",";
+    writeHeader ? detailedResultsStream << "Ch 1 Samples to Tick 3," : detailedResultsStream << "\"" << result.Channel1.SamplesToTick3 << "\",";
+    writeHeader ? detailedResultsStream << "Ch 1 Samples to Earliest 1," : detailedResultsStream << "\"" << result.Channel1.SamplesToIndex1 << "\",";
+    writeHeader ? detailedResultsStream << "Ch 1 Samples to Earliest 2," : detailedResultsStream << "\"" << result.Channel1.SamplesToIndex2 << "\",";
+    writeHeader ? detailedResultsStream << "Ch 1 Samples to Earliest 3," : detailedResultsStream << "\"" << result.Channel1.SamplesToIndex3 << "\",";
+    writeHeader ? detailedResultsStream << "Ch 2 Detection Threshold," : detailedResultsStream << "\"" << result.Channel2.DetectionThreshold << "\",";
+    writeHeader ? detailedResultsStream << "Ch 2 Samples to Tick 1," : detailedResultsStream << "\"" << result.Channel2.SamplesToTick1 << "\",";
+    writeHeader ? detailedResultsStream << "Ch 2 Samples to Tick 2," : detailedResultsStream << "\"" << result.Channel2.SamplesToTick2 << "\",";
+    writeHeader ? detailedResultsStream << "Ch 2 Samples to Tick 3," : detailedResultsStream << "\"" << result.Channel2.SamplesToTick3 << "\",";
+    writeHeader ? detailedResultsStream << "Ch 2 Samples to Earliest 1," : detailedResultsStream << "\"" << result.Channel2.SamplesToIndex1 << "\",";
+    writeHeader ? detailedResultsStream << "Ch 2 Samples to Earliest 2," : detailedResultsStream << "\"" << result.Channel2.SamplesToIndex2 << "\",";
+    writeHeader ? detailedResultsStream << "Ch 2 Samples to Earliest 3," : detailedResultsStream << "\"" << result.Channel2.SamplesToIndex3 << "\",";
+    writeHeader ? detailedResultsStream << "Ch 1 Invalid Reason," : detailedResultsStream << "\"" << result.Channel1.InvalidReason << "\",";
+    writeHeader ? detailedResultsStream << "Ch 2 Invalid Reason" : detailedResultsStream << "\"" << result.Channel2.InvalidReason << "\"";
+
+    detailedResultsStream << std::endl;
+
     if (writeHeader)
     {
-        detailedResultsStream << "Time,";
-        detailedResultsStream << "Audio Format,";
-        detailedResultsStream << "Recording,";
-        detailedResultsStream << ",";
-        detailedResultsStream << "Audio Latency (ms),";
-        detailedResultsStream << "Verified,";
-        detailedResultsStream << ",";
-        detailedResultsStream << "DUT Model,";
-        detailedResultsStream << "DUT Firmware Version,";
-        detailedResultsStream << "DUT Output Type,";
-        if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi)
-        {
-            detailedResultsStream << "DUT Video Mode,";
-        }
-        detailedResultsStream << "DUT Audio Settings,";
-        detailedResultsStream << "DUT Other Settings,";
-        detailedResultsStream << ",";
-        detailedResultsStream << "Audio Format,";
-        detailedResultsStream << "Audio Channels,";
-        detailedResultsStream << "Audio Sample Rate,";
-        detailedResultsStream << "Audio Bit Depth,";
-        detailedResultsStream << "Audio Speakers Description,";
-        detailedResultsStream << ",";
-        if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi)
-        {
-            detailedResultsStream << "Video Resolution,";
-            detailedResultsStream << "Video Refresh Rate,";
-            detailedResultsStream << "Video Bit Depth,";
-            detailedResultsStream << "Video Color Format,";
-            detailedResultsStream << "Video Color Space,";
-            detailedResultsStream << ",";
-        }
-        detailedResultsStream << "Notes 1,";
-        detailedResultsStream << "Notes 2,";
-        detailedResultsStream << "Notes 3,";
-        detailedResultsStream << "Notes 4,";
-        detailedResultsStream << ",";
-        detailedResultsStream << "Raw Offset (ms),";
-        detailedResultsStream << "Dual-Out Reference Device,";
-        detailedResultsStream << "Recording Method,";
-        detailedResultsStream << "Output Offset Profile,";
-        detailedResultsStream << "Output Offset Profile Value (ms),";
-        detailedResultsStream << ",";
-        detailedResultsStream << "Audio Output Device,";
-        detailedResultsStream << "Audio Input Device,";
-        detailedResultsStream << "Audio Input Format,";
-        detailedResultsStream << ",";
-        detailedResultsStream << "DEBUG INFO FOLLOWS -->,";
-        detailedResultsStream << ",";
-        detailedResultsStream << "Ch 1 Milliseconds to Tick 1,";
-        detailedResultsStream << "Ch 2 Milliseconds to Tick 1,";
-        detailedResultsStream << "Ch 1 Rel Milliseconds to Tick 2,";
-        detailedResultsStream << "Ch 2 Rel Milliseconds to Tick 2,";
-        detailedResultsStream << "Ch 1 Rel Milliseconds to Tick 3,";
-        detailedResultsStream << "Ch 2 Rel Milliseconds to Tick 3,";
-        detailedResultsStream << "Ch 1 Detection Threshold,";
-        detailedResultsStream << "Ch 1 Samples to Tick 1,";
-        detailedResultsStream << "Ch 1 Samples to Tick 2,";
-        detailedResultsStream << "Ch 1 Samples to Tick 3,";
-        detailedResultsStream << "Ch 1 Samples to Earliest 1,";
-        detailedResultsStream << "Ch 1 Samples to Earliest 2,";
-        detailedResultsStream << "Ch 1 Samples to Earliest 3,";
-        detailedResultsStream << "Ch 2 Detection Threshold,";
-        detailedResultsStream << "Ch 2 Samples to Tick 1,";
-        detailedResultsStream << "Ch 2 Samples to Tick 2,";
-        detailedResultsStream << "Ch 2 Samples to Tick 3,";
-        detailedResultsStream << "Ch 2 Samples to Earliest 1,";
-        detailedResultsStream << "Ch 2 Samples to Earliest 2,";
-        detailedResultsStream << "Ch 2 Samples to Earliest 3,";
-        detailedResultsStream << "Ch 1 Invalid Reason,";
-        detailedResultsStream << "Ch 2 Invalid Reason" << std::endl;
+        WriteIndividualRecordingResults(false, detailedResultsStream, outputEndpoint, inputEndpoint, result, inputFormat);
     }
-
-    detailedResultsStream << "\"" << StringHelper::GetTimeString(result.Time, false) << "\","; //"Time,";
-    detailedResultsStream << "\"" << result.Format->FormatString << "\","; //"Audio Format,";
-    detailedResultsStream << "\"" << result.GUID << ".wav\","; //"Recording,";
-    detailedResultsStream << "\"" << "\",";
-    detailedResultsStream << "\"" << result.AudioLatency() << "\","; //"Audio Latency (ms),";
-    detailedResultsStream << "\"" << (result.Verified ? "Yes" : "No") << "\","; //"Verified,";
-    detailedResultsStream << "\"" << "\",";
-    detailedResultsStream << "\"" << TestNotes::Notes.DutModel << "\","; //"DUT Model,";
-    detailedResultsStream << "\"" << TestNotes::Notes.DutFirmwareVersion << "\","; //"DUT Firmware Version,";
-    detailedResultsStream << "\"" << TestNotes::Notes.DutOutputType() << "\","; //"DUT,";
-    if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi)
-    {
-        detailedResultsStream << "\"" << TestNotes::Notes.DutVideoMode << "\","; //"DUT Video Mode,";
-    }
-    detailedResultsStream << "\"" << TestNotes::Notes.DutAudioSettings << "\",";
-    detailedResultsStream << "\"" << TestNotes::Notes.DutOtherSettings << "\",";
-    detailedResultsStream << "\"" << "\",";
-    detailedResultsStream << "\"" << AudioFormat::GetAudioDataFormatString(result.Format->WaveFormat) << "\","; //"Audio Format,";
-    detailedResultsStream << "\"" << result.Format->WaveFormat->nChannels << "\",";
-    detailedResultsStream << "\"" << result.Format->WaveFormat->nSamplesPerSec << "\",";
-    detailedResultsStream << "\"" << result.Format->WaveFormat->wBitsPerSample << "\",";
-    detailedResultsStream << "\"" << AudioFormat::GetChannelInfoString(result.Format->WaveFormat) << "\",";
-    detailedResultsStream << "\"" << "\",";
-    if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi)
-    {
-        detailedResultsStream << "\"" << TestNotes::Notes.VideoRes() << "\",";
-        detailedResultsStream << "\"" << TestNotes::Notes.VideoRefreshRate << "\",";
-        detailedResultsStream << "\"" << TestNotes::Notes.VideoBitDepth << "\",";
-        detailedResultsStream << "\"" << TestNotes::Notes.VideoColorFormat << "\",";
-        detailedResultsStream << "\"" << TestNotes::Notes.VideoColorSpace() << "\",";
-        detailedResultsStream << "\"" << "\",";
-    }
-    detailedResultsStream << "\"" << TestNotes::Notes.Notes1 << "\",";
-    detailedResultsStream << "\"" << TestNotes::Notes.Notes2 << "\",";
-    detailedResultsStream << "\"" << TestNotes::Notes.Notes3 << "\",";
-    detailedResultsStream << "\"" << TestNotes::Notes.Notes4 << "\",";
-    detailedResultsStream << "\"" << "\",";
-    detailedResultsStream << "\"" << result.Offset() << "\","; //"Raw Offset (ms),";
-    detailedResultsStream << "\"" << TestNotes::Notes.HDMIAudioDevice << "\","; //"Dual-Out Reference Device,";
-    detailedResultsStream << "\"" << TestNotes::Notes.RecordingMethod() << "\","; //"Recording Method,";
-    detailedResultsStream << "\"" << result.OffsetProfile->Name << "\","; //"Output Offset Profile,";
-    detailedResultsStream << "\"" << result.OutputOffsetFromProfile << "\","; //"Output Offset Profile Value (ms),";
-    detailedResultsStream << "\"" << "\",";
-    detailedResultsStream << "\"" << outputEndpoint.Name << " (" << outputEndpoint.ID << ")" << "\","; //"Audio output device,";
-    detailedResultsStream << "\"" << inputEndpoint.Name << " (" << inputEndpoint.ID << ")" << "\","; //"Audio input device,";
-    detailedResultsStream << "\"" << inputFormat << "\","; //"Audio input format,";
-    detailedResultsStream << "\"" << "\",";
-    detailedResultsStream << "\"" << "DEBUG INFO FOLLOWS -->" << "\",";
-    detailedResultsStream << "\"" << "\",";
-    detailedResultsStream << "\"" << result.Channel1.MillisecondsToTick1() << "\","; //"Ch 1 Milliseconds to Tick 1,";
-    detailedResultsStream << "\"" << result.Channel2.MillisecondsToTick1() << "\","; //"Ch 2 Milliseconds to Tick 1,";
-    detailedResultsStream << "\"" << result.Channel1.RelMillisecondsToTick2() << "\","; //"Ch 1 Rel Milliseconds to Tick 2,";
-    detailedResultsStream << "\"" << result.Channel2.RelMillisecondsToTick2() << "\","; //"Ch 2 Rel Milliseconds to Tick 2,";
-    detailedResultsStream << "\"" << result.Channel1.RelMillisecondsToTick3() << "\","; //"Ch 1 Rel Milliseconds to Tick 3,";
-    detailedResultsStream << "\"" << result.Channel2.RelMillisecondsToTick3() << "\","; //"Ch 2 Rel Milliseconds to Tick 3,";
-    detailedResultsStream << "\"" << result.Channel1.DetectionThreshold << "\","; //"Ch 1 Detection Threshold,";
-    detailedResultsStream << "\"" << result.Channel1.SamplesToTick1 << "\","; //"Ch 1 Samples to Tick 1,";
-    detailedResultsStream << "\"" << result.Channel1.SamplesToTick2 << "\","; //"Ch 1 Samples to Tick 2,";
-    detailedResultsStream << "\"" << result.Channel1.SamplesToTick3 << "\","; //"Ch 1 Samples to Tick 3,";
-    detailedResultsStream << "\"" << result.Channel1.SamplesToIndex1 << "\","; //"Ch 1 Samples to Earliest 1,";
-    detailedResultsStream << "\"" << result.Channel1.SamplesToIndex2 << "\","; //"Ch 1 Samples to Earliest 2,";
-    detailedResultsStream << "\"" << result.Channel1.SamplesToIndex3 << "\","; //"Ch 1 Samples to Earliest 3,";
-    detailedResultsStream << "\"" << result.Channel2.DetectionThreshold << "\","; //"Ch 2 Detection Threshold,";
-    detailedResultsStream << "\"" << result.Channel2.SamplesToTick1 << "\","; //"Ch 2 Samples to Tick 1,";
-    detailedResultsStream << "\"" << result.Channel2.SamplesToTick2 << "\","; //"Ch 2 Samples to Tick 2,";
-    detailedResultsStream << "\"" << result.Channel2.SamplesToTick3 << "\","; //"Ch 2 Samples to Tick 3,";
-    detailedResultsStream << "\"" << result.Channel2.SamplesToIndex1 << "\","; //"Ch 2 Samples to Earliest 1,";
-    detailedResultsStream << "\"" << result.Channel2.SamplesToIndex2 << "\","; //"Ch 2 Samples to Earliest 2,";
-    detailedResultsStream << "\"" << result.Channel2.SamplesToIndex3 << "\","; //"Ch 2 Samples to Earliest 3,";
-    detailedResultsStream << "\"" << result.Channel1.InvalidReason << "\","; //"Ch 1 Invalid Reason,";
-    detailedResultsStream << "\"" << result.Channel2.InvalidReason << "\"" << std::endl; //"Ch 2 Invalid Reason";
 }
 
 void ResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& resultsStream, const AveragedResult& result)
 {
+    writeHeader ? resultsStream << "Time," : resultsStream << "\"" << StringHelper::GetTimeString(result.Time, false) << "\",";
+    writeHeader ? resultsStream << "Audio Format," : resultsStream << "\"" << result.Format->FormatString << "\",";
+    writeHeader ? resultsStream << "," : resultsStream << "\"" << "\",";
+    writeHeader ? resultsStream << "Avg. Audio Latency (ms)," : resultsStream << "\"" << result.AverageLatency() << "\",";
+    writeHeader ? resultsStream << "Min Audio Latency (ms)," : resultsStream << "\"" << result.MinLatency() << "\",";
+    writeHeader ? resultsStream << "Max Audio Latency (ms)," : resultsStream << "\"" << result.MaxLatency() << "\",";
+    writeHeader ? resultsStream << "Verified Accuracy," : resultsStream << "\"" << (result.Verified ? "Yes" : "No") << "\",";
+    writeHeader ? resultsStream << "Valid Measurements," : resultsStream << "\"" << result.Offsets.size() << "\",";
+    writeHeader ? resultsStream << "," : resultsStream << "\"" << "\",";
+    writeHeader ? resultsStream << "DUT Model," : resultsStream << "\"" << TestNotes::Notes.DutModel << "\",";
+    writeHeader ? resultsStream << "DUT Firmware Version," : resultsStream << "\"" << TestNotes::Notes.DutFirmwareVersion << "\",";
+    writeHeader ? resultsStream << "DUT Output Type," : resultsStream << "\"" << TestNotes::Notes.DutOutputType() << "\",";
+    if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi)
+    {
+        writeHeader ? resultsStream << "DUT Video Mode," : resultsStream << "\"" << TestNotes::Notes.DutVideoMode << "\",";
+    }
+    writeHeader ? resultsStream << "DUT Audio Settings," : resultsStream << "\"" << TestNotes::Notes.DutAudioSettings << "\",";
+    writeHeader ? resultsStream << "DUT Other Settings," : resultsStream << "\"" << TestNotes::Notes.DutOtherSettings << "\",";
+    writeHeader ? resultsStream << "," : resultsStream << "\"" << "\",";
+    writeHeader ? resultsStream << "Audio Format," : resultsStream << "\"" << AudioFormat::GetAudioDataFormatString(result.Format->WaveFormat) << "\",";
+    writeHeader ? resultsStream << "Audio Channels," : resultsStream << "\"" << result.Format->WaveFormat->nChannels << "\",";
+    writeHeader ? resultsStream << "Audio Sample Rate," : resultsStream << "\"" << result.Format->WaveFormat->nSamplesPerSec << "\",";
+    writeHeader ? resultsStream << "Audio Bit Depth," : resultsStream << "\"" << result.Format->WaveFormat->wBitsPerSample << "\",";
+    writeHeader ? resultsStream << "Audio Speakers Description," : resultsStream << "\"" << AudioFormat::GetChannelInfoString(result.Format->WaveFormat) << "\",";
+    writeHeader ? resultsStream << "," : resultsStream << "\"" << "\",";
+    if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi)
+    {
+        writeHeader ? resultsStream << "Video Resolution," : resultsStream << "\"" << TestNotes::Notes.VideoRes() << "\",";
+        writeHeader ? resultsStream << "Video Refresh Rate," : resultsStream << "\"" << TestNotes::Notes.VideoRefreshRate << "\",";
+        writeHeader ? resultsStream << "Video Bit Depth," : resultsStream << "\"" << TestNotes::Notes.VideoBitDepth << "\",";
+        writeHeader ? resultsStream << "Video Color Format," : resultsStream << "\"" << TestNotes::Notes.VideoColorFormat << "\",";
+        writeHeader ? resultsStream << "Video Color Space," : resultsStream << "\"" << TestNotes::Notes.VideoColorSpace() << "\",";
+        writeHeader ? resultsStream << "," : resultsStream << "\"" << "\",";
+    }
+    writeHeader ? resultsStream << "Notes 1," : resultsStream << "\"" << TestNotes::Notes.Notes1 << "\",";
+    writeHeader ? resultsStream << "Notes 2," : resultsStream << "\"" << TestNotes::Notes.Notes2 << "\",";
+    writeHeader ? resultsStream << "Notes 3," : resultsStream << "\"" << TestNotes::Notes.Notes3 << "\",";
+    writeHeader ? resultsStream << "Notes 4," : resultsStream << "\"" << TestNotes::Notes.Notes4 << "\",";
+    writeHeader ? resultsStream << "," : resultsStream << "\"" << "\",";
+    writeHeader ? resultsStream << "Dual-Out Reference Device," : resultsStream << "\"" << TestNotes::Notes.HDMIAudioDevice << "\",";
+    writeHeader ? resultsStream << "Recording Method," : resultsStream << "\"" << TestNotes::Notes.RecordingMethod() << "\",";
+    writeHeader ? resultsStream << "Output Offset Profile," : resultsStream << "\"" << result.OffsetProfile->Name << "\",";
+    writeHeader ? resultsStream << "Output Offset Profile Value (ms)," : resultsStream << "\"" << result.OutputOffsetFromProfile << "\",";
+    writeHeader ? resultsStream << "," : resultsStream << "\"" << "\",";
+    writeHeader ? resultsStream << "Audio Output Device" : resultsStream << "\"" << result.OutputEndpoint.Name << " (" << result.OutputEndpoint.ID << ")" << "\"";
+
+    resultsStream << std::endl;
+
     if (writeHeader)
     {
-        resultsStream << "Time,";
-        resultsStream << "Audio Format,";
-        resultsStream << ",";
-        resultsStream << "Avg. Audio Latency (ms),";
-        resultsStream << "Min Audio Latency (ms),";
-        resultsStream << "Max Audio Latency (ms),";
-        resultsStream << "Verified Accuracy,";
-        resultsStream << "Valid Measurements,";
-        resultsStream << ",";
-        resultsStream << "DUT Model,";
-        resultsStream << "DUT Firmware Version,";
-        resultsStream << "DUT Output Type,";
-        if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi)
-        {
-            resultsStream << "DUT Video Mode,";
-        }
-        resultsStream << "DUT Audio Settings,";
-        resultsStream << "DUT Other Settings,";
-        resultsStream << ",";
-        resultsStream << "Audio Format,";
-        resultsStream << "Audio Channels,";
-        resultsStream << "Audio Sample Rate,";
-        resultsStream << "Audio Bit Depth,";
-        resultsStream << "Audio Speakers Description,";
-        resultsStream << ",";
-        if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi)
-        {
-            resultsStream << "Video Resolution,";
-            resultsStream << "Video Refresh Rate,";
-            resultsStream << "Video Bit Depth,";
-            resultsStream << "Video Color Format,";
-            resultsStream << "Video Color Space,";
-            resultsStream << ",";
-        }
-        resultsStream << "Notes 1,";
-        resultsStream << "Notes 2,";
-        resultsStream << "Notes 3,";
-        resultsStream << "Notes 4,";
-        resultsStream << ",";
-        resultsStream << "Dual-Out Reference Device,";
-        resultsStream << "Recording Method,";
-        resultsStream << "Output Offset Profile,";
-        resultsStream << "Output Offset Profile Value (ms),";
-        resultsStream << ",";
-        resultsStream << "Audio Output Device" << std::endl;
+        WriteFinalResultsLine(false, resultsStream, result);
     }
-
-    resultsStream << "\"" << StringHelper::GetTimeString(result.Time, false) << "\","; //"Time,";
-    resultsStream << "\"" << result.Format->FormatString << "\","; //"Audio Format,";
-    resultsStream << "\"" << "\",";
-    resultsStream << "\"" << result.AverageLatency() << "\",";
-    resultsStream << "\"" << result.MinLatency() << "\",";
-    resultsStream << "\"" << result.MaxLatency() << "\",";
-    resultsStream << "\"" << (result.Verified ? "Yes" : "No") << "\","; //"Verified,";
-    resultsStream << "\"" << result.Offsets.size() << "\",";
-    resultsStream << "\"" << "\",";
-    resultsStream << "\"" << TestNotes::Notes.DutModel << "\","; //"DUT Model,";
-    resultsStream << "\"" << TestNotes::Notes.DutFirmwareVersion << "\","; //"DUT Firmware Version,";
-    resultsStream << "\"" << TestNotes::Notes.DutOutputType() << "\","; //"DUT,";
-    if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi)
-    {
-        resultsStream << "\"" << TestNotes::Notes.DutVideoMode << "\","; //"DUT Video Mode,";
-    }
-    resultsStream << "\"" << TestNotes::Notes.DutAudioSettings << "\",";
-    resultsStream << "\"" << TestNotes::Notes.DutOtherSettings << "\",";
-    resultsStream << "\"" << "\",";
-    resultsStream << "\"" << AudioFormat::GetAudioDataFormatString(result.Format->WaveFormat) << "\","; //"Audio Format,";
-    resultsStream << "\"" << result.Format->WaveFormat->nChannels << "\",";
-    resultsStream << "\"" << result.Format->WaveFormat->nSamplesPerSec << "\",";
-    resultsStream << "\"" << result.Format->WaveFormat->wBitsPerSample << "\",";
-    resultsStream << "\"" << AudioFormat::GetChannelInfoString(result.Format->WaveFormat) << "\",";
-    resultsStream << "\"" << "\",";
-    if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi)
-    {
-        resultsStream << "\"" << TestNotes::Notes.VideoRes() << "\",";
-        resultsStream << "\"" << TestNotes::Notes.VideoRefreshRate << "\",";
-        resultsStream << "\"" << TestNotes::Notes.VideoBitDepth << "\",";
-        resultsStream << "\"" << TestNotes::Notes.VideoColorFormat << "\",";
-        resultsStream << "\"" << TestNotes::Notes.VideoColorSpace() << "\",";
-        resultsStream << "\"" << "\",";
-    }
-    resultsStream << "\"" << TestNotes::Notes.Notes1 << "\",";
-    resultsStream << "\"" << TestNotes::Notes.Notes2 << "\",";
-    resultsStream << "\"" << TestNotes::Notes.Notes3 << "\",";
-    resultsStream << "\"" << TestNotes::Notes.Notes4 << "\",";
-    resultsStream << "\"" << "\",";
-    resultsStream << "\"" << TestNotes::Notes.HDMIAudioDevice << "\","; //"Dual-Out Reference Device,";
-    resultsStream << "\"" << TestNotes::Notes.RecordingMethod() << "\","; //"Recording Method,";
-    resultsStream << "\"" << result.OffsetProfile->Name << "\","; //"Output Offset Profile,";
-    resultsStream << "\"" << result.OutputOffsetFromProfile << "\","; //"Output Offset Profile Value (ms),";
-    resultsStream << "\"" << "\",";
-    resultsStream << "\"" << result.OutputEndpoint.Name << " (" << result.OutputEndpoint.ID << ")" << "\"" << std::endl; //"Audio output device,";
 }
