@@ -1,4 +1,7 @@
 #include "OutputOffsetProfiles.h"
+#include "WindowsWaveFormats.h"
+#include <sstream>
+#include <format>
 
 OutputOffsetProfile* OutputOffsetProfiles::Hdmi_HDV_MB01 = NULL;
 OutputOffsetProfile* OutputOffsetProfiles::Hdmi_None = NULL;
@@ -37,7 +40,17 @@ void OutputOffsetProfiles::InitializeProfiles()
 	Spdif_None->isNoOffset = true;
 	Profiles.push_back(Spdif_None);
 
-	// Set up subset lists for the GUIs
+	PrepareSubsetListsForGui();
+	PrepareOffsetStringsForGui();
+}
+
+OutputOffsetProfile* OutputOffsetProfiles::CurrentProfile()
+{
+	return Profiles[SelectedProfileIndex];
+}
+
+void OutputOffsetProfiles::PrepareSubsetListsForGui()
+{
 	for (int i = 0; i < Profiles.size(); i++)
 	{
 		if (!Subsets.contains(Profiles[i]->OutType))
@@ -48,9 +61,72 @@ void OutputOffsetProfiles::InitializeProfiles()
 	}
 }
 
-OutputOffsetProfile* OutputOffsetProfiles::CurrentProfile()
+void OutputOffsetProfiles::PrepareOffsetStringsForGui()
 {
-	return Profiles[SelectedProfileIndex];
+	std::stringstream ss;
+	for (int i = 0; i < Profiles.size(); i++)
+	{
+		OutputOffsetProfile::OutputOffset offset = Profiles[i]->GetOffset(2, 48000, 16);
+		if (offset.verified)
+		{
+			std::string highlightedOffsetValue = std::format("LPCM 2ch-48kHz-16bit: {} ms", offset.value);
+			Profiles[i]->HighlightedVerifiedOffsetsForDisplay.push_back(highlightedOffsetValue);
+		}
+		offset = Profiles[i]->GetOffset(2, 192000, 16);
+		if (offset.verified)
+		{
+			std::string highlightedOffsetValue = std::format("LPCM 2ch-192kHz-16bit: {} ms", offset.value);
+			Profiles[i]->HighlightedVerifiedOffsetsForDisplay.push_back(highlightedOffsetValue);
+		}
+
+		offset = Profiles[i]->GetOffset(6, 48000, 16);
+		if (offset.verified)
+		{
+			std::string highlightedOffsetValue = std::format("LPCM 6ch-48kHz-16bit: {} ms", offset.value);
+			Profiles[i]->HighlightedVerifiedOffsetsForDisplay.push_back(highlightedOffsetValue);
+		}
+		offset = Profiles[i]->GetOffset(6, 192000, 16);
+		if (offset.verified)
+		{
+			std::string highlightedOffsetValue = std::format("LPCM 6ch-192kHz-16bit: {} ms", offset.value);
+			Profiles[i]->HighlightedVerifiedOffsetsForDisplay.push_back(highlightedOffsetValue);
+		}
+
+		offset = Profiles[i]->GetOffset(6, 48000, 16);
+		if (offset.verified)
+		{
+			std::string highlightedOffsetValue = std::format("LPCM 8ch-48kHz-16bit: {} ms", offset.value);
+			Profiles[i]->HighlightedVerifiedOffsetsForDisplay.push_back(highlightedOffsetValue);
+		}
+		offset = Profiles[i]->GetOffset(6, 192000, 16);
+		if (offset.verified)
+		{
+			std::string highlightedOffsetValue = std::format("LPCM 8ch-192kHz-16bit: {} ms", offset.value);
+			Profiles[i]->HighlightedVerifiedOffsetsForDisplay.push_back(highlightedOffsetValue);
+		}
+
+		for (int f = 0; f < WindowsWaveFormats::Formats.AllExFormats.size(); f++)
+		{
+			WAVEFORMATEX* format = WindowsWaveFormats::Formats.AllExFormats[f];
+			if (format->wFormatTag == WAVE_FORMAT_PCM)
+			{
+				OutputOffsetProfile::OutputOffset offsetValue = Profiles[i]->GetOffsetFromWaveFormat(format);
+				ss << AudioFormat::GetFormatString(WindowsWaveFormats::Formats.AllExFormats[f], true, false) << ": ";
+				if (offsetValue.verified)
+				{
+					ss << offsetValue.value;
+					Profiles[i]->VerifiedOffsetsForDisplay.push_back(ss.str());
+				}
+				else
+				{
+					ss << offsetValue.value;
+					Profiles[i]->UnverifiedOffsetsForDisplay.push_back(ss.str());
+				}
+				ss << " ms";
+				ss.str(std::string());
+			}
+		}
+	}
 }
 
 OutputOffsetProfile::OutputOffset OutputOffsetProfiles::Hdmi_HDV_MB01_GetOffset(int numChannels, int sampleRate, int bitDepth)

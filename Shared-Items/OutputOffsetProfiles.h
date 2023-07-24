@@ -42,6 +42,9 @@ public:
 	static OutputOffsetProfile* CurrentProfile();
 
 private:
+	static void PrepareSubsetListsForGui();
+	static void PrepareOffsetStringsForGui();
+
 	static OutputOffsetProfile::OutputOffset Hdmi_HDV_MB01_GetOffset(int numChannels, int sampleRate, int bitDepth);
 	static OutputOffsetProfile::OutputOffset Hdmi_None_GetOffset(int numChannels, int sampleRate, int bitDepth);
 

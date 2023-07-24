@@ -3,11 +3,19 @@
 
 AudioFormat::AudioFormat(WAVEFORMATEX* waveFormat) : WaveFormat(waveFormat)
 {
-    FormatString = std::format("{}ch-{}kHz-{}bit-{}",
+    FormatString = GetFormatString(waveFormat, false, true);
+}
+
+std::string AudioFormat::GetFormatString(WAVEFORMATEX* waveFormat, bool includeEncoding, bool includeChannelInfo)
+{
+    std::string encodingStr = std::format("{} ", GetAudioDataFormatString(waveFormat));
+    std::string channelInfoStr = std::format("-{}", GetChannelInfoString(waveFormat));
+    return std::format("{}{}ch-{}kHz-{}bit{}",
+        includeEncoding ? encodingStr : "",
         waveFormat->nChannels,
         (waveFormat->nSamplesPerSec == 44100 ? "44.1" : std::format("{}", waveFormat->nSamplesPerSec / 1000)),
         waveFormat->wBitsPerSample,
-        GetChannelInfoString(waveFormat));
+        includeChannelInfo ? channelInfoStr : "");
 }
 
 std::string AudioFormat::GetChannelInfoString(WAVEFORMATEX* waveFormat)

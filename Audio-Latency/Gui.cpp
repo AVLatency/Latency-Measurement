@@ -254,7 +254,7 @@ bool Gui::DoGui()
                             ImGui::TreePop();
                         }
                     }
-                    else if (OutputOffsetProfiles::Profiles[OutputOffsetProfiles::SelectedProfileIndex]->isNoOffset)
+                    else if (OutputOffsetProfiles::CurrentProfile()->isNoOffset)
                     {
                         ImGui::PushFont(FontHelper::BoldFont);
                         ImGui::Text("WARNING:");
@@ -270,11 +270,36 @@ bool Gui::DoGui()
 
                     ImGui::PushFont(FontHelper::BoldFont);
                     ImGui::Text("Output Offsets");
-                    ImGui::SameLine(); GuiHelper::HelpMarker("These offsets will be accounted for in reported measurements!\n\nPositive value: analog output leads digital output\nNegative value: digital output leads analog output");
+                    ImGui::SameLine(); GuiHelper::HelpMarker("These offsets will be accounted for in reported measurements!\n\nPositive value: analog output leads digital output\nNegative value: digital output leads analog output\n\nVerified formats will be marked as verified in the results.");
                     ImGui::PopFont();
 
-                    ImGui::Text("Verified output offsets:");
                     ImGui::Spacing();
+                    ImGui::Text("Common Formats:");
+                    ImGui::Spacing();
+                    for (int i = 0; i < OutputOffsetProfiles::CurrentProfile()->HighlightedVerifiedOffsetsForDisplay.size(); i++)
+                    {
+                        ImGui::Text(OutputOffsetProfiles::CurrentProfile()->HighlightedVerifiedOffsetsForDisplay[i].c_str());
+                    }
+
+                    ImGui::Spacing();
+
+                    if (ImGui::TreeNode("All Verified Formats"))
+                    {
+                        for (int i = 0; i < OutputOffsetProfiles::CurrentProfile()->VerifiedOffsetsForDisplay.size(); i++)
+                        {
+                            ImGui::Text(OutputOffsetProfiles::CurrentProfile()->VerifiedOffsetsForDisplay[i].c_str());
+                        }
+                        ImGui::TreePop();
+                    }
+
+                    if (ImGui::TreeNode("All Unverified Formats"))
+                    {
+                        for (int i = 0; i < OutputOffsetProfiles::CurrentProfile()->UnverifiedOffsetsForDisplay.size(); i++)
+                        {
+                            ImGui::Text(OutputOffsetProfiles::CurrentProfile()->UnverifiedOffsetsForDisplay[i].c_str());
+                        }
+                        ImGui::TreePop();
+                    }
 
                     ImGui::EndTable();
 

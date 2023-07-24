@@ -33,6 +33,7 @@ public:
 	OutputType OutType = OutputType::None;
 
 	std::string Name;
+
 	OutputOffset(*GetOffset)(int numChannels, int sampleRate, int bitDepth);
 	/// <summary>
 	/// Used if a device takes in a digital audio format but then outputs a different audio format. For example,
@@ -44,5 +45,21 @@ public:
 	OutputOffset GetOffsetFromWaveFormat(WAVEFORMATEX* waveFormat);
 
 	bool isNoOffset = false; // Flag to help things like the TestManager and GUI know if this is the "None" offset profile.
+
+	std::string Description;
+
+
+	/// <summary>
+	/// Auto-populated by OutputOffsetProfiles::InitializeProfiles()
+	/// </summary>
+	std::vector<std::string> HighlightedVerifiedOffsetsForDisplay;
+	/// <summary>
+	/// Auto-populated by OutputOffsetProfiles::InitializeProfiles()
+	/// </summary>
+	std::vector<std::string> VerifiedOffsetsForDisplay;
+	/// <summary>
+	/// Auto-populated by OutputOffsetProfiles::InitializeProfiles()
+	/// </summary>
+	std::vector<std::string> UnverifiedOffsetsForDisplay;
 };
 
