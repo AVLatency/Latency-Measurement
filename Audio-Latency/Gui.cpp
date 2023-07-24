@@ -137,10 +137,8 @@ bool Gui::DoGui()
             ImGui::Spacing();
             ImGui::Text("Welcome to the AV Latency.com audio latency measurement tool!");
             ImGui::Spacing();
-            ImGui::Text("Before starting, please connect your cables as described in the diagram above.");
-            ImGui::Spacing();
             ImGui::Text("You can find help text by hovering your mouse over these:");
-            ImGui::SameLine(); GuiHelper::HelpMarker("You can visit the AV Latency.com Toolkit Webpage to view a demonstration video and find out more about how to use this tool.\n\nClick \"Next\" once you've connected all of the cables to get started!");
+            ImGui::SameLine(); GuiHelper::HelpMarker("Visit the AV Latency.com Toolkit Webpage to view a demonstration video and find out more about how to use this tool.\n\nClick \"Next\" once you've connected all of the cables to get started!");
             ImGui::Spacing();
 
             if (ImGui::Button("AV Latency.com Toolkit Webpage"))
@@ -219,42 +217,7 @@ bool Gui::DoGui()
                     ImGui::TableNextColumn();
                     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetTextLineHeightWithSpacing());
 
-                    if (OutputOffsetProfiles::Profiles[OutputOffsetProfiles::SelectedProfileIndex] == OutputOffsetProfiles::Hdmi_HDV_MB01)
-                    {
-                        float imageScale = 0.45 * Gui::DpiScale;
-                        ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
-                        ImGui::TextWrapped("The HDV-MB01 is sold under these names:");
-                        ImGui::Spacing();
-                        ImGui::TextWrapped("- J-Tech Digital JTD18G - H5CH\n"
-                            "- Monoprice Blackbird 24278\n"
-                            "- OREI HDA - 912\n");
-                    }
-                    else if (OutputOffsetProfiles::Profiles[OutputOffsetProfiles::SelectedProfileIndex] == OutputOffsetProfiles::Spdif_HDV_MB01)
-                    {
-                        float imageScale = 0.45 * Gui::DpiScale;
-                        ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
-                        ImGui::TextWrapped("The HDV-MB01 is sold under these names:");
-                        ImGui::Spacing();
-                        ImGui::TextWrapped("- J-Tech Digital JTD18G - H5CH\n"
-                            "- Monoprice Blackbird 24278\n"
-                            "- OREI HDA - 912\n");
-
-                        if (ImGui::TreeNode("Supported Formats"))
-                        {
-                            ImGui::TextWrapped("With the right HDMI audio drivers and the right EDID information provided by the HDMI device connected to the HDV-MB01, the following formats are supported by this device:\n\n"
-                                "2ch-44.1kHz-16bit\n"
-                                "2ch-44.1kHz-24bit\n"
-                                "2ch-48kHz-16bit\n"
-                                "2ch-48kHz-24bit\n"
-                                "2ch-96kHz-16bit\n"
-                                "2ch-96kHz-24bit\n"
-                                "2ch-192kHz-16bit\n"
-                                "2ch-192kHz-24bit\n");
-
-                            ImGui::TreePop();
-                        }
-                    }
-                    else if (OutputOffsetProfiles::CurrentProfile()->isNoOffset)
+                    if (OutputOffsetProfiles::CurrentProfile()->isNoOffset)
                     {
                         ImGui::PushFont(FontHelper::BoldFont);
                         ImGui::Text("WARNING:");
@@ -263,6 +226,13 @@ bool Gui::DoGui()
                         ImGui::Spacing();
                         ImGui::TextWrapped("If you have another device that is suitable for use with this tool, "
                             "please let me know by email to allen"/* spam bot protection */"@"/* spam bot protection */"avlatency.com and I might be able to add support for this device.");
+                    }
+                    else
+                    {
+                        // TODO: Image based on profile
+                        float imageScale = 0.45 * Gui::DpiScale;
+                        ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
+                        ImGui::TextWrapped(OutputOffsetProfiles::CurrentProfile()->Description.c_str());
                     }
 
                     ImGui::TableNextColumn();

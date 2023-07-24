@@ -20,6 +20,12 @@ void OutputOffsetProfiles::InitializeProfiles()
 {
 	// HDMI
 	Hdmi_HDV_MB01 = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Hdmi, "HDV-MB01", Hdmi_HDV_MB01_GetOffset, AudioEndpoint::HdmiFormatsFilter);
+	Hdmi_HDV_MB01->Description =
+		"The HDV-MB01 is sold under these names:\n\n"
+		
+		"- J-Tech Digital JTD18G - H5CH\n"
+		"- Monoprice Blackbird 24278\n"
+		"- OREI HDA - 912";
 	Profiles.push_back(Hdmi_HDV_MB01);
 
 	Hdmi_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Hdmi, "Other", Hdmi_None_GetOffset, AudioEndpoint::HdmiFormatsFilter);
@@ -28,12 +34,45 @@ void OutputOffsetProfiles::InitializeProfiles()
 
 	// S/PDIF
 	Spdif_HDV_MB01 = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Spdif, "HDV-MB01", Spdif_HDV_MB01_GetOffset, CommonSpdifFormatFilter);
+	Spdif_HDV_MB01->Description =
+		"The HDV-MB01 is sold under these names:\n\n"
+		
+		"- J-Tech Digital JTD18G - H5CH\n"
+		"- Monoprice Blackbird 24278\n"
+		"- OREI HDA - 912\n\n"
+		
+		"Supported S/PDIF Formats:\n\n"
+
+		"2ch-44.1kHz-16bit\n"
+		"2ch-44.1kHz-24bit\n"
+		"2ch-48kHz-16bit\n"
+		"2ch-48kHz-24bit\n"
+		"2ch-96kHz-16bit\n"
+		"2ch-96kHz-24bit\n"
+		"2ch-192kHz-16bit\n"
+		"2ch-192kHz-24bit\n";
 	Profiles.push_back(Spdif_HDV_MB01);
 
 	Spdif_AYSA11 = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Spdif, "AYSA11", Spdif_AYSA11_GetOffset, CommonSpdifFormatFilter);
+	Spdif_AYSA11->Description =
+		"Supported S/PDIF Formats:\n\n"
+
+		"2ch-44.1kHz-16bit\n"
+		"2ch-44.1kHz-24bit\n"
+		"2ch-48kHz-16bit\n"
+		"2ch-48kHz-24bit\n"
+		"2ch-96kHz-16bit\n"
+		"2ch-96kHz-24bit\n"
+		"2ch-192kHz-16bit\n"
+		"2ch-192kHz-24bit\n";
 	Profiles.push_back(Spdif_AYSA11);
 
 	Spdif_LiNKFOR_USB_DAC = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Spdif, "LiNKFOR USB DAC", Spdif_LiNKFOR_USB_DAC_GetOffset, CommonSpdifFormatFilter);
+	Spdif_LiNKFOR_USB_DAC->Description =
+		"Supported S/PDIF Formats:\n\n"
+
+		"2ch-44.1kHz-16bit\n"
+		"2ch-48kHz-16bit\n";
 	Profiles.push_back(Spdif_LiNKFOR_USB_DAC);
 
 	Spdif_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Spdif, "Other", Spdif_None_GetOffset, AudioEndpoint::AllFormatsFilter);
@@ -114,15 +153,14 @@ void OutputOffsetProfiles::PrepareOffsetStringsForGui()
 				ss << AudioFormat::GetFormatString(WindowsWaveFormats::Formats.AllExFormats[f], true, false) << ": ";
 				if (offsetValue.verified)
 				{
-					ss << offsetValue.value;
+					ss << offsetValue.value << " ms";;
 					Profiles[i]->VerifiedOffsetsForDisplay.push_back(ss.str());
 				}
 				else
 				{
-					ss << offsetValue.value;
+					ss << offsetValue.value << " ms";;
 					Profiles[i]->UnverifiedOffsetsForDisplay.push_back(ss.str());
 				}
-				ss << " ms";
 				ss.str(std::string());
 			}
 		}
@@ -215,7 +253,7 @@ OutputOffsetProfile::OutputOffset OutputOffsetProfiles::Spdif_LiNKFOR_USB_DAC_Ge
 	OutputOffsetProfile::OutputOffset result;
 
 	if (numChannels == 2 && sampleRate == 48000 && bitDepth == 16) { result.SetValue(0); }
-	if (numChannels == 2 && sampleRate == 44100 && bitDepth == 16) { result.SetValue(0); }
+	else if (numChannels == 2 && sampleRate == 44100 && bitDepth == 16) { result.SetValue(0); }
 	else { result.value = 0; result.verified = false; }
 
 	return result;
