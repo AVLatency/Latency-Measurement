@@ -43,6 +43,6 @@ public:
 
 	OutputOffset GetOffsetFromWaveFormat(WAVEFORMATEX* waveFormat);
 
-	bool isNoOffset = false; // Flag to help things like the TestManager know if this is the "None" offset profile.
+	bool isNoOffset = false; // Flag to help things like the TestManager and GUI know if this is the "None" offset profile.
 };
 

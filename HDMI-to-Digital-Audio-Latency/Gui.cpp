@@ -139,7 +139,7 @@ bool Gui::DoGui()
                     {
                         profileSubset->SubsetSelectedIndex = n;
                         OutputOffsetProfiles::SelectedProfileIndex = profileSubset->ProfileIndeces[profileSubset->SubsetSelectedIndex];
-                        if (OutputOffsetProfiles::CurrentProfile() == OutputOffsetProfiles::Hdmi_None)
+                        if (OutputOffsetProfiles::CurrentProfile()->isNoOffset)
                         {
                             strcpy_s(TestNotes::Notes.HDMIAudioDevice, "");
                         }
@@ -164,7 +164,7 @@ bool Gui::DoGui()
                     "- Monoprice Blackbird 24278\n"
                     "- OREI HDA - 912\n");
             }
-            else if (OutputOffsetProfiles::Profiles[OutputOffsetProfiles::SelectedProfileIndex] == OutputOffsetProfiles::Hdmi_None)
+            else if (OutputOffsetProfiles::Profiles[OutputOffsetProfiles::SelectedProfileIndex]->isNoOffset)
             {
                 ImGui::PushFont(FontHelper::BoldFont);
                 ImGui::Text("WARNING:");
@@ -486,7 +486,6 @@ bool Gui::DoGui()
 
                 GuiHelper::TestConfiguration(DpiScale);
 
-                ImGui::PopItemWidth();
                 ImGui::Spacing();
 
                 ImGui::TableNextColumn();
@@ -496,7 +495,7 @@ bool Gui::DoGui()
                 ImGui::SameLine(); GuiHelper::HelpMarker("These notes will be included in the .csv spreadsheet result files that are saved in the folder that this app was launched from.");
                 ImGui::Spacing();
 
-                TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile = OutputOffsetProfiles::CurrentProfile() != OutputOffsetProfiles::Hdmi_None;
+                TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile = OutputOffsetProfiles::CurrentProfile()->isNoOffset;
                 if (TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile)
                 {
                     ImGui::BeginDisabled();

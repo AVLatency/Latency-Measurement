@@ -174,97 +174,124 @@ bool Gui::DoGui()
 
             if (outputTypeIndex != (int)OutputOffsetProfile::OutputType::None)
             {
-                ImGui::PushFont(FontHelper::BoldFont);
-                ImGui::Text("Dual-Out Reference Device");
-                ImGui::PopFont();
-                ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the time offset between the analog output and the HDMI output of the Dual-Out Reference Device for different audio formats.");
                 ImGui::Spacing();
 
-                if (ImGui::BeginListBox("Dual-Out Reference Device", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing())))
+                if (ImGui::BeginTable("MeasurementConfig", 3))
                 {
-                    OutputOffsetProfiles::ProfilesSubset* profileSubset = OutputOffsetProfiles::Subsets[(OutputOffsetProfile::OutputType)outputTypeIndex];
-                    for (int n = 0; n < profileSubset->ProfileIndeces.size(); n++)
+                    ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, 200 * DpiScale);
+                    ImGui::TableSetupColumn("column2", ImGuiTableColumnFlags_WidthFixed, 370 * DpiScale);
+
+                    ImGui::TableNextRow();
+
+                    ImGui::TableNextColumn();
+
+                    ImGui::PushFont(FontHelper::BoldFont);
+                    ImGui::Text("Dual-Out Reference Device");
+                    ImGui::PopFont();
+                    ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the time offset between the analog output and the HDMI output of the Dual-Out Reference Device for different audio formats.");
+                    ImGui::Spacing();
+
+                    if (ImGui::BeginListBox("Dual-Out Reference Device", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing())))
                     {
-                        const bool is_selected = (profileSubset->SubsetSelectedIndex == n);
-                        if (ImGui::Selectable(OutputOffsetProfiles::Profiles[profileSubset->ProfileIndeces[n]]->Name.c_str(), is_selected))
+                        OutputOffsetProfiles::ProfilesSubset* profileSubset = OutputOffsetProfiles::Subsets[(OutputOffsetProfile::OutputType)outputTypeIndex];
+                        for (int n = 0; n < profileSubset->ProfileIndeces.size(); n++)
                         {
-                            profileSubset->SubsetSelectedIndex = n;
-                            OutputOffsetProfiles::SelectedProfileIndex = profileSubset->ProfileIndeces[profileSubset->SubsetSelectedIndex];
-                            if (OutputOffsetProfiles::CurrentProfile() == OutputOffsetProfiles::Hdmi_None)
+                            const bool is_selected = (profileSubset->SubsetSelectedIndex == n);
+                            if (ImGui::Selectable(OutputOffsetProfiles::Profiles[profileSubset->ProfileIndeces[n]]->Name.c_str(), is_selected))
                             {
-                                strcpy_s(TestNotes::Notes.HDMIAudioDevice, "");
+                                profileSubset->SubsetSelectedIndex = n;
+                                OutputOffsetProfiles::SelectedProfileIndex = profileSubset->ProfileIndeces[profileSubset->SubsetSelectedIndex];
+                                if (OutputOffsetProfiles::CurrentProfile()->isNoOffset)
+                                {
+                                    strcpy_s(TestNotes::Notes.HDMIAudioDevice, "");
+                                }
+                            }
+                            // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                            if (is_selected)
+                            {
+                                ImGui::SetItemDefaultFocus();
                             }
                         }
-                        // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-                        if (is_selected)
+                        ImGui::EndListBox();
+                    }
+                    ImGui::Spacing();
+
+                    ImGui::TableNextColumn();
+                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetTextLineHeightWithSpacing());
+
+                    if (OutputOffsetProfiles::Profiles[OutputOffsetProfiles::SelectedProfileIndex] == OutputOffsetProfiles::Hdmi_HDV_MB01)
+                    {
+                        float imageScale = 0.45 * Gui::DpiScale;
+                        ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
+                        ImGui::TextWrapped("The HDV-MB01 is sold under these names:");
+                        ImGui::Spacing();
+                        ImGui::TextWrapped("- J-Tech Digital JTD18G - H5CH\n"
+                            "- Monoprice Blackbird 24278\n"
+                            "- OREI HDA - 912\n");
+                    }
+                    else if (OutputOffsetProfiles::Profiles[OutputOffsetProfiles::SelectedProfileIndex] == OutputOffsetProfiles::Spdif_HDV_MB01)
+                    {
+                        float imageScale = 0.45 * Gui::DpiScale;
+                        ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
+                        ImGui::TextWrapped("The HDV-MB01 is sold under these names:");
+                        ImGui::Spacing();
+                        ImGui::TextWrapped("- J-Tech Digital JTD18G - H5CH\n"
+                            "- Monoprice Blackbird 24278\n"
+                            "- OREI HDA - 912\n");
+
+                        if (ImGui::TreeNode("Supported Formats"))
                         {
-                            ImGui::SetItemDefaultFocus();
+                            ImGui::TextWrapped("With the right HDMI audio drivers and the right EDID information provided by the HDMI device connected to the HDV-MB01, the following formats are supported by this device:\n\n"
+                                "2ch-44.1kHz-16bit\n"
+                                "2ch-44.1kHz-24bit\n"
+                                "2ch-48kHz-16bit\n"
+                                "2ch-48kHz-24bit\n"
+                                "2ch-96kHz-16bit\n"
+                                "2ch-96kHz-24bit\n"
+                                "2ch-192kHz-16bit\n"
+                                "2ch-192kHz-24bit\n");
+
+                            ImGui::TreePop();
                         }
                     }
-                    ImGui::EndListBox();
-                }
-                ImGui::Spacing();
-
-                if (OutputOffsetProfiles::Profiles[OutputOffsetProfiles::SelectedProfileIndex] == OutputOffsetProfiles::Hdmi_HDV_MB01)
-                {
-                    float imageScale = 0.45 * Gui::DpiScale;
-                    ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
-                    ImGui::TextWrapped("The HDV-MB01 is sold under these names:");
-                    ImGui::Spacing();
-                    ImGui::TextWrapped("- J-Tech Digital JTD18G - H5CH\n"
-                        "- Monoprice Blackbird 24278\n"
-                        "- OREI HDA - 912\n");
-                }
-                else if (OutputOffsetProfiles::Profiles[OutputOffsetProfiles::SelectedProfileIndex] == OutputOffsetProfiles::Spdif_HDV_MB01)
-                {
-                    float imageScale = 0.45 * Gui::DpiScale;
-                    ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
-                    ImGui::TextWrapped("The HDV-MB01 is sold under these names:");
-                    ImGui::Spacing();
-                    ImGui::TextWrapped("- J-Tech Digital JTD18G - H5CH\n"
-                        "- Monoprice Blackbird 24278\n"
-                        "- OREI HDA - 912\n");
-
-                    if (ImGui::TreeNode("Supported Formats"))
+                    else if (OutputOffsetProfiles::Profiles[OutputOffsetProfiles::SelectedProfileIndex]->isNoOffset)
                     {
-                        ImGui::TextWrapped("With the right HDMI audio drivers and the right EDID information provided by the HDMI device connected to the HDV-MB01, the following formats are supported by this device:\n\n"
-                            "2ch-44.1kHz-16bit\n"
-                            "2ch-44.1kHz-24bit\n"
-                            "2ch-48kHz-16bit\n"
-                            "2ch-48kHz-24bit\n"
-                            "2ch-96kHz-16bit\n"
-                            "2ch-96kHz-24bit\n"
-                            "2ch-192kHz-16bit\n"
-                            "2ch-192kHz-24bit\n");
-
-                        ImGui::TreePop();
+                        ImGui::PushFont(FontHelper::BoldFont);
+                        ImGui::Text("WARNING:");
+                        ImGui::PopFont();
+                        ImGui::TextWrapped("Using a Dual-Out Reference Device that is not on this list may result in inaccurate measurements! This is because the offset between its different audio outputs will not be accounted for in the reported measurements.");
+                        ImGui::Spacing();
+                        ImGui::TextWrapped("If you have another device that is suitable for use with this tool, "
+                            "please let me know by email to allen"/* spam bot protection */"@"/* spam bot protection */"avlatency.com and I might be able to add support for this device.");
                     }
-                }
-                else if (OutputOffsetProfiles::Profiles[OutputOffsetProfiles::SelectedProfileIndex] == OutputOffsetProfiles::Hdmi_None
-                    || OutputOffsetProfiles::Profiles[OutputOffsetProfiles::SelectedProfileIndex] == OutputOffsetProfiles::Spdif_None)
-                {
+
+                    ImGui::TableNextColumn();
+                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetTextLineHeightWithSpacing());
+
                     ImGui::PushFont(FontHelper::BoldFont);
-                    ImGui::Text("WARNING:");
+                    ImGui::Text("Output Offsets");
+                    ImGui::SameLine(); GuiHelper::HelpMarker("These offsets will be accounted for in reported measurements!\n\nPositive value: analog output leads digital output\nNegative value: digital output leads analog output");
                     ImGui::PopFont();
-                    ImGui::TextWrapped("Using a Dual-Out Reference Device that is not on this list may result in inaccurate measurements! This is because the offset between its different audio outputs will not be accounted for in the reported measurements.");
+
+                    ImGui::Text("Verified output offsets:");
                     ImGui::Spacing();
-                    ImGui::TextWrapped("If you have another device that is suitable for use with this tool, "
-                        "please let me know by email to allen"/* spam bot protection */"@"/* spam bot protection */"avlatency.com and I might be able to add support for this device.");
-                }
 
-                if (ImGui::Button("Next"))
-                {
-                    if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi)
-                    {
-                        openEdidReminderDialog = true;
-                    }
-                    else
-                    {
-                        StartSelectAudioDevices();
-                    }
-                }
+                    ImGui::EndTable();
 
-                GuiHelper::DeveloperOptions();
+                    if (ImGui::Button("Next"))
+                    {
+                        if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi)
+                        {
+                            openEdidReminderDialog = true;
+                        }
+                        else
+                        {
+                            StartSelectAudioDevices();
+                        }
+                    }
+
+                    GuiHelper::DeveloperOptions();
+                }
             }
 
             ImGui::Spacing();
@@ -528,7 +555,6 @@ bool Gui::DoGui()
 
                 GuiHelper::TestConfiguration(DpiScale);
 
-                ImGui::PopItemWidth();
                 ImGui::Spacing();
 
                 ImGui::TableNextColumn();
@@ -538,9 +564,7 @@ bool Gui::DoGui()
                 ImGui::SameLine(); GuiHelper::HelpMarker("These notes will be included in the .csv spreadsheet result files that are saved in the folder that this app was launched from.");
                 ImGui::Spacing();
 
-                TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile =
-                    OutputOffsetProfiles::CurrentProfile() != OutputOffsetProfiles::Hdmi_None
-                    && OutputOffsetProfiles::CurrentProfile() != OutputOffsetProfiles::Spdif_None;
+                TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile = !OutputOffsetProfiles::CurrentProfile()->isNoOffset;
                 if (TestNotes::Notes.HDMIAudioDeviceUseOutputOffsetProfile)
                 {
                     ImGui::BeginDisabled();

@@ -480,6 +480,8 @@ void GuiHelper::TestConfiguration(float DpiScale)
 
         ImGui::TreePop();
     }
+
+    ImGui::PopItemWidth();
 }
 
 void GuiHelper::DearImGuiLegal()
