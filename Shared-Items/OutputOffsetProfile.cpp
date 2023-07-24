@@ -11,6 +11,9 @@ std::string OutputOffsetProfile::OutputTypeName(OutputOffsetProfile::OutputType 
 {
 	switch (outputType)
 	{
+	case OutputOffsetProfile::OutputType::None:
+		return "";
+		break;
 	case OutputOffsetProfile::OutputType::Hdmi:
 		return "HDMI";
 		break;
@@ -18,7 +21,7 @@ std::string OutputOffsetProfile::OutputTypeName(OutputOffsetProfile::OutputType 
 		return "S/PDIF";
 		break;
 	default:
-		return "";
+		throw "Attempting to get OutputTypeName for an OutputType that has not been handled.";
 	}
 }
 

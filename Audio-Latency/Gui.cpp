@@ -90,6 +90,25 @@ bool Gui::DoGui()
         break;
     }
 
+    if ((OutputOffsetProfile::OutputType)outputTypeIndex != OutputOffsetProfile::OutputType::None)
+    {
+        ImVec2 originalCursorPosition = ImGui::GetCursorPos();
+        ImGui::PushFont(FontHelper::BoldFont);
+
+        ImGui::SameLine();
+        ImVec2 newCursorPosition = ImGui::GetCursorPos();
+        newCursorPosition.y += 187 * DpiScale;
+        ImGui::SetCursorPos(newCursorPosition);
+        ImGui::Text(std::format("Measuring {0} audio latency", OutputOffsetProfile::OutputTypeName(OutputOffsetProfiles::CurrentProfile()->OutType)).c_str());
+
+        newCursorPosition.y += ImGui::GetTextLineHeightWithSpacing();
+        ImGui::SetCursorPos(newCursorPosition);
+        ImGui::Text(std::format("Using {0}", OutputOffsetProfiles::CurrentProfile()->Name).c_str());
+
+        ImGui::PopFont();
+        ImGui::SetCursorPos(originalCursorPosition);
+    }
+
     if (ImGui::BeginTable("MainViewTopLevelTable", 2, ImGuiTableFlags_Borders, ImVec2(1234 * DpiScale, 0)))
     {
         ImGui::TableSetupColumn("Col1", ImGuiTableColumnFlags_WidthFixed);
