@@ -15,6 +15,8 @@
 // Profile Textures
 #define HDMI_HDV_MB01 340
 #define ANALOG_Y_SPLITTER 341
+#define ARC_EXAMPLE_DEVICE 342
+#define EARC_EXAMPLE_DEVICE 343
 
 #define FONT_REGULAR 401
 #define FONT_BOLD 402

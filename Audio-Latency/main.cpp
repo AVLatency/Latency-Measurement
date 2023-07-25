@@ -104,6 +104,8 @@ int main(int, char**)
     profileRes.Hdmi_HDV_MB01_Texture = resources.HDV_MB01Texture;
     profileRes.Spdif_HDV_MB01_Texture = resources.HDV_MB01Texture;
     profileRes.Analog_YSplitter_Texture = resources.AnalogYSplitterTexture;
+    profileRes.Arc_ExampleDevice_Texture = resources.ArcExampleDeviceTexture;
+    profileRes.EArc_ExampleDevice_Texture = resources.EArcExampleDeviceTexture;
     
     OutputOffsetProfiles::InitializeProfiles(profileRes);
     DacLatencyProfiles::InitializeProfiles(profileRes);

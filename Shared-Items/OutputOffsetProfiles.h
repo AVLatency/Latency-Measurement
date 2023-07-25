@@ -29,8 +29,10 @@ public:
 	static OutputOffsetProfile* Spdif_LiNKFOR_USB_DAC;
 	static OutputOffsetProfile* Spdif_None;
 
+	static OutputOffsetProfile* Arc_ExampleReferenceSetup;
 	static OutputOffsetProfile* Arc_None;
 
+	static OutputOffsetProfile* EArc_ExampleReferenceSetup;
 	static OutputOffsetProfile* EArc_None;
 
 	static OutputOffsetProfile* Analog_BasicYSplitter;
@@ -61,6 +63,10 @@ private:
 	static OutputOffsetProfile::OutputOffset Spdif_HDV_MB01_GetOffset(int numChannels, int sampleRate, int bitDepth);
 	static OutputOffsetProfile::OutputOffset Spdif_AYSA11_GetOffset(int numChannels, int sampleRate, int bitDepth);
 	static OutputOffsetProfile::OutputOffset Spdif_LiNKFOR_USB_DAC_GetOffset(int numChannels, int sampleRate, int bitDepth);
+
+	static OutputOffsetProfile::OutputOffset Arc_ExampleReferenceSetup_GetOffset(int numChannels, int sampleRate, int bitDepth);
+
+	static OutputOffsetProfile::OutputOffset EArc_ExampleReferenceSetup_GetOffset(int numChannels, int sampleRate, int bitDepth);
 
 	static OutputOffsetProfile::OutputOffset Analog_BasicYSplitter_GetOffset(int numChannels, int sampleRate, int bitDepth);
 };

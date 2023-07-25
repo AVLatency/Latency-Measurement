@@ -19,6 +19,8 @@ public:
 
 	AVLTexture HDV_MB01Texture = AVLTexture();
 	AVLTexture AnalogYSplitterTexture = AVLTexture();
+	AVLTexture ArcExampleDeviceTexture = AVLTexture();
+	AVLTexture EArcExampleDeviceTexture = AVLTexture();
 
 private:
 	void LoadTexture(HINSTANCE hInstance, ID3D11Device* g_pd3dDevice, UINT type, AVLTexture& image);

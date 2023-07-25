@@ -11,8 +11,10 @@ OutputOffsetProfile* OutputOffsetProfiles::Spdif_AYSA11 = NULL;
 OutputOffsetProfile* OutputOffsetProfiles::Spdif_LiNKFOR_USB_DAC = NULL;
 OutputOffsetProfile* OutputOffsetProfiles::Spdif_None = NULL;
 
+OutputOffsetProfile* OutputOffsetProfiles::Arc_ExampleReferenceSetup = NULL;
 OutputOffsetProfile* OutputOffsetProfiles::Arc_None = NULL;
 
+OutputOffsetProfile* OutputOffsetProfiles::EArc_ExampleReferenceSetup = NULL;
 OutputOffsetProfile* OutputOffsetProfiles::EArc_None = NULL;
 
 OutputOffsetProfile* OutputOffsetProfiles::Analog_BasicYSplitter = NULL;
@@ -98,6 +100,14 @@ void OutputOffsetProfiles::InitializeProfiles(ProfileResources& resources)
 	// ARC AUDIO LATENCY PROFILES
 	// *****************************************************
 
+#ifdef _DEBUG
+	Arc_ExampleReferenceSetup = new OutputOffsetProfile(OutputOffsetProfile::OutputType::ARC, "Example ARC Reference Setup", Arc_ExampleReferenceSetup_GetOffset, AudioEndpoint::AllFormatsFilter);
+	Arc_ExampleReferenceSetup->Image = resources.Arc_ExampleDevice_Texture;
+	Arc_ExampleReferenceSetup->Description =
+		"This is a DEBUG-only example ARC reference device/setup that can be used as a starting point for creating new Output Offset Profiles.";
+	Profiles.push_back(Arc_ExampleReferenceSetup);
+#endif //_DEBUG
+
 	Arc_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::ARC, "Other", None_GetOffset, AudioEndpoint::AllFormatsFilter);
 	Arc_None->isNoOffset = true;
 	Profiles.push_back(Arc_None);
@@ -105,6 +115,14 @@ void OutputOffsetProfiles::InitializeProfiles(ProfileResources& resources)
 	// *****************************************************
 	// EARC AUDIO LATENCY PROFILES
 	// *****************************************************
+
+#ifdef _DEBUG
+	EArc_ExampleReferenceSetup = new OutputOffsetProfile(OutputOffsetProfile::OutputType::eARC, "Example eARC Reference Setup", EArc_ExampleReferenceSetup_GetOffset, AudioEndpoint::AllFormatsFilter);
+	EArc_ExampleReferenceSetup->Image = resources.EArc_ExampleDevice_Texture;
+	EArc_ExampleReferenceSetup->Description =
+		"This is a DEBUG-only example eARC reference device/setup that can be used as a starting point for creating new Output Offset Profiles.";
+	Profiles.push_back(EArc_ExampleReferenceSetup);
+#endif //_DEBUG
 
 	EArc_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::eARC, "Other", None_GetOffset, AudioEndpoint::AllFormatsFilter);
 	EArc_None->isNoOffset = true;
@@ -309,5 +327,21 @@ OutputOffsetProfile::OutputOffset OutputOffsetProfiles::Analog_BasicYSplitter_Ge
 {
 	OutputOffsetProfile::OutputOffset result;
 	result.SetValue(0);
+	return result;
+}
+
+OutputOffsetProfile::OutputOffset OutputOffsetProfiles::Arc_ExampleReferenceSetup_GetOffset(int numChannels, int sampleRate, int bitDepth)
+{
+	OutputOffsetProfile::OutputOffset result;
+	// TODO: Set the value based on the parameters of this function and the actual measured offset of the device!
+	result.SetValue(0.5);
+	return result;
+}
+
+OutputOffsetProfile::OutputOffset OutputOffsetProfiles::EArc_ExampleReferenceSetup_GetOffset(int numChannels, int sampleRate, int bitDepth)
+{
+	OutputOffsetProfile::OutputOffset result;
+	// TODO: Set the value based on the parameters of this function and the actual measured offset of the device!
+	result.SetValue(0.2);
 	return result;
 }
