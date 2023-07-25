@@ -48,4 +48,6 @@ private:
 	void StartSelectAudioDevices();
 	void StartAdjustVolume();
 	void StartTest();
+
+	bool IncludeSurroundAsDefault();
 };
