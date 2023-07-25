@@ -146,9 +146,12 @@ bool Gui::DoGui()
                 ShellExecuteA(NULL, "open", "https://avlatency.com/tools/av-latency-com-toolkit/", NULL, NULL, SW_SHOWNORMAL);
             }
 
-            ImGui::Text("Start by selecting your audio latency type and Dual-Out Reference Device.");
-            ImGui::Text("Then connect your cables as shown in the diagram above before continuing.");
+            ImGui::Text("Start by selecting your audio latency type and Dual-Out Reference Device,\n"
+                "then connect your cables as shown in the diagram above before continuing.");
 
+            ImGui::Spacing();
+
+            ImGui::SetNextItemWidth(200 * DpiScale);
             if(ImGui::BeginCombo("Audio Latency Type", OutputOffsetProfile::OutputTypeName((OutputOffsetProfile::OutputType)outputTypeIndex).c_str()))
             {
                 for (int i = 0; i < (int)OutputOffsetProfile::OutputType::ENUM_LENGTH; i++)
@@ -226,7 +229,12 @@ bool Gui::DoGui()
                         ImGui::TextWrapped("Using a Dual-Out Reference Device that is not on this list may result in inaccurate measurements! This is because the offset between its different audio outputs will not be accounted for in the reported measurements.");
                         ImGui::Spacing();
                         ImGui::TextWrapped("If you have another device that is suitable for use with this tool, "
-                            "please let me know by email to allen"/* spam bot protection */"@"/* spam bot protection */"avlatency.com and I might be able to add support for this device.");
+                            "please let me know and I might be able to add support for this device.");
+                        ImGui::Spacing();
+                        if (ImGui::Button("Open Contact Webpage"))
+                        {
+                            ShellExecuteA(NULL, "open", "https://avlatency.com/contact/", NULL, NULL, SW_SHOWNORMAL);
+                        }
                     }
                     else
                     {

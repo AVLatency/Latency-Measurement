@@ -172,7 +172,12 @@ bool Gui::DoGui()
                 ImGui::TextWrapped("Using a Dual-Out Reference Device that is not on this list may result in inaccurate measurements! This is because the offset between its different audio outputs will not be accounted for in the reported measurements.");
                 ImGui::Spacing();
                 ImGui::TextWrapped("If you have another device that is suitable for use with this tool, "
-                    "please let me know by email to allen"/* spam bot protection */"@"/* spam bot protection */"avlatency.com and I might be able to add support for this device.");
+                    "please let me know and I might be able to add support for this device.");
+                ImGui::Spacing();
+                if (ImGui::Button("Open Contact Webpage"))
+                {
+                    ShellExecuteA(NULL, "open", "https://avlatency.com/contact/", NULL, NULL, SW_SHOWNORMAL);
+                }
             }
 
             ImGui::Spacing();
@@ -232,8 +237,13 @@ bool Gui::DoGui()
                 ImGui::PopFont();
                 ImGui::TextWrapped("Using a DAC that is not on this list may result in inaccurate measurements! This is because the DAC's audio latency will not be accounted for in the reported measurements.");
                 ImGui::Spacing();
-                ImGui::TextWrapped("If you have another DAC that is suitable for use with this tool, "
-                    "please let me know by email to allen"/* spam bot protection */"@"/* spam bot protection */"avlatency.com and I might be able to add support for this device.");
+                ImGui::TextWrapped("If you have another device that is suitable for use with this tool, "
+                    "please let me know and I might be able to add support for this device.");
+                ImGui::Spacing();
+                if (ImGui::Button("Open Contact Webpage"))
+                {
+                    ShellExecuteA(NULL, "open", "https://avlatency.com/contact/", NULL, NULL, SW_SHOWNORMAL);
+                }
             }
 
             if (ImGui::Button("Next"))
