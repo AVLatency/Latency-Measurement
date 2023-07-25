@@ -288,26 +288,10 @@ std::string GuiHelper::CableHelpText(Tool tool, OutputOffsetProfile::OutputType 
     }
     else
     {
-        switch (outType)
-        {
-        case OutputOffsetProfile::OutputType::Spdif:
-            return "To record audio output from the Device Under Test (DUT) you can use a microphone or directly connect to the headphone or speaker output of the DUT.\n\n"
-                "- Microphone: Make sure to position the mic as close as possible to the speaker because sound travels measurably slow. Position the mic close to the tweeter if there are separate speaker components. When recording with a mic, the Mic port must be used on computers that have separate Line In and Mic ports.\n"
-                "- DUT headphone output: Note that speaker and headphone output can sometimes have different latency on some devices.\n"
-                "- Directly connect to DUT speaker output: Start the volume low as some amplifiers may be capable of high voltage outputs that could damage your audio input device.\n\n"
-                "Your \"Dual-Out Reference Device\" must be capable of analog audio output *and* S/PDIF audio output at the same time. The time offset between analog audio output and S/PDIF audio output (the \"output offset\") must be known. Recommended devices can be found on the AV Latency.com Toolkit webpage.\n\n"
-                "AV Latency.com Toolkit Webpage: avlatency.com/tools/av-latency-com-toolkit";
-            break;
-        case OutputOffsetProfile::OutputType::Hdmi:
-        default:
-            return "To record audio output from the Device Under Test (DUT) you can use a microphone or directly connect to the headphone or speaker output of the DUT.\n\n"
-                "- Microphone: Make sure to position the mic as close as possible to the speaker because sound travels measurably slow. Position the mic close to the tweeter if there are separate speaker components. When recording with a mic, the Mic port must be used on computers that have separate Line In and Mic ports.\n"
-                "- DUT headphone output: Note that speaker and headphone output can sometimes have different latency on some devices.\n"
-                "- Directly connect to DUT speaker output: Start the volume low as some amplifiers may be capable of high voltage outputs that could damage your audio input device.\n\n"
-                "Your \"Dual-Out Reference Device\" must be capable of analog audio output *and* HDMI audio output at the same time. The time offset between analog audio output and HDMI audio output (the \"output offset\") must be known. Recommended devices can be found on the AV Latency.com Toolkit webpage.\n\n"
-                "AV Latency.com Toolkit Webpage: avlatency.com/tools/av-latency-com-toolkit";
-            break;
-        }
+        return "To record audio output from the Device Under Test (DUT) you can use a microphone or directly connect to the headphone or speaker output of the DUT.\n\n"
+            "- Microphone: Make sure to position the mic as close as possible to the speaker because sound travels measurably slow. Position the mic close to the tweeter if there are separate speaker components. When recording with a mic, the Mic port must be used on computers that have separate Line In and Mic ports.\n"
+            "- DUT headphone output: Note that speaker and headphone output can sometimes have different latency on some devices.\n"
+            "- Directly connect to DUT speaker output: Start the volume low as some amplifiers may be capable of high voltage outputs that could damage your audio input device.\n\n";
     }
 }
 
@@ -326,14 +310,7 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, OutputOffsetP
     ImGui::Text("Basic Instructions:");
     ImGui::PopFont();
     ImGui::Text("- Verify device and cable setup using visual feedback from this tool.");
-    if (tool == Tool::AudioLatency && outType == OutputOffsetProfile::OutputType::Hdmi)
-    {
-        ImGui::Text("- Adjust output volume of the DUT and input device volume to make the Signal Quality for both channels OK.");
-    }
-    else
-    {
-        ImGui::Text("- Adjust microphone placement, output volume of the DUT, and input device volume to make the Signal Quality for both channels OK.");
-    }
+    ImGui::Text("- Adjust output volume of the DUT and input device volume to make the Signal Quality for both channels OK.");
     ImGui::Spacing();
 
     if (ImGui::TreeNode("Example"))

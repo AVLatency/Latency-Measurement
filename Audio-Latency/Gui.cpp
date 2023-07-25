@@ -233,7 +233,7 @@ bool Gui::DoGui()
                     {
                         ImGui::PushFont(FontHelper::BoldFont);
                         ImGui::Text("WARNING:");
-                        ImGui::PopFont();
+                        ImGui::PopFont();   
                         ImGui::TextWrapped("Using a Dual-Out Reference Device that is not on this list may result in inaccurate measurements! This is because the offset between its different audio outputs will not be accounted for in the reported measurements.");
                         ImGui::Spacing();
                         ImGui::TextWrapped("If you have another device that is suitable for use with this tool, "
@@ -362,7 +362,9 @@ bool Gui::DoGui()
                     ImGui::EndCombo();
                 }
                 ImGui::SameLine();
-                if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi)
+                if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi
+                    || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::ARC
+                    || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::eARC)
                 {
                     GuiHelper::HelpMarker("Select your HDMI audio output.");
                 }
@@ -487,8 +489,7 @@ bool Gui::DoGui()
                 else if (state == MeasurementToolGuiState::FinishingAdjustVolume)
                 {
                     state = MeasurementToolGuiState::MeasurementConfig;
-                    bool includeSurroundAsDefault = OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi;
-                    outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, includeSurroundAsDefault, true, OutputOffsetProfiles::CurrentProfile()->FormatFilter);
+                    outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, IncludeSurroundAsDefault(), true, OutputOffsetProfiles::CurrentProfile()->FormatFilter);
                     strcpy_s(TestNotes::Notes.DutModel, outputAudioEndpoints[outputDeviceIndex].Name.c_str());
                 }
             }
@@ -514,7 +515,9 @@ bool Gui::DoGui()
 
                 ImGui::TableNextColumn();
                 ImGui::PushFont(FontHelper::BoldFont);
-                if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi)
+                if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi
+                    || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::ARC
+                    || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::eARC)
                 {
                     ImGui::Text("HDMI Audio Formats (LPCM)");
                     ImGui::PopFont();
@@ -536,8 +539,7 @@ bool Gui::DoGui()
                     {
                         format.UserSelected = false;
                     }
-                    bool includeSurroundAsDefault = OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi;
-                    outputAudioEndpoints[outputDeviceIndex].SetDefaultFormats(includeSurroundAsDefault, true);
+                    outputAudioEndpoints[outputDeviceIndex].SetDefaultFormats(IncludeSurroundAsDefault(), true);
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("Select All"))
@@ -748,7 +750,7 @@ bool Gui::DoGui()
                     ImGui::Text(std::format("Stereo Audio Latency: {}", stereoLatency).c_str());
                     ImGui::PopFont();
                     ImGui::Text(stereoFormat.c_str());
-                    if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi)
+                    if (IncludeSurroundAsDefault())
                     {
                         ImGui::Spacing();
                         ImGui::PushFont(FontHelper::HeaderFont);
@@ -1055,4 +1057,11 @@ void Gui::StartTest()
 
         testManager = new TestManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex], selectedFormats, fileString, APP_FOLDER, (IResultsWriter&)ResultsWriter::Writer, OutputOffsetProfiles::CurrentProfile(), &DacLatencyProfiles::None);
     }
+}
+
+bool Gui::IncludeSurroundAsDefault()
+{
+    return OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi
+        || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::ARC
+        || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::eARC;
 }
