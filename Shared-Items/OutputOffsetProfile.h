@@ -13,6 +13,9 @@ public:
 		None = 0,
 		Hdmi,
 		Spdif,
+		ARC,
+		eARC,
+		Analog,
 		ENUM_LENGTH
 	};
 

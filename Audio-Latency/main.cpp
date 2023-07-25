@@ -103,6 +103,7 @@ int main(int, char**)
     ProfileResources profileRes;
     profileRes.Hdmi_HDV_MB01_Texture = resources.HDV_MB01Texture;
     profileRes.Spdif_HDV_MB01_Texture = resources.HDV_MB01Texture;
+    profileRes.Analog_YSplitter_Texture = resources.AnalogYSplitterTexture;
     
     OutputOffsetProfiles::InitializeProfiles(profileRes);
     DacLatencyProfiles::InitializeProfiles(profileRes);

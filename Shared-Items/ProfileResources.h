@@ -8,6 +8,7 @@ public:
 
 	AVLTexture Hdmi_HDV_MB01_Texture;
 	AVLTexture Spdif_HDV_MB01_Texture;
+	AVLTexture Analog_YSplitter_Texture;
 
 	AVLTexture Dac_CV121AD_ARC_Texture;
 	AVLTexture Dac_CV121AD_SPDIF_COAX_Texture;

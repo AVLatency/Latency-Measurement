@@ -84,6 +84,15 @@ bool Gui::DoGui()
     case OutputOffsetProfile::OutputType::Spdif:
         ImGui::Image((void*)resources.SpdifCableMapTexture.TextureData, ImVec2(resources.SpdifCableMapTexture.Width * cableMapScale, resources.SpdifCableMapTexture.Height * cableMapScale));
         break;
+    case OutputOffsetProfile::OutputType::ARC:
+        ImGui::Image((void*)resources.ArcCableMapTexture.TextureData, ImVec2(resources.ArcCableMapTexture.Width * cableMapScale, resources.ArcCableMapTexture.Height * cableMapScale));
+        break;
+    case OutputOffsetProfile::OutputType::eARC:
+        ImGui::Image((void*)resources.EArcCableMapTexture.TextureData, ImVec2(resources.EArcCableMapTexture.Width * cableMapScale, resources.EArcCableMapTexture.Height * cableMapScale));
+        break;
+    case OutputOffsetProfile::OutputType::Analog:
+        ImGui::Image((void*)resources.AnalogCableMapTexture.TextureData, ImVec2(resources.AnalogCableMapTexture.Width * cableMapScale, resources.AnalogCableMapTexture.Height * cableMapScale));
+        break;
     case OutputOffsetProfile::OutputType::Hdmi:
     default:
         ImGui::Image((void*)resources.HdmiCableMapTexture.TextureData, ImVec2(resources.HdmiCableMapTexture.Width * cableMapScale, resources.HdmiCableMapTexture.Height * cableMapScale));

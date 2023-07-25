@@ -8,9 +8,13 @@
 
 #define HDMI_CABLE_MAP 320
 #define SPDIF_CABLE_MAP 321
+#define ARC_CABLE_MAP 322
+#define EARC_CABLE_MAP 323
+#define ANALOG_CABLE_MAP 324
 
 // Profile Textures
 #define HDMI_HDV_MB01 340
+#define ANALOG_Y_SPLITTER 341
 
 #define FONT_REGULAR 401
 #define FONT_BOLD 402

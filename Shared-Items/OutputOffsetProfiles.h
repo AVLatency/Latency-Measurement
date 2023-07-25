@@ -29,6 +29,13 @@ public:
 	static OutputOffsetProfile* Spdif_LiNKFOR_USB_DAC;
 	static OutputOffsetProfile* Spdif_None;
 
+	static OutputOffsetProfile* ARC_None;
+
+	static OutputOffsetProfile* EARC_None;
+
+	static OutputOffsetProfile* Analog_BasicYSplitter;
+	static OutputOffsetProfile* Analog_None;
+
 	static std::vector<OutputOffsetProfile*> Profiles;
 	static int SelectedProfileIndex;
 
@@ -46,13 +53,15 @@ private:
 	static void PrepareSubsetListsForGui();
 	static void PrepareOffsetStringsForGui();
 
+	static OutputOffsetProfile::OutputOffset None_GetOffset(int numChannels, int sampleRate, int bitDepth);
+
 	static OutputOffsetProfile::OutputOffset Hdmi_HDV_MB01_GetOffset(int numChannels, int sampleRate, int bitDepth);
-	static OutputOffsetProfile::OutputOffset Hdmi_None_GetOffset(int numChannels, int sampleRate, int bitDepth);
 
 	static bool CommonSpdifFormatFilter(WAVEFORMATEX*);
 	static OutputOffsetProfile::OutputOffset Spdif_HDV_MB01_GetOffset(int numChannels, int sampleRate, int bitDepth);
 	static OutputOffsetProfile::OutputOffset Spdif_AYSA11_GetOffset(int numChannels, int sampleRate, int bitDepth);
 	static OutputOffsetProfile::OutputOffset Spdif_LiNKFOR_USB_DAC_GetOffset(int numChannels, int sampleRate, int bitDepth);
-	static OutputOffsetProfile::OutputOffset Spdif_None_GetOffset(int numChannels, int sampleRate, int bitDepth);
+
+	static OutputOffsetProfile::OutputOffset Analog_BasicYSplitter_GetOffset(int numChannels, int sampleRate, int bitDepth);
 };
 

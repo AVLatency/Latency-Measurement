@@ -6,7 +6,6 @@ void OutputOffsetProfile::OutputOffset::SetValue(float value)
 	verified = true;
 }
 
-
 std::string OutputOffsetProfile::OutputTypeName(OutputOffsetProfile::OutputType outputType)
 {
 	switch (outputType)
@@ -19,6 +18,15 @@ std::string OutputOffsetProfile::OutputTypeName(OutputOffsetProfile::OutputType 
 		break;
 	case OutputOffsetProfile::OutputType::Spdif:
 		return "S/PDIF";
+		break;
+	case OutputOffsetProfile::OutputType::ARC:
+		return "ARC";
+		break;
+	case OutputOffsetProfile::OutputType::eARC:
+		return "eARC";
+		break;
+	case OutputOffsetProfile::OutputType::Analog:
+		return "Analog";
 		break;
 	default:
 		throw "Attempting to get OutputTypeName for an OutputType that has not been handled.";

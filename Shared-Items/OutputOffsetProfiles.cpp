@@ -11,6 +11,13 @@ OutputOffsetProfile* OutputOffsetProfiles::Spdif_AYSA11 = NULL;
 OutputOffsetProfile* OutputOffsetProfiles::Spdif_LiNKFOR_USB_DAC = NULL;
 OutputOffsetProfile* OutputOffsetProfiles::Spdif_None = NULL;
 
+OutputOffsetProfile* OutputOffsetProfiles::ARC_None = NULL;
+
+OutputOffsetProfile* OutputOffsetProfiles::EARC_None = NULL;
+
+OutputOffsetProfile* OutputOffsetProfiles::Analog_BasicYSplitter = NULL;
+OutputOffsetProfile* OutputOffsetProfiles::Analog_None = NULL;
+
 std::vector<OutputOffsetProfile*> OutputOffsetProfiles::Profiles;
 int OutputOffsetProfiles::SelectedProfileIndex = 0;
 
@@ -18,7 +25,10 @@ std::map<OutputOffsetProfile::OutputType, OutputOffsetProfiles::ProfilesSubset*>
 
 void OutputOffsetProfiles::InitializeProfiles(ProfileResources& resources)
 {
-	// HDMI
+	// *****************************************************
+	// HDMI AUDIO LATENCY PROFILES
+	// *****************************************************
+
 	Hdmi_HDV_MB01 = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Hdmi, "HDV-MB01", Hdmi_HDV_MB01_GetOffset, AudioEndpoint::HdmiFormatsFilter);
 	Hdmi_HDV_MB01->Image = resources.Hdmi_HDV_MB01_Texture;
 	Hdmi_HDV_MB01->Description =
@@ -29,11 +39,14 @@ void OutputOffsetProfiles::InitializeProfiles(ProfileResources& resources)
 		"- OREI HDA - 912";
 	Profiles.push_back(Hdmi_HDV_MB01);
 
-	Hdmi_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Hdmi, "Other", Hdmi_None_GetOffset, AudioEndpoint::HdmiFormatsFilter);
+	Hdmi_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Hdmi, "Other", None_GetOffset, AudioEndpoint::HdmiFormatsFilter);
 	Hdmi_None->isNoOffset = true;
 	Profiles.push_back(Hdmi_None);
 
-	// S/PDIF
+	// *****************************************************
+	// S/PDIF AUDIO LATENCY PROFILES
+	// *****************************************************
+
 	Spdif_HDV_MB01 = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Spdif, "HDV-MB01", Spdif_HDV_MB01_GetOffset, CommonSpdifFormatFilter);
 	Spdif_HDV_MB01->Image = resources.Spdif_HDV_MB01_Texture;
 	Spdif_HDV_MB01->Description =
@@ -77,9 +90,40 @@ void OutputOffsetProfiles::InitializeProfiles(ProfileResources& resources)
 		"2ch-48kHz-16bit\n";
 	Profiles.push_back(Spdif_LiNKFOR_USB_DAC);
 
-	Spdif_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Spdif, "Other", Spdif_None_GetOffset, AudioEndpoint::AllFormatsFilter);
+	Spdif_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Spdif, "Other", None_GetOffset, AudioEndpoint::AllFormatsFilter);
 	Spdif_None->isNoOffset = true;
 	Profiles.push_back(Spdif_None);
+
+	// *****************************************************
+	// ARC AUDIO LATENCY PROFILES
+	// *****************************************************
+
+	ARC_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::ARC, "Other", None_GetOffset, AudioEndpoint::AllFormatsFilter);
+	ARC_None->isNoOffset = true;
+	Profiles.push_back(ARC_None);
+
+	// *****************************************************
+	// EARC AUDIO LATENCY PROFILES
+	// *****************************************************
+
+	EARC_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::eARC, "Other", None_GetOffset, AudioEndpoint::AllFormatsFilter);
+	EARC_None->isNoOffset = true;
+	Profiles.push_back(EARC_None);
+
+	// *****************************************************
+	// ANALOG AUDIO LATENCY PROFILES
+	// *****************************************************
+
+	Analog_BasicYSplitter = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Analog, "Basic Analog Y Splitter", Analog_BasicYSplitter_GetOffset, AudioEndpoint::AllFormatsFilter);
+	Analog_BasicYSplitter->Image = resources.Analog_YSplitter_Texture;
+	Analog_BasicYSplitter->Description =
+		"For measuring analog audio latency, a basic analog Y splitter can be used to produce "
+		"two identical outputs that can act as a \"Dual-Out Reference\".";
+	Profiles.push_back(Analog_BasicYSplitter);
+
+	Analog_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Analog, "Other", None_GetOffset, AudioEndpoint::AllFormatsFilter);
+	Analog_None->isNoOffset = true;
+	Profiles.push_back(Analog_None);
 
 	PrepareSubsetListsForGui();
 	PrepareOffsetStringsForGui();
@@ -169,6 +213,12 @@ void OutputOffsetProfiles::PrepareOffsetStringsForGui()
 	}
 }
 
+OutputOffsetProfile::OutputOffset OutputOffsetProfiles::None_GetOffset(int numChannels, int sampleRate, int bitDepth)
+{
+	OutputOffsetProfile::OutputOffset result;
+	return result;
+}
+
 OutputOffsetProfile::OutputOffset OutputOffsetProfiles::Hdmi_HDV_MB01_GetOffset(int numChannels, int sampleRate, int bitDepth)
 {
 	OutputOffsetProfile::OutputOffset result;
@@ -196,12 +246,6 @@ OutputOffsetProfile::OutputOffset OutputOffsetProfiles::Hdmi_HDV_MB01_GetOffset(
 #endif
 	}
 
-	return result;
-}
-
-OutputOffsetProfile::OutputOffset OutputOffsetProfiles::Hdmi_None_GetOffset(int numChannels, int sampleRate, int bitDepth)
-{
-	OutputOffsetProfile::OutputOffset result;
 	return result;
 }
 
@@ -261,8 +305,9 @@ OutputOffsetProfile::OutputOffset OutputOffsetProfiles::Spdif_LiNKFOR_USB_DAC_Ge
 	return result;
 }
 
-OutputOffsetProfile::OutputOffset OutputOffsetProfiles::Spdif_None_GetOffset(int numChannels, int sampleRate, int bitDepth)
+OutputOffsetProfile::OutputOffset OutputOffsetProfiles::Analog_BasicYSplitter_GetOffset(int numChannels, int sampleRate, int bitDepth)
 {
 	OutputOffsetProfile::OutputOffset result;
+	result.SetValue(0);
 	return result;
 }

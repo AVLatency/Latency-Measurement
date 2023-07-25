@@ -14,8 +14,12 @@
 
 HDMI_CABLE_MAP RCDATA "HDMI-Latency_cable-map.png"
 SPDIF_CABLE_MAP RCDATA "SPDIF-Latency_cable-map.png"
+ARC_CABLE_MAP RCDATA "ARC-Latency_cable-map.png"
+EARC_CABLE_MAP RCDATA "eARC-Latency_cable-map.png"
+ANALOG_CABLE_MAP RCDATA "Analog-Latency_cable-map.png"
 HDMI_EDID_MODE RCDATA "../Shared-Items/EDID-mode-TV.png"
 HDMI_HDV_MB01 RCDATA "../Shared-Items/AudioDevice_HDV-MB01.png"
+ANALOG_Y_SPLITTER RCDATA "../Shared-Items/AudioDevice_AnalogYSplitter.png"
 HDMI_WINDOWS_DISPLAY_SETTINGS RCDATA "../Shared-Items/AdvancedDisplaySettings.png"
 VOLUME_ADJUST_EXAMPLE RCDATA "../Shared-Items/VolumeAdjustmentExample.png"
 FONT_REGULAR RCDATA "../Shared-Items/Fonts/Inter-Regular.ttf"
