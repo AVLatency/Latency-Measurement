@@ -82,11 +82,11 @@ bool Gui::DoGui()
     switch (OutputOffsetProfiles::CurrentProfile()->OutType)
     {
     case OutputOffsetProfile::OutputType::Spdif:
-        ImGui::Image((void*)resources.SpdifCableMapTexture, ImVec2(resources.SpdifCableMapTextureWidth * cableMapScale, resources.SpdifCableMapTextureHeight * cableMapScale));
+        ImGui::Image((void*)resources.SpdifCableMapTexture.TextureData, ImVec2(resources.SpdifCableMapTexture.Width * cableMapScale, resources.SpdifCableMapTexture.Height * cableMapScale));
         break;
     case OutputOffsetProfile::OutputType::Hdmi:
     default:
-        ImGui::Image((void*)resources.HdmiCableMapTexture, ImVec2(resources.HdmiCableMapTextureWidth * cableMapScale, resources.HdmiCableMapTextureHeight * cableMapScale));
+        ImGui::Image((void*)resources.HdmiCableMapTexture.TextureData, ImVec2(resources.HdmiCableMapTexture.Width * cableMapScale, resources.HdmiCableMapTexture.Height * cableMapScale));
         break;
     }
 
@@ -176,8 +176,9 @@ bool Gui::DoGui()
 
                 if (ImGui::BeginTable("MeasurementConfig", 3))
                 {
+                    int descriptionColWidth = 450;
                     ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, 200 * DpiScale);
-                    ImGui::TableSetupColumn("column2", ImGuiTableColumnFlags_WidthFixed, 370 * DpiScale);
+                    ImGui::TableSetupColumn("column2", ImGuiTableColumnFlags_WidthFixed, descriptionColWidth * DpiScale);
 
                     ImGui::TableNextRow();
 
@@ -229,10 +230,16 @@ bool Gui::DoGui()
                     }
                     else
                     {
-                        // TODO: Image based on profile
-                        float imageScale = 0.45 * Gui::DpiScale;
-                        ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
-                        ImGui::TextWrapped(OutputOffsetProfiles::CurrentProfile()->Description.c_str());
+                        OutputOffsetProfile* currentProfile = OutputOffsetProfiles::CurrentProfile();
+                        if (currentProfile->Image.TextureData != NULL)
+                        {
+                            float maxWidth = descriptionColWidth;
+                            float maxHeight = 179;
+                            float imageScale = min(maxWidth / currentProfile->Image.Width, maxHeight / currentProfile->Image.Height);
+                            imageScale *= Gui::DpiScale;
+                            ImGui::Image((void*)currentProfile->Image.TextureData, ImVec2(currentProfile->Image.Width * imageScale, currentProfile->Image.Height * imageScale));
+                        }
+                        ImGui::TextWrapped(currentProfile->Description.c_str());
                     }
 
                     ImGui::TableNextColumn();
@@ -403,7 +410,7 @@ bool Gui::DoGui()
                     openDialogVolumeAdjustDisabledCrosstalk = true;
                 }
 
-                GuiHelper::AdjustVolumeInstructionsTroubleshooting(GuiHelper::Tool::AudioLatency, (OutputOffsetProfile::OutputType)outputTypeIndex, lastCheckedInputSampleRate, &TestConfiguration::OutputVolume, &adjustVolumeManager->OverrideNoisyQuiet, (void*)resources.VolumeAdjustExampleTexture, resources.VolumeAdjustExampleTextureWidth, resources.VolumeAdjustExampleTextureHeight, DpiScale);
+                GuiHelper::AdjustVolumeInstructionsTroubleshooting(GuiHelper::Tool::AudioLatency, (OutputOffsetProfile::OutputType)outputTypeIndex, lastCheckedInputSampleRate, &TestConfiguration::OutputVolume, &adjustVolumeManager->OverrideNoisyQuiet, (void*)resources.VolumeAdjustExampleTexture.TextureData, resources.VolumeAdjustExampleTexture.Width, resources.VolumeAdjustExampleTexture.Height, DpiScale);
                 ImGui::Spacing();
                 
                 if (state == MeasurementToolGuiState::AdjustVolume)
@@ -601,7 +608,7 @@ bool Gui::DoGui()
                         ImGui::Spacing();
                         ImGui::TextUnformatted("Example:");
                         float imageScale = 0.7 * Gui::DpiScale;
-                        ImGui::Image((void*)resources.WindowsDisplaySettingsTexture, ImVec2(resources.WindowsDisplaySettingsTextureWidth * imageScale, resources.WindowsDisplaySettingsTextureHeight * imageScale));
+                        ImGui::Image((void*)resources.WindowsDisplaySettingsTexture.TextureData, ImVec2(resources.WindowsDisplaySettingsTexture.Width * imageScale, resources.WindowsDisplaySettingsTexture.Height * imageScale));
                         ImGui::PopTextWrapPos();
                         ImGui::EndTooltip();
                     }
@@ -910,7 +917,7 @@ bool Gui::DoGui()
         ImGui::Spacing();
 
         float imageScale = 0.6 * Gui::DpiScale;
-        ImGui::Image((void*)resources.EDIDModeTexture, ImVec2(resources.EDIDModeTextureWidth * imageScale, resources.EDIDModeTextureHeight * imageScale));
+        ImGui::Image((void*)resources.EDIDModeTexture.TextureData, ImVec2(resources.EDIDModeTexture.Width * imageScale, resources.EDIDModeTexture.Height * imageScale));
 
         ImGui::Text("This EDID mode is often labelled \"TV\" on HDMI audio extractors.");
         ImGui::Spacing();

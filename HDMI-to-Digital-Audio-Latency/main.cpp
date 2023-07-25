@@ -98,9 +98,17 @@ int main(int, char**)
     FontHelper::LoadFonts(wc.hInstance, io, FONT_REGULAR, FONT_BOLD, Gui::DpiScale);
     style.ScaleAllSizes(Gui::DpiScale);
 
-    OutputOffsetProfiles::InitializeProfiles();
-    DacLatencyProfiles::InitializeProfiles();
     Resources resources(wc.hInstance, g_pd3dDevice);
+
+    ProfileResources profileRes;
+    profileRes.Hdmi_HDV_MB01_Texture = resources.HDV_MB01Texture;
+    profileRes.Dac_CV121AD_ARC_Texture = resources.CV121ADTexture;
+    profileRes.Dac_CV121AD_SPDIF_COAX_Texture = resources.CV121ADTexture;
+    profileRes.Dac_CV121AD_SPDIF_OPTICAL_Texture = resources.CV121ADTexture;
+    profileRes.Dac_SHARCV1_EARC_Texture = resources.SHARCv1Texture;
+
+    OutputOffsetProfiles::InitializeProfiles(profileRes);
+    DacLatencyProfiles::InitializeProfiles(profileRes);
     Gui gui(resources);
 
     bool canWriteFiles = FilesystemCheck::IsFilesystemWritable(std::filesystem::path(std::format("{}\\{}", StringHelper::GetRootPath(APP_FOLDER), "Temporary Filesystem Write Test.tmp")));

@@ -26,7 +26,7 @@ std::string OutputOffsetProfile::OutputTypeName(OutputOffsetProfile::OutputType 
 }
 
 OutputOffsetProfile::OutputOffsetProfile(OutputType type, std::string name, OutputOffset(*getOffsetFunc)(int numChannels, int sampleRate, int bitDepth), bool (*formatFilter)(WAVEFORMATEX*))
-	: OutType(type), Name(name), GetOffset(getOffsetFunc), FormatFilter(formatFilter)
+	: OutType(type), Name(name), GetOffset(getOffsetFunc), FormatFilter(formatFilter), Image(AVLTexture()), isNoOffset(false)
 {
 }
 

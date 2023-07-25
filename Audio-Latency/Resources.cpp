@@ -6,10 +6,15 @@
 
 Resources::Resources(HINSTANCE hInstance, ID3D11Device* g_pd3dDevice)
 {
-    ResourceLoader::LoadImage(hInstance, g_pd3dDevice, HDMI_CABLE_MAP, &HdmiCableMapTexture, &HdmiCableMapTextureWidth, &HdmiCableMapTextureHeight);
-    ResourceLoader::LoadImage(hInstance, g_pd3dDevice, SPDIF_CABLE_MAP, &SpdifCableMapTexture, &SpdifCableMapTextureWidth, &SpdifCableMapTextureHeight);
-    ResourceLoader::LoadImage(hInstance, g_pd3dDevice, HDMI_EDID_MODE, &EDIDModeTexture, &EDIDModeTextureWidth, &EDIDModeTextureHeight);
-    ResourceLoader::LoadImage(hInstance, g_pd3dDevice, HDMI_HDV_MB01, &HDV_MB01Texture, &HDV_MB01TextureWidth, &HDV_MB01TextureHeight);
-    ResourceLoader::LoadImage(hInstance, g_pd3dDevice, HDMI_WINDOWS_DISPLAY_SETTINGS, &WindowsDisplaySettingsTexture, &WindowsDisplaySettingsTextureWidth, &WindowsDisplaySettingsTextureHeight);
-    ResourceLoader::LoadImage(hInstance, g_pd3dDevice, VOLUME_ADJUST_EXAMPLE, &VolumeAdjustExampleTexture, &VolumeAdjustExampleTextureWidth, &VolumeAdjustExampleTextureHeight);
+    LoadTexture(hInstance, g_pd3dDevice, HDMI_CABLE_MAP, HdmiCableMapTexture);
+    LoadTexture(hInstance, g_pd3dDevice, SPDIF_CABLE_MAP, SpdifCableMapTexture);
+    LoadTexture(hInstance, g_pd3dDevice, HDMI_EDID_MODE, EDIDModeTexture);
+    LoadTexture(hInstance, g_pd3dDevice, HDMI_HDV_MB01, HDV_MB01Texture);
+    LoadTexture(hInstance, g_pd3dDevice, HDMI_WINDOWS_DISPLAY_SETTINGS, WindowsDisplaySettingsTexture);
+    LoadTexture(hInstance, g_pd3dDevice, VOLUME_ADJUST_EXAMPLE, VolumeAdjustExampleTexture);
+}
+
+void Resources::LoadTexture(HINSTANCE hInstance, ID3D11Device* g_pd3dDevice, UINT type, AVLTexture& image)
+{
+    ResourceLoader::LoadImage(hInstance, g_pd3dDevice, type, &image.TextureData, &image.Width, &image.Height);
 }

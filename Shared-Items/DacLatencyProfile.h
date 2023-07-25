@@ -3,6 +3,7 @@
 #include <map>
 #include <Audioclient.h>
 #include "AudioEndpoint.h"
+#include "AVLTexture.h"
 
 /// <summary>
 /// All DACs must have a very similar latency to with all audio formats!!!
@@ -15,9 +16,10 @@ public:
 	enum struct DacInputType { Unknown, ARC, eARC, SPDIF_Optical, SPDIF_Coax };
 
 	std::string Name;
-	float Latency = 0; // in milliseconds
+	std::string Description;
+	AVLTexture Image;
+	bool isNoLatency = false; // Flag to help things like the TestManager and GUI know if this is the "None" offset profile.
 	DacInputType InputType;
-
-	bool isNoLatency = false; // Flag to help things like the TestManager know if this is the "None" latency profile.
+	float Latency = 0; // in milliseconds
 };
 

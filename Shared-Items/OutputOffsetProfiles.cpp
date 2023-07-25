@@ -16,10 +16,11 @@ int OutputOffsetProfiles::SelectedProfileIndex = 0;
 
 std::map<OutputOffsetProfile::OutputType, OutputOffsetProfiles::ProfilesSubset*> OutputOffsetProfiles::Subsets;
 
-void OutputOffsetProfiles::InitializeProfiles()
+void OutputOffsetProfiles::InitializeProfiles(ProfileResources& resources)
 {
 	// HDMI
 	Hdmi_HDV_MB01 = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Hdmi, "HDV-MB01", Hdmi_HDV_MB01_GetOffset, AudioEndpoint::HdmiFormatsFilter);
+	Hdmi_HDV_MB01->Image = resources.Hdmi_HDV_MB01_Texture;
 	Hdmi_HDV_MB01->Description =
 		"The HDV-MB01 is sold under these names:\n\n"
 		
@@ -34,6 +35,7 @@ void OutputOffsetProfiles::InitializeProfiles()
 
 	// S/PDIF
 	Spdif_HDV_MB01 = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Spdif, "HDV-MB01", Spdif_HDV_MB01_GetOffset, CommonSpdifFormatFilter);
+	Spdif_HDV_MB01->Image = resources.Spdif_HDV_MB01_Texture;
 	Spdif_HDV_MB01->Description =
 		"The HDV-MB01 is sold under these names:\n\n"
 		

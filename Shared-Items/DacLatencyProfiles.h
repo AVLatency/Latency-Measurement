@@ -1,6 +1,7 @@
 #pragma once
 #include "DacLatencyProfile.h"
 #include <vector>
+#include "ProfileResources.h"
 
 class DacLatencyProfiles
 {
@@ -14,7 +15,7 @@ public:
 	static std::vector<DacLatencyProfile*> Profiles;
 	static int SelectedProfileIndex;
 
-	static void InitializeProfiles();
+	static void InitializeProfiles(ProfileResources& resources);
 
 	static DacLatencyProfile* CurrentProfile();
 };

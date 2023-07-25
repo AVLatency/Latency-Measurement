@@ -1,6 +1,7 @@
 #pragma once
 #include "OutputOffsetProfile.h"
 #include <vector>
+#include "ProfileResources.h"
 
 /// <summary>
 /// Describes the offset between digital output and analog output of
@@ -37,7 +38,7 @@ public:
 	/// </summary>
 	static std::map<OutputOffsetProfile::OutputType, ProfilesSubset*> Subsets;
 
-	static void InitializeProfiles();
+	static void InitializeProfiles(ProfileResources& resources);
 
 	static OutputOffsetProfile* CurrentProfile();
 

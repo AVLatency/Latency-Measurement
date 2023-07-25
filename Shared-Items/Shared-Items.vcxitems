@@ -19,6 +19,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)AudioEndpointHelper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)AudioFormat.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)AveragedResult.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)AVLTexture.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)DacLatencyProfile.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)DacLatencyProfiles.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)FilesystemCheck.h" />
@@ -29,6 +30,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)MeasurementToolGuiState.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)IResultsWriter.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)OutputOffsetProfile.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ProfileResources.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ResourceLoader.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)StringHelper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)RecordingAnalyzer.h" />

@@ -3,6 +3,7 @@
 #include <map>
 #include <Audioclient.h>
 #include "AudioEndpoint.h"
+#include "AVLTexture.h"
 
 class OutputOffsetProfile
 {
@@ -31,8 +32,10 @@ public:
 	OutputOffsetProfile(OutputType type, std::string name, OutputOffset (*getOffsetFunc)(int numChannels, int sampleRate, int bitDepth), bool (*formatFilter)(WAVEFORMATEX*));
 
 	OutputType OutType = OutputType::None;
-
 	std::string Name;
+	std::string Description;
+	AVLTexture Image;
+	bool isNoOffset = false; // Flag to help things like the TestManager and GUI know if this is the "None" offset profile.
 
 	OutputOffset(*GetOffset)(int numChannels, int sampleRate, int bitDepth);
 	/// <summary>
@@ -43,10 +46,6 @@ public:
 	bool (*FormatFilter)(WAVEFORMATEX*);
 
 	OutputOffset GetOffsetFromWaveFormat(WAVEFORMATEX* waveFormat);
-
-	bool isNoOffset = false; // Flag to help things like the TestManager and GUI know if this is the "None" offset profile.
-
-	std::string Description;
 
 
 	/// <summary>

@@ -79,7 +79,7 @@ bool Gui::DoGui()
     ImGui::Text("Cable Diagram:");
     ImGui::SameLine(); GuiHelper::HelpMarker(std::format("Before starting you must connect your audio devices and cables as described in this diagram.\n\n{}", GuiHelper::CableHelpText(GuiHelper::Tool::HdmiToDigitalAudio, OutputOffsetProfile::OutputType::Hdmi)).c_str());
     float cableMapScale = 0.55 * Gui::DpiScale;
-    ImGui::Image((void*)resources.CableMapTexture, ImVec2(resources.CableMapTextureWidth * cableMapScale, resources.CableMapTextureHeight * cableMapScale));
+    ImGui::Image((void*)resources.CableMapTexture.TextureData, ImVec2(resources.CableMapTexture.Width * cableMapScale, resources.CableMapTexture.Height * cableMapScale));
 
     if (ImGui::BeginTable("MainViewTopLevelTable", 2, ImGuiTableFlags_Borders, ImVec2(1234 * DpiScale, 0)))
     {
@@ -108,7 +108,7 @@ bool Gui::DoGui()
         {
             ImGui::Spacing();
             float scale = 0.55 * Gui::DpiScale;
-            ImGui::Image((void*)resources.HdmiToDigitalAudioDefinitionTexture , ImVec2(resources.HdmiToDigitalAudioDefinitionTextureWidth * scale, resources.HdmiToDigitalAudioDefinitionTextureHeight * scale));
+            ImGui::Image((void*)resources.HdmiToDigitalAudioDefinitionTexture.TextureData, ImVec2(resources.HdmiToDigitalAudioDefinitionTexture.Width * scale, resources.HdmiToDigitalAudioDefinitionTexture.Height * scale));
 
             ImGui::Text("Welcome to the AV Latency.com HDMI Audio Passthrough Latency measurement tool!");
             ImGui::Spacing();
@@ -157,7 +157,7 @@ bool Gui::DoGui()
             if (OutputOffsetProfiles::Profiles[OutputOffsetProfiles::SelectedProfileIndex] == OutputOffsetProfiles::Hdmi_HDV_MB01)
             {
                 float imageScale = 0.45 * Gui::DpiScale;
-                ImGui::Image((void*)resources.HDV_MB01Texture, ImVec2(resources.HDV_MB01TextureWidth * imageScale, resources.HDV_MB01TextureHeight * imageScale));
+                ImGui::Image((void*)resources.HDV_MB01Texture.TextureData, ImVec2(resources.HDV_MB01Texture.Width * imageScale, resources.HDV_MB01Texture.Height * imageScale));
                 ImGui::TextWrapped("The HDV-MB01 is sold under these names:");
                 ImGui::Spacing();
                 ImGui::TextWrapped("- J-Tech Digital JTD18G - H5CH\n"
@@ -214,7 +214,7 @@ bool Gui::DoGui()
                 || DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::CV121AD_SPDIF_OPTICAL)
             {
                 float imageScale = 0.30 * Gui::DpiScale;
-                ImGui::Image((void*)resources.CV121ADTexture, ImVec2(resources.CV121ADTextureWidth * imageScale, resources.CV121ADTextureHeight * imageScale));
+                ImGui::Image((void*)resources.CV121ADTexture.TextureData, ImVec2(resources.CV121ADTexture.Width * imageScale, resources.CV121ADTexture.Height * imageScale));
                 ImGui::TextWrapped("The CV121AD is sold under these names:");
                 ImGui::Spacing();
                 ImGui::TextWrapped("- MYPIN 192KHz DAC Converter Multifunction Audio Converter");
@@ -222,7 +222,7 @@ bool Gui::DoGui()
             else if (DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::SHARCV1_EARC)
             {
                 float imageScale = 0.6 * Gui::DpiScale;
-                ImGui::Image((void*)resources.SHARCv1Texture, ImVec2(resources.SHARCv1TextureWidth * imageScale, resources.SHARCv1TextureHeight * imageScale));
+                ImGui::Image((void*)resources.SHARCv1Texture.TextureData, ImVec2(resources.SHARCv1Texture.Width * imageScale, resources.SHARCv1Texture.Height * imageScale));
                 ImGui::TextWrapped("The SHARC v1 is produced and sold by Thenaudio.");
             }
             else if (DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::None)
@@ -349,7 +349,7 @@ bool Gui::DoGui()
                     openDialogVolumeAdjustDisabledCrosstalk = true;
                 }
 
-                GuiHelper::AdjustVolumeInstructionsTroubleshooting(GuiHelper::Tool::HdmiToDigitalAudio, OutputOffsetProfile::OutputType::Hdmi, lastCheckedInputSampleRate, &TestConfiguration::OutputVolume, &adjustVolumeManager->OverrideNoisyQuiet, (void*)resources.VolumeAdjustExampleTexture, resources.VolumeAdjustExampleTextureWidth, resources.VolumeAdjustExampleTextureHeight, DpiScale);
+                GuiHelper::AdjustVolumeInstructionsTroubleshooting(GuiHelper::Tool::HdmiToDigitalAudio, OutputOffsetProfile::OutputType::Hdmi, lastCheckedInputSampleRate, &TestConfiguration::OutputVolume, &adjustVolumeManager->OverrideNoisyQuiet, (void*)resources.VolumeAdjustExampleTexture.TextureData, resources.VolumeAdjustExampleTexture.Width, resources.VolumeAdjustExampleTexture.Height, DpiScale);
                 ImGui::Spacing();
 
                 if (state == MeasurementToolGuiState::AdjustVolume)
@@ -544,7 +544,7 @@ bool Gui::DoGui()
                     ImGui::Spacing();
                     ImGui::TextUnformatted("Example:");
                     float imageScale = 0.7 * Gui::DpiScale;
-                    ImGui::Image((void*)resources.WindowsDisplaySettingsTexture, ImVec2(resources.WindowsDisplaySettingsTextureWidth * imageScale, resources.WindowsDisplaySettingsTextureHeight * imageScale));
+                    ImGui::Image((void*)resources.WindowsDisplaySettingsTexture.TextureData, ImVec2(resources.WindowsDisplaySettingsTexture.Width * imageScale, resources.WindowsDisplaySettingsTexture.Height * imageScale));
                     ImGui::PopTextWrapPos();
                     ImGui::EndTooltip();
                 }
@@ -857,7 +857,7 @@ bool Gui::DoGui()
         ImGui::Spacing();
 
         float imageScale = 0.6 * Gui::DpiScale;
-        ImGui::Image((void*)resources.EDIDModeTexture, ImVec2(resources.EDIDModeTextureWidth * imageScale, resources.EDIDModeTextureHeight * imageScale));
+        ImGui::Image((void*)resources.EDIDModeTexture.TextureData, ImVec2(resources.EDIDModeTexture.Width * imageScale, resources.EDIDModeTexture.Height * imageScale));
 
         ImGui::Text("This EDID mode is often labelled \"TV\" on HDMI audio extractors.");
         ImGui::Spacing();
