@@ -186,6 +186,12 @@ bool Gui::DoGui()
             {
                 ImGui::Spacing();
 
+                ImGui::PushFont(FontHelper::BoldFont);
+                ImGui::Text("Dual-Out Reference Device");
+                ImGui::PopFont();
+                ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the time offset between the analog output and the HDMI output of the Dual-Out Reference Device for different audio formats.");
+                ImGui::Spacing();
+
                 if (ImGui::BeginTable("MeasurementConfig", 3))
                 {
                     int descriptionColWidth = 450;
@@ -195,12 +201,6 @@ bool Gui::DoGui()
                     ImGui::TableNextRow();
 
                     ImGui::TableNextColumn();
-
-                    ImGui::PushFont(FontHelper::BoldFont);
-                    ImGui::Text("Dual-Out Reference Device");
-                    ImGui::PopFont();
-                    ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the time offset between the analog output and the HDMI output of the Dual-Out Reference Device for different audio formats.");
-                    ImGui::Spacing();
 
                     if (ImGui::BeginListBox("Dual-Out Reference Device", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing())))
                     {
@@ -228,7 +228,6 @@ bool Gui::DoGui()
                     ImGui::Spacing();
 
                     ImGui::TableNextColumn();
-                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetTextLineHeightWithSpacing());
 
                     if (OutputOffsetProfiles::CurrentProfile()->isNoOffset)
                     {
@@ -260,7 +259,6 @@ bool Gui::DoGui()
                     }
 
                     ImGui::TableNextColumn();
-                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetTextLineHeightWithSpacing());
 
                     ImGui::PushFont(FontHelper::BoldFont);
                     ImGui::Text("Output Offsets");
