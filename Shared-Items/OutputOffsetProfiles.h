@@ -29,9 +29,9 @@ public:
 	static OutputOffsetProfile* Spdif_LiNKFOR_USB_DAC;
 	static OutputOffsetProfile* Spdif_None;
 
-	static OutputOffsetProfile* ARC_None;
+	static OutputOffsetProfile* Arc_None;
 
-	static OutputOffsetProfile* EARC_None;
+	static OutputOffsetProfile* EArc_None;
 
 	static OutputOffsetProfile* Analog_BasicYSplitter;
 	static OutputOffsetProfile* Analog_None;

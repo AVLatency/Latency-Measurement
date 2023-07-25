@@ -11,9 +11,9 @@ OutputOffsetProfile* OutputOffsetProfiles::Spdif_AYSA11 = NULL;
 OutputOffsetProfile* OutputOffsetProfiles::Spdif_LiNKFOR_USB_DAC = NULL;
 OutputOffsetProfile* OutputOffsetProfiles::Spdif_None = NULL;
 
-OutputOffsetProfile* OutputOffsetProfiles::ARC_None = NULL;
+OutputOffsetProfile* OutputOffsetProfiles::Arc_None = NULL;
 
-OutputOffsetProfile* OutputOffsetProfiles::EARC_None = NULL;
+OutputOffsetProfile* OutputOffsetProfiles::EArc_None = NULL;
 
 OutputOffsetProfile* OutputOffsetProfiles::Analog_BasicYSplitter = NULL;
 OutputOffsetProfile* OutputOffsetProfiles::Analog_None = NULL;
@@ -98,17 +98,17 @@ void OutputOffsetProfiles::InitializeProfiles(ProfileResources& resources)
 	// ARC AUDIO LATENCY PROFILES
 	// *****************************************************
 
-	ARC_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::ARC, "Other", None_GetOffset, AudioEndpoint::AllFormatsFilter);
-	ARC_None->isNoOffset = true;
-	Profiles.push_back(ARC_None);
+	Arc_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::ARC, "Other", None_GetOffset, AudioEndpoint::AllFormatsFilter);
+	Arc_None->isNoOffset = true;
+	Profiles.push_back(Arc_None);
 
 	// *****************************************************
 	// EARC AUDIO LATENCY PROFILES
 	// *****************************************************
 
-	EARC_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::eARC, "Other", None_GetOffset, AudioEndpoint::AllFormatsFilter);
-	EARC_None->isNoOffset = true;
-	Profiles.push_back(EARC_None);
+	EArc_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::eARC, "Other", None_GetOffset, AudioEndpoint::AllFormatsFilter);
+	EArc_None->isNoOffset = true;
+	Profiles.push_back(EArc_None);
 
 	// *****************************************************
 	// ANALOG AUDIO LATENCY PROFILES
