@@ -7,9 +7,10 @@ public:
 	static bool SaveIndividualWavFiles;
 	static int NumMeasurements;
 	/// <summary>
-	/// In seconds
+	/// In seconds. This is the end padding that is added to the end of the recording samples.
+	/// It will increase the overall recording time.
 	/// </summary>
-	static float RecordingLegnth;
+	static float AdditionalRecordingTime;
 	/// <summary>
 	/// In milliseconds. This is the time during the start of the recording that will be ignored.
 	/// </summary>

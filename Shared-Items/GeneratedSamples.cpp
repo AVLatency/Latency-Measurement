@@ -71,7 +71,7 @@ void GeneratedSamples::GenerateLatencyMeasurementSamples()
         round(tickTimes[0] * sampleRate),
         round(tickTimes[1] * sampleRate),
         round(tickTimes[2] * sampleRate) }; int tickTimesInSamplesLength = 3;
-    double endPadding = max(TestConfiguration::RecordingLegnth - startPadding - patternTick3RelTime, 0.1);
+    double endPadding = TestConfiguration::AdditionalRecordingTime;
 
     // Frequencies
     double tickFreq = GetTickFrequency(sampleRate);

@@ -456,8 +456,8 @@ void GuiHelper::TestConfiguration(float DpiScale)
         ImGui::DragFloat("Lead-in Duration (seconds)", &TestConfiguration::LeadInDuration, 0.1f, 0.4f, 10.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::SameLine(); GuiHelper::HelpMarker("Increase this if the DUT takes a long time to wake up/sync to a new audio format.");
 
-        ImGui::DragFloat("Recording Length (seconds)", &TestConfiguration::RecordingLegnth, 0.1f, 0.6f, 10.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::SameLine(); GuiHelper::HelpMarker("Increase the measurement recording length to measure higher audio latency. The default of 0.9 seconds enables latency measurements up to around 200 or 300 milliseconds, depending on input and output driver latency.");
+        ImGui::DragFloat("Additional Recording Time (seconds)", &TestConfiguration::AdditionalRecordingTime, 0.1f, 0.12f, 10.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::SameLine(); GuiHelper::HelpMarker("Increase the measurement recording time to measure higher audio latency. The default of 0.42 seconds enables latency measurements up to around 200 or 300 milliseconds, depending on input and output driver latency.");
 
         ImGui::Checkbox("Save Individual Recording Results", &TestConfiguration::SaveIndividualRecordingResults);
         ImGui::SameLine(); GuiHelper::HelpMarker("Saves detailed individual measurement results in a CSV file for each format that is measured. Useful for troubleshooting.");
