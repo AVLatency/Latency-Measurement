@@ -11,25 +11,30 @@ int DacLatencyProfiles::SelectedProfileIndex = 0;
 void DacLatencyProfiles::InitializeProfiles(ProfileResources& resources)
 {
 	CV121AD_ARC.Name = "CV121AD: ARC Input";
+	CV121AD_ARC.Description = "The CV121AD is sold under these names:\n\n"
+		"- MYPIN 192KHz DAC Converter Multifunction Audio Converter";
 	CV121AD_ARC.Image = resources.Dac_CV121AD_ARC_Texture;
 	CV121AD_ARC.Latency = 0.123; // 2 channel 48 kHz 16 bit. For other formats, this could be off by up to 0.1 ms.
 	CV121AD_ARC.InputType = DacLatencyProfile::DacInputType::ARC;
 	Profiles.push_back(&CV121AD_ARC);
 
 	CV121AD_SPDIF_COAX.Name = "CV121AD: S/PDIF Coax Input";
-	CV121AD_ARC.Image = resources.Dac_CV121AD_SPDIF_COAX_Texture;
+	CV121AD_SPDIF_COAX.Description = CV121AD_ARC.Description;
+	CV121AD_SPDIF_COAX.Image = resources.Dac_CV121AD_SPDIF_COAX_Texture;
 	CV121AD_SPDIF_COAX.Latency = 0.118; // 2 channel 48 kHz 16 bit. For other formats, this could be off by up to 0.1 ms.
 	CV121AD_SPDIF_COAX.InputType = DacLatencyProfile::DacInputType::SPDIF_Coax;
 	Profiles.push_back(&CV121AD_SPDIF_COAX);
 
 	CV121AD_SPDIF_OPTICAL.Name = "CV121AD: S/PDIF Optical Input";
-	CV121AD_ARC.Image = resources.Dac_CV121AD_SPDIF_OPTICAL_Texture;
+	CV121AD_SPDIF_OPTICAL.Description = CV121AD_ARC.Description;
+	CV121AD_SPDIF_OPTICAL.Image = resources.Dac_CV121AD_SPDIF_OPTICAL_Texture;
 	CV121AD_SPDIF_OPTICAL.Latency = 0.118; // 2 channel 48 kHz 16 bit. For other formats, this could be off by up to 0.1 ms.
 	CV121AD_SPDIF_OPTICAL.InputType = DacLatencyProfile::DacInputType::SPDIF_Optical;
 	Profiles.push_back(&CV121AD_SPDIF_OPTICAL);
 
 	SHARCV1_EARC.Name = "SHARK v1: eARC Input";
-	CV121AD_ARC.Image = resources.Dac_SHARCV1_EARC_Texture;
+	SHARCV1_EARC.Description = "The SHARC v1 is produced and sold by Thenaudio.";
+	SHARCV1_EARC.Image = resources.Dac_SHARCV1_EARC_Texture;
 	SHARCV1_EARC.Latency = 0;
 	SHARCV1_EARC.InputType = DacLatencyProfile::DacInputType::eARC;
 	Profiles.push_back(&SHARCV1_EARC);

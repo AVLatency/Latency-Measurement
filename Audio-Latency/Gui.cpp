@@ -109,13 +109,25 @@ bool Gui::DoGui()
 
         ImGui::SameLine();
         ImVec2 newCursorPosition = ImGui::GetCursorPos();
+
+        ImGui::SetCursorPos(newCursorPosition);
+
+        if (outputTypeIndex == (int)OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
+        {
+            float scale = 0.55 * Gui::DpiScale;
+            ImGui::Image((void*)resources.HdmiAudioPassthroughDefinitionTexture.TextureData, ImVec2(resources.HdmiAudioPassthroughDefinitionTexture.Width * scale, resources.HdmiAudioPassthroughDefinitionTexture.Height * scale));
+            ImGui::Spacing();
+        }
+
         newCursorPosition.y += 187 * DpiScale;
         ImGui::SetCursorPos(newCursorPosition);
-        ImGui::Text(std::format("Measuring {0} audio latency", OutputOffsetProfile::OutputTypeName(OutputOffsetProfiles::CurrentProfile()->OutType)).c_str());
+        ImGui::Text(std::format("Measuring {} audio latency", OutputOffsetProfile::OutputTypeName(OutputOffsetProfiles::CurrentProfile()->OutType)).c_str());
 
         newCursorPosition.y += ImGui::GetTextLineHeightWithSpacing();
         ImGui::SetCursorPos(newCursorPosition);
-        ImGui::Text(std::format("Using {0}", OutputOffsetProfiles::CurrentProfile()->Name).c_str());
+        std::string referenceDacStr = std::format(" and {}", DacLatencyProfiles::CurrentProfile()->Name);
+        ImGui::Text(std::format("Using {}{}", OutputOffsetProfiles::CurrentProfile()->Name,
+            (OutputOffsetProfile::OutputType)outputTypeIndex == OutputOffsetProfile::OutputType::HdmiAudioPassthrough ? referenceDacStr : "").c_str());
 
         ImGui::PopFont();
         ImGui::SetCursorPos(originalCursorPosition);
@@ -188,13 +200,8 @@ bool Gui::DoGui()
             if (outputTypeIndex != (int)OutputOffsetProfile::OutputType::None)
             {
                 ImGui::Spacing();
-
-                if (outputTypeIndex == (int)OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
-                {
-                    float scale = 0.55 * Gui::DpiScale;
-                    ImGui::Image((void*)resources.HdmiAudioPassthroughDefinitionTexture.TextureData, ImVec2(resources.HdmiAudioPassthroughDefinitionTexture.Width* scale, resources.HdmiAudioPassthroughDefinitionTexture.Height* scale));
-                    ImGui::Spacing();
-                }
+                ImGui::Separator();
+                ImGui::Spacing();
 
                 ImGui::PushFont(FontHelper::BoldFont);
                 ImGui::Text("Dual-Out Reference Device");
@@ -202,7 +209,7 @@ bool Gui::DoGui()
                 ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the time offset between the analog output and the HDMI output of the Dual-Out Reference Device for different audio formats.");
                 ImGui::Spacing();
 
-                if (ImGui::BeginTable("MeasurementConfig", 3))
+                if (ImGui::BeginTable("DualOutRefDeviceTable", 3))
                 {
                     int descriptionColWidth = 450;
                     ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, 200 * DpiScale);
@@ -318,60 +325,72 @@ bool Gui::DoGui()
                     ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the amount of time between the digital audio signal entering the DAC's input to the analog output of the DAC. Only DACs that have similar latency for all audio formats are compatable with this tool.");
                     ImGui::Spacing();
 
-                    if (ImGui::BeginListBox("Reference DAC", ImVec2(-FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing())))
+                    if (ImGui::BeginTable("RefDacTable", 3))
                     {
-                        for (int n = 0; n < DacLatencyProfiles::Profiles.size(); n++)
-                        {
-                            const bool is_selected = (DacLatencyProfiles::SelectedProfileIndex == n);
-                            if (ImGui::Selectable(DacLatencyProfiles::Profiles[n]->Name.c_str(), is_selected))
-                            {
-                                DacLatencyProfiles::SelectedProfileIndex = n;
-                                if (DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::None)
-                                {
-                                    strcpy_s(TestNotes::Notes.DAC, "");
-                                }
-                                SetDutPassthroughOutputType();
-                            }
-                            // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-                            if (is_selected)
-                            {
-                                ImGui::SetItemDefaultFocus();
-                            }
-                        }
-                        ImGui::EndListBox();
-                    }
-                    ImGui::Spacing();
+                        int descriptionColWidth = 450;
+                        ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, 200 * DpiScale);
+                        ImGui::TableSetupColumn("column2", ImGuiTableColumnFlags_WidthFixed, descriptionColWidth * DpiScale);
 
-                    if (DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::CV121AD_ARC
-                        || DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::CV121AD_SPDIF_COAX
-                        || DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::CV121AD_SPDIF_OPTICAL)
-                    {
-                        float imageScale = 0.30 * Gui::DpiScale;
-                        ImGui::Image((void*)resources.CV121ADTexture.TextureData, ImVec2(resources.CV121ADTexture.Width * imageScale, resources.CV121ADTexture.Height * imageScale));
-                        ImGui::TextWrapped("The CV121AD is sold under these names:");
-                        ImGui::Spacing();
-                        ImGui::TextWrapped("- MYPIN 192KHz DAC Converter Multifunction Audio Converter");
-                    }
-                    else if (DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::SHARCV1_EARC)
-                    {
-                        float imageScale = 0.6 * Gui::DpiScale;
-                        ImGui::Image((void*)resources.SHARCv1Texture.TextureData, ImVec2(resources.SHARCv1Texture.Width * imageScale, resources.SHARCv1Texture.Height * imageScale));
-                        ImGui::TextWrapped("The SHARC v1 is produced and sold by Thenaudio.");
-                    }
-                    else if (DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::None)
-                    {
-                        ImGui::PushFont(FontHelper::BoldFont);
-                        ImGui::Text("WARNING:");
-                        ImGui::PopFont();
-                        ImGui::TextWrapped("Using a DAC that is not on this list may result in inaccurate measurements! This is because the DAC's audio latency will not be accounted for in the reported measurements.");
-                        ImGui::Spacing();
-                        ImGui::TextWrapped("If you have another device that is suitable for use with this tool, "
-                            "please let me know and I might be able to add support for this device.");
-                        ImGui::Spacing();
-                        if (ImGui::Button("Open Contact Webpage"))
+                        ImGui::TableNextRow();
+
+                        ImGui::TableNextColumn();
+
+                        if (ImGui::BeginListBox("Reference DAC", ImVec2(-FLT_MIN, 10 * ImGui::GetTextLineHeightWithSpacing())))
                         {
-                            ShellExecuteA(NULL, "open", "https://avlatency.com/contact/", NULL, NULL, SW_SHOWNORMAL);
+                            for (int n = 0; n < DacLatencyProfiles::Profiles.size(); n++)
+                            {
+                                const bool is_selected = (DacLatencyProfiles::SelectedProfileIndex == n);
+                                if (ImGui::Selectable(DacLatencyProfiles::Profiles[n]->Name.c_str(), is_selected))
+                                {
+                                    DacLatencyProfiles::SelectedProfileIndex = n;
+                                    if (DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::None)
+                                    {
+                                        strcpy_s(TestNotes::Notes.DAC, "");
+                                    }
+                                    SetDutPassthroughOutputType();
+                                }
+                                // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                                if (is_selected)
+                                {
+                                    ImGui::SetItemDefaultFocus();
+                                }
+                            }
+                            ImGui::EndListBox();
                         }
+                        ImGui::Spacing();
+
+                        ImGui::TableNextColumn();
+
+                        if (DacLatencyProfiles::CurrentProfile()->isNoLatency)
+                        {
+                            ImGui::PushFont(FontHelper::BoldFont);
+                            ImGui::Text("WARNING:");
+                            ImGui::PopFont();
+                            ImGui::TextWrapped("Using a DAC that is not on this list may result in inaccurate measurements! This is because the DAC's audio latency will not be accounted for in the reported measurements.");
+                            ImGui::Spacing();
+                            ImGui::TextWrapped("If you have another device that is suitable for use with this tool, "
+                                "please let me know and I might be able to add support for this device.");
+                            ImGui::Spacing();
+                            if (ImGui::Button("Open Contact Webpage"))
+                            {
+                                ShellExecuteA(NULL, "open", "https://avlatency.com/contact/", NULL, NULL, SW_SHOWNORMAL);
+                            }
+                        }
+                        else
+                        {
+                            DacLatencyProfile* currentProfile = DacLatencyProfiles::CurrentProfile();
+                            if (currentProfile->Image.TextureData != NULL)
+                            {
+                                float maxWidth = descriptionColWidth;
+                                float maxHeight = 179;
+                                float imageScale = min(maxWidth / currentProfile->Image.Width, maxHeight / currentProfile->Image.Height);
+                                imageScale *= Gui::DpiScale;
+                                ImGui::Image((void*)currentProfile->Image.TextureData, ImVec2(currentProfile->Image.Width * imageScale, currentProfile->Image.Height * imageScale));
+                            }
+                            ImGui::TextWrapped(currentProfile->Description.c_str());
+                        }
+
+                        ImGui::EndTable();
                     }
                 }
 
