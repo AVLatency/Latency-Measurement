@@ -494,7 +494,7 @@ bool Gui::DoGui()
                 ImGui::Spacing();
                 ImGui::Text("");
 
-                GuiHelper::TestConfiguration(DpiScale);
+                GuiHelper::TestConfiguration(DpiScale, OutputOffsetProfiles::CurrentProfile()->OutType);
 
                 ImGui::Spacing();
 
