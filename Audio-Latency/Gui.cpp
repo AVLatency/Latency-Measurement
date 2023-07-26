@@ -202,7 +202,7 @@ bool Gui::DoGui()
 
                     ImGui::TableNextColumn();
 
-                    if (ImGui::BeginListBox("Dual-Out Reference Device", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing())))
+                    if (ImGui::BeginListBox("Dual-Out Reference Device", ImVec2(-FLT_MIN, 10 * ImGui::GetTextLineHeightWithSpacing())))
                     {
                         OutputOffsetProfiles::ProfilesSubset* profileSubset = OutputOffsetProfiles::Subsets[(OutputOffsetProfile::OutputType)outputTypeIndex];
                         for (int n = 0; n < profileSubset->ProfileIndeces.size(); n++)
