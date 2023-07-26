@@ -279,9 +279,9 @@ void GuiHelper::PeakLevel(AdjustVolumeManager::PeakLevelGrade grade, const char*
     ImGui::PopFont();
 }
 
-std::string GuiHelper::CableHelpText(Tool tool, OutputOffsetProfile::OutputType outType)
+std::string GuiHelper::CableHelpText(OutputOffsetProfile::OutputType outType)
 {
-    if (tool == GuiHelper::Tool::HdmiToDigitalAudio)
+    if (outType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
     {
         return "For your Dual-Out Reference Device, the time offset between analog audio output and HDMI audio output must be known. For your Reference DAC, the digital to analog latency must be known. Recommended devices can be found on the AV Latency.com Toolkit webpage.\n\n"
             "AV Latency.com Toolkit Webpage: avlatency.com/tools/av-latency-com-toolkit";
@@ -295,7 +295,7 @@ std::string GuiHelper::CableHelpText(Tool tool, OutputOffsetProfile::OutputType 
     }
 }
 
-void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, OutputOffsetProfile::OutputType outType, int lastCheckedInputSampleRate, float* outputVolume, bool* overrideNoisyQuiet, void* exampleTexture, int exampleTextureWidth, int exampleTextureHeight, float DpiScale)
+void GuiHelper::AdjustVolumeInstructionsTroubleshooting(OutputOffsetProfile::OutputType outType, int lastCheckedInputSampleRate, float* outputVolume, bool* overrideNoisyQuiet, void* exampleTexture, int exampleTextureWidth, int exampleTextureHeight, float DpiScale)
 {
     ImGui::Spacing();
     ImGui::Spacing();
@@ -327,7 +327,7 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, OutputOffsetP
         ImGui::Text("Initial Cable Setup");
         ImGui::PopFont();
         ImGui::Indent();
-        ImGui::TextWrapped(std::format("Connect your audio devices and cables as described in the diagram at the top of this window.\n\n{}", GuiHelper::CableHelpText(tool, outType)).c_str());
+        ImGui::TextWrapped(std::format("Connect your audio devices and cables as described in the diagram at the top of this window.\n\n{}", GuiHelper::CableHelpText(outType)).c_str());
         ImGui::Unindent();
 
         ImGui::Spacing();
@@ -384,7 +384,7 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, OutputOffsetP
             "5) If the previous three strategies do not resolve the issue, you may need to use an inline analog volume control on the line-level device to reduce its audio level and, in turn, reduce the crosstalk that it is causing.\n\n"
             "NOTE: In cases that are very rare for digital audio, the audio signal from both outputs may be very closely aligned, resulting in incorrectly detected crosstalk. When this happens, you may need to disable crosstalk detection. "
             "Before doing so, it is important to test a number of devices and become familiar with how this tool works and gain confidence in your wiring/microphone setup and audio levels.",
-            tool == Tool::HdmiToDigitalAudio ? "" : " and/or positioning the microphone closer to the DUT's left speaker").c_str());
+            outType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough ? "" : " and/or positioning the microphone closer to the DUT's left speaker").c_str());
         ImGui::Unindent();
 
         ImGui::Spacing();
@@ -397,7 +397,7 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, OutputOffsetP
                 "2) Double check your input and output device selection.\n"
                 "3) Increase the signal to noise ratio by turning up the output volume of the DUT{}.\n"
                 "4) Follow the \"Best Practices\" listed above.",
-                tool == Tool::HdmiToDigitalAudio ? "" : " and/or positioning the microphone closer to the DUT's left speaker").c_str());
+                outType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough ? "" : " and/or positioning the microphone closer to the DUT's left speaker").c_str());
         ImGui::Unindent();
 
         ImGui::Spacing();

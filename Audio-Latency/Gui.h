@@ -49,5 +49,6 @@ private:
 	void StartAdjustVolume();
 	void StartTest();
 
+	void SetDutPassthroughOutputType();
 	bool IncludeSurroundAsDefault();
 };

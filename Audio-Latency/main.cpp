@@ -106,6 +106,10 @@ int main(int, char**)
     profileRes.Analog_YSplitter_Texture = resources.AnalogYSplitterTexture;
     profileRes.Arc_ExampleDevice_Texture = resources.ArcExampleDeviceTexture;
     profileRes.EArc_ExampleDevice_Texture = resources.EArcExampleDeviceTexture;
+    profileRes.Dac_CV121AD_ARC_Texture = resources.CV121ADTexture;
+    profileRes.Dac_CV121AD_SPDIF_COAX_Texture = resources.CV121ADTexture;
+    profileRes.Dac_CV121AD_SPDIF_OPTICAL_Texture = resources.CV121ADTexture;
+    profileRes.Dac_SHARCV1_EARC_Texture = resources.SHARCv1Texture;
     
     OutputOffsetProfiles::InitializeProfiles(profileRes);
     DacLatencyProfiles::InitializeProfiles(profileRes);

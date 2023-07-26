@@ -7,6 +7,7 @@ public:
 
 	bool DaulOutRefDeviceUseOutputOffsetProfile = true;
 	char DaulOutRefDevice[128] = "";
+	char DAC[128] = "";
 	int RecordingMethodIndex = 0;
 	const char* RecordingMethodOptions[4] = { "", "Microphone", "Direct Connection", "Other" };
 	char RecordingMethodOther[128] = "";
@@ -23,6 +24,13 @@ public:
 	const char* DutOutputType()
 	{
 		return (DutOutputTypeIndex == IM_ARRAYSIZE(DutOutputTypeOptions) - 1 ? DutOutputTypeOther : DutOutputTypeOptions[DutOutputTypeIndex]);
+	}
+	int DutPassthroughOutputTypeIndex = 0;
+	const char* DutPassthroughOutputTypeOptions[6] = { "", "ARC", "eARC", "S/PDIF Optical", "S/PDIF Coaxial", "Other" };
+	char DutPassthroughOutputTypeOther[128] = "";
+	const char* DutPassthroughOutputType()
+	{
+		return (DutPassthroughOutputTypeIndex == IM_ARRAYSIZE(DutPassthroughOutputTypeOptions) - 1 ? DutPassthroughOutputTypeOther : DutPassthroughOutputTypeOptions[DutPassthroughOutputTypeIndex]);
 	}
 	char DutVideoMode[128] = "";
 	char DutAudioSettings[128] = "";

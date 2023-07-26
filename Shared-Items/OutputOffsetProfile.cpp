@@ -28,6 +28,9 @@ std::string OutputOffsetProfile::OutputTypeName(OutputOffsetProfile::OutputType 
 	case OutputOffsetProfile::OutputType::Analog:
 		return "Analog";
 		break;
+	case OutputOffsetProfile::OutputType::HdmiAudioPassthrough:
+		return "HDMI Audio Passthrough";
+		break;
 	default:
 		throw "Attempting to get OutputTypeName for an OutputType that has not been handled.";
 	}

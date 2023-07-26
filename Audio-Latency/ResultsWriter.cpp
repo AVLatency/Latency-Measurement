@@ -16,8 +16,16 @@ void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstre
     writeHeader ? detailedResultsStream << "," : detailedResultsStream << "\"" << "\",";
     writeHeader ? detailedResultsStream << "DUT Model," : detailedResultsStream << "\"" << TestNotes::Notes.DutModel << "\",";
     writeHeader ? detailedResultsStream << "DUT Firmware Version," : detailedResultsStream << "\"" << TestNotes::Notes.DutFirmwareVersion << "\",";
-    writeHeader ? detailedResultsStream << "DUT Output Type," : detailedResultsStream << "\"" << TestNotes::Notes.DutOutputType() << "\",";
-    if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi)
+    if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
+    {
+        writeHeader ? detailedResultsStream << "DUT Output Type," : detailedResultsStream << "\"" << TestNotes::Notes.DutPassthroughOutputType() << "\",";
+    }
+    else
+    {
+        writeHeader ? detailedResultsStream << "DUT Output Type," : detailedResultsStream << "\"" << TestNotes::Notes.DutOutputType() << "\",";
+    }
+    if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi
+        || result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
     {
         writeHeader ? detailedResultsStream << "DUT Video Mode," : detailedResultsStream << "\"" << TestNotes::Notes.DutVideoMode << "\",";
     }
@@ -30,7 +38,8 @@ void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstre
     writeHeader ? detailedResultsStream << "Audio Bit Depth," : detailedResultsStream << "\"" << result.Format->WaveFormat->wBitsPerSample << "\",";
     writeHeader ? detailedResultsStream << "Audio Speakers Description," : detailedResultsStream << "\"" << AudioFormat::GetChannelInfoString(result.Format->WaveFormat) << "\",";
     writeHeader ? detailedResultsStream << "," : detailedResultsStream << "\"" << "\",";
-    if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi)
+    if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi
+        || result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
     {
         writeHeader ? detailedResultsStream << "Video Resolution," : detailedResultsStream << "\"" << TestNotes::Notes.VideoRes() << "\",";
         writeHeader ? detailedResultsStream << "Video Refresh Rate," : detailedResultsStream << "\"" << TestNotes::Notes.VideoRefreshRate << "\",";
@@ -46,9 +55,18 @@ void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstre
     writeHeader ? detailedResultsStream << "," : detailedResultsStream << "\"" << "\",";
     writeHeader ? detailedResultsStream << "Raw Offset (ms)," : detailedResultsStream << "\"" << result.Offset() << "\",";
     writeHeader ? detailedResultsStream << "Dual-Out Reference Device," : detailedResultsStream << "\"" << TestNotes::Notes.DaulOutRefDevice << "\",";
-    writeHeader ? detailedResultsStream << "Recording Method," : detailedResultsStream << "\"" << TestNotes::Notes.RecordingMethod() << "\",";
+    if (result.OffsetProfile->OutType != OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
+    {
+        writeHeader ? detailedResultsStream << "Recording Method," : detailedResultsStream << "\"" << TestNotes::Notes.RecordingMethod() << "\",";
+    }
     writeHeader ? detailedResultsStream << "Output Offset Profile," : detailedResultsStream << "\"" << result.OffsetProfile->Name << "\",";
     writeHeader ? detailedResultsStream << "Output Offset Profile Value (ms)," : detailedResultsStream << "\"" << result.OutputOffsetFromProfile << "\",";
+    if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
+    {
+        writeHeader ? detailedResultsStream << "Reference DAC," : detailedResultsStream << "\"" << TestNotes::Notes.DAC << "\",";
+        writeHeader ? detailedResultsStream << "Reference DAC Latency Profile," : detailedResultsStream << "\"" << result.ReferenceDacName << "\",";
+        writeHeader ? detailedResultsStream << "Reference DAC Latency Value (ms)," : detailedResultsStream << "\"" << result.ReferenceDacLatency << "\",";
+    }
     writeHeader ? detailedResultsStream << "," : detailedResultsStream << "\"" << "\",";
     writeHeader ? detailedResultsStream << "Audio Output Device," : detailedResultsStream << "\"" << outputEndpoint.Name << " (" << outputEndpoint.ID << ")" << "\",";
     writeHeader ? detailedResultsStream << "Audio Input Device," : detailedResultsStream << "\"" << inputEndpoint.Name << " (" << inputEndpoint.ID << ")" << "\",";
@@ -101,8 +119,16 @@ void ResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& result
     writeHeader ? resultsStream << "," : resultsStream << "\"" << "\",";
     writeHeader ? resultsStream << "DUT Model," : resultsStream << "\"" << TestNotes::Notes.DutModel << "\",";
     writeHeader ? resultsStream << "DUT Firmware Version," : resultsStream << "\"" << TestNotes::Notes.DutFirmwareVersion << "\",";
-    writeHeader ? resultsStream << "DUT Output Type," : resultsStream << "\"" << TestNotes::Notes.DutOutputType() << "\",";
-    if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi)
+    if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
+    {
+        writeHeader ? resultsStream << "DUT Output Type," : resultsStream << "\"" << TestNotes::Notes.DutPassthroughOutputType() << "\",";
+    }
+    else
+    {
+        writeHeader ? resultsStream << "DUT Output Type," : resultsStream << "\"" << TestNotes::Notes.DutOutputType() << "\",";
+    }
+    if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi
+        || result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
     {
         writeHeader ? resultsStream << "DUT Video Mode," : resultsStream << "\"" << TestNotes::Notes.DutVideoMode << "\",";
     }
@@ -115,7 +141,8 @@ void ResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& result
     writeHeader ? resultsStream << "Audio Bit Depth," : resultsStream << "\"" << result.Format->WaveFormat->wBitsPerSample << "\",";
     writeHeader ? resultsStream << "Audio Speakers Description," : resultsStream << "\"" << AudioFormat::GetChannelInfoString(result.Format->WaveFormat) << "\",";
     writeHeader ? resultsStream << "," : resultsStream << "\"" << "\",";
-    if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi)
+    if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi
+        || result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
     {
         writeHeader ? resultsStream << "Video Resolution," : resultsStream << "\"" << TestNotes::Notes.VideoRes() << "\",";
         writeHeader ? resultsStream << "Video Refresh Rate," : resultsStream << "\"" << TestNotes::Notes.VideoRefreshRate << "\",";
@@ -130,9 +157,18 @@ void ResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& result
     writeHeader ? resultsStream << "Notes 4," : resultsStream << "\"" << TestNotes::Notes.Notes4 << "\",";
     writeHeader ? resultsStream << "," : resultsStream << "\"" << "\",";
     writeHeader ? resultsStream << "Dual-Out Reference Device," : resultsStream << "\"" << TestNotes::Notes.DaulOutRefDevice << "\",";
-    writeHeader ? resultsStream << "Recording Method," : resultsStream << "\"" << TestNotes::Notes.RecordingMethod() << "\",";
+    if (result.OffsetProfile->OutType != OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
+    {
+        writeHeader ? resultsStream << "Recording Method," : resultsStream << "\"" << TestNotes::Notes.RecordingMethod() << "\",";
+    }
     writeHeader ? resultsStream << "Output Offset Profile," : resultsStream << "\"" << result.OffsetProfile->Name << "\",";
     writeHeader ? resultsStream << "Output Offset Profile Value (ms)," : resultsStream << "\"" << result.OutputOffsetFromProfile << "\",";
+    if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
+    {
+        writeHeader ? resultsStream << "Reference DAC," : resultsStream << "\"" << TestNotes::Notes.DAC << "\",";
+        writeHeader ? resultsStream << "Reference DAC Latency Profile," : resultsStream << "\"" << result.ReferenceDacName << "\",";
+        writeHeader ? resultsStream << "Reference DAC Latency Value (ms)," : resultsStream << "\"" << result.ReferenceDacLatency << "\",";
+    }
     writeHeader ? resultsStream << "," : resultsStream << "\"" << "\",";
     writeHeader ? resultsStream << "Audio Output Device" : resultsStream << "\"" << result.OutputEndpoint.Name << " (" << result.OutputEndpoint.ID << ")" << "\"";
 

@@ -77,7 +77,7 @@ bool Gui::DoGui()
     }
 
     ImGui::Text("Cable Diagram:");
-    ImGui::SameLine(); GuiHelper::HelpMarker(std::format("Before starting you must connect your audio devices and cables as described in this diagram.\n\n{}", GuiHelper::CableHelpText(GuiHelper::Tool::AudioLatency, (OutputOffsetProfile::OutputType)outputTypeIndex)).c_str());
+    ImGui::SameLine(); GuiHelper::HelpMarker(std::format("Before starting you must connect your audio devices and cables as described in this diagram.\n\n{}", GuiHelper::CableHelpText((OutputOffsetProfile::OutputType)outputTypeIndex)).c_str());
     float cableMapScale = 0.55 * Gui::DpiScale;
     switch (OutputOffsetProfiles::CurrentProfile()->OutType)
     {
@@ -92,6 +92,9 @@ bool Gui::DoGui()
         break;
     case OutputOffsetProfile::OutputType::Analog:
         ImGui::Image((void*)resources.AnalogCableMapTexture.TextureData, ImVec2(resources.AnalogCableMapTexture.Width * cableMapScale, resources.AnalogCableMapTexture.Height * cableMapScale));
+        break;
+    case OutputOffsetProfile::OutputType::HdmiAudioPassthrough:
+        ImGui::Image((void*)resources.HdmiAudioPassthroughCableMapTexture.TextureData, ImVec2(resources.HdmiAudioPassthroughCableMapTexture.Width * cableMapScale, resources.HdmiAudioPassthroughCableMapTexture.Height * cableMapScale));
         break;
     case OutputOffsetProfile::OutputType::Hdmi:
     default:
@@ -185,6 +188,13 @@ bool Gui::DoGui()
             if (outputTypeIndex != (int)OutputOffsetProfile::OutputType::None)
             {
                 ImGui::Spacing();
+
+                if (outputTypeIndex == (int)OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
+                {
+                    float scale = 0.55 * Gui::DpiScale;
+                    ImGui::Image((void*)resources.HdmiAudioPassthroughDefinitionTexture.TextureData, ImVec2(resources.HdmiAudioPassthroughDefinitionTexture.Width* scale, resources.HdmiAudioPassthroughDefinitionTexture.Height* scale));
+                    ImGui::Spacing();
+                }
 
                 ImGui::PushFont(FontHelper::BoldFont);
                 ImGui::Text("Dual-Out Reference Device");
@@ -294,21 +304,92 @@ bool Gui::DoGui()
                     }
 
                     ImGui::EndTable();
+                }
 
-                    if (ImGui::Button("Next"))
+                if (outputTypeIndex == (int)OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
+                {
+                    ImGui::Spacing();
+                    ImGui::Separator();
+                    ImGui::Spacing();
+
+                    ImGui::PushFont(FontHelper::BoldFont);
+                    ImGui::Text("Reference DAC");
+                    ImGui::PopFont();
+                    ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the amount of time between the digital audio signal entering the DAC's input to the analog output of the DAC. Only DACs that have similar latency for all audio formats are compatable with this tool.");
+                    ImGui::Spacing();
+
+                    if (ImGui::BeginListBox("Reference DAC", ImVec2(-FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing())))
                     {
-                        if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi)
+                        for (int n = 0; n < DacLatencyProfiles::Profiles.size(); n++)
                         {
-                            openEdidReminderDialog = true;
+                            const bool is_selected = (DacLatencyProfiles::SelectedProfileIndex == n);
+                            if (ImGui::Selectable(DacLatencyProfiles::Profiles[n]->Name.c_str(), is_selected))
+                            {
+                                DacLatencyProfiles::SelectedProfileIndex = n;
+                                if (DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::None)
+                                {
+                                    strcpy_s(TestNotes::Notes.DAC, "");
+                                }
+                                SetDutPassthroughOutputType();
+                            }
+                            // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                            if (is_selected)
+                            {
+                                ImGui::SetItemDefaultFocus();
+                            }
                         }
-                        else
+                        ImGui::EndListBox();
+                    }
+                    ImGui::Spacing();
+
+                    if (DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::CV121AD_ARC
+                        || DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::CV121AD_SPDIF_COAX
+                        || DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::CV121AD_SPDIF_OPTICAL)
+                    {
+                        float imageScale = 0.30 * Gui::DpiScale;
+                        ImGui::Image((void*)resources.CV121ADTexture.TextureData, ImVec2(resources.CV121ADTexture.Width * imageScale, resources.CV121ADTexture.Height * imageScale));
+                        ImGui::TextWrapped("The CV121AD is sold under these names:");
+                        ImGui::Spacing();
+                        ImGui::TextWrapped("- MYPIN 192KHz DAC Converter Multifunction Audio Converter");
+                    }
+                    else if (DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::SHARCV1_EARC)
+                    {
+                        float imageScale = 0.6 * Gui::DpiScale;
+                        ImGui::Image((void*)resources.SHARCv1Texture.TextureData, ImVec2(resources.SHARCv1Texture.Width * imageScale, resources.SHARCv1Texture.Height * imageScale));
+                        ImGui::TextWrapped("The SHARC v1 is produced and sold by Thenaudio.");
+                    }
+                    else if (DacLatencyProfiles::CurrentProfile() == &DacLatencyProfiles::None)
+                    {
+                        ImGui::PushFont(FontHelper::BoldFont);
+                        ImGui::Text("WARNING:");
+                        ImGui::PopFont();
+                        ImGui::TextWrapped("Using a DAC that is not on this list may result in inaccurate measurements! This is because the DAC's audio latency will not be accounted for in the reported measurements.");
+                        ImGui::Spacing();
+                        ImGui::TextWrapped("If you have another device that is suitable for use with this tool, "
+                            "please let me know and I might be able to add support for this device.");
+                        ImGui::Spacing();
+                        if (ImGui::Button("Open Contact Webpage"))
                         {
-                            StartSelectAudioDevices();
+                            ShellExecuteA(NULL, "open", "https://avlatency.com/contact/", NULL, NULL, SW_SHOWNORMAL);
                         }
                     }
-
-                    GuiHelper::DeveloperOptions();
                 }
+
+                if (ImGui::Button("Next"))
+                {
+                    if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi
+                        || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
+                    {
+                        openEdidReminderDialog = true;
+                    }
+                    else
+                    {
+                        StartSelectAudioDevices();
+                    }
+                }
+
+                GuiHelper::DeveloperOptions();
+
             }
 
             ImGui::Spacing();
@@ -364,7 +445,8 @@ bool Gui::DoGui()
                 ImGui::SameLine();
                 if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi
                     || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::ARC
-                    || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::eARC)
+                    || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::eARC
+                    || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
                 {
                     GuiHelper::HelpMarker("Select your HDMI audio output.");
                 }
@@ -387,8 +469,10 @@ bool Gui::DoGui()
                     }
                     ImGui::EndCombo();
                 }
-                ImGui::SameLine(); GuiHelper::HelpMarker("Select your stereo analog input device. When recording with a microphone, the Mic port must be used on computers that have separate Line In and Mic ports.\n\n"
-                    "At least 44.1 kHz 16 bit is recommended.");
+                std::string helpText = std::format("Select your stereo analog input device.{}",
+                        OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough
+                        ? "" : " When recording with a microphone, the Mic port must be used on computers that have separate Line In and Mic ports.\n\nAt least 44.1 kHz 16 bit is recommended.");
+                ImGui::SameLine(); GuiHelper::HelpMarker(helpText.c_str());
 
                 ImGui::Spacing();
                 if (ImGui::Button("Back"))
@@ -414,20 +498,30 @@ bool Gui::DoGui()
             if (state >= MeasurementToolGuiState::AdjustVolume)
             {
                 bool previousCrossTalk = TestConfiguration::Ch1CableCrosstalkDetection;
-                GuiHelper::AdjustVolumeDisplay("left channel volume", adjustVolumeManager->LeftVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, "Left Channel Input (Analog Out of Dual-Out Reference Device)", &TestConfiguration::Ch1AutoThresholdDetection, &TestConfiguration::Ch1DetectionThreshold, &TestConfiguration::Ch1CableCrosstalkDetection, setAdjustVolumeDefaultState);
+                std::string titleText = "Left Channel Input (Analog Out of Dual-Out Reference Device)";
+                if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
+                {
+                    titleText = "Left Channel Input (Analog Out of Dual-Out Reference Device)";
+                }
+                GuiHelper::AdjustVolumeDisplay("left channel volume", adjustVolumeManager->LeftVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, titleText.c_str(), &TestConfiguration::Ch1AutoThresholdDetection, &TestConfiguration::Ch1DetectionThreshold, &TestConfiguration::Ch1CableCrosstalkDetection, setAdjustVolumeDefaultState);
                 if (!TestConfiguration::Ch1CableCrosstalkDetection && previousCrossTalk)
                 {
                     openDialogVolumeAdjustDisabledCrosstalk = true;
                 }
 
+                titleText = "Right Channel Input (Output of DUT)";
+                if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
+                {
+                    titleText = "Right Channel Input (Output of Reference DAC)";
+                }
                 previousCrossTalk = TestConfiguration::Ch2CableCrosstalkDetection;
-                GuiHelper::AdjustVolumeDisplay("right channel volume", adjustVolumeManager->RightVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, "Right Channel Input (Output of DUT)", &TestConfiguration::Ch2AutoThresholdDetection, &TestConfiguration::Ch2DetectionThreshold, &TestConfiguration::Ch2CableCrosstalkDetection, setAdjustVolumeDefaultState);
+                GuiHelper::AdjustVolumeDisplay("right channel volume", adjustVolumeManager->RightVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, titleText.c_str(), &TestConfiguration::Ch2AutoThresholdDetection, &TestConfiguration::Ch2DetectionThreshold, &TestConfiguration::Ch2CableCrosstalkDetection, setAdjustVolumeDefaultState);
                 if (!TestConfiguration::Ch2CableCrosstalkDetection && previousCrossTalk)
                 {
                     openDialogVolumeAdjustDisabledCrosstalk = true;
                 }
 
-                GuiHelper::AdjustVolumeInstructionsTroubleshooting(GuiHelper::Tool::AudioLatency, (OutputOffsetProfile::OutputType)outputTypeIndex, lastCheckedInputSampleRate, &TestConfiguration::OutputVolume, &adjustVolumeManager->OverrideNoisyQuiet, (void*)resources.VolumeAdjustExampleTexture.TextureData, resources.VolumeAdjustExampleTexture.Width, resources.VolumeAdjustExampleTexture.Height, DpiScale);
+                GuiHelper::AdjustVolumeInstructionsTroubleshooting((OutputOffsetProfile::OutputType)outputTypeIndex, lastCheckedInputSampleRate, &TestConfiguration::OutputVolume, &adjustVolumeManager->OverrideNoisyQuiet, (void*)resources.VolumeAdjustExampleTexture.TextureData, resources.VolumeAdjustExampleTexture.Width, resources.VolumeAdjustExampleTexture.Height, DpiScale);
                 ImGui::Spacing();
                 
                 if (state == MeasurementToolGuiState::AdjustVolume)
@@ -491,6 +585,10 @@ bool Gui::DoGui()
                     state = MeasurementToolGuiState::MeasurementConfig;
                     outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, IncludeSurroundAsDefault(), true, OutputOffsetProfiles::CurrentProfile()->FormatFilter);
                     strcpy_s(TestNotes::Notes.DutModel, outputAudioEndpoints[outputDeviceIndex].Name.c_str());
+                    if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
+                    {
+                        SetDutPassthroughOutputType();
+                    }
                 }
             }
         }
@@ -520,10 +618,15 @@ bool Gui::DoGui()
                     ImGui::PushFont(FontHelper::BoldFont);
                     if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi
                         || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::ARC
-                        || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::eARC)
+                        || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::eARC
+                        || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
                     {
                         ImGui::Text("HDMI Audio Formats (LPCM)");
                         ImGui::PopFont();
+                        if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
+                        {
+                            ImGui::SameLine(); GuiHelper::HelpMarker("The audio format given to the Dual-Out Reference Device.\n\nThis is different than the audio format given by the DUT to the Reference DAC! The DUT may choose to transmit a different audio format.");
+                        }
                     }
                     else
                     {
@@ -597,15 +700,41 @@ bool Gui::DoGui()
                 {
                     ImGui::InputText("Dual-Out Reference Device", TestNotes::Notes.DaulOutRefDevice, IM_ARRAYSIZE(TestNotes::Notes.DaulOutRefDevice), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
                 }
-                GuiHelper::OtherCombo("Recording Method", "Recording Method (Other)", &TestNotes::Notes.RecordingMethodIndex, TestNotes::Notes.RecordingMethodOptions, IM_ARRAYSIZE(TestNotes::Notes.RecordingMethodOptions), TestNotes::Notes.RecordingMethodOther, IM_ARRAYSIZE(TestNotes::Notes.RecordingMethodOther));
+
+                if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
+                {
+                    if (DacLatencyProfiles::CurrentProfile() != &DacLatencyProfiles::None)
+                    {
+                        ImGui::BeginDisabled();
+                        strcpy_s(TestNotes::Notes.DAC, DacLatencyProfiles::CurrentProfile()->Name.c_str());
+                        ImGui::InputText("Reference DAC", TestNotes::Notes.DAC, IM_ARRAYSIZE(TestNotes::Notes.DAC));
+                        ImGui::EndDisabled();
+                    }
+                    else
+                    {
+                        ImGui::InputText("Reference DAC", TestNotes::Notes.DAC, IM_ARRAYSIZE(TestNotes::Notes.DAC), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
+                    }
+                }
+                else
+                {
+                    GuiHelper::OtherCombo("Recording Method", "Recording Method (Other)", &TestNotes::Notes.RecordingMethodIndex, TestNotes::Notes.RecordingMethodOptions, IM_ARRAYSIZE(TestNotes::Notes.RecordingMethodOptions), TestNotes::Notes.RecordingMethodOther, IM_ARRAYSIZE(TestNotes::Notes.RecordingMethodOther));
+                }
 
                 ImGui::PushFont(FontHelper::BoldFont);
                 ImGui::Text("Device Under Test");
                 ImGui::PopFont();
                 ImGui::InputText("Model", TestNotes::Notes.DutModel, IM_ARRAYSIZE(TestNotes::Notes.DutModel), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
                 ImGui::InputText("Firmware Version", TestNotes::Notes.DutFirmwareVersion, IM_ARRAYSIZE(TestNotes::Notes.DutFirmwareVersion), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
-                GuiHelper::OtherCombo("Output Type", "Output Type (Other)", &TestNotes::Notes.DutOutputTypeIndex, TestNotes::Notes.DutOutputTypeOptions, IM_ARRAYSIZE(TestNotes::Notes.DutOutputTypeOptions), TestNotes::Notes.DutOutputTypeOther, IM_ARRAYSIZE(TestNotes::Notes.DutOutputTypeOther));
-                if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi)
+                if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
+                {
+                    GuiHelper::OtherCombo("Output Type", "Output Type (Other)", &TestNotes::Notes.DutPassthroughOutputTypeIndex, TestNotes::Notes.DutPassthroughOutputTypeOptions, IM_ARRAYSIZE(TestNotes::Notes.DutPassthroughOutputTypeOptions), TestNotes::Notes.DutPassthroughOutputTypeOther, IM_ARRAYSIZE(TestNotes::Notes.DutPassthroughOutputTypeOther));
+                }
+                else
+                {
+                    GuiHelper::OtherCombo("Output Type", "Output Type (Other)", &TestNotes::Notes.DutOutputTypeIndex, TestNotes::Notes.DutOutputTypeOptions, IM_ARRAYSIZE(TestNotes::Notes.DutOutputTypeOptions), TestNotes::Notes.DutOutputTypeOther, IM_ARRAYSIZE(TestNotes::Notes.DutOutputTypeOther));
+                }
+                if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi
+                    || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
                 {
                     ImGui::InputText("Video Mode", TestNotes::Notes.DutVideoMode, IM_ARRAYSIZE(TestNotes::Notes.DutVideoMode), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
                 }
@@ -613,7 +742,8 @@ bool Gui::DoGui()
                 ImGui::InputText("Other Settings", TestNotes::Notes.DutOtherSettings, IM_ARRAYSIZE(TestNotes::Notes.DutOtherSettings), ImGuiInputTextFlags_CallbackCharFilter, (ImGuiInputTextCallback)GuiHelper::CsvInputFilter);
                 ImGui::Spacing();
 
-                if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi)
+                if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi
+                    || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
                 {
                     ImGui::PushFont(FontHelper::BoldFont);
                     ImGui::Text("Video Signal");
@@ -708,6 +838,8 @@ bool Gui::DoGui()
             break;
         case MeasurementToolGuiState::Results:
         {
+            std::string passthroughStr = OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough ? " Passthrough" : "";
+
             ImGui::PushFont(FontHelper::BoldFont);
             ImGui::Text("Measurement Results");
             ImGui::PopFont();
@@ -749,19 +881,19 @@ bool Gui::DoGui()
                     }
 
                     ImGui::PushFont(FontHelper::HeaderFont);
-                    ImGui::Text(std::format("Stereo Audio Latency: {}", stereoLatency).c_str());
+                    ImGui::Text(std::format("Stereo Audio{} Latency: {}", passthroughStr, stereoLatency).c_str());
                     ImGui::PopFont();
                     ImGui::Text(stereoFormat.c_str());
                     if (IncludeSurroundAsDefault())
                     {
                         ImGui::Spacing();
                         ImGui::PushFont(FontHelper::HeaderFont);
-                        ImGui::Text(std::format("5.1 Audio Latency: {}", fiveOneLatency).c_str());
+                        ImGui::Text(std::format("5.1 Audio{} Latency: {}", passthroughStr, fiveOneLatency).c_str());
                         ImGui::PopFont();
                         ImGui::Text(fiveOneFormat.c_str());
                         ImGui::Spacing();
                         ImGui::PushFont(FontHelper::HeaderFont);
-                        ImGui::Text(std::format("7.1 Audio Latency: {}", sevenOneLatency).c_str());
+                        ImGui::Text(std::format("7.1 Audio{} Latency: {}", passthroughStr, sevenOneLatency).c_str());
                         ImGui::PopFont();
                         ImGui::Text(sevenOneFormat.c_str());
                     }
@@ -808,18 +940,23 @@ bool Gui::DoGui()
                         if (avgResult.Format == selectedFormat)
                         {
                             ImGui::PushFont(FontHelper::BoldFont);
-                            ImGui::Text(std::format("Average Audio Latency: {} ms", round(avgResult.AverageLatency())).c_str());
+                            ImGui::Text(std::format("Average Audio{} Latency: {} ms", passthroughStr, round(avgResult.AverageLatency())).c_str());
                             ImGui::PopFont();
                             ImGui::Text(std::format("(rounded from: {} ms)", avgResult.AverageLatency()).c_str());
                             ImGui::Spacing();
-                            ImGui::Text(std::format("Min Audio Latency: {} ms", avgResult.MinLatency()).c_str());
-                            ImGui::Text(std::format("Max Audio Latency: {} ms", avgResult.MaxLatency()).c_str());
+                            ImGui::Text(std::format("Min Audio{} Latency: {} ms", passthroughStr, avgResult.MinLatency()).c_str());
+                            ImGui::Text(std::format("Max Audio{} Latency: {} ms", passthroughStr, avgResult.MaxLatency()).c_str());
                             ImGui::Text(std::format("Valid Measurements: {}", avgResult.Offsets.size()).c_str());
                             ImGui::Spacing();
                             ImGui::Text(std::format("Output Offset Profile: {}", avgResult.OffsetProfile->Name).c_str());
                             ImGui::Text(std::format("Output Offset Value: {} ms", avgResult.OutputOffsetFromProfile).c_str());
                             ImGui::Text(std::format("Verified Accuracy: {}", avgResult.Verified ? "Yes" : "No").c_str());
                             GuiHelper::VerifiedHelp();
+                            if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
+                            {
+                                ImGui::Text(std::format("Reference DAC: {}", avgResult.ReferenceDacName).c_str());
+                                ImGui::Text(std::format("Reference DAC Audio Latency: {} ms", avgResult.ReferenceDacLatency).c_str());
+                            }
 
                             break;
                         }
@@ -1059,7 +1196,35 @@ void Gui::StartTest()
         std::string fileString = StringHelper::GetFilenameSafeString(std::format("{} {}", TestNotes::Notes.DutModel, TestNotes::Notes.DutOutputType()));
         fileString = fileString.substr(0, 80); // 80 is a magic number that will keep path lengths reasonable without needing to do a lot of Windows API programming.
 
-        testManager = new TestManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex], selectedFormats, fileString, APP_FOLDER, (IResultsWriter&)ResultsWriter::Writer, OutputOffsetProfiles::CurrentProfile(), &DacLatencyProfiles::None);
+        
+        DacLatencyProfile* currentDacProfile =
+            OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough
+            ? DacLatencyProfiles::CurrentProfile() : &DacLatencyProfiles::None;
+
+        testManager = new TestManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex], selectedFormats, fileString, APP_FOLDER, (IResultsWriter&)ResultsWriter::Writer, OutputOffsetProfiles::CurrentProfile(), currentDacProfile);
+    }
+}
+
+void Gui::SetDutPassthroughOutputType()
+{
+    switch (DacLatencyProfiles::CurrentProfile()->InputType)
+    {
+    case DacLatencyProfile::DacInputType::ARC:
+        TestNotes::Notes.DutPassthroughOutputTypeIndex = 1;
+        break;
+    case DacLatencyProfile::DacInputType::eARC:
+        TestNotes::Notes.DutPassthroughOutputTypeIndex = 2;
+        break;
+    case DacLatencyProfile::DacInputType::SPDIF_Optical:
+        TestNotes::Notes.DutPassthroughOutputTypeIndex = 3;
+        break;
+    case DacLatencyProfile::DacInputType::SPDIF_Coax:
+        TestNotes::Notes.DutPassthroughOutputTypeIndex = 4;
+        break;
+    case DacLatencyProfile::DacInputType::Unknown:
+    default:
+        TestNotes::Notes.DutPassthroughOutputTypeIndex = 0;
+        break;
     }
 }
 
@@ -1067,5 +1232,6 @@ bool Gui::IncludeSurroundAsDefault()
 {
     return OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi
         || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::ARC
-        || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::eARC;
+        || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::eARC
+        || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough;
 }

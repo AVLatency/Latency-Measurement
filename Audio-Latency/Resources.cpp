@@ -11,6 +11,8 @@ Resources::Resources(HINSTANCE hInstance, ID3D11Device* g_pd3dDevice)
     LoadTexture(hInstance, g_pd3dDevice, ARC_CABLE_MAP, ArcCableMapTexture);
     LoadTexture(hInstance, g_pd3dDevice, EARC_CABLE_MAP, EArcCableMapTexture);
     LoadTexture(hInstance, g_pd3dDevice, ANALOG_CABLE_MAP, AnalogCableMapTexture);
+    LoadTexture(hInstance, g_pd3dDevice, HDMI_AUDIO_PASSTHROUGH_CABLE_MAP, HdmiAudioPassthroughCableMapTexture);
+    LoadTexture(hInstance, g_pd3dDevice, HDMI_AUDIO_PASSTHROUGH_DEFINITION, HdmiAudioPassthroughDefinitionTexture);
     LoadTexture(hInstance, g_pd3dDevice, HDMI_EDID_MODE, EDIDModeTexture);
     LoadTexture(hInstance, g_pd3dDevice, HDMI_WINDOWS_DISPLAY_SETTINGS, WindowsDisplaySettingsTexture);
     LoadTexture(hInstance, g_pd3dDevice, VOLUME_ADJUST_EXAMPLE, VolumeAdjustExampleTexture);
@@ -19,6 +21,8 @@ Resources::Resources(HINSTANCE hInstance, ID3D11Device* g_pd3dDevice)
     LoadTexture(hInstance, g_pd3dDevice, ANALOG_Y_SPLITTER, AnalogYSplitterTexture);
     LoadTexture(hInstance, g_pd3dDevice, ARC_EXAMPLE_DEVICE, ArcExampleDeviceTexture);
     LoadTexture(hInstance, g_pd3dDevice, EARC_EXAMPLE_DEVICE, EArcExampleDeviceTexture);
+    LoadTexture(hInstance, g_pd3dDevice, DEVICE_CV121AD, CV121ADTexture);
+    LoadTexture(hInstance, g_pd3dDevice, DEVICE_SHARCV1, SHARCv1Texture);
 }
 
 void Resources::LoadTexture(HINSTANCE hInstance, ID3D11Device* g_pd3dDevice, UINT type, AVLTexture& image)

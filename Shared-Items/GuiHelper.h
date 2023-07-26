@@ -7,8 +7,6 @@
 class GuiHelper
 {
 public:
-	enum struct Tool { AudioLatency, HdmiToDigitalAudio };
-
 	static void HelpMarker(const char* desc);
 	static void DeveloperOptions();
 	static void FormatDescriptions();
@@ -18,8 +16,8 @@ public:
 	static void OptionallyBoldText(const char* text, bool bold);
 	static void AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManager::VolumeAnalysis& analysis, float DpiScale, float tickMonitorWidth, float fullMonitorWidth, const char* title, bool* useAutoThreshold, float* manualThreshold, bool* cableCrosstalkDetection, bool setDefaultState);
 	static void PeakLevel(AdjustVolumeManager::PeakLevelGrade grade, const char* helpText);
-	static std::string CableHelpText(Tool tool, OutputOffsetProfile::OutputType outType);
-	static void AdjustVolumeInstructionsTroubleshooting(Tool tool, OutputOffsetProfile::OutputType outType, int lastCheckedInputSampleRate, float* outputVolume, bool* overrideNoisyQuiet, void* exampleTexture, int exampleTextureWidth, int exampleTextureHeight, float DpiScale);
+	static std::string CableHelpText(OutputOffsetProfile::OutputType outType);
+	static void AdjustVolumeInstructionsTroubleshooting(OutputOffsetProfile::OutputType outType, int lastCheckedInputSampleRate, float* outputVolume, bool* overrideNoisyQuiet, void* exampleTexture, int exampleTextureWidth, int exampleTextureHeight, float DpiScale);
 	static void TestConfiguration(float DpiScale, OutputOffsetProfile::OutputType outType);
 	static void VerifiedHelp();
 	static void DearImGuiLegal();

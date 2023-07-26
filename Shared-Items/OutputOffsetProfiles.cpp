@@ -20,6 +20,9 @@ OutputOffsetProfile* OutputOffsetProfiles::EArc_None = NULL;
 OutputOffsetProfile* OutputOffsetProfiles::Analog_BasicYSplitter = NULL;
 OutputOffsetProfile* OutputOffsetProfiles::Analog_None = NULL;
 
+OutputOffsetProfile* OutputOffsetProfiles::HdmiAudioPassthrough_HDV_MB01 = NULL;
+OutputOffsetProfile* OutputOffsetProfiles::HdmiAudioPassthrough_None = NULL;
+
 std::vector<OutputOffsetProfile*> OutputOffsetProfiles::Profiles;
 int OutputOffsetProfiles::SelectedProfileIndex = 0;
 
@@ -142,6 +145,20 @@ void OutputOffsetProfiles::InitializeProfiles(ProfileResources& resources)
 	Analog_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Analog, "Other", None_GetOffset, AudioEndpoint::AllFormatsFilter);
 	Analog_None->isNoOffset = true;
 	Profiles.push_back(Analog_None);
+
+	// *****************************************************
+	// HDMI AUDIO PASSTHROUGH LATENCY PROFILES
+	// *****************************************************
+
+	// A copy of the Hdmi_HDV_MB01 profile, but with OutputType::HdmiAudioPassthrough
+	HdmiAudioPassthrough_HDV_MB01 = new OutputOffsetProfile(OutputOffsetProfile::OutputType::HdmiAudioPassthrough, "HDV-MB01", Hdmi_HDV_MB01_GetOffset, AudioEndpoint::HdmiFormatsFilter);
+	HdmiAudioPassthrough_HDV_MB01->Image = Hdmi_HDV_MB01->Image;
+	HdmiAudioPassthrough_HDV_MB01->Description = Hdmi_HDV_MB01->Description;
+	Profiles.push_back(HdmiAudioPassthrough_HDV_MB01);
+
+	HdmiAudioPassthrough_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::HdmiAudioPassthrough, "Other", None_GetOffset, AudioEndpoint::HdmiFormatsFilter);
+	HdmiAudioPassthrough_None->isNoOffset = true;
+	Profiles.push_back(HdmiAudioPassthrough_None);
 
 	PrepareSubsetListsForGui();
 	PrepareOffsetStringsForGui();

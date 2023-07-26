@@ -16,6 +16,7 @@ public:
 		ARC,
 		eARC,
 		Analog,
+		HdmiAudioPassthrough,
 		ENUM_LENGTH
 	};
 

@@ -38,6 +38,9 @@ public:
 	static OutputOffsetProfile* Analog_BasicYSplitter;
 	static OutputOffsetProfile* Analog_None;
 
+	static OutputOffsetProfile* HdmiAudioPassthrough_HDV_MB01;
+	static OutputOffsetProfile* HdmiAudioPassthrough_None;
+
 	static std::vector<OutputOffsetProfile*> Profiles;
 	static int SelectedProfileIndex;
 
