@@ -6,6 +6,7 @@ ResultsWriter ResultsWriter::Writer;
 
 void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstream& detailedResultsStream, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result, std::string inputFormat)
 {
+    writeHeader ? detailedResultsStream << "Audio Latency Type," : detailedResultsStream << "\"" << OutputOffsetProfile::OutputTypeName(result.OffsetProfile->OutType) << "\",";
     writeHeader ? detailedResultsStream << "Time," : detailedResultsStream << "\"" << StringHelper::GetTimeString(result.Time, false) << "\",";
     writeHeader ? detailedResultsStream << "Audio Format," : detailedResultsStream << "\"" << result.Format->FormatString << "\",";
     writeHeader ? detailedResultsStream << "Recording," : detailedResultsStream << "\"" << result.GUID << ".wav\",";
@@ -88,6 +89,7 @@ void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstre
 
 void ResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& resultsStream, const AveragedResult& result)
 {
+    writeHeader ? resultsStream << "Audio Latency Type," : resultsStream << "\"" << OutputOffsetProfile::OutputTypeName(result.OffsetProfile->OutType) << "\",";
     writeHeader ? resultsStream << "Time," : resultsStream << "\"" << StringHelper::GetTimeString(result.Time, false) << "\",";
     writeHeader ? resultsStream << "Audio Format," : resultsStream << "\"" << result.Format->FormatString << "\",";
     writeHeader ? resultsStream << "," : resultsStream << "\"" << "\",";
