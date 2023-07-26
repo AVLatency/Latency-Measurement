@@ -5,7 +5,6 @@ class TestNotes
 public:
 	static TestNotes Notes;
 
-	bool DaulOutRefDeviceUseOutputOffsetProfile = true;
 	char DaulOutRefDevice[128] = "";
 	bool DACUseLatencyProfile = true;
 	char DAC[128] = "";

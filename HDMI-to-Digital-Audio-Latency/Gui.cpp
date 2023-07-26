@@ -505,8 +505,7 @@ bool Gui::DoGui()
                 ImGui::SameLine(); GuiHelper::HelpMarker("These notes will be included in the .csv spreadsheet result files that are saved in the folder that this app was launched from.");
                 ImGui::Spacing();
 
-                TestNotes::Notes.DaulOutRefDeviceUseOutputOffsetProfile = OutputOffsetProfiles::CurrentProfile()->isNoOffset;
-                if (TestNotes::Notes.DaulOutRefDeviceUseOutputOffsetProfile)
+                if (!OutputOffsetProfiles::CurrentProfile()->isNoOffset)
                 {
                     ImGui::BeginDisabled();
                     strcpy_s(TestNotes::Notes.DaulOutRefDevice, OutputOffsetProfiles::CurrentProfile()->Name.c_str());
