@@ -5,7 +5,6 @@ on: [push]
 env:
   # Path to the solution file relative to the root of the project.
   AUDIO-LATENCY_SOLUTION_FILE_PATH: "Audio-Latency/Audio-Latency.vcxproj"
-  HDMI-TO-DIGITAL-AUDIO-LATENCY_SOLUTION_FILE_PATH: "HDMI-to-Digital-Audio-Latency/HDMI-to-Digital-Audio-Latency.vcxproj"
   AUDIO-DRIVER-CHECK_SOLUTION_FILE_PATH: "Audio-Driver-Check/Audio-Driver-Check.vcxproj"
 
   # Configuration type to build.
@@ -35,12 +34,6 @@ jobs:
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.AUDIO-LATENCY_SOLUTION_FILE_PATH}}
 
-    - name: HDMI-to-Digital-Audio-Latency
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      # Add additional options to the MSBuild command line here (like platform or verbosity level).
-      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.HDMI-TO-DIGITAL-AUDIO-LATENCY_SOLUTION_FILE_PATH}}
-
     - name: Build Audio-Driver-Check
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
@@ -52,7 +45,6 @@ jobs:
         New-Item "FinalFiles" -Type Directory
         New-Item "FinalFiles/AV Latency.com Toolkit" -Type Directory
         Copy-Item "Audio-Latency/Release/Audio-Latency/Audio Latency.exe" -Destination "FinalFiles/AV Latency.com Toolkit/Audio Latency.exe"
-        Copy-Item "HDMI-to-Digital-Audio-Latency/Release/HDMI-to-Digital-Audio-Latency/HDMI Audio Passthrough Latency.exe" -Destination "FinalFiles/AV Latency.com Toolkit/HDMI Audio Passthrough Latency.exe"
         Copy-Item "Audio-Driver-Check/Release/Audio-Generator-Driver-Check/Audio Generator Driver Check.exe" -Destination "FinalFiles/AV Latency.com Toolkit/Audio Generator Driver Check.exe"
       shell: powershell
     
