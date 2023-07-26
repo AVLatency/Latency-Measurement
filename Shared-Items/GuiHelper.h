@@ -20,7 +20,7 @@ public:
 	static void PeakLevel(AdjustVolumeManager::PeakLevelGrade grade, const char* helpText);
 	static std::string CableHelpText(Tool tool, OutputOffsetProfile::OutputType outType);
 	static void AdjustVolumeInstructionsTroubleshooting(Tool tool, OutputOffsetProfile::OutputType outType, int lastCheckedInputSampleRate, float* outputVolume, bool* overrideNoisyQuiet, void* exampleTexture, int exampleTextureWidth, int exampleTextureHeight, float DpiScale);
-	static void TestConfiguration(float DpiScale);
+	static void TestConfiguration(float DpiScale, OutputOffsetProfile::OutputType outType);
 	static void VerifiedHelp();
 	static void DearImGuiLegal();
 

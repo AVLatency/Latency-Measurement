@@ -514,65 +514,68 @@ bool Gui::DoGui()
                 ImGui::TableNextRow();
 
                 ImGui::TableNextColumn();
-                ImGui::PushFont(FontHelper::BoldFont);
-                if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi
-                    || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::ARC
-                    || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::eARC)
-                {
-                    ImGui::Text("HDMI Audio Formats (LPCM)");
-                    ImGui::PopFont();
-                }
-                else
-                {
-                    ImGui::Text("Windows Audio Formats (LPCM)");
-                    ImGui::PopFont();
-                    ImGui::SameLine(); GuiHelper::HelpMarker("This is the Windows audio format that will be used to send audio to the audio driver."
-                        " The final S/PDIF format may be slightly different. For example, 16 bit audio may be sent as 20 bit audio via S/PDIF or the speaker assignment may be disregarded.");
-                }
-                ImGui::Spacing();
 
-                std::vector<AudioFormat>& supportedFormats = outputAudioEndpoints[outputDeviceIndex].SupportedFormats;
-
-                if (ImGui::Button("Select Default"))
+                if (OutputOffsetProfiles::CurrentProfile()->OutType != OutputOffsetProfile::OutputType::Analog)
                 {
-                    for (AudioFormat& format : supportedFormats)
+                    ImGui::PushFont(FontHelper::BoldFont);
+                    if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi
+                        || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::ARC
+                        || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::eARC)
                     {
-                        format.UserSelected = false;
+                        ImGui::Text("HDMI Audio Formats (LPCM)");
+                        ImGui::PopFont();
                     }
-                    outputAudioEndpoints[outputDeviceIndex].SetDefaultFormats(IncludeSurroundAsDefault(), true);
-                }
-                ImGui::SameLine();
-                if (ImGui::Button("Select All"))
-                {
-                    for (AudioFormat& format : supportedFormats)
+                    else
                     {
-                        format.UserSelected = true;
+                        ImGui::Text("Windows Audio Formats (LPCM)");
+                        ImGui::PopFont();
+                        ImGui::SameLine(); GuiHelper::HelpMarker("This is the Windows audio format that will be used to send audio to the audio driver."
+                            " The final S/PDIF format may be slightly different. For example, 16 bit audio may be sent as 20 bit audio via S/PDIF or the speaker assignment may be disregarded.");
                     }
-                }
-                ImGui::SameLine();
-                if (ImGui::Button("Select None"))
-                {
-                    for (AudioFormat& format : supportedFormats)
+                    ImGui::Spacing();
+
+                    std::vector<AudioFormat>& supportedFormats = outputAudioEndpoints[outputDeviceIndex].SupportedFormats;
+
+                    if (ImGui::Button("Select Default"))
                     {
-                        format.UserSelected = false;
+                        for (AudioFormat& format : supportedFormats)
+                        {
+                            format.UserSelected = false;
+                        }
+                        outputAudioEndpoints[outputDeviceIndex].SetDefaultFormats(IncludeSurroundAsDefault(), true);
                     }
-                }
-
-                ImGui::BeginChild("formatsChildWindow", ImVec2(0, 15 * ImGui::GetTextLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar);
-                {
-                    for (AudioFormat& format : supportedFormats)
+                    ImGui::SameLine();
+                    if (ImGui::Button("Select All"))
                     {
-                        ImGui::Checkbox(format.FormatString.c_str(), &format.UserSelected);
+                        for (AudioFormat& format : supportedFormats)
+                        {
+                            format.UserSelected = true;
+                        }
                     }
+                    ImGui::SameLine();
+                    if (ImGui::Button("Select None"))
+                    {
+                        for (AudioFormat& format : supportedFormats)
+                        {
+                            format.UserSelected = false;
+                        }
+                    }
+
+                    ImGui::BeginChild("formatsChildWindow", ImVec2(0, 15 * ImGui::GetTextLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar);
+                    {
+                        for (AudioFormat& format : supportedFormats)
+                        {
+                            ImGui::Checkbox(format.FormatString.c_str(), &format.UserSelected);
+                        }
+                    }
+                    ImGui::EndChild();
+
+                    GuiHelper::FormatDescriptions();
+
+                    ImGui::Spacing();
+                    ImGui::Text("");
                 }
-                ImGui::EndChild();
-
-                GuiHelper::FormatDescriptions();
-
-                ImGui::Spacing();
-                ImGui::Text("");
-
-                GuiHelper::TestConfiguration(DpiScale);
+                GuiHelper::TestConfiguration(DpiScale, OutputOffsetProfiles::CurrentProfile()->OutType);
 
                 ImGui::Spacing();
 
@@ -1051,6 +1054,8 @@ void Gui::StartTest()
                 selectedFormats.push_back(&format);
             }
         }
+
+        TestConfiguration::ForceSingleMeasurement = OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Analog;
 
         std::string fileString = StringHelper::GetFilenameSafeString(std::format("{} {}", TestNotes::Notes.DutModel, TestNotes::Notes.DutOutputType()));
         fileString = fileString.substr(0, 80); // 80 is a magic number that will keep path lengths reasonable without needing to do a lot of Windows API programming.

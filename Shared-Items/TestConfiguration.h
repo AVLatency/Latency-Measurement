@@ -5,6 +5,11 @@ class TestConfiguration
 public:
 	static bool SaveIndividualRecordingResults;
 	static bool SaveIndividualWavFiles;
+	/// <summary>
+	/// When this is set to true, NumMeasurements will be ignored and only 1 measurement will be
+	/// taken. This makes sense when using an output method that does not allow for different audio formats.
+	/// </summary>
+	static bool ForceSingleMeasurement;
 	static int NumMeasurements;
 	/// <summary>
 	/// In seconds. This is the end padding that is added to the end of the recording samples.

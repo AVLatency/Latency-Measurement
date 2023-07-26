@@ -9,6 +9,7 @@
 
 bool TestConfiguration::SaveIndividualRecordingResults = IS_DEBUG;
 bool TestConfiguration::SaveIndividualWavFiles = IS_DEBUG;
+bool TestConfiguration::ForceSingleMeasurement = false;
 int TestConfiguration::NumMeasurements = 10;
 float TestConfiguration::AdditionalRecordingTime = 0.42;
 int TestConfiguration::InitialIgnoreLength = 10;

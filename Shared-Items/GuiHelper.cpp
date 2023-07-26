@@ -419,15 +419,18 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(Tool tool, OutputOffsetP
     }
 }
 
-void GuiHelper::TestConfiguration(float DpiScale)
+void GuiHelper::TestConfiguration(float DpiScale, OutputOffsetProfile::OutputType outType)
 {
     ImGui::PushFont(FontHelper::BoldFont);
     ImGui::Text("Test Configuration");
     ImGui::PopFont();
-
     ImGui::PushItemWidth(75 * DpiScale);
-    ImGui::DragInt("Number of Measurements", &TestConfiguration::NumMeasurements, .05f, 1, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
-    ImGui::SameLine(); GuiHelper::HelpMarker("The number of measurements for each of the selected audio formats. A higher number of measurements will give a more accurate average audio latency result, but will take longer to complete.");
+
+    if (outType != OutputOffsetProfile::OutputType::Analog)
+    {
+        ImGui::DragInt("Number of Measurements", &TestConfiguration::NumMeasurements, .05f, 1, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::SameLine(); GuiHelper::HelpMarker("The number of measurements for each of the selected audio formats. A higher number of measurements will give a more accurate average audio latency result, but will take longer to complete.");
+    }
     if (ImGui::TreeNode("Advanced Configuration"))
     {
         ImGui::DragFloat("Lead-in Duration (seconds)", &TestConfiguration::LeadInDuration, 0.1f, 0.4f, 10.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
