@@ -390,6 +390,17 @@ bool Gui::DoGui()
                             ImGui::TextWrapped(currentProfile->Description.c_str());
                         }
 
+                        ImGui::TableNextColumn();
+
+                        ImGui::PushFont(FontHelper::BoldFont);
+                        ImGui::Text("DAC Latency");
+                        ImGui::SameLine(); GuiHelper::HelpMarker("This latency will be accounted for in reported measurements!\n\nOnly one latency value is used because the exact output format of the DUT may not match the format that is given to it.");
+                        ImGui::PopFont();
+
+                        ImGui::Spacing();
+
+                        ImGui::Text(std::format("{} ms", DacLatencyProfiles::CurrentProfile()->Latency).c_str());
+
                         ImGui::EndTable();
                     }
                 }
