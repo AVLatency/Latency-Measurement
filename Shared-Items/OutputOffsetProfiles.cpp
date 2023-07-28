@@ -107,7 +107,7 @@ void OutputOffsetProfiles::InitializeProfiles(ProfileResources& resources)
 	Arc_ExampleReferenceSetup = new OutputOffsetProfile(OutputOffsetProfile::OutputType::ARC, "Example ARC Reference Setup", Arc_ExampleReferenceSetup_GetOffset, AudioEndpoint::AllFormatsFilter);
 	Arc_ExampleReferenceSetup->Image = resources.Arc_ExampleDevice_Texture;
 	Arc_ExampleReferenceSetup->Description =
-		"This is a DEBUG-only example ARC reference device/setup that can be used as a starting point for creating new Output Offset Profiles.";
+		"This is a DEBUG-only example ARC Receiver Latency reference device/setup that can be used as a starting point for creating new Output Offset Profiles.";
 	Profiles.push_back(Arc_ExampleReferenceSetup);
 #endif //_DEBUG
 
@@ -123,7 +123,7 @@ void OutputOffsetProfiles::InitializeProfiles(ProfileResources& resources)
 	EArc_ExampleReferenceSetup = new OutputOffsetProfile(OutputOffsetProfile::OutputType::eARC, "Example eARC Reference Setup", EArc_ExampleReferenceSetup_GetOffset, AudioEndpoint::AllFormatsFilter);
 	EArc_ExampleReferenceSetup->Image = resources.EArc_ExampleDevice_Texture;
 	EArc_ExampleReferenceSetup->Description =
-		"This is a DEBUG-only example eARC reference device/setup that can be used as a starting point for creating new Output Offset Profiles.";
+		"This is a DEBUG-only example eARC Receiver Latency reference device/setup that can be used as a starting point for creating new Output Offset Profiles.";
 	Profiles.push_back(EArc_ExampleReferenceSetup);
 #endif //_DEBUG
 

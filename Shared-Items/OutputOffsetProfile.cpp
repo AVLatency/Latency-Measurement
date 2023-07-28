@@ -20,10 +20,10 @@ std::string OutputOffsetProfile::OutputTypeName(OutputOffsetProfile::OutputType 
 		return "S/PDIF";
 		break;
 	case OutputOffsetProfile::OutputType::ARC:
-		return "ARC";
+		return "ARC Receiver";
 		break;
 	case OutputOffsetProfile::OutputType::eARC:
-		return "eARC";
+		return "eARC Receiver";
 		break;
 	case OutputOffsetProfile::OutputType::Analog:
 		return "Analog";
