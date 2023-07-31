@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <fstream> // For std::endl
 #include <sstream>
+#include "WasapiOutput.h"
 
 float Gui::DpiScale = 1.0f;
 bool Gui::DpiScaleChanged = false;

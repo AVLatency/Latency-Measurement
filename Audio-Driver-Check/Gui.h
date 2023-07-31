@@ -5,7 +5,7 @@
 #include <vector>
 #include <AudioEndpoint.h>
 #include "imgui.h"
-#include "WasapiOutput.h"
+#include "AbstractOutput.h"
 #include "GeneratedSamples.h"
 #include <thread>
 
@@ -27,7 +27,7 @@ private:
 	int outputDeviceIndex = 0;
 	std::vector<AudioEndpoint> outputAudioEndpoints; // TODO: refs and pointers to these are used here and there, which isn't safe.
 
-	WasapiOutput* output = nullptr;
+	AbstractOutput* output = nullptr;
 	std::thread* outputThread = nullptr;
 	GeneratedSamples* currentSamples = nullptr;
 	bool firstChannelOnly = false;

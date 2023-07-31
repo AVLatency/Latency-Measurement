@@ -1,6 +1,6 @@
 #pragma once
 #include "WasapiInput.h"
-#include "WasapiOutput.h"
+#include "AbstractOutput.h"
 #include <thread>
 #include "AudioEndpoint.h"
 #include "GeneratedSamples.h"
@@ -40,7 +40,7 @@ public:
 		PeakLevelGrade Grade = PeakLevelGrade::Quiet;
 	};
 
-	WasapiOutput* output = nullptr;
+	AbstractOutput* output = nullptr;
 	WasapiInput* input = nullptr;
 
 	bool working = false;

@@ -14,6 +14,7 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)AbstractOutput.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)AdjustVolumeManager.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)AudioEndpoint.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)AudioEndpointHelper.h" />
@@ -45,6 +46,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)WindowsWaveFormats.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)AbstractOutput.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)AdjustVolumeManager.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)AudioEndpoint.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)AudioEndpointHelper.cpp" />

@@ -5,6 +5,7 @@
 #include <math.h>
 #include "TestConfiguration.h"
 #include "RecordingAnalyzer.h"
+#include "WasapiOutput.h"
 
 #define SAFE_RELEASE(punk)  \
               if ((punk) != NULL)  \
