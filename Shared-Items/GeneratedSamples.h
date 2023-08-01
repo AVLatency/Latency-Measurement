@@ -15,7 +15,7 @@ public:
 		Config(WaveType type) : waveType(type), blipFrequency(1), blipSampleLength(24), onOffFrequency(1) {};
 	};
 
-	WAVEFORMATEX* WaveFormat;
+	int SamplesPerSecond;
 	WaveType Type;
 
     // Test wave is constructed like this:
@@ -54,8 +54,8 @@ public:
 	/// </summary>
 	int constantToneFreq = 300;
 
-	GeneratedSamples(WAVEFORMATEX* waveFormat, WaveType type);
-	GeneratedSamples(WAVEFORMATEX* waveFormat, Config config);
+	GeneratedSamples(int samplesPerSecond, WaveType type);
+	GeneratedSamples(int samplesPerSecond, Config config);
 	~GeneratedSamples();
 
 	double TestWaveDurationInSeconds() const;

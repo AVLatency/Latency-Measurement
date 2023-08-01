@@ -8,11 +8,11 @@
 #define CONSTANT_TONE_AMPLITUDE 0.002
 #define TICK_AMPLITUDE (1.0 - CONSTANT_TONE_AMPLITUDE)
 
-GeneratedSamples::GeneratedSamples(WAVEFORMATEX* waveFormat, WaveType type)
-    : GeneratedSamples(waveFormat, Config(type) ) { }
+GeneratedSamples::GeneratedSamples(int samplesPerSecond, WaveType type)
+    : GeneratedSamples(samplesPerSecond, Config(type)) { }
 
-    GeneratedSamples::GeneratedSamples(WAVEFORMATEX* waveFormat, Config config)
-    : WaveFormat(waveFormat), Type(config.waveType)
+    GeneratedSamples::GeneratedSamples(int samplesPerSecond, Config config)
+    : SamplesPerSecond(samplesPerSecond), Type(config.waveType)
 {
     switch (Type)
     {
@@ -51,7 +51,7 @@ GeneratedSamples::~GeneratedSamples()
 
 double GeneratedSamples::TestWaveDurationInSeconds() const
 {
-    return samplesLength / (double)WaveFormat->nSamplesPerSec;
+    return samplesLength / (double)SamplesPerSecond;
 }
 
 double GeneratedSamples::GetTickFrequency(int sampleRate)
@@ -62,7 +62,7 @@ double GeneratedSamples::GetTickFrequency(int sampleRate)
 
 void GeneratedSamples::GenerateLatencyMeasurementSamples()
 {
-    int sampleRate = WaveFormat->nSamplesPerSec;
+    int sampleRate = SamplesPerSecond;
 
     // Timing
     double startPadding = TestConfiguration::LeadInDuration;
@@ -130,7 +130,7 @@ void GeneratedSamples::GenerateLatencyMeasurementSamples()
 
 void GeneratedSamples::GenerateVolumeAdjustmentSamples()
 {
-    int sampleRate = WaveFormat->nSamplesPerSec;
+    int sampleRate = SamplesPerSecond;
 
     // Timing
     double durationSeconds = 0.1f;
@@ -181,7 +181,7 @@ void GeneratedSamples::GenerateVolumeAdjustmentSamples()
 
 void GeneratedSamples::GenerateFormatSwitchSamples()
 {
-    int sampleRate = WaveFormat->nSamplesPerSec;
+    int sampleRate = SamplesPerSecond;
 
     // Timing
     double durationSeconds = 1.0f;
@@ -202,7 +202,7 @@ void GeneratedSamples::GenerateFormatSwitchSamples()
 
 void GeneratedSamples::GenerateTestPattern_ToneSamples()
 {
-    int sampleRate = WaveFormat->nSamplesPerSec;
+    int sampleRate = SamplesPerSecond;
 
     samplesLength = sampleRate; // 1 second
     samples = new float[samplesLength];
@@ -230,7 +230,7 @@ void GeneratedSamples::GenerateTestPattern_TonePlusHighFreqSamples()
 
 void GeneratedSamples::GenerateTestPattern_ToneHighFreqOnOffSamples(double frequency)
 {
-    int sampleRate = WaveFormat->nSamplesPerSec;
+    int sampleRate = SamplesPerSecond;
     samplesLength = sampleRate / frequency; // high frequency on/off
     if (samplesLength < 2)
     {
@@ -256,7 +256,7 @@ void GeneratedSamples::GenerateTestPattern_ToneHighFreqOnOffSamples(double frequ
 
 void GeneratedSamples::GenerateTestPattern_ToneHighFreqBlip(int blipSampleLength, double frequency)
 {
-    int sampleRate = WaveFormat->nSamplesPerSec;
+    int sampleRate = SamplesPerSecond;
     samplesLength = round(sampleRate / frequency); // high frequency on/off
     if (samplesLength < 2)
     {
@@ -281,7 +281,7 @@ void GeneratedSamples::GenerateTestPattern_ToneHighFreqBlip(int blipSampleLength
 
 void GeneratedSamples::GenerateTestPattern_VisuallyIdentifiableSamples()
 {
-    int sampleRate = WaveFormat->nSamplesPerSec;
+    int sampleRate = SamplesPerSecond;
     samplesLength = sampleRate / 10; // 0.1 second pattern: enough to easily visualize 100 ms latency
     if (samplesLength < 2)
     {

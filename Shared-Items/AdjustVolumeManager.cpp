@@ -25,7 +25,7 @@ AdjustVolumeManager::AdjustVolumeManager(const AudioEndpoint& outputEndpoint, co
 
 	if (waveFormat != NULL)
 	{
-		generatedSamples = new GeneratedSamples(waveFormat, GeneratedSamples::WaveType::VolumeAdjustment);
+		generatedSamples = new GeneratedSamples(waveFormat->nSamplesPerSec, GeneratedSamples::WaveType::VolumeAdjustment);
 
 		output = new WasapiOutput(outputEndpoint, true, true, generatedSamples->samples, generatedSamples->samplesLength, waveFormat);
 		outputThread = new std::thread([this] { output->StartPlayback(); });
@@ -245,7 +245,7 @@ void AdjustVolumeManager::CopyBuffer(float* sourceBuffer, int sourceBufferLength
 void AdjustVolumeManager::AnalyseChannel(VolumeAnalysis& analysis, float* recordedSamples, int recordedSamplesLength)
 {
 	// Get some info about the ticks that were generated and create the sample buffers
-	int outputSampleRate = generatedSamples->WaveFormat->nSamplesPerSec;
+	int outputSampleRate = generatedSamples->SamplesPerSecond;
 	int inputSampleRate = input->waveFormat.Format.nSamplesPerSec;
 	double expectedTickFrequency = generatedSamples->GetTickFrequency(outputSampleRate);
 	int tickDurationInSamples = ceil(inputSampleRate / expectedTickFrequency);
@@ -403,7 +403,7 @@ void AdjustVolumeManager::SetGrades()
 void AdjustVolumeManager::CheckCableCrosstalk(VolumeAnalysis& analysis, VolumeAnalysis& other, const float& threshold)
 {
 	// Get some info about the ticks that were generated and create the sample buffers
-	int outputSampleRate = generatedSamples->WaveFormat->nSamplesPerSec;
+	int outputSampleRate = generatedSamples->SamplesPerSecond;
 	int inputSampleRate = input->waveFormat.Format.nSamplesPerSec;
 	double expectedTickFrequency = generatedSamples->GetTickFrequency(outputSampleRate);
 	int tickDurationInSamples = ceil(inputSampleRate / expectedTickFrequency);
@@ -425,7 +425,7 @@ void AdjustVolumeManager::CheckCableCrosstalk(VolumeAnalysis& analysis, VolumeAn
 void AdjustVolumeManager::SetChannelGrade(VolumeAnalysis& analysis, const float& threshold)
 {
 	// Get some info about the ticks that were generated and create the sample buffers
-	int outputSampleRate = generatedSamples->WaveFormat->nSamplesPerSec;
+	int outputSampleRate = generatedSamples->SamplesPerSecond;
 	int inputSampleRate = input->waveFormat.Format.nSamplesPerSec;
 	double expectedTickFrequency = generatedSamples->GetTickFrequency(outputSampleRate);
 	int tickDurationInSamples = ceil(inputSampleRate / expectedTickFrequency);

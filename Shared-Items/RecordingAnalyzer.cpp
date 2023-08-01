@@ -46,7 +46,7 @@ RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& gene
         && result.Channel2.ValidResult)
     {
         bool detectedCrosstalk = false;
-        double expectedTickFrequency = GeneratedSamples::GetTickFrequency(generatedSamples.WaveFormat->nSamplesPerSec);
+        double expectedTickFrequency = GeneratedSamples::GetTickFrequency(generatedSamples.SamplesPerSecond);
         int halfTickDurationInSamples = ceil((inputSampleRate / 2) / expectedTickFrequency);
 
         // This is a different method of checking for crosstalk than what is used in AdjustVolumeManager::CheckCableCrosstalk.
@@ -263,7 +263,7 @@ RecordingSingleChannelResult RecordingAnalyzer::AnalyzeSingleChannel(const Gener
     result.RecordingSampleRate = inputSampleRate;
     result.DetectionThreshold = threshold;
 
-    vector<TickPosition> possibleTickPositions = GetTicks(recordedSamples, recordedSamplesLength, inputSampleRate, GeneratedSamples::GetTickFrequency(config.WaveFormat->nSamplesPerSec), 3, threshold);
+    vector<TickPosition> possibleTickPositions = GetTicks(recordedSamples, recordedSamplesLength, inputSampleRate, GeneratedSamples::GetTickFrequency(config.SamplesPerSecond), 3, threshold);
 
     if (possibleTickPositions.size() < 3)
     {

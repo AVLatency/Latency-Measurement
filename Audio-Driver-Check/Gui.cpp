@@ -257,7 +257,7 @@ bool Gui::DoGui()
                 {
                     config.onOffFrequency = onOffFrequency;
                 }
-                currentSamples = new GeneratedSamples(waveFormat, config);
+                currentSamples = new GeneratedSamples(waveFormat->nSamplesPerSec, config);
                 output = new WasapiOutput(outputAudioEndpoints[outputDeviceIndex], true, firstChannelOnly, currentSamples->samples, currentSamples->samplesLength, waveFormat);
                 SetThreadExecutionState(ES_DISPLAY_REQUIRED); // Prevent display from turning off while running this tool.
                 outputThread = new std::thread([this] { output->StartPlayback(); });
