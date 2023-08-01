@@ -8,6 +8,7 @@
 #include "AbstractOutput.h"
 #include "GeneratedSamples.h"
 #include <thread>
+#include "OutputAPI.h"
 
 class Gui
 {
@@ -24,6 +25,7 @@ public:
 private:
 	Resources& resources;
 	GuiState state = GuiState::SelectAudioDevice;
+	OutputAPI outputType = OutputAPI::WasapiExclusive;
 	int outputDeviceIndex = 0;
 	std::vector<AudioEndpoint> outputAudioEndpoints; // TODO: refs and pointers to these are used here and there, which isn't safe.
 
@@ -42,4 +44,6 @@ private:
 
 	void RefreshAudioEndpoints();
 	void ClearFormatSelection();
+
+	void WaveTypeSelection(int samplesPerSec);
 };

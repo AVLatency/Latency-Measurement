@@ -28,6 +28,8 @@
     <ClInclude Include="GuiState.h" />
     <ClInclude Include="Gui.h" />
     <ClInclude Include="Resources.h" />
+    <ClInclude Include="OutputAPI.h" />
+    <ClInclude Include="OutputAPIHelper.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\imgui\imgui.cpp">
@@ -56,6 +58,7 @@
     </ClCompile>
     <ClCompile Include="Gui.cpp" />
     <ClCompile Include="Resources.cpp" />
+    <ClCompile Include="OutputAPIHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.txt" />
