@@ -46,7 +46,8 @@ void TestManager::StartTest()
 {
 	SetThreadExecutionState(ES_DISPLAY_REQUIRED); // Prevent display from turning off while running this tool.
 
-	TotalPasses = TestConfiguration::NumMeasurements > 0 && !TestConfiguration::ForceSingleMeasurement ? TestConfiguration::NumMeasurements : 1;
+	TotalPasses = (TestConfiguration::NumMeasurements > 0
+		&& TestConfiguration::MeasureAverageLatency) ? TestConfiguration::NumMeasurements : 1;
 	TotalRecordingsPerPass = SelectedFormats.size() > 0 ? SelectedFormats.size() : 1;
 
 	for (int i = 0; i < TotalPasses; i++)
@@ -86,7 +87,7 @@ void TestManager::StartTest()
 		TotalRecordingsPerPass = RecordingCount;
 
 		// Inject a dummy format when we're down to a single recording to force the HDMI Audio Device to re-sync to a new signal format
-		if (TestConfiguration::InsertFormatSwitch && !switchedSampleRates && !StopRequested)
+		if (TestConfiguration::MeasureAverageLatency && !switchedSampleRates && !StopRequested)
 		{
 			bool formatSwitchResult = PlayFormatSwitch(lastPlayedFormat);
 			if (!formatSwitchResult)

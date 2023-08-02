@@ -428,8 +428,24 @@ void GuiHelper::TestConfiguration(float DpiScale, OutputOffsetProfile::OutputTyp
 
     if (outType != OutputOffsetProfile::OutputType::Analog)
     {
-        ImGui::DragInt("Number of Measurements", &TestConfiguration::NumMeasurements, .05f, 1, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::Checkbox("Calculate Min, Max, and Average Latency", &TestConfiguration::MeasureAverageLatency);
+        ImGui::SameLine(); GuiHelper::HelpMarker(
+            "Switches the output audio format between measurements to force the DUT to re-sync. This is usually equivalent to power cycling the DUT between measurements.\n\n"
+            "If you choose to disable this feature, you can manually calculate the min, max, and average latency of your DUT by power cycling the DUT between measurements.");
+
+        int one = 1;
+        int* numMeasurements = &TestConfiguration::NumMeasurements;
+        if (!TestConfiguration::MeasureAverageLatency)
+        {
+            numMeasurements = &one;
+            ImGui::BeginDisabled();
+        }
+        ImGui::DragInt("Number of Measurements", numMeasurements, .05f, 1, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
         ImGui::SameLine(); GuiHelper::HelpMarker("The number of measurements for each of the selected audio formats. A higher number of measurements will give a more accurate average audio latency result, but will take longer to complete.");
+        if (!TestConfiguration::MeasureAverageLatency)
+        {
+            ImGui::EndDisabled();
+        }
     }
     if (ImGui::TreeNode("Advanced Configuration"))
     {
@@ -454,9 +470,6 @@ void GuiHelper::TestConfiguration(float DpiScale, OutputOffsetProfile::OutputTyp
 
         ImGui::DragInt("Initial Ignored Time (ms)", &TestConfiguration::InitialIgnoreLength, .05f, 1, 400, "%d", ImGuiSliderFlags_AlwaysClamp);
         ImGui::SameLine(); GuiHelper::HelpMarker("This is the time from the start of the recording that will be ignored. This addresses interruption of measurements caused by pops and clicks at the start of playback. Default: 10 milliseconds.");
-
-        ImGui::Checkbox("Format Switch Tone", &TestConfiguration::InsertFormatSwitch);
-        ImGui::SameLine(); GuiHelper::HelpMarker("When only one sample rate is being measured per pass, this feature will insert an audio tone at a different sample rate to force the DUT to resync between passes. This is necessary to determine the range of audio latency that the DUT exhibits for a given audio format. Disabling this will likely result in an incorrectly low audio latency variance.");
 
         ImGui::TreePop();
     }

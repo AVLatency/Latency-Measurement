@@ -1184,6 +1184,11 @@ void Gui::RefreshAudioEndpoints()
 
 void Gui::StartSelectAudioDevices()
 {
+    // Default to MeasureAverageLatency == true for all latency types except for Analog.
+    // This is set in the StartSelectAudioDevices() because that's when the user has locked into the
+    // OutputOffsetProfile::OutputType
+    TestConfiguration::MeasureAverageLatency = OutputOffsetProfiles::CurrentProfile()->OutType != OutputOffsetProfile::OutputType::Analog;
+
     RefreshAudioEndpoints();
     state = MeasurementToolGuiState::SelectAudioDevices;
 }
@@ -1220,8 +1225,6 @@ void Gui::StartTest()
                 selectedFormats.push_back(&format);
             }
         }
-
-        TestConfiguration::ForceSingleMeasurement = OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Analog;
 
         std::string fileString = StringHelper::GetFilenameSafeString(std::format("{} {}", TestNotes::Notes.DutModel, TestNotes::Notes.DutOutputType()));
         fileString = fileString.substr(0, 80); // 80 is a magic number that will keep path lengths reasonable without needing to do a lot of Windows API programming.

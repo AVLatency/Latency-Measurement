@@ -9,7 +9,6 @@
 
 bool TestConfiguration::SaveIndividualRecordingResults = IS_DEBUG;
 bool TestConfiguration::SaveIndividualWavFiles = IS_DEBUG;
-bool TestConfiguration::ForceSingleMeasurement = false;
 int TestConfiguration::NumMeasurements = 10;
 float TestConfiguration::AdditionalRecordingTime = 0.42;
 int TestConfiguration::InitialIgnoreLength = 10;
@@ -45,4 +44,4 @@ float TestConfiguration::Ch2DetectionThreshold = 0.05f * 2.0f;
 bool TestConfiguration::Ch2CableCrosstalkDetection = true;
 
 int TestConfiguration::AttemptsBeforeFail = 6;
-bool TestConfiguration::InsertFormatSwitch = true;
+bool TestConfiguration::MeasureAverageLatency = true;
