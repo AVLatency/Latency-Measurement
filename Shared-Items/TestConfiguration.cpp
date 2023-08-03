@@ -7,7 +7,7 @@
 #endif // _DEBUG
 
 
-bool TestConfiguration::SaveIndividualRecordingResults = IS_DEBUG;
+bool TestConfiguration::SaveIndividualRecordingResults = true;
 bool TestConfiguration::SaveIndividualWavFiles = IS_DEBUG;
 int TestConfiguration::NumMeasurements = 10;
 float TestConfiguration::AdditionalRecordingTime = 0.42;
