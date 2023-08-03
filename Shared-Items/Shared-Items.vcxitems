@@ -24,6 +24,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)AVLTexture.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)DacLatencyProfile.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)DacLatencyProfiles.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)DebugLog.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)FilesystemCheck.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)FontHelper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)GeneratedSamples.h" />
@@ -56,6 +57,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)AveragedResult.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)DacLatencyProfile.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)DacLatencyProfiles.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)DebugLog.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)FilesystemCheck.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)FontHelper.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)GeneratedSamples.cpp" />
