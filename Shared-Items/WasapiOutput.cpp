@@ -222,6 +222,9 @@ WORD WasapiOutput::GetFormatID()
 
 HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flags)
 {
+    // TODO: upon review (over a year after I wrote this) I'm not sure why the next four are here at all.
+    // Wouldn't it be better to let this function fill the buffer with 0 samples and set the 
+    // AUDCLNT_BUFFERFLAGS_SILENT at the end of the function?
     if (FinishedPlayback(true))
     {
         *flags = AUDCLNT_BUFFERFLAGS_SILENT;
