@@ -140,7 +140,8 @@ void TestManager::StartTest()
 
 bool TestManager::PerformRecording(AudioFormat* audioFormat)
 {
-	GeneratedSamples* generatedSamples = new GeneratedSamples(audioFormat->WaveFormat->nSamplesPerSec, GeneratedSamples::WaveType::LatencyMeasurement);
+	int sampleRate = audioFormat == nullptr ? AudioGraphOutput::CurrentWindowsSampleRate() : audioFormat->WaveFormat->nSamplesPerSec;
+	GeneratedSamples* generatedSamples = new GeneratedSamples(sampleRate, GeneratedSamples::WaveType::LatencyMeasurement);
 
 	bool validResult = false;
 	for (int i = 0; i < TestConfiguration::AttemptsBeforeFail; i++)

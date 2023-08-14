@@ -13,7 +13,7 @@ std::string AudioFormat::GetCurrentWinAudioFormatString()
 
 std::string AudioFormat::GetFormatString(WAVEFORMATEX* waveFormat, bool includeEncoding, bool includeChannelInfo)
 {
-    std::string encodingStr = std::format("{} ", GetAudioDataFormatString(waveFormat));
+    std::string encodingStr = std::format("{} ", GetAudioDataEncodingString(waveFormat));
     std::string channelInfoStr = std::format("-{}", GetChannelInfoString(waveFormat));
     return std::format("{}{}ch-{}kHz-{}bit{}",
         includeEncoding ? encodingStr : "",
@@ -26,7 +26,7 @@ std::string AudioFormat::GetFormatString(WAVEFORMATEX* waveFormat, bool includeE
 std::string AudioFormat::GetChannelInfoString(WAVEFORMATEX* waveFormat)
 {
     std::string result;
-    if (waveFormat->wFormatTag != WAVE_FORMAT_EXTENSIBLE)
+    if (waveFormat == nullptr || waveFormat->wFormatTag != WAVE_FORMAT_EXTENSIBLE)
     {
         result = "Default.Speakers";
     }
@@ -101,8 +101,13 @@ WORD AudioFormat::GetFormatID(WAVEFORMATEX* waveFormat)
     }
 }
 
-std::string AudioFormat::GetAudioDataFormatString(WAVEFORMATEX* waveFormat)
+std::string AudioFormat::GetAudioDataEncodingString(WAVEFORMATEX* waveFormat)
 {
+    if (waveFormat == nullptr)
+    {
+        return "UnknownEncoding";
+    }
+
     WORD formatID = GetFormatID(waveFormat);
 
     if (formatID == WAVE_FORMAT_IEEE_FLOAT)

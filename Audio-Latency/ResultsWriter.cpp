@@ -6,9 +6,16 @@ ResultsWriter ResultsWriter::Writer;
 
 void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstream& detailedResultsStream, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result, std::string inputFormat)
 {
+    WAVEFORMATEX* waveFormat = nullptr;
+    if (result.Format != nullptr)
+    {
+        waveFormat = result.Format->WaveFormat;
+    }
+    std::string formatString = result.Format == nullptr ? "CurrentWindowsAudioFormat" : result.Format->FormatString;
+
     writeHeader ? detailedResultsStream << "Audio Latency Type," : detailedResultsStream << "\"" << OutputOffsetProfile::OutputTypeName(result.OffsetProfile->OutType) << "\",";
     writeHeader ? detailedResultsStream << "Time," : detailedResultsStream << "\"" << StringHelper::GetTimeString(result.Time, false) << "\",";
-    writeHeader ? detailedResultsStream << "Audio Format," : detailedResultsStream << "\"" << result.Format->FormatString << "\",";
+    writeHeader ? detailedResultsStream << "Audio Format," : detailedResultsStream << "\"" << formatString << "\",";
     writeHeader ? detailedResultsStream << "Recording," : detailedResultsStream << "\"" << result.GUID << ".wav\",";
     writeHeader ? detailedResultsStream << "," : detailedResultsStream << "\"" << "\",";
     writeHeader ? detailedResultsStream << "Audio Latency (ms)," : detailedResultsStream << "\"" << result.AudioLatency() << "\",";
@@ -32,11 +39,11 @@ void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstre
     writeHeader ? detailedResultsStream << "DUT Audio Settings," : detailedResultsStream << "\"" << TestNotes::Notes.DutAudioSettings << "\",";
     writeHeader ? detailedResultsStream << "DUT Other Settings," : detailedResultsStream << "\"" << TestNotes::Notes.DutOtherSettings << "\",";
     writeHeader ? detailedResultsStream << "," : detailedResultsStream << "\"" << "\",";
-    writeHeader ? detailedResultsStream << "Audio Format," : detailedResultsStream << "\"" << AudioFormat::GetAudioDataFormatString(result.Format->WaveFormat) << "\",";
-    writeHeader ? detailedResultsStream << "Audio Channels," : detailedResultsStream << "\"" << result.Format->WaveFormat->nChannels << "\",";
-    writeHeader ? detailedResultsStream << "Audio Sample Rate," : detailedResultsStream << "\"" << result.Format->WaveFormat->nSamplesPerSec << "\",";
-    writeHeader ? detailedResultsStream << "Audio Bit Depth," : detailedResultsStream << "\"" << result.Format->WaveFormat->wBitsPerSample << "\",";
-    writeHeader ? detailedResultsStream << "Audio Speakers Description," : detailedResultsStream << "\"" << AudioFormat::GetChannelInfoString(result.Format->WaveFormat) << "\",";
+    writeHeader ? detailedResultsStream << "Audio Encoding," : detailedResultsStream << "\"" << AudioFormat::GetAudioDataEncodingString(waveFormat) << "\",";
+    writeHeader ? detailedResultsStream << "Audio Channels," : detailedResultsStream << "\"" << (waveFormat == nullptr ? 0 : waveFormat->nChannels) << "\",";
+    writeHeader ? detailedResultsStream << "Audio Sample Rate," : detailedResultsStream << "\"" << (waveFormat == nullptr ? 0 : waveFormat->nSamplesPerSec) << "\",";
+    writeHeader ? detailedResultsStream << "Audio Bit Depth," : detailedResultsStream << "\"" << (waveFormat == nullptr ? 0 : waveFormat->wBitsPerSample) << "\",";
+    writeHeader ? detailedResultsStream << "Audio Speakers Description," : detailedResultsStream << "\"" << AudioFormat::GetChannelInfoString(waveFormat) << "\",";
     writeHeader ? detailedResultsStream << "," : detailedResultsStream << "\"" << "\",";
     if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi
         || result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
@@ -107,9 +114,16 @@ void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstre
 
 void ResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& resultsStream, const AveragedResult& result)
 {
+    WAVEFORMATEX* waveFormat = nullptr;
+    if (result.Format != nullptr)
+    {
+        waveFormat = result.Format->WaveFormat;
+    }
+    std::string formatString = result.Format == nullptr ? "CurrentWindowsAudioFormat" : result.Format->FormatString;
+
     writeHeader ? resultsStream << "Audio Latency Type," : resultsStream << "\"" << OutputOffsetProfile::OutputTypeName(result.OffsetProfile->OutType) << "\",";
     writeHeader ? resultsStream << "Time," : resultsStream << "\"" << StringHelper::GetTimeString(result.Time, false) << "\",";
-    writeHeader ? resultsStream << "Audio Format," : resultsStream << "\"" << result.Format->FormatString << "\",";
+    writeHeader ? resultsStream << "Audio Format," : resultsStream << "\"" << formatString << "\",";
     writeHeader ? resultsStream << "," : resultsStream << "\"" << "\",";
     writeHeader ? resultsStream << "Avg. Audio Latency (ms)," : resultsStream << "\"" << result.AverageLatency() << "\",";
     writeHeader ? resultsStream << "Min Audio Latency (ms)," : resultsStream << "\"" << result.MinLatency() << "\",";
@@ -135,11 +149,11 @@ void ResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& result
     writeHeader ? resultsStream << "DUT Audio Settings," : resultsStream << "\"" << TestNotes::Notes.DutAudioSettings << "\",";
     writeHeader ? resultsStream << "DUT Other Settings," : resultsStream << "\"" << TestNotes::Notes.DutOtherSettings << "\",";
     writeHeader ? resultsStream << "," : resultsStream << "\"" << "\",";
-    writeHeader ? resultsStream << "Audio Format," : resultsStream << "\"" << AudioFormat::GetAudioDataFormatString(result.Format->WaveFormat) << "\",";
-    writeHeader ? resultsStream << "Audio Channels," : resultsStream << "\"" << result.Format->WaveFormat->nChannels << "\",";
-    writeHeader ? resultsStream << "Audio Sample Rate," : resultsStream << "\"" << result.Format->WaveFormat->nSamplesPerSec << "\",";
-    writeHeader ? resultsStream << "Audio Bit Depth," : resultsStream << "\"" << result.Format->WaveFormat->wBitsPerSample << "\",";
-    writeHeader ? resultsStream << "Audio Speakers Description," : resultsStream << "\"" << AudioFormat::GetChannelInfoString(result.Format->WaveFormat) << "\",";
+    writeHeader ? resultsStream << "Audio Encoding," : resultsStream << "\"" << AudioFormat::GetAudioDataEncodingString(waveFormat) << "\",";
+    writeHeader ? resultsStream << "Audio Channels," : resultsStream << "\"" << (waveFormat == nullptr ? 0 : waveFormat->nChannels) << "\",";
+    writeHeader ? resultsStream << "Audio Sample Rate," : resultsStream << "\"" << (waveFormat == nullptr ? 0 : waveFormat->nSamplesPerSec) << "\",";
+    writeHeader ? resultsStream << "Audio Bit Depth," : resultsStream << "\"" << (waveFormat == nullptr ? 0 : waveFormat->wBitsPerSample) << "\",";
+    writeHeader ? resultsStream << "Audio Speakers Description," : resultsStream << "\"" << AudioFormat::GetChannelInfoString(waveFormat) << "\",";
     writeHeader ? resultsStream << "," : resultsStream << "\"" << "\",";
     if (result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::Hdmi
         || result.OffsetProfile->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)

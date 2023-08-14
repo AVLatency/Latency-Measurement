@@ -51,6 +51,7 @@ public:
 	bool (*FormatFilter)(WAVEFORMATEX*);
 
 	OutputOffset GetOffsetFromWaveFormat(WAVEFORMATEX* waveFormat);
+	OutputOffset GetOffsetForCurrentWinFormat();
 
 
 	/// <summary>

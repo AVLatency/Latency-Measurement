@@ -447,7 +447,8 @@ bool Gui::DoGui()
                 RefreshAudioEndpoints();
             }
 
-            if (outputAudioEndpoints.size() < 1)
+            if ((OutputOffsetProfiles::CurrentProfile()->isCurrentWindowsAudioFormat && defaultAudioOutputEndpoint == nullptr)
+                || outputAudioEndpoints.size() < 1)
             {
                 ImGui::Text("Error: cannot find an output audio device.");
             }
@@ -457,33 +458,41 @@ bool Gui::DoGui()
             }
             else
             {
-                if (ImGui::BeginCombo("Output Device", outputAudioEndpoints[outputDeviceIndex].Name.c_str()))
+                if (OutputOffsetProfiles::CurrentProfile()->isCurrentWindowsAudioFormat)
                 {
-                    for (int i = 0; i < outputAudioEndpoints.size(); i++)
-                    {
-                        const bool is_selected = (outputDeviceIndex == i);
-                        if (ImGui::Selectable(outputAudioEndpoints[i].Name.c_str(), is_selected))
-                        {
-                            outputDeviceIndex = i;
-                        }
-                        // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-                        if (is_selected)
-                            ImGui::SetItemDefaultFocus();
-                    }
-                    ImGui::EndCombo();
-                }
-                ImGui::SameLine();
-                if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi
-                    || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::ARC
-                    || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::eARC
-                    || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
-                {
-                    GuiHelper::HelpMarker("Select your HDMI audio output.");
+                    ImGui::Text(std::format("Output Device (current Windows audio format): {}", defaultAudioOutputEndpoint->Name).c_str());
                 }
                 else
                 {
-                    GuiHelper::HelpMarker("Select your audio output.");
+                    if (ImGui::BeginCombo("Output Device", SelectedAudioOutputEndpoint().Name.c_str()))
+                    {
+                        for (int i = 0; i < outputAudioEndpoints.size(); i++)
+                        {
+                            const bool is_selected = (outputDeviceIndex == i);
+                            if (ImGui::Selectable(outputAudioEndpoints[i].Name.c_str(), is_selected))
+                            {
+                                outputDeviceIndex = i;
+                            }
+                            // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                            if (is_selected)
+                                ImGui::SetItemDefaultFocus();
+                        }
+                        ImGui::EndCombo();
+                    }
+                    ImGui::SameLine();
+                    if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi
+                        || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::ARC
+                        || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::eARC
+                        || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
+                    {
+                        GuiHelper::HelpMarker("Select your HDMI audio output.");
+                    }
+                    else
+                    {
+                        GuiHelper::HelpMarker("Select your audio output.");
+                    }
                 }
+
                 if (ImGui::BeginCombo("Input Device", inputAudioEndpoints[inputDeviceIndex].Name.c_str()))
                 {
                     for (int i = 0; i < inputAudioEndpoints.size(); i++)
@@ -613,8 +622,8 @@ bool Gui::DoGui()
                 else if (state == MeasurementToolGuiState::FinishingAdjustVolume)
                 {
                     state = MeasurementToolGuiState::MeasurementConfig;
-                    outputAudioEndpoints[outputDeviceIndex].PopulateSupportedFormats(false, IncludeSurroundAsDefault(), true, OutputOffsetProfiles::CurrentProfile()->FormatFilter);
-                    strcpy_s(TestNotes::Notes.DutModel, outputAudioEndpoints[outputDeviceIndex].Name.c_str());
+                    SelectedAudioOutputEndpoint().PopulateSupportedFormats(false, IncludeSurroundAsDefault(), true, OutputOffsetProfiles::CurrentProfile()->FormatFilter);
+                    strcpy_s(TestNotes::Notes.DutModel, SelectedAudioOutputEndpoint().Name.c_str());
                     if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
                     {
                         SetDutPassthroughOutputType();
@@ -668,7 +677,7 @@ bool Gui::DoGui()
                     }
                     ImGui::Spacing();
 
-                    std::vector<AudioFormat>& supportedFormats = outputAudioEndpoints[outputDeviceIndex].SupportedFormats;
+                    std::vector<AudioFormat>& supportedFormats = SelectedAudioOutputEndpoint().SupportedFormats;
 
                     if (ImGui::Button("Select Default"))
                     {
@@ -676,7 +685,7 @@ bool Gui::DoGui()
                         {
                             format.UserSelected = false;
                         }
-                        outputAudioEndpoints[outputDeviceIndex].SetDefaultFormats(IncludeSurroundAsDefault(), true);
+                        SelectedAudioOutputEndpoint().SetDefaultFormats(IncludeSurroundAsDefault(), true);
                     }
                     ImGui::SameLine();
                     if (ImGui::Button("Select All"))
@@ -885,48 +894,67 @@ bool Gui::DoGui()
             {
                 if (ImGui::BeginTabItem("Summary"))
                 {
-                    std::string stereoLatency = "Not measured";
-                    std::string stereoFormat = "- LPCM 2ch-48kHz-16bit";
-                    std::string fiveOneLatency = "Not measured";
-                    std::string fiveOneFormat = "- LPCM 6ch-48kHz-16bit";
-                    std::string sevenOneLatency = "Not measured";
-                    std::string sevenOneFormat = "- LPCM 8ch-48kHz-16bit";
-
-                    for (AveragedResult& result : testManager->SummaryResults)
+                    if (OutputOffsetProfiles::CurrentProfile()->isCurrentWindowsAudioFormat)
                     {
-                        if (result.Format->WaveFormat->nChannels == 2)
+                        std::string latencyStr = "Not measured";
+                        for (AveragedResult& result : testManager->SummaryResults)
                         {
-                            stereoLatency = std::format("{} ms", round(result.AverageLatency()));
-                            stereoFormat = std::format("- LPCM {}", result.Format->FormatString);
+                            if (result.Format == nullptr)
+                            {
+                                latencyStr = std::format("{} ms", round(result.AverageLatency()));
+                            }
                         }
-                        if (result.Format->WaveFormat->nChannels == 6)
-                        {
-                            fiveOneLatency = std::format("{} ms", round(result.AverageLatency()));
-                            fiveOneFormat = std::format("- LPCM {}", result.Format->FormatString);
-                        }
-                        if (result.Format->WaveFormat->nChannels == 8)
-                        {
-                            sevenOneLatency = std::format("{} ms", round(result.AverageLatency()));
-                            sevenOneFormat = std::format("- LPCM {}", result.Format->FormatString);
-                        }
+
+                        ImGui::PushFont(FontHelper::HeaderFont);
+                        ImGui::Text(std::format("Audio{} Latency: {}", passthroughStr, latencyStr).c_str());
+                        ImGui::PopFont();
+                        ImGui::Text("- Current Windows audio format");
                     }
-
-                    ImGui::PushFont(FontHelper::HeaderFont);
-                    ImGui::Text(std::format("Stereo Audio{} Latency: {}", passthroughStr, stereoLatency).c_str());
-                    ImGui::PopFont();
-                    ImGui::Text(stereoFormat.c_str());
-                    if (IncludeSurroundAsDefault())
+                    else
                     {
-                        ImGui::Spacing();
+                        std::string stereoLatency = "Not measured";
+                        std::string stereoFormat = "- LPCM 2ch-48kHz-16bit";
+                        std::string fiveOneLatency = "Not measured";
+                        std::string fiveOneFormat = "- LPCM 6ch-48kHz-16bit";
+                        std::string sevenOneLatency = "Not measured";
+                        std::string sevenOneFormat = "- LPCM 8ch-48kHz-16bit";
+
+                        for (AveragedResult& result : testManager->SummaryResults)
+                        {
+                            if (result.Format->WaveFormat->nChannels == 2)
+                            {
+                                stereoLatency = std::format("{} ms", round(result.AverageLatency()));
+                                stereoFormat = std::format("- LPCM {}", result.Format->FormatString);
+                            }
+                            if (result.Format->WaveFormat->nChannels == 6)
+                            {
+                                fiveOneLatency = std::format("{} ms", round(result.AverageLatency()));
+                                fiveOneFormat = std::format("- LPCM {}", result.Format->FormatString);
+                            }
+                            if (result.Format->WaveFormat->nChannels == 8)
+                            {
+                                sevenOneLatency = std::format("{} ms", round(result.AverageLatency()));
+                                sevenOneFormat = std::format("- LPCM {}", result.Format->FormatString);
+                            }
+                        }
+
                         ImGui::PushFont(FontHelper::HeaderFont);
-                        ImGui::Text(std::format("5.1 Audio{} Latency: {}", passthroughStr, fiveOneLatency).c_str());
+                        ImGui::Text(std::format("Stereo Audio{} Latency: {}", passthroughStr, stereoLatency).c_str());
                         ImGui::PopFont();
-                        ImGui::Text(fiveOneFormat.c_str());
-                        ImGui::Spacing();
-                        ImGui::PushFont(FontHelper::HeaderFont);
-                        ImGui::Text(std::format("7.1 Audio{} Latency: {}", passthroughStr, sevenOneLatency).c_str());
-                        ImGui::PopFont();
-                        ImGui::Text(sevenOneFormat.c_str());
+                        ImGui::Text(stereoFormat.c_str());
+                        if (IncludeSurroundAsDefault())
+                        {
+                            ImGui::Spacing();
+                            ImGui::PushFont(FontHelper::HeaderFont);
+                            ImGui::Text(std::format("5.1 Audio{} Latency: {}", passthroughStr, fiveOneLatency).c_str());
+                            ImGui::PopFont();
+                            ImGui::Text(fiveOneFormat.c_str());
+                            ImGui::Spacing();
+                            ImGui::PushFont(FontHelper::HeaderFont);
+                            ImGui::Text(std::format("7.1 Audio{} Latency: {}", passthroughStr, sevenOneLatency).c_str());
+                            ImGui::PopFont();
+                            ImGui::Text(sevenOneFormat.c_str());
+                        }
                     }
 
                     ImGui::EndTabItem();
@@ -943,7 +971,8 @@ bool Gui::DoGui()
                         for (auto avgResult : testManager->AveragedResults)
                         {
                             const bool is_selected = (resultFormatIndex == n);
-                            if (ImGui::Selectable(avgResult.Format->FormatString.c_str(), is_selected))
+                            std::string formatStr = avgResult.Format == nullptr ? "Current Windows audio format" : avgResult.Format->FormatString;
+                            if (ImGui::Selectable(formatStr.c_str(), is_selected))
                             {
                                 resultFormatIndex = n;
                             }
@@ -1003,7 +1032,8 @@ bool Gui::DoGui()
                         {
                             for (AudioFormat* format : testManager->FailedFormats)
                             {
-                                ImGui::Text(format->FormatString.c_str());
+                                std::string formatStr = format == nullptr ? "Current Windows audio format" : format->FormatString;
+                                ImGui::Text(formatStr.c_str());
                             }
                             ImGui::EndListBox();
                         }
@@ -1179,8 +1209,25 @@ void Gui::RefreshAudioEndpoints()
 {
     outputAudioEndpoints = AudioEndpointHelper::GetAudioEndPoints(eRender);
     inputAudioEndpoints = AudioEndpointHelper::GetAudioEndPoints(eCapture);
+    if (defaultAudioOutputEndpoint != nullptr)
+    {
+        delete defaultAudioOutputEndpoint;
+    }
+    defaultAudioOutputEndpoint = AudioEndpointHelper::GetDefaultAudioEndPoint(eRender);
     outputDeviceIndex = 0;
     inputDeviceIndex = 0;
+}
+
+AudioEndpoint& Gui::SelectedAudioOutputEndpoint()
+{
+    if (OutputOffsetProfiles::CurrentProfile()->isCurrentWindowsAudioFormat)
+    {
+        return *defaultAudioOutputEndpoint;
+    }
+    else
+    {
+        return outputAudioEndpoints[outputDeviceIndex];
+    }
 }
 
 void Gui::StartSelectAudioDevices()
@@ -1204,7 +1251,7 @@ void Gui::StartAdjustVolume()
     }
     if (adjustVolumeManager == nullptr)
     {
-        adjustVolumeManager = new AdjustVolumeManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex], DpiScale * 270, DpiScale * 250, TestConfiguration::Ch1DetectionThreshold, TestConfiguration::Ch2DetectionThreshold);
+        adjustVolumeManager = new AdjustVolumeManager(SelectedAudioOutputEndpoint(), inputAudioEndpoints[inputDeviceIndex], DpiScale * 270, DpiScale * 250, TestConfiguration::Ch1DetectionThreshold, TestConfiguration::Ch2DetectionThreshold);
     }
 }
 
@@ -1225,7 +1272,7 @@ void Gui::StartTest()
         }
         else
         {
-            for (AudioFormat& format : outputAudioEndpoints[outputDeviceIndex].SupportedFormats)
+            for (AudioFormat& format : SelectedAudioOutputEndpoint().SupportedFormats)
             {
                 if (format.UserSelected)
                 {
@@ -1242,7 +1289,7 @@ void Gui::StartTest()
             OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough
             ? DacLatencyProfiles::CurrentProfile() : &DacLatencyProfiles::None;
 
-        testManager = new TestManager(outputAudioEndpoints[outputDeviceIndex], inputAudioEndpoints[inputDeviceIndex], selectedFormats, fileString, APP_FOLDER, (IResultsWriter&)ResultsWriter::Writer, OutputOffsetProfiles::CurrentProfile(), currentDacProfile);
+        testManager = new TestManager(SelectedAudioOutputEndpoint(), inputAudioEndpoints[inputDeviceIndex], selectedFormats, fileString, APP_FOLDER, (IResultsWriter&)ResultsWriter::Writer, OutputOffsetProfiles::CurrentProfile(), currentDacProfile);
     }
 }
 

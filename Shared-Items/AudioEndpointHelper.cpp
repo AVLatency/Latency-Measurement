@@ -99,6 +99,59 @@ Exit:
     return result;
 }
 
+/// <summary>
+/// Taken from https://learn.microsoft.com/en-us/windows/win32/coreaudio/rendering-a-stream
+/// </summary>
+AudioEndpoint* AudioEndpointHelper::GetDefaultAudioEndPoint(EDataFlow type)
+{
+    HRESULT hr;
+    IMMDeviceEnumerator* pEnumerator = NULL;
+    IMMDevice* pEndpoint = NULL;
+    IPropertyStore* pProps = NULL;
+    LPWSTR pwszID = NULL;
+
+    hr = CoCreateInstance(
+        CLSID_MMDeviceEnumerator, NULL,
+        CLSCTX_ALL, IID_IMMDeviceEnumerator,
+        (void**)&pEnumerator);
+    if (!FAILED(hr))
+    {
+        hr = pEnumerator->GetDefaultAudioEndpoint(type, eMultimedia, &pEndpoint); // eMultimedia matches AudioGraphOutput Render::AudioRenderCategory::Media
+        if (!FAILED(hr))
+        {
+            // Get the endpoint ID string.
+            hr = pEndpoint->GetId(&pwszID);
+            if (!FAILED(hr))
+            {
+                hr = pEndpoint->OpenPropertyStore(STGM_READ, &pProps);
+                if (!FAILED(hr))
+                {
+                    PROPVARIANT varName;
+                    // Initialize container for property value.
+                    PropVariantInit(&varName);
+
+                    // Get the endpoint's friendly-name property.
+                    hr = pProps->GetValue(PKEY_Device_FriendlyName, &varName);
+                    if (!FAILED(hr))
+                    {
+                        AudioEndpoint* result = new AudioEndpoint(pEndpoint, (char*)_bstr_t(varName.pwszVal), (char*)_bstr_t(pwszID));
+
+                        SAFE_RELEASE(pEnumerator)
+                        SAFE_RELEASE(pEndpoint)
+                        SAFE_RELEASE(pProps)
+                        return result;
+                    }
+                }
+            }
+        }
+    }
+
+    SAFE_RELEASE(pEnumerator)
+    SAFE_RELEASE(pEndpoint)
+    SAFE_RELEASE(pProps)
+    return nullptr;
+}
+
 int AudioEndpointHelper::GetInputMixFormatSampleRate(const AudioEndpoint& endpoint)
 {
     const IID IID_IAudioClient = __uuidof(IAudioClient);

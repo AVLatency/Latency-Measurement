@@ -36,7 +36,7 @@ void AudioGraphOutput::StartPlayback()
 
 IAsyncAction AudioGraphOutput::CreateGraphAsync(AudioGraphWrapper* audioGraph)
 {
-	AudioGraphSettings settings(Render::AudioRenderCategory::Media);
+	AudioGraphSettings settings(Render::AudioRenderCategory::Media); // Matches AudioEndpointHelper::GetDefaultAudioEndPoint eMultimedia
 	// Explicitly disabling audio processing to ensure the test waveform isn't excessively modified
 	// This is already going to be the case for LowestLatency mode
 	settings.DesiredRenderDeviceAudioProcessing(AudioProcessing::Raw);

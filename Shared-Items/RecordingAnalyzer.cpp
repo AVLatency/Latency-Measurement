@@ -17,7 +17,9 @@ const std::string RecordingAnalyzer::invalidRecordingsFilename{ "Invalid-Individ
 
 RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& generatedSamples, const WasapiInput& input, AudioFormat* format, OutputOffsetProfile* currentProfile, DacLatencyProfile* referenceDacLatency)
 {
-    OutputOffsetProfile::OutputOffset offset = currentProfile->GetOffsetFromWaveFormat(format->WaveFormat);
+    OutputOffsetProfile::OutputOffset offset = currentProfile->isCurrentWindowsAudioFormat
+        ? currentProfile->GetOffsetForCurrentWinFormat()
+        : currentProfile->GetOffsetFromWaveFormat(format->WaveFormat);
     RecordingResult result(format, currentProfile, offset.value, offset.verified, referenceDacLatency->Name, referenceDacLatency->Latency);
 
     // Extract individual channels for analysis

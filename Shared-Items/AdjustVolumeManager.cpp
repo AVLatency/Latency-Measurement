@@ -6,6 +6,8 @@
 #include "TestConfiguration.h"
 #include "RecordingAnalyzer.h"
 #include "WasapiOutput.h"
+#include "OutputOffsetProfiles.h"
+#include "AudioGraphOutput.h"
 
 #define SAFE_RELEASE(punk)  \
               if ((punk) != NULL)  \
@@ -21,22 +23,32 @@ AdjustVolumeManager::AdjustVolumeManager(const AudioEndpoint& outputEndpoint, co
 	SetThreadExecutionState(ES_DISPLAY_REQUIRED); // Prevent display from turning off while running this tool.
 	working = true;
 
-	WAVEFORMATEX* waveFormat = GetWaveFormat(outputEndpoint);
-
-	if (waveFormat != NULL)
+	WAVEFORMATEX* waveFormat = NULL;
+	
+	if (!OutputOffsetProfiles::CurrentProfile()->isCurrentWindowsAudioFormat)
 	{
-		generatedSamples = new GeneratedSamples(waveFormat->nSamplesPerSec, GeneratedSamples::WaveType::VolumeAdjustment);
+		waveFormat = GetWaveFormat(outputEndpoint);
+		if (waveFormat == NULL)
+		{
+			throw "Could not find a suitable wave format for adjusting volume."; // TODO: error handling
+		}
+	}
 
-		output = new WasapiOutput(outputEndpoint, true, true, generatedSamples->samples, generatedSamples->samplesLength, waveFormat);
-		outputThread = new std::thread([this] { output->StartPlayback(); });
+	int sampleRate = waveFormat == NULL ? AudioGraphOutput::CurrentWindowsSampleRate() : waveFormat->nSamplesPerSec;
+	generatedSamples = new GeneratedSamples(sampleRate, GeneratedSamples::WaveType::VolumeAdjustment);
 
-		input = new WasapiInput(inputEndpoint, true, recordBufferDurationInSeconds);
-		inputThread = new std::thread([this] { input->StartRecording(); });
+	if (waveFormat == NULL)
+	{
+		output = new AudioGraphOutput(true, true, generatedSamples->samples, generatedSamples->samplesLength);
 	}
 	else
 	{
-		throw "Could not find a suitable wave format for adjusting volume."; // TODO: error handling
+		output = new WasapiOutput(outputEndpoint, true, true, generatedSamples->samples, generatedSamples->samplesLength, waveFormat);
 	}
+	outputThread = new std::thread([this] { output->StartPlayback(); });
+
+	input = new WasapiInput(inputEndpoint, true, recordBufferDurationInSeconds);
+	inputThread = new std::thread([this] { input->StartRecording(); });
 }
 
 AdjustVolumeManager::~AdjustVolumeManager()

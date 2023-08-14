@@ -45,3 +45,8 @@ OutputOffsetProfile::OutputOffset OutputOffsetProfile::GetOffsetFromWaveFormat(W
 {
 	return GetOffset(waveFormat->nChannels, waveFormat->nSamplesPerSec, waveFormat->wBitsPerSample);
 }
+
+OutputOffsetProfile::OutputOffset OutputOffsetProfile::GetOffsetForCurrentWinFormat()
+{
+	return GetOffset(0, 0, 0);
+}
