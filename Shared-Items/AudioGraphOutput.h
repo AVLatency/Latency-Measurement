@@ -1,5 +1,6 @@
 #pragma once
 #include "AbstractOutput.h"
+#include "AudioGraphWrapper.h"
 #include "winrt/Windows.Foundation.h"
 #include "winrt/Windows.Media.Audio.h"
 
@@ -34,11 +35,11 @@ private:
 
 	bool stopRequested = false;
 
-	AudioGraph audioGraph = nullptr;
-	AudioDeviceOutputNode deviceOutputNode = nullptr;
-	AudioFrameInputNode frameInputNode = nullptr;
-	event_token quantumStartedEventToken;
+	AudioGraphWrapper* audioGraph = nullptr;
+	static int lastSampleRate;
 
+	static IAsyncAction CreateGraphAsync(AudioGraphWrapper* audioGraph);
+	void DestroyGraph();
 	IAsyncAction StartPlaybackAsync();
 	void AudioOutputCallback(AudioFrameInputNode sender, FrameInputNodeQuantumStartedEventArgs args);
 

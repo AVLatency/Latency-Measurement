@@ -29,6 +29,7 @@ WasapiOutput::~WasapiOutput()
 
 void WasapiOutput::StartPlayback()
 {
+    sampleIndex = 0;
     playbackInProgress = true;
 
     const IID IID_IAudioClient = __uuidof(IAudioClient);

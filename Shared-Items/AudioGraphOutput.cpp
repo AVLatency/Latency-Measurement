@@ -2,6 +2,8 @@
 #include "TestConfiguration.h"
 #include "winrt/Windows.Media.MediaProperties.h"
 
+int AudioGraphOutput::lastSampleRate = 0;
+
 AudioGraphOutput::AudioGraphOutput(bool loop, bool firstChannelOnly, float* audioSamples, int audioSamplesLength)
 	: loop(loop), firstChannelOnly(firstChannelOnly), audioSamples(audioSamples), audioSamplesLength(audioSamplesLength)
 {
@@ -9,36 +11,30 @@ AudioGraphOutput::AudioGraphOutput(bool loop, bool firstChannelOnly, float* audi
 
 AudioGraphOutput::~AudioGraphOutput()
 {
+	DestroyGraph();
 }
 
 void AudioGraphOutput::StartPlayback()
 {
+	sampleIndex = 0;
 	playbackInProgress = true;
+	DestroyGraph();
+	audioGraph = new AudioGraphWrapper();
+	CreateGraphAsync(audioGraph).get();
 	StartPlaybackAsync().get();
-	while (audioGraph)
+	while (true)
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		if (stopRequested)
 		{
-			if (frameInputNode)
-			{
-				frameInputNode.QuantumStarted(quantumStartedEventToken); // unregisters event handler
-				frameInputNode.Stop();
-				frameInputNode.Close();
-			}
-
-			if (audioGraph)
-			{
-				audioGraph.Stop();
-			}
-
 			break;
 		}
 	}
+	DestroyGraph();
 	playbackInProgress = false;
 }
 
-IAsyncAction AudioGraphOutput::StartPlaybackAsync()
+IAsyncAction AudioGraphOutput::CreateGraphAsync(AudioGraphWrapper* audioGraph)
 {
 	AudioGraphSettings settings(Render::AudioRenderCategory::Media);
 	// Explicitly disabling audio processing to ensure the test waveform isn't excessively modified
@@ -50,50 +46,74 @@ IAsyncAction AudioGraphOutput::StartPlaybackAsync()
 
 	if (graphCreateResult.Status() == AudioGraphCreationStatus::Success)
 	{
-		audioGraph = graphCreateResult.Graph();
-
-		CreateAudioDeviceOutputNodeResult createDeviceResult = co_await audioGraph.CreateDeviceOutputNodeAsync();
-		if (createDeviceResult.Status() == AudioDeviceNodeCreationStatus::Success)
-		{
-			deviceOutputNode = createDeviceResult.DeviceOutputNode();
-
-			// Create the FrameInputNode at the same format as the graph
-			AudioEncodingProperties nodeEncodingProperties = audioGraph.EncodingProperties();
-			frameInputNode = audioGraph.CreateFrameInputNode(nodeEncodingProperties);
-
-			frameInputNode.AddOutgoingConnection(deviceOutputNode);
-
-			// Initialize the Frame Input Node in the stopped state
-			frameInputNode.Stop();
-
-			// Hook up an event handler so we can start generating samples when needed
-			// This event is triggered when the node is required to provide data
-			quantumStartedEventToken = frameInputNode.QuantumStarted([=](auto&& sender, auto&& args)
-				{
-					AudioOutputCallback(sender, args);
-				});
-
-			audioGraph.Start();
-
-			if (frameInputNode)
-			{
-				frameInputNode.Start();
-			}
-			else
-			{
-				printf("Error: No frameInputNode\n");
-				playbackInProgress = false;
-			}
-		}
-		else // could not create output node
-		{
-			printf(std::format("Error: Could not create output device. Status: {}\n", (int)createDeviceResult.Status()).c_str());
-			playbackInProgress = false;
-		}
+		audioGraph->graph = graphCreateResult.Graph();
+		lastSampleRate = audioGraph->graph.EncodingProperties().SampleRate();
 	}
 	else
 	{
 		printf(std::format("Error: Could not create AudioGraph. Status: {}\n", (int)graphCreateResult.Status()).c_str());
+	}
+}
+
+void AudioGraphOutput::DestroyGraph()
+{
+	if (audioGraph != nullptr)
+	{
+		if (audioGraph->frameInputNode != nullptr)
+		{
+			audioGraph->frameInputNode.QuantumStarted(audioGraph->quantumStartedEventToken); // unregisters event handler
+			audioGraph->frameInputNode.Stop();
+		}
+		if (audioGraph->deviceOutputNode != nullptr)
+		{
+			audioGraph->deviceOutputNode.Stop();
+		}
+		if (audioGraph->graph != nullptr)
+		{
+			audioGraph->graph.Stop();
+		}
+		delete audioGraph;
+	}
+}
+
+IAsyncAction AudioGraphOutput::StartPlaybackAsync()
+{
+	CreateAudioDeviceOutputNodeResult createDeviceResult = co_await audioGraph->graph.CreateDeviceOutputNodeAsync();
+	if (createDeviceResult.Status() == AudioDeviceNodeCreationStatus::Success)
+	{
+		audioGraph->deviceOutputNode = createDeviceResult.DeviceOutputNode();
+
+		// Create the FrameInputNode at the same format as the graph
+		AudioEncodingProperties nodeEncodingProperties = audioGraph->graph.EncodingProperties();
+		audioGraph->frameInputNode = audioGraph->graph.CreateFrameInputNode(nodeEncodingProperties);
+
+		audioGraph->frameInputNode.AddOutgoingConnection(audioGraph->deviceOutputNode);
+
+		// Initialize the Frame Input Node in the stopped state
+		audioGraph->frameInputNode.Stop();
+
+		// Hook up an event handler so we can start generating samples when needed
+		// This event is triggered when the node is required to provide data
+		audioGraph->quantumStartedEventToken = audioGraph->frameInputNode.QuantumStarted([=](auto&& sender, auto&& args)
+			{
+				AudioOutputCallback(sender, args);
+			});
+
+		audioGraph->graph.Start();
+
+		if (audioGraph->frameInputNode)
+		{
+			audioGraph->frameInputNode.Start();
+		}
+		else
+		{
+			printf("Error: No frameInputNode\n");
+			playbackInProgress = false;
+		}
+	}
+	else // could not create output node
+	{
+		printf(std::format("Error: Could not create output device. Status: {}\n", (int)createDeviceResult.Status()).c_str());
 		playbackInProgress = false;
 	}
 }
@@ -180,8 +200,13 @@ bool AudioGraphOutput::FinishedPlayback(bool loopIfNeeded)
 
 int AudioGraphOutput::CurrentWindowsSampleRate()
 {
-	// TODO: Some audio graph singleton that is lazy loaded and blocks until the async thing has finished loading.
-	// This audio graph would be used by everything for the lifetime of the app?
-	//return AudioGraphSingleton->audioGraph.SamplesPerQuantum;
-    return 96000; // TODO
+	if (lastSampleRate == 0)
+	{
+		winrt::init_apartment();
+		AudioGraphWrapper* audioGraph = new AudioGraphWrapper();
+		CreateGraphAsync(audioGraph).get();
+		lastSampleRate = audioGraph->graph.EncodingProperties().SampleRate();
+		delete audioGraph;
+	}
+	return lastSampleRate;
 }
