@@ -447,6 +447,7 @@ bool Gui::DoGui()
                 RefreshAudioEndpoints();
             }
 
+            bool showNextButton = false;
             if ((OutputOffsetProfiles::CurrentProfile()->isCurrentWindowsAudioFormat && defaultAudioOutputEndpoint == nullptr)
                 || outputAudioEndpoints.size() < 1)
             {
@@ -458,6 +459,7 @@ bool Gui::DoGui()
             }
             else
             {
+                showNextButton = true;
                 if (OutputOffsetProfiles::CurrentProfile()->isCurrentWindowsAudioFormat)
                 {
                     ImGui::Text(std::format("Output Device (current Windows audio format): {}", defaultAudioOutputEndpoint->Name).c_str());
@@ -512,12 +514,15 @@ bool Gui::DoGui()
                         OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough
                         ? "" : " When recording with a microphone, the Mic port must be used on computers that have separate Line In and Mic ports.\n\nAt least 44.1 kHz 16 bit is recommended.");
                 ImGui::SameLine(); GuiHelper::HelpMarker(helpText.c_str());
+            }
 
-                ImGui::Spacing();
-                if (ImGui::Button("Back"))
-                {
-                    state = MeasurementToolGuiState::GettingStarted;
-                }
+            ImGui::Spacing();
+            if (ImGui::Button("Back"))
+            {
+                state = MeasurementToolGuiState::GettingStarted;
+            }
+            if (showNextButton)
+            {
                 ImGui::SameLine();
                 if (ImGui::Button("Next"))
                 {

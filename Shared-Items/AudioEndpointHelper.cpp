@@ -26,6 +26,9 @@ std::vector<AudioEndpoint> AudioEndpointHelper::GetAudioEndPoints(EDataFlow type
     IPropertyStore* pProps = NULL;
     LPWSTR pwszID = NULL;
 
+    hr = CoInitialize(NULL);
+    EXIT_ON_ERROR(hr)
+
     hr = CoCreateInstance(
         CLSID_MMDeviceEnumerator, NULL,
         CLSCTX_ALL, IID_IMMDeviceEnumerator,
@@ -78,23 +81,27 @@ std::vector<AudioEndpoint> AudioEndpointHelper::GetAudioEndPoints(EDataFlow type
         result.push_back(endpoint);
 
         CoTaskMemFree(pwszID);
-        pwszID = NULL;
         PropVariantClear(&varName);
         SAFE_RELEASE(pProps)
-            SAFE_RELEASE(pEndpoint)
+        SAFE_RELEASE(pEndpoint)
     }
     SAFE_RELEASE(pEnumerator)
-        SAFE_RELEASE(pCollection)
+    SAFE_RELEASE(pCollection)
+    CoUninitialize();
 
-        return result;
+    return result;
 
 Exit:
-    printf("Error!\n");
-    CoTaskMemFree(pwszID);
+    printf("GetAudioEndPoints Error!\n");
+    if (pwszID != NULL)
+    {
+        CoTaskMemFree(pwszID);
+    }
     SAFE_RELEASE(pEnumerator)
-        SAFE_RELEASE(pCollection)
-        SAFE_RELEASE(pEndpoint)
-        SAFE_RELEASE(pProps)
+    SAFE_RELEASE(pCollection)
+    SAFE_RELEASE(pProps)
+    SAFE_RELEASE(pEndpoint)
+    CoUninitialize();
 
     return result;
 }
@@ -109,46 +116,53 @@ AudioEndpoint* AudioEndpointHelper::GetDefaultAudioEndPoint(EDataFlow type)
     IMMDevice* pEndpoint = NULL;
     IPropertyStore* pProps = NULL;
     LPWSTR pwszID = NULL;
-
-    hr = CoCreateInstance(
-        CLSID_MMDeviceEnumerator, NULL,
-        CLSCTX_ALL, IID_IMMDeviceEnumerator,
-        (void**)&pEnumerator);
+    
+    hr = CoInitialize(NULL);
     if (!FAILED(hr))
     {
-        hr = pEnumerator->GetDefaultAudioEndpoint(type, eMultimedia, &pEndpoint); // eMultimedia matches AudioGraphOutput Render::AudioRenderCategory::Media
+        hr = CoCreateInstance(
+            CLSID_MMDeviceEnumerator, NULL,
+            CLSCTX_ALL, IID_IMMDeviceEnumerator,
+            (void**)&pEnumerator);
         if (!FAILED(hr))
         {
-            // Get the endpoint ID string.
-            hr = pEndpoint->GetId(&pwszID);
+            hr = pEnumerator->GetDefaultAudioEndpoint(type, eMultimedia, &pEndpoint); // eMultimedia matches AudioGraphOutput Render::AudioRenderCategory::Media
             if (!FAILED(hr))
             {
-                hr = pEndpoint->OpenPropertyStore(STGM_READ, &pProps);
+                // Get the endpoint ID string.
+                hr = pEndpoint->GetId(&pwszID);
                 if (!FAILED(hr))
                 {
-                    PROPVARIANT varName;
-                    // Initialize container for property value.
-                    PropVariantInit(&varName);
-
-                    // Get the endpoint's friendly-name property.
-                    hr = pProps->GetValue(PKEY_Device_FriendlyName, &varName);
+                    hr = pEndpoint->OpenPropertyStore(STGM_READ, &pProps);
                     if (!FAILED(hr))
                     {
-                        AudioEndpoint* result = new AudioEndpoint(pEndpoint, (char*)_bstr_t(varName.pwszVal), (char*)_bstr_t(pwszID));
+                        PROPVARIANT varName;
+                        // Initialize container for property value.
+                        PropVariantInit(&varName);
 
-                        SAFE_RELEASE(pEnumerator)
-                        SAFE_RELEASE(pEndpoint)
-                        SAFE_RELEASE(pProps)
-                        return result;
+                        // Get the endpoint's friendly-name property.
+                        hr = pProps->GetValue(PKEY_Device_FriendlyName, &varName);
+                        if (!FAILED(hr))
+                        {
+                            AudioEndpoint* result = new AudioEndpoint(pEndpoint, (char*)_bstr_t(varName.pwszVal), (char*)_bstr_t(pwszID));
+
+                            SAFE_RELEASE(pEnumerator)
+                            SAFE_RELEASE(pEndpoint)
+                            SAFE_RELEASE(pProps)
+                            CoUninitialize();
+                            return result;
+                        }
                     }
                 }
             }
         }
     }
 
+    printf("GetDefaultAudioEndPoint Error!\n");
     SAFE_RELEASE(pEnumerator)
     SAFE_RELEASE(pEndpoint)
     SAFE_RELEASE(pProps)
+    CoUninitialize();
     return nullptr;
 }
 
