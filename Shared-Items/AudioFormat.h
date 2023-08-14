@@ -10,6 +10,7 @@ public:
 	bool UserSelected = false;
 	bool DefaultSelection = false;
 
+	static std::string GetCurrentWinAudioFormatString();
 	static std::string GetFormatString(WAVEFORMATEX* waveFormat, bool includeEncoding, bool includeChannelInfo);
 	static std::string GetChannelInfoString(WAVEFORMATEX* waveFormat);
 	static WORD GetFormatID(WAVEFORMATEX* waveFormat);

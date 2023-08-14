@@ -10,7 +10,7 @@ struct RecordingResult
 public:
     std::string GUID;
     time_t Time;
-    AudioFormat* Format;
+    AudioFormat* Format; // Will be nullptr when current windows audio format is used by OffsetProfile
     RecordingSingleChannelResult Channel1;
     RecordingSingleChannelResult Channel2;
 

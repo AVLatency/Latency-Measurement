@@ -40,6 +40,7 @@ public:
 	std::string Description;
 	AVLTexture Image;
 	bool isNoOffset = false; // Flag to help things like the TestManager and GUI know if this is the "None" offset profile.
+	bool isCurrentWindowsAudioFormat = false; // If true, the AudioGraphOutput should be used instead of WasapiOutput
 
 	OutputOffset(*GetOffset)(int numChannels, int sampleRate, int bitDepth);
 	/// <summary>

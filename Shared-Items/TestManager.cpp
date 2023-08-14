@@ -1,6 +1,7 @@
 #include "TestManager.h"
 #include <thread>
 #include <Mmdeviceapi.h>
+#include "AudioGraphOutput.h"
 #include "WasapiOutput.h"
 #include "WasapiInput.h"
 #include "GeneratedSamples.h"
@@ -71,16 +72,23 @@ void TestManager::StartTest()
 				}
 				RecordingCount++;
 				lastPlayedFormat = audioFormat;
-				if (firstSampleRate == -1)
+				if (audioFormat != nullptr)
 				{
-					firstSampleRate = audioFormat->WaveFormat->nSamplesPerSec;
+					if (firstSampleRate == -1)
+					{
+						firstSampleRate = audioFormat->WaveFormat->nSamplesPerSec;
+					}
+					else
+					{
+						if (firstSampleRate != audioFormat->WaveFormat->nSamplesPerSec)
+						{
+							switchedSampleRates = true;
+						}
+					}
 				}
 				else
 				{
-					if (firstSampleRate != audioFormat->WaveFormat->nSamplesPerSec)
-					{
-						switchedSampleRates = true;
-					}
+					// we are playing the current audio format
 				}
 			}
 		}
@@ -137,7 +145,15 @@ bool TestManager::PerformRecording(AudioFormat* audioFormat)
 	bool validResult = false;
 	for (int i = 0; i < TestConfiguration::AttemptsBeforeFail; i++)
 	{
-		AbstractOutput* output = new WasapiOutput(outputEndpoint, false, true, generatedSamples->samples, generatedSamples->samplesLength, audioFormat->WaveFormat);
+		AbstractOutput* output;
+		if (audioFormat == nullptr)
+		{
+			output = new AudioGraphOutput(false, true, generatedSamples->samples, generatedSamples->samplesLength);
+		}
+		else
+		{
+			output = new WasapiOutput(outputEndpoint, false, true, generatedSamples->samples, generatedSamples->samplesLength, audioFormat->WaveFormat);
+		}
 		std::thread outputThread{ [output] { output->StartPlayback(); } };
 
 		WasapiInput* input = new WasapiInput(inputEndpoint, false, generatedSamples->TestWaveDurationInSeconds());
@@ -151,7 +167,8 @@ bool TestManager::PerformRecording(AudioFormat* audioFormat)
 		
 		if (TestConfiguration::SaveIndividualWavFiles)
 		{
-			std::string recordingFolder = format("{}/{}/{}", StringHelper::GetRootPath(AppDirectory), TestFileString, audioFormat->FormatString);
+			std::string audioFormatString = audioFormat == nullptr ? AudioFormat::GetCurrentWinAudioFormatString() : audioFormat->FormatString;
+			std::string recordingFolder = format("{}/{}/{}", StringHelper::GetRootPath(AppDirectory), TestFileString, audioFormatString);
 			try
 			{
 				RecordingAnalyzer::SaveRecording(*input, recordingFolder, std::format("{}.wav", result.GUID));
@@ -281,20 +298,28 @@ void TestManager::PopulateSummaryResults()
 	bool foundSevenOne = false;
 	for (AveragedResult avgResult : AveragedResults)
 	{
-		if (avgResult.Format->DefaultSelection)
+		if (avgResult.Format == nullptr)
 		{
+			// Current windows audio format
 			SummaryResults.push_back(avgResult);
-			if (avgResult.Format->WaveFormat->nChannels == 2)
+		}
+		else
+		{
+			if (avgResult.Format->DefaultSelection)
 			{
-				foundStereo = true;
-			}
-			else if (avgResult.Format->WaveFormat->nChannels == 6)
-			{
-				foundFiveOne = true;
-			}
-			else if (avgResult.Format->WaveFormat->nChannels == 8)
-			{
-				foundSevenOne = true;
+				SummaryResults.push_back(avgResult);
+				if (avgResult.Format->WaveFormat->nChannels == 2)
+				{
+					foundStereo = true;
+				}
+				else if (avgResult.Format->WaveFormat->nChannels == 6)
+				{
+					foundFiveOne = true;
+				}
+				else if (avgResult.Format->WaveFormat->nChannels == 8)
+				{
+					foundSevenOne = true;
+				}
 			}
 		}
 	}
@@ -302,6 +327,7 @@ void TestManager::PopulateSummaryResults()
 	for (AveragedResult avgResult : AveragedResults)
 	{
 		if (!foundStereo
+			&& avgResult.Format != nullptr
 			&& avgResult.Format->WaveFormat->nChannels == 2
 			&& avgResult.Format->WaveFormat->nSamplesPerSec == 48000
 			&& avgResult.Format->WaveFormat->wBitsPerSample == 16)
@@ -310,6 +336,7 @@ void TestManager::PopulateSummaryResults()
 			foundStereo = true;
 		}
 		if (!foundFiveOne
+			&& avgResult.Format != nullptr
 			&& avgResult.Format->WaveFormat->nChannels == 6
 			&& avgResult.Format->WaveFormat->nSamplesPerSec == 48000
 			&& avgResult.Format->WaveFormat->wBitsPerSample == 16)
@@ -318,6 +345,7 @@ void TestManager::PopulateSummaryResults()
 			foundFiveOne = true;
 		}
 		if (!foundSevenOne
+			&& avgResult.Format != nullptr
 			&& avgResult.Format->WaveFormat->nChannels == 8
 			&& avgResult.Format->WaveFormat->nSamplesPerSec == 48000
 			&& avgResult.Format->WaveFormat->wBitsPerSample == 16)

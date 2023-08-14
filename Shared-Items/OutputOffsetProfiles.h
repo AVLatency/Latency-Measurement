@@ -23,23 +23,28 @@ public:
 
 	static OutputOffsetProfile* Hdmi_HDV_MB01;
 	static OutputOffsetProfile* Hdmi_None;
+	static OutputOffsetProfile* Hdmi_None_CurrentWinAudioFormat;
 
 	static OutputOffsetProfile* Spdif_HDV_MB01;
 	static OutputOffsetProfile* Spdif_AYSA11;
 	static OutputOffsetProfile* Spdif_LiNKFOR_USB_DAC;
 	static OutputOffsetProfile* Spdif_None;
+	static OutputOffsetProfile* Spdif_None_CurrentWinAudioFormat;
 
 	static OutputOffsetProfile* Arc_ExampleReferenceSetup;
 	static OutputOffsetProfile* Arc_None;
+	static OutputOffsetProfile* Arc_None_CurrentWinAudioFormat;
 
 	static OutputOffsetProfile* EArc_ExampleReferenceSetup;
 	static OutputOffsetProfile* EArc_None;
+	static OutputOffsetProfile* EArc_None_CurrentWinAudioFormat;
 
 	static OutputOffsetProfile* Analog_BasicYSplitter;
 	static OutputOffsetProfile* Analog_None;
 
 	static OutputOffsetProfile* HdmiAudioPassthrough_HDV_MB01;
 	static OutputOffsetProfile* HdmiAudioPassthrough_None;
+	static OutputOffsetProfile* HdmiAudioPassthrough_None_CurrentWinAudioFormat;
 
 	static std::vector<OutputOffsetProfile*> Profiles;
 	static int SelectedProfileIndex;

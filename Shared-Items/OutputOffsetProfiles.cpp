@@ -5,23 +5,28 @@
 
 OutputOffsetProfile* OutputOffsetProfiles::Hdmi_HDV_MB01 = NULL;
 OutputOffsetProfile* OutputOffsetProfiles::Hdmi_None = NULL;
+OutputOffsetProfile* OutputOffsetProfiles::Hdmi_None_CurrentWinAudioFormat = NULL;
 
 OutputOffsetProfile* OutputOffsetProfiles::Spdif_HDV_MB01 = NULL;
 OutputOffsetProfile* OutputOffsetProfiles::Spdif_AYSA11 = NULL;
 OutputOffsetProfile* OutputOffsetProfiles::Spdif_LiNKFOR_USB_DAC = NULL;
 OutputOffsetProfile* OutputOffsetProfiles::Spdif_None = NULL;
+OutputOffsetProfile* OutputOffsetProfiles::Spdif_None_CurrentWinAudioFormat = NULL;
 
 OutputOffsetProfile* OutputOffsetProfiles::Arc_ExampleReferenceSetup = NULL;
 OutputOffsetProfile* OutputOffsetProfiles::Arc_None = NULL;
+OutputOffsetProfile* OutputOffsetProfiles::Arc_None_CurrentWinAudioFormat = NULL;
 
 OutputOffsetProfile* OutputOffsetProfiles::EArc_ExampleReferenceSetup = NULL;
 OutputOffsetProfile* OutputOffsetProfiles::EArc_None = NULL;
+OutputOffsetProfile* OutputOffsetProfiles::EArc_None_CurrentWinAudioFormat = NULL;
 
 OutputOffsetProfile* OutputOffsetProfiles::Analog_BasicYSplitter = NULL;
 OutputOffsetProfile* OutputOffsetProfiles::Analog_None = NULL;
 
 OutputOffsetProfile* OutputOffsetProfiles::HdmiAudioPassthrough_HDV_MB01 = NULL;
 OutputOffsetProfile* OutputOffsetProfiles::HdmiAudioPassthrough_None = NULL;
+OutputOffsetProfile* OutputOffsetProfiles::HdmiAudioPassthrough_None_CurrentWinAudioFormat = NULL;
 
 std::vector<OutputOffsetProfile*> OutputOffsetProfiles::Profiles;
 int OutputOffsetProfiles::SelectedProfileIndex = 0;
@@ -47,6 +52,11 @@ void OutputOffsetProfiles::InitializeProfiles(ProfileResources& resources)
 	Hdmi_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Hdmi, "Other", None_GetOffset, AudioEndpoint::HdmiFormatsFilter);
 	Hdmi_None->isNoOffset = true;
 	Profiles.push_back(Hdmi_None);
+
+	Hdmi_None_CurrentWinAudioFormat = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Hdmi, "Other (Current Windows audio format)", None_GetOffset, AudioEndpoint::HdmiFormatsFilter);
+	Hdmi_None_CurrentWinAudioFormat->isNoOffset = true;
+	Hdmi_None_CurrentWinAudioFormat->isCurrentWindowsAudioFormat = true;
+	Profiles.push_back(Hdmi_None_CurrentWinAudioFormat);
 
 	// *****************************************************
 	// S/PDIF AUDIO LATENCY PROFILES
@@ -99,6 +109,11 @@ void OutputOffsetProfiles::InitializeProfiles(ProfileResources& resources)
 	Spdif_None->isNoOffset = true;
 	Profiles.push_back(Spdif_None);
 
+	Spdif_None_CurrentWinAudioFormat = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Spdif, "Other (Current Windows audio format)", None_GetOffset, AudioEndpoint::AllFormatsFilter);
+	Spdif_None_CurrentWinAudioFormat->isNoOffset = true;
+	Spdif_None_CurrentWinAudioFormat->isCurrentWindowsAudioFormat = true;
+	Profiles.push_back(Spdif_None_CurrentWinAudioFormat);
+
 	// *****************************************************
 	// ARC AUDIO LATENCY PROFILES
 	// *****************************************************
@@ -115,6 +130,11 @@ void OutputOffsetProfiles::InitializeProfiles(ProfileResources& resources)
 	Arc_None->isNoOffset = true;
 	Profiles.push_back(Arc_None);
 
+	Arc_None_CurrentWinAudioFormat = new OutputOffsetProfile(OutputOffsetProfile::OutputType::ARC, "Other (Current Windows audio format)", None_GetOffset, AudioEndpoint::AllFormatsFilter);
+	Arc_None_CurrentWinAudioFormat->isNoOffset = true;
+	Arc_None_CurrentWinAudioFormat->isCurrentWindowsAudioFormat = true;
+	Profiles.push_back(Arc_None_CurrentWinAudioFormat);
+
 	// *****************************************************
 	// EARC AUDIO LATENCY PROFILES
 	// *****************************************************
@@ -130,6 +150,11 @@ void OutputOffsetProfiles::InitializeProfiles(ProfileResources& resources)
 	EArc_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::eARC, "Other", None_GetOffset, AudioEndpoint::AllFormatsFilter);
 	EArc_None->isNoOffset = true;
 	Profiles.push_back(EArc_None);
+
+	EArc_None_CurrentWinAudioFormat = new OutputOffsetProfile(OutputOffsetProfile::OutputType::eARC, "Other (Current Windows audio format)", None_GetOffset, AudioEndpoint::AllFormatsFilter);
+	EArc_None_CurrentWinAudioFormat->isNoOffset = true;
+	EArc_None_CurrentWinAudioFormat->isCurrentWindowsAudioFormat = true;
+	Profiles.push_back(EArc_None_CurrentWinAudioFormat);
 
 	// *****************************************************
 	// ANALOG AUDIO LATENCY PROFILES
@@ -159,6 +184,11 @@ void OutputOffsetProfiles::InitializeProfiles(ProfileResources& resources)
 	HdmiAudioPassthrough_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::HdmiAudioPassthrough, "Other", None_GetOffset, AudioEndpoint::HdmiFormatsFilter);
 	HdmiAudioPassthrough_None->isNoOffset = true;
 	Profiles.push_back(HdmiAudioPassthrough_None);
+
+	HdmiAudioPassthrough_None_CurrentWinAudioFormat = new OutputOffsetProfile(OutputOffsetProfile::OutputType::HdmiAudioPassthrough, "Other (Current Windows audio format)", None_GetOffset, AudioEndpoint::HdmiFormatsFilter);
+	HdmiAudioPassthrough_None_CurrentWinAudioFormat->isNoOffset = true;
+	HdmiAudioPassthrough_None_CurrentWinAudioFormat->isCurrentWindowsAudioFormat = true;
+	Profiles.push_back(HdmiAudioPassthrough_None_CurrentWinAudioFormat);
 
 	PrepareSubsetListsForGui();
 	PrepareOffsetStringsForGui();

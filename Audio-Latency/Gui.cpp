@@ -209,10 +209,11 @@ bool Gui::DoGui()
                 ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the time offset between the analog output and the HDMI output of the Dual-Out Reference Device for different audio formats.");
                 ImGui::Spacing();
 
+                int deviceColWidth = 300;
+                int descriptionColWidth = 450;
                 if (ImGui::BeginTable("DualOutRefDeviceTable", 3))
                 {
-                    int descriptionColWidth = 450;
-                    ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, 200 * DpiScale);
+                    ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, deviceColWidth* DpiScale);
                     ImGui::TableSetupColumn("column2", ImGuiTableColumnFlags_WidthFixed, descriptionColWidth * DpiScale);
 
                     ImGui::TableNextRow();
@@ -251,7 +252,7 @@ bool Gui::DoGui()
                         ImGui::PushFont(FontHelper::BoldFont);
                         ImGui::Text("WARNING:");
                         ImGui::PopFont();   
-                        ImGui::TextWrapped("Using a Dual-Out Reference Device that is not on this list may result in inaccurate measurements! This is because the offset between its different audio outputs will not be accounted for in the reported measurements.");
+                        ImGui::TextWrapped("Using a Dual-Out Reference Device that is not on the list may result in inaccurate measurements! This is because the offset between its different audio outputs will not be accounted for in the reported measurements.");
                         ImGui::Spacing();
                         ImGui::TextWrapped("If you have another device that is suitable for use with this tool, "
                             "please let me know and I might be able to add support for this device.");
@@ -327,8 +328,7 @@ bool Gui::DoGui()
 
                     if (ImGui::BeginTable("RefDacTable", 3))
                     {
-                        int descriptionColWidth = 450;
-                        ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, 200 * DpiScale);
+                        ImGui::TableSetupColumn("column1", ImGuiTableColumnFlags_WidthFixed, deviceColWidth * DpiScale);
                         ImGui::TableSetupColumn("column2", ImGuiTableColumnFlags_WidthFixed, descriptionColWidth * DpiScale);
 
                         ImGui::TableNextRow();
@@ -366,7 +366,7 @@ bool Gui::DoGui()
                             ImGui::PushFont(FontHelper::BoldFont);
                             ImGui::Text("WARNING:");
                             ImGui::PopFont();
-                            ImGui::TextWrapped("Using a DAC that is not on this list may result in inaccurate measurements! This is because the DAC's audio latency will not be accounted for in the reported measurements.");
+                            ImGui::TextWrapped("Using a DAC that is not on the list may result in inaccurate measurements! This is because the DAC's audio latency will not be accounted for in the reported measurements.");
                             ImGui::Spacing();
                             ImGui::TextWrapped("If you have another device that is suitable for use with this tool, "
                                 "please let me know and I might be able to add support for this device.");
@@ -643,7 +643,8 @@ bool Gui::DoGui()
 
                 ImGui::TableNextColumn();
 
-                if (OutputOffsetProfiles::CurrentProfile()->OutType != OutputOffsetProfile::OutputType::Analog)
+                if (OutputOffsetProfiles::CurrentProfile()->OutType != OutputOffsetProfile::OutputType::Analog
+                    && !OutputOffsetProfiles::CurrentProfile()->isCurrentWindowsAudioFormat)
                 {
                     ImGui::PushFont(FontHelper::BoldFont);
                     if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi
@@ -1218,11 +1219,18 @@ void Gui::StartTest()
     if (testManager == nullptr)
     {
         std::vector<AudioFormat*> selectedFormats;
-        for (AudioFormat& format : outputAudioEndpoints[outputDeviceIndex].SupportedFormats)
+        if (OutputOffsetProfiles::CurrentProfile()->isCurrentWindowsAudioFormat)
         {
-            if (format.UserSelected)
+            selectedFormats.push_back(nullptr);
+        }
+        else
+        {
+            for (AudioFormat& format : outputAudioEndpoints[outputDeviceIndex].SupportedFormats)
             {
-                selectedFormats.push_back(&format);
+                if (format.UserSelected)
+                {
+                    selectedFormats.push_back(&format);
+                }
             }
         }
 

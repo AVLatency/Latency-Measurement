@@ -6,6 +6,11 @@ AudioFormat::AudioFormat(WAVEFORMATEX* waveFormat) : WaveFormat(waveFormat)
     FormatString = GetFormatString(waveFormat, false, true);
 }
 
+std::string AudioFormat::GetCurrentWinAudioFormatString()
+{
+    return "Current Windows audio format";
+}
+
 std::string AudioFormat::GetFormatString(WAVEFORMATEX* waveFormat, bool includeEncoding, bool includeChannelInfo)
 {
     std::string encodingStr = std::format("{} ", GetAudioDataFormatString(waveFormat));
