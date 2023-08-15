@@ -322,31 +322,6 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(OutputOffsetProfile::Out
         ImGui::Spacing();
         ImGui::TreePop();
     }
-    if (ImGui::TreeNode("Wiring and Cable Setup"))
-    {
-        ImGui::PushFont(FontHelper::BoldFont);
-        ImGui::Text("Initial Cable Setup");
-        ImGui::PopFont();
-        ImGui::Indent();
-        ImGui::TextWrapped(std::format("Connect your audio devices and cables as described in the diagram at the top of this window.\n\n{}", GuiHelper::CableHelpText(outType)).c_str());
-        ImGui::Unindent();
-
-        ImGui::Spacing();
-        ImGui::PushFont(FontHelper::BoldFont);
-        ImGui::Text("How to Ensure Cable Wiring is Correct");
-        ImGui::PopFont();
-        ImGui::Indent();
-        ImGui::TextWrapped("The peak audio level on the left side of the \"Raw Wave View\" shows the current volume of the channel. "
-            "This can be used to give immediate feedback on the audio input of each channel, which can help in determining if your wiring is correct. "
-            "Simply mute and unmute or unplug and re-plug the device and watch for a change in this peak audio level. "
-            "If your wiring is correct, changes to one channel should not affect the other.");
-        ImGui::Unindent();
-
-        ImGui::Spacing();
-        ImGui::Spacing();
-        ImGui::Spacing();
-        ImGui::TreePop();
-    }
     if (ImGui::TreeNode("Detailed Instructions and Troubleshooting"))
     {
         ImGui::PushFont(FontHelper::BoldFont);
@@ -363,42 +338,13 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(OutputOffsetProfile::Out
         ImGui::Text("Best Practices");
         ImGui::PopFont();
         ImGui::Indent();
-        ImGui::TextWrapped("- Disable the microphone boost and all sound effects and audio enhancements for your input device through the Advanced / Additional device properties in the Windows Settings app.\n"
+        ImGui::TextWrapped("- Use a mic input, rather than a line in, if you are using a mic to measure your DUT.\n"
+            "- Disable the microphone boost and all sound effects and audio enhancements for your input device through the Advanced / Additional device properties in the Windows Settings app.\n"
             "- Set the input device volume to around 25 percent as a starting point.\n"
             "- Set the input device sample rate to 48 kHz to filter out high frequency noise.\n"
             "- If using a microphone, point the microphone directly at the left speaker of the DUT and position the microphone as close as possible. Position the mic close to the tweeter if there are separate speaker components.\n"
             "- Turn up the output volume of the DUT.\n"
             "- Clipping: Although audio clipping will not affect the accuracy of measurements, some onboard microphone inputs have dynamic normalization that becomes problematic with high input volumes. Use the Raw Wave View to inspect the waveform for clipping to ensure your volume level is not too high.");
-        ImGui::Unindent();
-
-        ImGui::Spacing();
-        ImGui::PushFont(FontHelper::BoldFont);
-        ImGui::Text("How to Fix"); ImGui::SameLine(); ImGui::TextColored((ImVec4)ImColor::HSV(0, 0.5f, 1.0f), "Crosstalk detected");
-        ImGui::PopFont();
-        ImGui::Indent();
-        ImGui::TextWrapped(std::format("Crosstalk is most often detected when one of the two channels is receiving no audio signal at all. "
-            "When no audio signal is present, a very weak crosstalk signal is detected instead. "
-            "To address this:\n\n1) Make sure that your wiring is correct and that both channels are receiving audio input using the above \"Wiring and Cable Setup\" instructions.\n"
-            "2) Double check your input and output device selection.\n"
-            "3) Increase the signal to noise ratio by turning up the output volume of the DUT{}.\n"
-            "4) Try manually increasing the Threshold by disabling the \"Automatic threshold detection\" to bring the Threshold above the crosstalk signal.\n"
-            "5) If the previous three strategies do not resolve the issue, you may need to use an inline analog volume control on the line-level device to reduce its audio level and, in turn, reduce the crosstalk that it is causing.\n\n"
-            "NOTE: In cases that are very rare for digital audio, the audio signal from both outputs may be very closely aligned, resulting in incorrectly detected crosstalk. When this happens, you may need to disable crosstalk detection. "
-            "Before doing so, it is important to test a number of devices and become familiar with how this tool works and gain confidence in your wiring/microphone setup and audio levels.",
-            outType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough ? "" : " and/or positioning the microphone closer to the DUT's left speaker").c_str());
-        ImGui::Unindent();
-
-        ImGui::Spacing();
-        ImGui::PushFont(FontHelper::BoldFont);
-        ImGui::Text("How to Fix"); ImGui::SameLine(); ImGui::TextColored((ImVec4)ImColor::HSV(0, 0.5f, 1.0f), "Noisy / Quiet");
-        ImGui::PopFont();
-        ImGui::Indent();
-            ImGui::TextWrapped(std::format("A Noisy / Quiet signal quality often happens when there is no audio signal present or the signal to noise ratio is too low. To address this:\n\n"
-                "1) Make sure that your wiring is correct and that both channels are receiving audio input using the above \"Wiring and Cable Setup\" instructions.\n"
-                "2) Double check your input and output device selection.\n"
-                "3) Increase the signal to noise ratio by turning up the output volume of the DUT{}.\n"
-                "4) Follow the \"Best Practices\" listed above.",
-                outType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough ? "" : " and/or positioning the microphone closer to the DUT's left speaker").c_str());
         ImGui::Unindent();
 
         ImGui::Spacing();
@@ -527,7 +473,7 @@ void GuiHelper::DialogVolumeAdjustDisabledCrosstalk(bool openDialog, ImVec2 cent
         double safeDistanceInches = safeDistance * 39.3701;
 
         ImGui::Text(std::format("Crosstalk is detected when the left and right inputs trigger within {:.2} ms of each other. This\n"
-            "usually happens when wiring or input device configuration is incorrect.", overlapTime * 1000).c_str());
+            "usually happens when wiring or input device selection/configuration is incorrect.", overlapTime * 1000).c_str());
 
         ImGui::Spacing();
 

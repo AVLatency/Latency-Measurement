@@ -162,7 +162,7 @@ bool Gui::DoGui()
             ImGui::Text("Welcome to the AV Latency.com audio latency measurement tool!");
             ImGui::Spacing();
             ImGui::Text("You can find help text by hovering your mouse over these:");
-            ImGui::SameLine(); GuiHelper::HelpMarker("Visit the AV Latency.com Toolkit Webpage to view a demonstration video and find out more about how to use this tool.\n\nClick \"Next\" once you've connected all of the cables to get started!");
+            ImGui::SameLine(); GuiHelper::HelpMarker("You're great!");
             ImGui::Spacing();
 
             if (ImGui::Button("AV Latency.com Toolkit Webpage"))
