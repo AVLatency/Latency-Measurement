@@ -241,7 +241,7 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
 
     ImGui::Checkbox("Automatic Threshold Detection", useAutoThreshold);
     ImGui::SameLine();
-    HelpMarker("Automatically sets the audio pattern detection threshold to a portion of the largest edge magnitude.\n\nDisable this feature to increase the threshold when there is loud crosstalk or background noise or decrease the threshold when using professional audio equipment in a quiet environment with lots of echoes.");
+    HelpMarker("Automatically sets the detection threshold to a portion of the largest edge magnitude.\n\nConsider disabling this feature and manually adjusting the threshold when crosstalk is detected or when the signal quality is \"Noisy / Quiet\" due to background noise, echo, acoustic reverberations, or digital sound processing performed by the DUT.");
     if (!*useAutoThreshold)
     {
         ImGui::DragFloat("Manual Threshold", manualThreshold, 0.001, 0, 1.9, "%.4f", ImGuiSliderFlags_AlwaysClamp | ImGuiSliderFlags_Logarithmic);
@@ -283,7 +283,7 @@ std::string GuiHelper::CableHelpText(OutputOffsetProfile::OutputType outType)
     {
         return "To record audio output from the Device Under Test (DUT) you can use a microphone or directly connect to the headphone or speaker output of the DUT.\n\n"
             "- Microphone: Make sure to position the mic as close as possible to the speaker because sound travels measurably slow. Position the mic close to the tweeter if there are separate speaker components. When recording with a mic, the Mic port must be used on computers that have separate Line In and Mic ports.\n"
-            "- DUT headphone output: Note that speaker and headphone output can sometimes have different latency on some devices.\n"
+            "- DUT headphone output: Note that speaker and headphone output can have different latency on some devices.\n"
             "- Directly connect to DUT speaker output: Start the volume low as some amplifiers may be capable of high voltage outputs that could damage your audio input device.\n\n";
     }
 }
@@ -299,14 +299,22 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(OutputOffsetProfile::Out
     ImGui::PopFont();
 
     ImGui::Spacing();
-    ImGui::PushFont(FontHelper::BoldFont);
-    ImGui::Text("Basic Instructions:");
-    ImGui::PopFont();
-    ImGui::Text("- Verify device and cable setup using visual feedback from this tool.");
-    ImGui::Text("- Adjust output volume of the DUT and input device volume to make the Signal Quality for both channels OK.");
+
+    if (ImGui::Button("View Demonstration Video on YouTube"))
+    {
+        ShellExecuteA(NULL, "open", "https://youtu.be/KiaBPszcMIs?t=124", NULL, NULL, SW_SHOWNORMAL);
+    }
     ImGui::Spacing();
 
-    if (ImGui::TreeNode("Example"))
+    ImGui::Text("This video demonstrates how to:");
+    ImGui::Indent();
+    ImGui::Text("- Verify device and cable setup using visual feedback from this tool.");
+    ImGui::Text("- Adjust output volume of the DUT and input device volume to make the Signal Quality for both channels OK.");
+    ImGui::Text("- Adjust mic volume levels through the Windows device settings.");
+    ImGui::Unindent();
+    ImGui::Spacing();
+
+    if (ImGui::TreeNode("Example Screenshot"))
     {
         ImGui::Text(std::format("The following is a screenshot of correctly adjusted volume levels:", lastCheckedInputSampleRate).c_str());
         float exampleTextureScale = 0.95 * DpiScale;
@@ -502,7 +510,7 @@ int GuiHelper::CsvInputFilter(ImGuiInputTextCallbackData * data)
 
 void GuiHelper::DialogVolumeAdjustDisabledCrosstalk(bool openDialog, ImVec2 center)
 {
-    const char* title = "Crosstalk Detection Disabled";
+    const char* title = "Are You Sure?";
     if (openDialog)
     {
         ImGui::OpenPopup(title);
@@ -510,15 +518,49 @@ void GuiHelper::DialogVolumeAdjustDisabledCrosstalk(bool openDialog, ImVec2 cent
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     if (ImGui::BeginPopupModal(title, NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("Crosstalk detection is an important accuracy feature in this tool:\nDisalbing it may result in an incorrect 0 ms audio latency measurement!\n\n"
-            "To address a crosstalk problem, try manually increasing the Threshold\ninstead. See the \"Detailed Instructions and Troubleshooting\" section for more details.");
+        double speedOfSound = 343;
+        double timePerTick = 1 / GeneratedSamples::GetTickFrequency(44100);
+        double overlapTime = timePerTick * 2;
+        double safeTime = timePerTick * 3;
+        double safeDistance = safeTime * speedOfSound; // in metres
+        double safeDistanceCM = safeDistance * 100;
+        double safeDistanceInches = safeDistance * 39.3701;
+
+        ImGui::Text(std::format("Crosstalk is detected when the left and right inputs trigger within {:.2} ms of each other. This\n"
+            "usually happens when wiring or input device configuration is incorrect.", overlapTime * 1000).c_str());
+
+        ImGui::Spacing();
+
+        if (ImGui::Button("View Demonstration Video on YouTube"))
+        {
+            ShellExecuteA(NULL, "open", "https://youtu.be/KiaBPszcMIs?t=124", NULL, NULL, SW_SHOWNORMAL);
+        }
+
+        ImGui::Spacing();
+
+        ImGui::Text(std::format("If you are still getting crosstalk after watching the video, move the mic at least {:.2} cm ({:.2} inches)\n"
+            "further from the speaker. This will delay the input from the DUT by {:.2} ms.\n\n"
+            "If moving the mic completely stops ALL crosstalk, you can safely move the mic closer to the\n"
+            "speaker and disable crosstalk detection. If moving the mic does not remove crosstalk, then \n"
+            "crosstalk has been correctly detected and something in your configuration is not correct.\n\n"
+            "If you are using a direct connection to your DUT (no mic), then be sure to verify your input\n"
+            "configuration by adjusting the output volume of the DUT, as shown in the video, before disabling\n"
+            "crosstalk detection.", safeDistanceCM, safeDistanceInches, safeTime * 1000).c_str());
+
 
         ImGui::Spacing();
         ImGui::Separator();
         ImGui::Spacing();
 
-        if (ImGui::Button("OK", ImVec2(120, 0)))
+        if (ImGui::Button("Disable Crosstalk Detection", ImVec2(300, 0)))
         {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel", ImVec2(300, 0)))
+        {
+            TestConfiguration::Ch1CableCrosstalkDetection = true;
+            TestConfiguration::Ch2CableCrosstalkDetection = true;
             ImGui::CloseCurrentPopup();
         }
 
