@@ -454,7 +454,7 @@ int GuiHelper::CsvInputFilter(ImGuiInputTextCallbackData * data)
     }
 }
 
-void GuiHelper::DialogVolumeAdjustDisabledCrosstalk(bool openDialog, ImVec2 center)
+void GuiHelper::DialogVolumeAdjustDisabledCrosstalk(bool openDialog, ImVec2 center, float DpiScale)
 {
     const char* title = "Are You Sure?";
     if (openDialog)
@@ -498,12 +498,12 @@ void GuiHelper::DialogVolumeAdjustDisabledCrosstalk(bool openDialog, ImVec2 cent
         ImGui::Separator();
         ImGui::Spacing();
 
-        if (ImGui::Button("Disable Crosstalk Detection", ImVec2(300, 0)))
+        if (ImGui::Button("Disable Crosstalk Detection", ImVec2(300 * DpiScale, 0)))
         {
             ImGui::CloseCurrentPopup();
         }
         ImGui::SameLine();
-        if (ImGui::Button("Cancel", ImVec2(300, 0)))
+        if (ImGui::Button("Cancel", ImVec2(300 * DpiScale, 0)))
         {
             TestConfiguration::Ch1CableCrosstalkDetection = true;
             TestConfiguration::Ch2CableCrosstalkDetection = true;
@@ -514,7 +514,7 @@ void GuiHelper::DialogVolumeAdjustDisabledCrosstalk(bool openDialog, ImVec2 cent
     }
 }
 
-void GuiHelper::DialogNegativeLatency(bool openDialog, ImVec2 center)
+void GuiHelper::DialogNegativeLatency(bool openDialog, ImVec2 center, float DpiScale)
 {
     const char* title = "Error: Incorrect Cable Wiring";
     if (openDialog)
@@ -533,7 +533,7 @@ void GuiHelper::DialogNegativeLatency(bool openDialog, ImVec2 center)
         ImGui::Separator();
         ImGui::Spacing();
 
-        if (ImGui::Button("OK", ImVec2(120, 0)))
+        if (ImGui::Button("OK", ImVec2(120 * DpiScale, 0)))
         {
             ImGui::CloseCurrentPopup();
         }

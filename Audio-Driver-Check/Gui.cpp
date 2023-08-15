@@ -386,7 +386,7 @@ bool Gui::DoGui()
         ImGui::Spacing();
 
         ImGui::SetItemDefaultFocus();
-        if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+        if (ImGui::Button("OK", ImVec2(120 * DpiScale, 0))) { ImGui::CloseCurrentPopup(); }
 
         ImGui::EndPopup();
     }

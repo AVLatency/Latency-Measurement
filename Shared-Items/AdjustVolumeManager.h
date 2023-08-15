@@ -56,6 +56,8 @@ public:
 	const float& UserRightThreshold;
 	bool OverrideNoisyQuiet = false;
 
+	int GoodGradeCount = 0;
+
 	AdjustVolumeManager(const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, int targetTickMonitorSampleLength, int targetFullMonitorSampleLength, const float& userLeftThreshold, const float& userRightThreshold);
 	~AdjustVolumeManager();
 	void Tick();

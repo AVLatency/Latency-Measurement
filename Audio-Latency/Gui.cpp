@@ -280,8 +280,8 @@ bool Gui::DoGui()
 
                     ImGui::PushFont(FontHelper::BoldFont);
                     ImGui::Text("Output Offsets");
-                    ImGui::SameLine(); GuiHelper::HelpMarker("These offsets will be accounted for in reported measurements!\n\nPositive value: analog output leads digital output\nNegative value: digital output leads analog output\n\nVerified formats will be marked as verified in the results.");
                     ImGui::PopFont();
+                    ImGui::SameLine(); GuiHelper::HelpMarker("These offsets will be accounted for in reported measurements!\n\nPositive value: analog output leads digital output\nNegative value: digital output leads analog output\n\nVerified formats will be marked as verified in the results.");
 
                     ImGui::Spacing();
                     ImGui::Text("Common Formats:");
@@ -574,6 +574,7 @@ bool Gui::DoGui()
 
                 GuiHelper::AdjustVolumeInstructionsTroubleshooting((OutputOffsetProfile::OutputType)outputTypeIndex, lastCheckedInputSampleRate, &TestConfiguration::OutputVolume, &adjustVolumeManager->OverrideNoisyQuiet, (void*)resources.VolumeAdjustExampleTexture.TextureData, resources.VolumeAdjustExampleTexture.Width, resources.VolumeAdjustExampleTexture.Height, DpiScale);
                 ImGui::Spacing();
+                ImGui::Spacing();
                 
                 if (state == MeasurementToolGuiState::AdjustVolume)
                 {
@@ -598,16 +599,18 @@ bool Gui::DoGui()
                     }
                     else
                     {
-                        bool disabled = adjustVolumeManager->paused
-                            || (!adjustVolumeManager->OverrideNoisyQuiet && adjustVolumeManager->LeftVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Quiet)
-                            || (!adjustVolumeManager->OverrideNoisyQuiet && adjustVolumeManager->RightVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Quiet)
-                            || adjustVolumeManager->LeftVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Crosstalk
-                            || adjustVolumeManager->RightVolumeAnalysis.Grade == AdjustVolumeManager::PeakLevelGrade::Crosstalk;
+                        ImGui::Text(" "); ImGui::SameLine();
+
+                        float width = 70 * DpiScale;
+                        ImVec2 curPos = ImGui::GetCursorPos();
+
+                        int minGoodGrades = 3;
+                        bool disabled = adjustVolumeManager->paused || adjustVolumeManager->GoodGradeCount < minGoodGrades;
                         if (disabled)
                         {
                             ImGui::BeginDisabled();
                         }
-                        if (ImGui::Button("Finish"))
+                        if (ImGui::Button("Finish", ImVec2(width, 0)))
                         {
                             state = MeasurementToolGuiState::FinishingAdjustVolume;
                             if (adjustVolumeManager != nullptr)
@@ -619,6 +622,13 @@ bool Gui::DoGui()
                         {
                             ImGui::EndDisabled();
                         }
+                        ImVec2 oldCurPos = ImGui::GetCursorPos();
+
+                        curPos.y -= 6 * DpiScale;
+                        ImGui::SetCursorPos(curPos);
+                        ImGui::ProgressBar(adjustVolumeManager->GoodGradeCount / (float)minGoodGrades, ImVec2(width, 4 * DpiScale), "");
+
+                        ImGui::SetCursorPos(oldCurPos);
                     }
                     ImGui::Spacing();
                 }
@@ -1099,15 +1109,15 @@ bool Gui::DoGui()
         switch (fileSystemErrorType)
         {
         case Gui::FileSystemErrorType::Initial:
-            if (ImGui::Button("Ignore", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+            if (ImGui::Button("Ignore", ImVec2(120 * DpiScale, 0))) { ImGui::CloseCurrentPopup(); }
             ImGui::SameLine();
             ImGui::SetItemDefaultFocus();
-            if (ImGui::Button("Exit", ImVec2(120, 0))) { done = true; }
+            if (ImGui::Button("Exit", ImVec2(120 * DpiScale, 0))) { done = true; }
             break;
         case Gui::FileSystemErrorType::MidTest:
         default:
             ImGui::SetItemDefaultFocus();
-            if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+            if (ImGui::Button("OK", ImVec2(120 * DpiScale, 0))) { ImGui::CloseCurrentPopup(); }
             break;
         }
         ImGui::EndPopup();
@@ -1130,7 +1140,7 @@ bool Gui::DoGui()
         ImGui::Spacing();
 
         ImGui::SetItemDefaultFocus();
-        if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+        if (ImGui::Button("OK", ImVec2(120 * DpiScale, 0))) { ImGui::CloseCurrentPopup(); }
 
         ImGui::EndPopup();
     }
@@ -1152,7 +1162,7 @@ bool Gui::DoGui()
         ImGui::Spacing();
 
         ImGui::SetItemDefaultFocus();
-        if (ImGui::Button("OK", ImVec2(120, 0)))
+        if (ImGui::Button("OK", ImVec2(120 * DpiScale, 0)))
         {
             StartSelectAudioDevices();
             ImGui::CloseCurrentPopup();
@@ -1175,7 +1185,7 @@ bool Gui::DoGui()
         ImGui::Separator();
         ImGui::Spacing();
 
-        if (ImGui::Button("OK", ImVec2(120, 0)))
+        if (ImGui::Button("OK", ImVec2(120 * DpiScale, 0)))
         {
             ImGui::CloseCurrentPopup();
         }
@@ -1183,8 +1193,8 @@ bool Gui::DoGui()
         ImGui::EndPopup();
     }
 
-    GuiHelper::DialogVolumeAdjustDisabledCrosstalk(openDialogVolumeAdjustDisabledCrosstalk, center);
-    GuiHelper::DialogNegativeLatency(openNegativeLatencyErrorDialog, center);
+    GuiHelper::DialogVolumeAdjustDisabledCrosstalk(openDialogVolumeAdjustDisabledCrosstalk, center, DpiScale);
+    GuiHelper::DialogNegativeLatency(openNegativeLatencyErrorDialog, center, DpiScale);
 
     ImGui::PopFont();
 

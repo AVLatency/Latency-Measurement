@@ -410,6 +410,16 @@ void AdjustVolumeManager::SetGrades()
 	{
 		SetChannelGrade(RightVolumeAnalysis, UserRightThreshold);
 	}
+
+	if ((LeftVolumeAnalysis.Grade == PeakLevelGrade::Good && RightVolumeAnalysis.Grade == PeakLevelGrade::Good)
+		|| (OverrideNoisyQuiet && LeftVolumeAnalysis.Grade != PeakLevelGrade::Crosstalk && RightVolumeAnalysis.Grade != PeakLevelGrade::Crosstalk))
+	{
+		GoodGradeCount++;
+	}
+	else
+	{
+		GoodGradeCount = 0;
+	}
 }
 
 void AdjustVolumeManager::CheckCableCrosstalk(VolumeAnalysis& analysis, VolumeAnalysis& other, const float& threshold)
