@@ -110,7 +110,7 @@ void GuiHelper::OptionallyBoldText(const char* text, bool bold)
     }
 }
 
-void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManager::VolumeAnalysis& analysis, float DpiScale, float tickMonitorWidth, float fullMonitorWidth, const char* title, bool* useAutoThreshold, float* manualThreshold, bool* cableCrosstalkDetection, bool setDefaultState)
+void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManager::VolumeAnalysis& analysis, float DpiScale, float tickMonitorWidth, float fullMonitorWidth, const char* title, bool* useAutoThreshold, float* manualThreshold, bool setDefaultState)
 {
     ImGui::Spacing();
     ImGui::Spacing();
@@ -246,13 +246,6 @@ void GuiHelper::AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManag
     {
         ImGui::DragFloat("Manual Threshold", manualThreshold, 0.001, 0, 1.9, "%.4f", ImGuiSliderFlags_AlwaysClamp | ImGuiSliderFlags_Logarithmic);
     }
-    else
-    {
-        ImGui::SameLine();
-    }
-    ImGui::Checkbox("Crosstalk Detection", cableCrosstalkDetection);
-    ImGui::SameLine();
-    HelpMarker("Ensures accuracy of measurements by detecting when crosstalk may be exceeding the current threshold setting.");
 
     ImGui::PopID();
 }

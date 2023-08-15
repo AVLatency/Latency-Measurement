@@ -541,29 +541,36 @@ bool Gui::DoGui()
 
             if (state >= MeasurementToolGuiState::AdjustVolume)
             {
-                bool previousCrossTalk = TestConfiguration::Ch1CableCrosstalkDetection;
                 std::string titleText = "Left Channel Input (Analog Out of Dual-Out Reference Device)";
                 if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
                 {
                     titleText = "Left Channel Input (Analog Out of Dual-Out Reference Device)";
                 }
-                GuiHelper::AdjustVolumeDisplay("left channel volume", adjustVolumeManager->LeftVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, titleText.c_str(), &TestConfiguration::Ch1AutoThresholdDetection, &TestConfiguration::Ch1DetectionThreshold, &TestConfiguration::Ch1CableCrosstalkDetection, setAdjustVolumeDefaultState);
-                if (!TestConfiguration::Ch1CableCrosstalkDetection && previousCrossTalk)
-                {
-                    openDialogVolumeAdjustDisabledCrosstalk = true;
-                }
+                GuiHelper::AdjustVolumeDisplay("left channel volume", adjustVolumeManager->LeftVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, titleText.c_str(), &TestConfiguration::Ch1AutoThresholdDetection, &TestConfiguration::Ch1DetectionThreshold, setAdjustVolumeDefaultState);
 
                 titleText = "Right Channel Input (Output of DUT)";
                 if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
                 {
                     titleText = "Right Channel Input (Output of Reference DAC)";
                 }
-                previousCrossTalk = TestConfiguration::Ch2CableCrosstalkDetection;
-                GuiHelper::AdjustVolumeDisplay("right channel volume", adjustVolumeManager->RightVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, titleText.c_str(), &TestConfiguration::Ch2AutoThresholdDetection, &TestConfiguration::Ch2DetectionThreshold, &TestConfiguration::Ch2CableCrosstalkDetection, setAdjustVolumeDefaultState);
-                if (!TestConfiguration::Ch2CableCrosstalkDetection && previousCrossTalk)
+                GuiHelper::AdjustVolumeDisplay("right channel volume", adjustVolumeManager->RightVolumeAnalysis, DpiScale, adjustVolumeManager->TargetTickMonitorSampleLength * 2, adjustVolumeManager->TargetFullMonitorSampleLength * 2, titleText.c_str(), &TestConfiguration::Ch2AutoThresholdDetection, &TestConfiguration::Ch2DetectionThreshold, setAdjustVolumeDefaultState);
+
+                ImGui::Spacing();
+                ImGui::Spacing();
+                ImGui::Spacing();
+
+                // One checkbox for crosstalk detection of both channels.
+                // Although these could be turned on and off individually, it is very rare that a user would want to do that.
+                // Normally both channels will trigger, so it makes sense to match the two settings.
+                bool previousCrossTalk = TestConfiguration::Ch1CableCrosstalkDetection;
+                ImGui::Checkbox("Crosstalk Detection", &TestConfiguration::Ch1CableCrosstalkDetection);
+                TestConfiguration::Ch2CableCrosstalkDetection = TestConfiguration::Ch1CableCrosstalkDetection;
+                if (!TestConfiguration::Ch1CableCrosstalkDetection && previousCrossTalk)
                 {
                     openDialogVolumeAdjustDisabledCrosstalk = true;
                 }
+                ImGui::SameLine();
+                GuiHelper::HelpMarker("Ensures accuracy of measurements by detecting when crosstalk between the left and right channel may be exceeding the threshold settings.");
 
                 GuiHelper::AdjustVolumeInstructionsTroubleshooting((OutputOffsetProfile::OutputType)outputTypeIndex, lastCheckedInputSampleRate, &TestConfiguration::OutputVolume, &adjustVolumeManager->OverrideNoisyQuiet, (void*)resources.VolumeAdjustExampleTexture.TextureData, resources.VolumeAdjustExampleTexture.Width, resources.VolumeAdjustExampleTexture.Height, DpiScale);
                 ImGui::Spacing();
