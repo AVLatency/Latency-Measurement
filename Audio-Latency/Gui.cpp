@@ -558,6 +558,14 @@ bool Gui::DoGui()
                 ImGui::Spacing();
                 ImGui::Spacing();
                 ImGui::Spacing();
+                ImGui::PushFont(FontHelper::BoldFont);
+                ImGui::Text("Input Sample Rate:");
+                ImGui::PopFont();
+                ImGui::SameLine();
+                ImGui::Text(std::format("{} Hz", lastCheckedInputSampleRate).c_str());
+                ImGui::SameLine();
+                GuiHelper::HelpMarker("Recommended: 48000 Hz\n\n"
+                    "Any input device sample rate of 44100 Hz or higher will generally perform well. A 48000 Hz sample rate often performs better than higher sample rates because it will filter out high frequency noise that may be captured with higher sample rates. This sample rate can be configured in the Windows Settings app.");
 
                 // One checkbox for crosstalk detection of both channels.
                 // Although these could be turned on and off individually, it is very rare that a user would want to do that.
@@ -572,7 +580,7 @@ bool Gui::DoGui()
                 ImGui::SameLine();
                 GuiHelper::HelpMarker("Ensures accuracy of measurements by detecting when crosstalk between the left and right channel may be exceeding the threshold settings.");
 
-                GuiHelper::AdjustVolumeInstructionsTroubleshooting((OutputOffsetProfile::OutputType)outputTypeIndex, lastCheckedInputSampleRate, &TestConfiguration::OutputVolume, &adjustVolumeManager->OverrideNoisyQuiet, (void*)resources.VolumeAdjustExampleTexture.TextureData, resources.VolumeAdjustExampleTexture.Width, resources.VolumeAdjustExampleTexture.Height, DpiScale);
+                GuiHelper::AdjustVolumeInstructionsTroubleshooting((OutputOffsetProfile::OutputType)outputTypeIndex, &TestConfiguration::OutputVolume, &adjustVolumeManager->OverrideNoisyQuiet, (void*)resources.VolumeAdjustExampleTexture.TextureData, resources.VolumeAdjustExampleTexture.Width, resources.VolumeAdjustExampleTexture.Height, DpiScale);
                 ImGui::Spacing();
                 ImGui::Spacing();
                 

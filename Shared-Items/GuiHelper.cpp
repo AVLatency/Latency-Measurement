@@ -288,7 +288,7 @@ std::string GuiHelper::CableHelpText(OutputOffsetProfile::OutputType outType)
     }
 }
 
-void GuiHelper::AdjustVolumeInstructionsTroubleshooting(OutputOffsetProfile::OutputType outType, int lastCheckedInputSampleRate, float* outputVolume, bool* overrideNoisyQuiet, void* exampleTexture, int exampleTextureWidth, int exampleTextureHeight, float DpiScale)
+void GuiHelper::AdjustVolumeInstructionsTroubleshooting(OutputOffsetProfile::OutputType outType, float* outputVolume, bool* overrideNoisyQuiet, void* exampleTexture, int exampleTextureWidth, int exampleTextureHeight, float DpiScale)
 {
     ImGui::Spacing();
     ImGui::Spacing();
@@ -316,7 +316,7 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(OutputOffsetProfile::Out
 
     if (ImGui::TreeNode("Example Screenshot"))
     {
-        ImGui::Text(std::format("The following is a screenshot of correctly adjusted volume levels:", lastCheckedInputSampleRate).c_str());
+        ImGui::Text(std::format("The following is a screenshot of correctly adjusted volume levels:").c_str());
         float exampleTextureScale = 0.95 * DpiScale;
         ImGui::Image(exampleTexture, ImVec2(exampleTextureWidth * exampleTextureScale, exampleTextureHeight * exampleTextureScale));
         ImGui::Spacing();
@@ -324,15 +324,6 @@ void GuiHelper::AdjustVolumeInstructionsTroubleshooting(OutputOffsetProfile::Out
     }
     if (ImGui::TreeNode("Detailed Instructions and Troubleshooting"))
     {
-        ImGui::PushFont(FontHelper::BoldFont);
-        ImGui::Text("Current Input Sample Rate");
-        ImGui::PopFont();
-        ImGui::Indent();
-            ImGui::Text(std::format("{} Hz", lastCheckedInputSampleRate).c_str());
-            ImGui::SameLine();
-            HelpMarker("An input device sample rate of 44100 Hz or higher is recommended. A 48000 Hz sample rate often performs best because it will filter out high frequency noise that may be captured with higher sample rates. This sample rate can be configured in the Windows Settings app.");
-        ImGui::Unindent();
-
         ImGui::Spacing();
         ImGui::PushFont(FontHelper::BoldFont);
         ImGui::Text("Best Practices");

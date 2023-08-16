@@ -17,7 +17,7 @@ public:
 	static void AdjustVolumeDisplay(const char* imGuiID, const AdjustVolumeManager::VolumeAnalysis& analysis, float DpiScale, float tickMonitorWidth, float fullMonitorWidth, const char* title, bool* useAutoThreshold, float* manualThreshold, bool setDefaultState);
 	static void PeakLevel(AdjustVolumeManager::PeakLevelGrade grade, const char* helpText);
 	static std::string CableHelpText(OutputOffsetProfile::OutputType outType);
-	static void AdjustVolumeInstructionsTroubleshooting(OutputOffsetProfile::OutputType outType, int lastCheckedInputSampleRate, float* outputVolume, bool* overrideNoisyQuiet, void* exampleTexture, int exampleTextureWidth, int exampleTextureHeight, float DpiScale);
+	static void AdjustVolumeInstructionsTroubleshooting(OutputOffsetProfile::OutputType outType, float* outputVolume, bool* overrideNoisyQuiet, void* exampleTexture, int exampleTextureWidth, int exampleTextureHeight, float DpiScale);
 	static void TestConfiguration(float DpiScale, OutputOffsetProfile::OutputType outType);
 	static void VerifiedHelp();
 	static void DearImGuiLegal();
