@@ -472,7 +472,7 @@ void Gui::RefreshAudioEndpoints()
     {
         for (int i = 0; i < outputAudioEndpoints.size(); i++)
         {
-            outputAudioEndpoints[i].PopulateSupportedFormats(true, true, false, AudioEndpoint::AllFormatsFilter);
+            outputAudioEndpoints[i].PopulateSupportedFormats(true, true, false, false, AudioEndpoint::AllFormatsFilter);
         }
     }
 }

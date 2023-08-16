@@ -652,7 +652,12 @@ bool Gui::DoGui()
                 else if (state == MeasurementToolGuiState::FinishingAdjustVolume)
                 {
                     state = MeasurementToolGuiState::MeasurementConfig;
-                    SelectedAudioOutputEndpoint().PopulateSupportedFormats(false, IncludeSurroundAsDefault(), true, OutputOffsetProfiles::CurrentProfile()->FormatFilter);
+                    SelectedAudioOutputEndpoint().PopulateSupportedFormats(
+                        false,
+                        IncludeSurroundAsDefault(),
+                        OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Analog,
+                        true,
+                        OutputOffsetProfiles::CurrentProfile()->FormatFilter);
                     strcpy_s(TestNotes::Notes.DutModel, SelectedAudioOutputEndpoint().Name.c_str());
                     if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
                     {
@@ -715,7 +720,10 @@ bool Gui::DoGui()
                         {
                             format.UserSelected = false;
                         }
-                        SelectedAudioOutputEndpoint().SetDefaultFormats(IncludeSurroundAsDefault(), true);
+                        SelectedAudioOutputEndpoint().SetDefaultFormats(
+                            IncludeSurroundAsDefault(),
+                            OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Analog,
+                            true);
                     }
                     ImGui::SameLine();
                     if (ImGui::Button("Select All"))

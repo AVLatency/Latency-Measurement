@@ -178,6 +178,7 @@ WAVEFORMATEX* AdjustVolumeManager::GetWaveFormat(const AudioEndpoint& endpoint)
 				else
 				{
 					// Couldn't find a suitable format. TODO: error handling.
+					printf("Could not find an audio format for adjusting volumes.");
 				}
 
 				if (result != exFormat)

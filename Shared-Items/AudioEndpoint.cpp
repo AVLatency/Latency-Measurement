@@ -32,7 +32,7 @@ AudioEndpoint::~AudioEndpoint()
 	SAFE_RELEASE(Device);
 }
 
-void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool includeSurroundAsDefault, bool selectDefaults, bool (*formatFilter)(WAVEFORMATEX*))
+void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool includeSurroundAsDefault, bool ensureOneFormat, bool selectDefaults, bool (*formatFilter)(WAVEFORMATEX*))
 {
 	if (SupportedFormats.size() > 0)
 	{
@@ -133,14 +133,16 @@ void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool 
 		std::sort(SupportedFormats.begin(), SupportedFormats.end(), sortFunc);
 		std::sort(DuplicateSupportedFormats.begin(), DuplicateSupportedFormats.end(), sortFunc);
 
-		SetDefaultFormats(includeSurroundAsDefault, selectDefaults);
+		SetDefaultFormats(includeSurroundAsDefault, ensureOneFormat, selectDefaults);
 	}
 
 	SAFE_RELEASE(pAudioClient);
 }
 
-void AudioEndpoint::SetDefaultFormats(bool includeSurroundAsDefault, bool selectDefaults)
+void AudioEndpoint::SetDefaultFormats(bool includeSurroundAsDefault, bool ensureOneFormat, bool selectDefaults)
 {
+	bool foundFormat = true;
+
 	std::vector<AudioFormat*> stereoFormats = GetFormats(2, 48000, 16);
 	if (stereoFormats.size() > 1)
 	{
@@ -168,6 +170,25 @@ void AudioEndpoint::SetDefaultFormats(bool includeSurroundAsDefault, bool select
 			stereoFormats[0]->UserSelected = true;
 		}
 	}
+	else if (ensureOneFormat)
+	{
+		// We didn't find any, but maybe there are some at a different sample rate or bit rate:
+		std::vector<AudioFormat*> stereoFormats = GetFormats(2);
+		if (stereoFormats.size() > 0)
+		{
+			// We didn't get our preference as described above, so just go with whatever one
+			// is first on the list. This is scenario happens when using the Analog audio latency type.
+			stereoFormats[0]->DefaultSelection = true;
+			if (selectDefaults)
+			{
+				stereoFormats[0]->UserSelected = true;
+			}
+		}
+		else
+		{
+			foundFormat = false;
+		}
+	}
 
 	if (includeSurroundAsDefault)
 	{
@@ -183,6 +204,7 @@ void AudioEndpoint::SetDefaultFormats(bool includeSurroundAsDefault, bool select
 					// KSAUDIO_SPEAKER_5POINT1_SURROUND (using side/surround speakers)
 					if (reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->WaveFormat)->dwChannelMask == (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_SIDE_LEFT | SPEAKER_SIDE_RIGHT))
 					{
+						foundFormat = true;
 						format->DefaultSelection = true;
 						if (selectDefaults)
 						{
@@ -202,6 +224,7 @@ void AudioEndpoint::SetDefaultFormats(bool includeSurroundAsDefault, bool select
 						// Note: This format is excluded for HDMI, so this will never happen for HDMI formats.
 						if (reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->WaveFormat)->dwChannelMask == (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT))
 						{
+							foundFormat = true;
 							format->DefaultSelection = true;
 							if (selectDefaults)
 							{
@@ -214,6 +237,7 @@ void AudioEndpoint::SetDefaultFormats(bool includeSurroundAsDefault, bool select
 		}
 		else if (fivePointOneFormats.size() > 0)
 		{
+			foundFormat = true;
 			fivePointOneFormats[0]->DefaultSelection = true;
 			if (selectDefaults)
 			{
@@ -232,6 +256,7 @@ void AudioEndpoint::SetDefaultFormats(bool includeSurroundAsDefault, bool select
 					// KSAUDIO_SPEAKER_7POINT1_SURROUND
 					if (reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->WaveFormat)->dwChannelMask == (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT | SPEAKER_SIDE_LEFT | SPEAKER_SIDE_RIGHT))
 					{
+						foundFormat = true;
 						format->DefaultSelection = true;
 						if (selectDefaults)
 						{
@@ -243,11 +268,28 @@ void AudioEndpoint::SetDefaultFormats(bool includeSurroundAsDefault, bool select
 		}
 		else if (sevenPointOneFormats.size() > 0)
 		{
+			foundFormat = true;
 			sevenPointOneFormats[0]->DefaultSelection = true;
 			if (selectDefaults)
 			{
 				sevenPointOneFormats[0]->UserSelected = true;
 			}
+		}
+	}
+
+	if (ensureOneFormat && !foundFormat)
+	{
+		if (SupportedFormats.size() > 0)
+		{
+			SupportedFormats[0].DefaultSelection = true;
+			if (selectDefaults)
+			{
+				SupportedFormats[0].UserSelected = true;
+			}
+		}
+		else
+		{
+			printf("Error: could not find audio format.");
 		}
 	}
 }
