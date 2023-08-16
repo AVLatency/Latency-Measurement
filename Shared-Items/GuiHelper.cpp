@@ -475,7 +475,7 @@ void GuiHelper::DialogVolumeAdjustDisabledCrosstalk(bool openDialog, ImVec2 cent
 
         ImGui::Spacing();
 
-        ImGui::Text(std::format("If you are still getting crosstalk after watching the video, move the mic at least {:.2} cm ({:.2} inches)\n"
+        ImGui::Text(std::format("If you are still getting crosstalk after verifying your setup, move the mic at least {:.2} cm ({:.2} inches)\n"
             "further from the speaker. This will delay the input from the DUT by {:.2} ms.\n\n"
             "If moving the mic completely stops ALL crosstalk, you can safely move the mic closer to the\n"
             "speaker and disable crosstalk detection. If moving the mic does not remove crosstalk, then \n"
@@ -484,20 +484,20 @@ void GuiHelper::DialogVolumeAdjustDisabledCrosstalk(bool openDialog, ImVec2 cent
             "configuration by adjusting the output volume of the DUT, as shown in the video, before disabling\n"
             "crosstalk detection.", safeDistanceCM, safeDistanceInches, safeTime * 1000).c_str());
 
-
         ImGui::Spacing();
         ImGui::Separator();
         ImGui::Spacing();
 
-        if (ImGui::Button("Disable Crosstalk Detection", ImVec2(300 * DpiScale, 0)))
-        {
-            ImGui::CloseCurrentPopup();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Cancel", ImVec2(300 * DpiScale, 0)))
+        float buttonWidth = 280 * DpiScale;
+        if (ImGui::Button("Cancel", ImVec2(buttonWidth, 0)))
         {
             TestConfiguration::Ch1CableCrosstalkDetection = true;
             TestConfiguration::Ch2CableCrosstalkDetection = true;
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Disable Crosstalk Detection", ImVec2(buttonWidth, 0)))
+        {
             ImGui::CloseCurrentPopup();
         }
 

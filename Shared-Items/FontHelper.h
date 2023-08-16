@@ -9,6 +9,8 @@ public:
 	static ImFont* BoldFont;
 	static ImFont* HeaderFont;
 
+	static ImVec4 WarningColour;
+
 	static void LoadFonts(HINSTANCE hInstance, ImGuiIO& io, int regularFontId, int boldFontId, float dpiScale);
 
 private:

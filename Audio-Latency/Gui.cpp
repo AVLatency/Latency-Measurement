@@ -249,8 +249,8 @@ bool Gui::DoGui()
 
                     if (OutputOffsetProfiles::CurrentProfile()->isNoOffset)
                     {
-                        ImGui::PushFont(FontHelper::BoldFont);
-                        ImGui::Text("WARNING:");
+                        ImGui::PushFont(FontHelper::HeaderFont);
+                        ImGui::TextColored(FontHelper::WarningColour, "WARNING:");
                         ImGui::PopFont();   
                         ImGui::TextWrapped("Using a Dual-Out Reference Device that is not on the list may result in inaccurate measurements! This is because the offset between its different audio outputs will not be accounted for in the reported measurements.");
                         ImGui::Spacing();
@@ -363,8 +363,8 @@ bool Gui::DoGui()
 
                         if (DacLatencyProfiles::CurrentProfile()->isNoLatency)
                         {
-                            ImGui::PushFont(FontHelper::BoldFont);
-                            ImGui::Text("WARNING:");
+                            ImGui::PushFont(FontHelper::HeaderFont);
+                            ImGui::TextColored(FontHelper::WarningColour, "WARNING:");
                             ImGui::PopFont();
                             ImGui::TextWrapped("Using a DAC that is not on the list may result in inaccurate measurements! This is because the DAC's audio latency will not be accounted for in the reported measurements.");
                             ImGui::Spacing();

@@ -5,6 +5,7 @@
 ImFont* FontHelper::RegularFont = nullptr;
 ImFont* FontHelper::BoldFont = nullptr;
 ImFont* FontHelper::HeaderFont = nullptr;
+ImVec4 FontHelper::WarningColour = ImVec4(1.0f, 218.0f / 255.0f, 117.0f / 255.0f, 1.0f);
 
 bool FontHelper::initialized = false;
 
