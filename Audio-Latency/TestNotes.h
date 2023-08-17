@@ -19,7 +19,7 @@ public:
 	char DutModel[128] = "";
 	char DutFirmwareVersion[128] = "";
 	int DutOutputTypeIndex = 0;
-	const char* DutOutputTypeOptions[4] = { "", "Speaker", "Headphone Output", "Other" };
+	const char* DutOutputTypeOptions[4] = { "", "Speaker", "Headphone", "Other" };
 	char DutOutputTypeOther[128] = "";
 	const char* DutOutputType()
 	{

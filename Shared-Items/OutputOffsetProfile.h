@@ -32,6 +32,7 @@ public:
 	};
 
 	static std::string OutputTypeName(OutputOffsetProfile::OutputType outputType);
+	static std::string OutputTypeNameFileSafe(OutputOffsetProfile::OutputType outputType);
 	
 	OutputOffsetProfile(OutputType type, std::string name, OutputOffset (*getOffsetFunc)(int numChannels, int sampleRate, int bitDepth), bool (*formatFilter)(WAVEFORMATEX*));
 

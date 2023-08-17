@@ -1319,8 +1319,10 @@ void Gui::StartTest()
             }
         }
 
-        std::string fileString = StringHelper::GetFilenameSafeString(std::format("{} {}", TestNotes::Notes.DutModel, TestNotes::Notes.DutOutputType()));
-        fileString = fileString.substr(0, 80); // 80 is a magic number that will keep path lengths reasonable without needing to do a lot of Windows API programming.
+        const char* outType = OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough
+            ? TestNotes::Notes.DutPassthroughOutputType() : TestNotes::Notes.DutOutputType();
+        std::string fileString = StringHelper::GetFilenameSafeString(std::format("{}~{}", outType, TestNotes::Notes.DutModel));
+        fileString = fileString.substr(0, 67); // 67 is a magic number that will keep path lengths reasonable without needing to do a lot of Windows API programming.
 
         
         DacLatencyProfile* currentDacProfile =

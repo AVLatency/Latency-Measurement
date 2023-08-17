@@ -12,7 +12,7 @@
 TestManager::TestManager(AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, std::vector<AudioFormat*> selectedFormats, std::string fileString, std::string appDirectory, IResultsWriter& resultsWriter, OutputOffsetProfile* currentProfile, DacLatencyProfile* referenceDacLatency)
 	: outputEndpoint(outputEndpoint), inputEndpoint(inputEndpoint), SelectedFormats(selectedFormats), AppDirectory(appDirectory), resultsWriter(resultsWriter), Time(time(0)), outputOffsetProfile(currentProfile), referenceDacLatency(referenceDacLatency)
 {
-	TestFileString = std::format("{} {}", StringHelper::GetTimeString(Time, true), fileString);
+	TestFileString = std::format("{}~{}~{}", StringHelper::GetTimeString(Time, true), OutputOffsetProfile::OutputTypeNameFileSafe(currentProfile->OutType) , fileString);
 
 	// Removes all spaces from the beginning of the string
 	while (TestFileString.size() > 0 && isspace(TestFileString.front()))
