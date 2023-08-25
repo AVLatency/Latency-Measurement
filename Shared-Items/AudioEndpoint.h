@@ -41,7 +41,8 @@ public:
 	static bool HdmiFormatsFilter(WAVEFORMATEX* waveFormat);
 
 private:
-	bool SupportsFormat(int numChannels, int samplesPerSec, int bitsPerSample);
-	bool SupportsFormat(int numChannels, int samplesPerSec);
+	bool SupportsFormat(WORD formatId, int numChannels, int samplesPerSec, int bitsPerSample);
+	static int GetFormatIdOrder(const AudioFormat& audioFormat);
 
+	static WORD GetFormatID(WAVEFORMATEX* waveFormat);
 };

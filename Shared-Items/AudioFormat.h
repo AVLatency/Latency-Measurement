@@ -13,7 +13,6 @@ public:
 	static std::string GetCurrentWinAudioFormatString();
 	static std::string GetFormatString(WAVEFORMATEX* waveFormat, bool includeEncoding, bool includeChannelInfo);
 	static std::string GetChannelInfoString(WAVEFORMATEX* waveFormat);
-	static WORD GetFormatID(WAVEFORMATEX* waveFormat);
 	static std::string GetAudioDataEncodingString(WAVEFORMATEX* waveFormat);
 
 	AudioFormat(WAVEFORMATEX* waveFormat);

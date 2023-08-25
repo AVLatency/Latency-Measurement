@@ -22,6 +22,8 @@ void WindowsWaveFormats::PopulateExtensibleFormats()
 	extensibleFormat.SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
 
 	RecordExtensibleSubFormat(&extensibleFormat);
+
+	PopulateIEC61937Formats();
 }
 
 void WindowsWaveFormats::RecordExtensibleSubFormat(WAVEFORMATEXTENSIBLE* extensibleFormat)
@@ -29,9 +31,15 @@ void WindowsWaveFormats::RecordExtensibleSubFormat(WAVEFORMATEXTENSIBLE* extensi
 	extensibleFormat->SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
 	RecordExtensibleChannels(extensibleFormat);
 
-	// HDMI doesn't support floating point audio formats, as far as I'm aware.
-	//extensibleFormat->SubFormat = KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
-	//RecordExtensibleChannels(extensibleFormat);
+	// PERFORMANCE OPTIMIZATION: Exclude these formats I haven't found any drivers that support them:
+	// KSDATAFORMAT_SUBTYPE_DTS_AUDIO;
+
+	// PERFORMANCE OPTIMIZATION: Exclude these formats because I don't know of any consumer electronics
+	// that send these types of encodings over the wire:
+	// KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
+	// KSDATAFORMAT_SUBTYPE_ALAW;
+	// KSDATAFORMAT_SUBTYPE_MULAW;
+	// KSDATAFORMAT_SUBTYPE_ADPCM;
 }
 
 void WindowsWaveFormats::RecordExtensibleChannels(WAVEFORMATEXTENSIBLE* extensibleFormat)
@@ -250,8 +258,173 @@ void WindowsWaveFormats::RecordExtensibleFormat(WAVEFORMATEXTENSIBLE* extensible
 	AllExtensibleFormats.push_back(pWfx);
 }
 
+void WindowsWaveFormats::PopulateIEC61937Formats()
+{
+	/*
+	* TODO!
+	* (The follwoing are just rough notes
+	* 
+	
+	
+
+
+
+	extensibleFormat->Format.cbSize = 34; // Indicates that Format is part of a WAVEFORMATEXTENSIBLE_IEC61937 structure.
+
+	extensibleFormat->SubFormat = KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL;
+	RecordExtensibleChannels(extensibleFormat);
+
+	extensibleFormat->SubFormat = KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL_PLUS;
+	RecordExtensibleChannels(extensibleFormat);
+
+	extensibleFormat->SubFormat = KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL_PLUS_ATMOS;
+	RecordExtensibleChannels(extensibleFormat);
+
+	extensibleFormat->SubFormat = KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_MLP;
+	RecordExtensibleChannels(extensibleFormat);
+
+	extensibleFormat->SubFormat = KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_MAT20;
+	RecordExtensibleChannels(extensibleFormat);
+
+	extensibleFormat->SubFormat = KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_MAT21;
+	RecordExtensibleChannels(extensibleFormat);
+
+	extensibleFormat->SubFormat = KSDATAFORMAT_SUBTYPE_IEC61937_DTS;
+	RecordExtensibleChannels(extensibleFormat);
+
+	extensibleFormat->SubFormat = KSDATAFORMAT_SUBTYPE_IEC61937_DTS_HD;
+	RecordExtensibleChannels(extensibleFormat);
+
+	extensibleFormat->SubFormat = KSDATAFORMAT_SUBTYPE_IEC61937_DTSX_E1;
+	RecordExtensibleChannels(extensibleFormat);
+
+	extensibleFormat->SubFormat = KSDATAFORMAT_SUBTYPE_IEC61937_DTSX_E2;
+	RecordExtensibleChannels(extensibleFormat);
+
+
+
+	
+	
+	WAVEFORMATEXTENSIBLE extensibleFormat;
+	memset(&extensibleFormat, 0, sizeof(WAVEFORMATEXTENSIBLE));
+	extensibleFormat.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
+	extensibleFormat.Format.nChannels = 1;
+	extensibleFormat.Format.nSamplesPerSec = 44100;
+	SetBitsPerSample(&extensibleFormat.Format, 16);
+	extensibleFormat.Format.cbSize = 22;
+	extensibleFormat.Samples.wValidBitsPerSample = (WORD)extensibleFormat.Format.wBitsPerSample;
+	extensibleFormat.dwChannelMask = 0; // This could be all types of who knows!
+	extensibleFormat.SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
+
+	/*
+	// Now try manually focing some specific formats as per specs from
+	// https://github.com/MicrosoftDocs/win32/blob/docs/desktop-src/CoreAudio/representing-formats-for-iec-61937-transmissions.md
+	// This one is supported by my HDMI audio driver:
+	WAVEFORMATEXTENSIBLE_IEC61937 wfext;
+	wfext.FormatExt.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
+	wfext.FormatExt.Format.nChannels = 2;              // One IEC 60958 Line.
+	wfext.FormatExt.Format.nSamplesPerSec = 192000;    // Link runs at 192 KHz.
+	wfext.FormatExt.Format.nAvgBytesPerSec = 768000;   // 192 KHz * 4.
+	wfext.FormatExt.Format.nBlockAlign = 4;            // 16 bits * 2 channels.
+	wfext.FormatExt.Format.wBitsPerSample = 16;        // Always at 16 bits over IEC 60958.
+	wfext.FormatExt.Format.cbSize = 34;                // Indicates that Format is part of a
+	// WAVEFORMATEXTENSIBLE_IEC61937 structure.
+	wfext.FormatExt.Samples.wValidBitsPerSample = 16;
+	wfext.FormatExt.dwChannelMask = KSAUDIO_SPEAKER_5POINT1;    // Dolby 5.1 Surround.
+	wfext.FormatExt.SubFormat = KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL_PLUS;
+	wfext.dwEncodedSamplesPerSec = 48000;                       // Sample rate of encoded content.
+	wfext.dwEncodedChannelCount = 6;                            // Encoded data contains 6 channels.
+	wfext.dwAverageBytesPerSec = 0;                             // Ignored for this format.
+
+	WAVEFORMATEXTENSIBLE_IEC61937* pWfx = new WAVEFORMATEXTENSIBLE_IEC61937();
+	*pWfx = wfext;
+	AllExtensibleFormats.push_back(reinterpret_cast<WAVEFORMATEXTENSIBLE*>(pWfx));
+
+	// This one is supported by my HDMI audio driver:
+	wfext.FormatExt.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
+	wfext.FormatExt.Format.nChannels = 8;                // Four IEC 60958 Lines.
+	wfext.FormatExt.Format.nSamplesPerSec = 192000;      // Link runs at 192 KHz.
+	wfext.FormatExt.Format.nAvgBytesPerSec = 3072000;    // 192 KHz * 16.
+	wfext.FormatExt.Format.nBlockAlign = 16;             // 16-bits * 8 channels.
+	wfext.FormatExt.Format.wBitsPerSample = 16;          // Always at 16 bits over IEC 60958.
+	wfext.FormatExt.Format.cbSize = 34;                  // Indicates that Format is part of a
+	// WAVEFORMATEXTENSIBLE_IEC61937 structure.
+	wfext.FormatExt.Samples.wValidBitsPerSample = 16;
+	wfext.FormatExt.dwChannelMask = KSAUDIO_SPEAKER_7POINT1;    // Dolby 7.1 Surround.
+	wfext.FormatExt.SubFormat = KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_MLP; // This structure indicates MLP (MAT 1.0) support.
+	wfext.dwEncodedSamplesPerSec = 96000;                       // Sample rate of encoded content.
+	wfext.dwEncodedChannelCount = 8;                            // Encoded data contains 8 channels.
+	wfext.dwAverageBytesPerSec = 0;                             // Ignored for this format.
+
+	pWfx = new WAVEFORMATEXTENSIBLE_IEC61937();
+	*pWfx = wfext;
+	AllExtensibleFormats.push_back(reinterpret_cast<WAVEFORMATEXTENSIBLE*>(pWfx));
+
+	wfext.FormatExt.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
+	wfext.FormatExt.Format.nChannels = 8;                // Four IEC 60958 Lines.
+	wfext.FormatExt.Format.nSamplesPerSec = 192000;      // Link runs at 192 KHz.
+	wfext.FormatExt.Format.nAvgBytesPerSec = 3072000;    // 192 KHz * 16.
+	wfext.FormatExt.Format.nBlockAlign = 16;             // 16-bits * 8 channels.
+	wfext.FormatExt.Format.wBitsPerSample = 16;          // Always at 16 bits over IEC 60958.
+	wfext.FormatExt.Format.cbSize = 34;                  // Indicates that Format is part of a
+	// WAVEFORMATEXTENSIBLE_IEC61937 structure.
+	wfext.FormatExt.Samples.wValidBitsPerSample = 16;
+	wfext.FormatExt.dwChannelMask = KSAUDIO_SPEAKER_7POINT1;    // Dolby 7.1 Surround.
+	wfext.FormatExt.SubFormat = KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_MAT20; // This structure indicates MAT 2.0 support.
+	wfext.dwEncodedSamplesPerSec = 96000;                       // Sample rate of encoded content.
+	wfext.dwEncodedChannelCount = 8;                            // Encoded data contains 8 channels.
+	wfext.dwAverageBytesPerSec = 0;                             // Ignored for this format.
+
+	pWfx = new WAVEFORMATEXTENSIBLE_IEC61937();
+	*pWfx = wfext;
+	AllExtensibleFormats.push_back(reinterpret_cast<WAVEFORMATEXTENSIBLE*>(pWfx));
+
+	wfext.FormatExt.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
+	wfext.FormatExt.Format.nChannels = 8;                // Four IEC 60958 Lines.
+	wfext.FormatExt.Format.nSamplesPerSec = 192000;      // Link runs at 192 KHz.
+	wfext.FormatExt.Format.nAvgBytesPerSec = 3072000;    // 192 KHz * 16.
+	wfext.FormatExt.Format.nBlockAlign = 16;             // 16-bits * 8 channels.
+	wfext.FormatExt.Format.wBitsPerSample = 16;          // Always at 16 bits over IEC 60958.
+	wfext.FormatExt.Format.cbSize = 34;                  // Indicates that Format is part of a
+	// WAVEFORMATEXTENSIBLE_IEC61937 structure.
+	wfext.FormatExt.Samples.wValidBitsPerSample = 16;
+	wfext.FormatExt.dwChannelMask = KSAUDIO_SPEAKER_7POINT1;    // Dolby 7.1 Surround.
+	wfext.FormatExt.SubFormat = KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_MAT21; // This structure indicates MAT 2.1 support.
+	wfext.dwEncodedSamplesPerSec = 96000;                       // Sample rate of encoded content.
+	wfext.dwEncodedChannelCount = 8;                            // Encoded data contains 8 channels.
+	wfext.dwAverageBytesPerSec = 0;                             // Ignored for this format.
+
+	pWfx = new WAVEFORMATEXTENSIBLE_IEC61937();
+	*pWfx = wfext;
+	AllExtensibleFormats.push_back(reinterpret_cast<WAVEFORMATEXTENSIBLE*>(pWfx));
+
+	wfext.FormatExt.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
+	wfext.FormatExt.Format.nChannels = 2;             // One IEC 60958 Line.
+	wfext.FormatExt.Format.nSamplesPerSec = 96000;    // Link runs at 96 KHz.
+	wfext.FormatExt.Format.nAvgBytesPerSec = 384000;  // 96 KHz * 4.
+	wfext.FormatExt.Format.nBlockAlign = 4;           // 16 bits * 8 channels.
+	wfext.FormatExt.Format.wBitsPerSample = 16;       // Always at 16 bits over link.
+	wfext.FormatExt.Format.cbSize = 34;               // Indicates that Format is part of a
+	// WAVEFORMATEXTENSIBLE_IEC61937 structure.
+	wfext.FormatExt.Samples.wValidBitsPerSample = 16;
+	wfext.FormatExt.dwChannelMask = KSAUDIO_SPEAKER_5POINT1;    // 5.1 Surround.
+	wfext.FormatExt.SubFormat = KSDATAFORMAT_SUBTYPE_IEC61937_WMA_PRO;
+	wfext.dwEncodedSamplesPerSec = 96000;                       // Sample rate of encoded content.
+	wfext.dwEncodedChannelCount = 6;                            // Encoded data contains 6 channels.
+	wfext.dwAverageBytesPerSec = 0;                             // Ignored for this format.
+
+	pWfx = new WAVEFORMATEXTENSIBLE_IEC61937();
+	*pWfx = wfext;
+	AllExtensibleFormats.push_back(reinterpret_cast<WAVEFORMATEXTENSIBLE*>(pWfx));
+	*/
+}
+
 void WindowsWaveFormats::PopulateExFormats()
 {
+	// WAVEFORMATEX are legacy formats that are typically duplicates of the WAVEFORMATEXTENSIBLE ones
+	// But they are still important because NVIDIA (and possibly other) drivers only support 24 bit HDMI
+	// audio output through these legacy formats.
+
 	WAVEFORMATEX exFormat;
 	memset(&exFormat, 0, sizeof(WAVEFORMATEX));
 	exFormat.wFormatTag = WAVE_FORMAT_PCM;
@@ -268,8 +441,25 @@ void WindowsWaveFormats::RecordExFormatTag(WAVEFORMATEX* exFormat)
 	exFormat->wFormatTag = WAVE_FORMAT_PCM;
 	RecordExChannels(exFormat);
 
-	exFormat->wFormatTag = WAVE_FORMAT_IEEE_FLOAT;
-	RecordExChannels(exFormat);
+	// Encoders not yet implemented:
+	//exFormat->wFormatTag = WAVE_FORMAT_DOLBY_AC3_SPDIF;
+	//RecordExChannels(exFormat);
+
+	//exFormat->wFormatTag = WAVE_FORMAT_DTS;
+	//RecordExChannels(exFormat);
+
+	// PERFORMANCE OPTIMIZATION: Exclude these formats I haven't found any drivers that support them:
+	// WAVE_FORMAT_DOLBY_AC2;
+	// WAVE_FORMAT_DOLBY_AC4;
+	// WAVE_FORMAT_DTS_DS;
+	// WAVE_FORMAT_DTS2;
+
+	// PERFORMANCE OPTIMIZATION: Exclude these formats because I don't know of any consumer electronics
+	// that send these types of encodings over the wire:
+	// WAVE_FORMAT_ADPCM;
+	// WAVE_FORMAT_IEEE_FLOAT;
+	// WAVE_FORMAT_ALAW;
+	// WAVE_FORMAT_MULAW;
 }
 
 void WindowsWaveFormats::RecordExChannels(WAVEFORMATEX* exFormat)

@@ -327,14 +327,7 @@ bool Gui::DoGui()
                     if (ImGui::Button("Copy format to clipboard"))
                     {
                         std::stringstream copyableFormatText;
-                        if (WasapiOutput::GetFormatID(waveFormat) == WAVE_FORMAT_PCM)
-                        {
-                            copyableFormatText << "LPCM";
-                        }
-                        else if (WasapiOutput::GetFormatID(waveFormat) == WAVE_FORMAT_IEEE_FLOAT)
-                        {
-                            copyableFormatText << "IEEE Floating Point";
-                        }
+                        copyableFormatText << AudioFormat::GetAudioDataEncodingString(waveFormat);
                         copyableFormatText << '\t' << waveFormat->nChannels
                             << '\t' << waveFormat->nSamplesPerSec
                             << '\t' << waveFormat->wBitsPerSample

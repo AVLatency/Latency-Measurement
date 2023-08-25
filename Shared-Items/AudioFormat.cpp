@@ -3,7 +3,7 @@
 
 AudioFormat::AudioFormat(WAVEFORMATEX* waveFormat) : WaveFormat(waveFormat)
 {
-    FormatString = GetFormatString(waveFormat, false, true);
+    FormatString = GetFormatString(waveFormat, true, true);
 }
 
 std::string AudioFormat::GetCurrentWinAudioFormatString()
@@ -89,18 +89,6 @@ std::string AudioFormat::GetChannelInfoString(WAVEFORMATEX* waveFormat)
     return result;
 }
 
-WORD AudioFormat::GetFormatID(WAVEFORMATEX* waveFormat)
-{
-    if (waveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
-    {
-        return EXTRACT_WAVEFORMATEX_ID(&(reinterpret_cast<WAVEFORMATEXTENSIBLE*>(waveFormat)->SubFormat));
-    }
-    else
-    {
-        return waveFormat->wFormatTag;
-    }
-}
-
 std::string AudioFormat::GetAudioDataEncodingString(WAVEFORMATEX* waveFormat)
 {
     if (waveFormat == nullptr)
@@ -108,18 +96,130 @@ std::string AudioFormat::GetAudioDataEncodingString(WAVEFORMATEX* waveFormat)
         return "UnknownEncoding";
     }
 
-    WORD formatID = GetFormatID(waveFormat);
+    if (waveFormat->wFormatTag != WAVE_FORMAT_EXTENSIBLE)
+    {
+        WORD formatID = waveFormat->wFormatTag;
 
-    if (formatID == WAVE_FORMAT_IEEE_FLOAT)
-    {
-        return "IEEE_FLOAT";
-    }
-    else if (formatID == WAVE_FORMAT_PCM)
-    {
-        return "LPCM";
+        if (formatID == WAVE_FORMAT_PCM)
+        {
+            return "LPCM";
+        }
+        else if (formatID == WAVE_FORMAT_ADPCM)
+        {
+            return "ADPCM";
+        }
+        else if (formatID == WAVE_FORMAT_IEEE_FLOAT)
+        {
+            return "IEEE_FLOAT";
+        }
+        else if (formatID == WAVE_FORMAT_ALAW)
+        {
+            return "ALAW";
+        }
+        else if (formatID == WAVE_FORMAT_MULAW)
+        {
+            return "MULAW";
+        }
+        else if (formatID == WAVE_FORMAT_DOLBY_AC2)
+        {
+            return "DOLBY_AC2";
+        }
+        else if (formatID == WAVE_FORMAT_DOLBY_AC3_SPDIF)
+        {
+            return "DOLBY_AC3_SPDIF";
+        }
+        else if (formatID == WAVE_FORMAT_DOLBY_AC4)
+        {
+            return "DOLBY_AC4";
+        }
+        else if (formatID == WAVE_FORMAT_DTS)
+        {
+            return "DTS";
+        }
+        else if (formatID == WAVE_FORMAT_DTS_DS)
+        {
+            return "DTS_DS";
+        }
+        else if (formatID == WAVE_FORMAT_DTS2)
+        {
+            return "DTS2";
+        }
+        else
+        {
+            return std::format("UnknownFormat0x{:X}", formatID);
+        }
     }
     else
     {
-        return std::format("UnknownFormat0x{:X}", formatID);
+        auto waveFormatExtensible = reinterpret_cast<WAVEFORMATEXTENSIBLE*>(waveFormat);
+        auto subFormat = waveFormatExtensible->SubFormat;
+        if (subFormat == KSDATAFORMAT_SUBTYPE_PCM)
+        {
+            return "LPCM";
+        }
+        else if (subFormat == KSDATAFORMAT_SUBTYPE_IEEE_FLOAT)
+        {
+            return "IEEE_FLOAT";
+        }
+        else if (subFormat == KSDATAFORMAT_SUBTYPE_ALAW)
+        {
+            return "ALAW";
+        }
+        else if (subFormat == KSDATAFORMAT_SUBTYPE_MULAW)
+        {
+            return "MULAW";
+        }
+        else if (subFormat == KSDATAFORMAT_SUBTYPE_ADPCM)
+        {
+            return "ADPCM";
+        }
+        else if (subFormat == KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL)
+        {
+            return "IEC61937_DOLBY_DIGITAL";
+        }
+        else if (subFormat == KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL_PLUS)
+        {
+            return "IEC61937_DOLBY_DIGITAL_PLUS";
+        }
+        else if (subFormat == KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL_PLUS_ATMOS)
+        {
+            return "IEC61937_DOLBY_DIGITAL_PLUS_ATMOS";
+        }
+        else if (subFormat == KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_MLP)
+        {
+            return "IEC61937_DOLBY_MLP_MAT10";
+        }
+        else if (subFormat == KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_MAT20)
+        {
+            return "IEC61937_DOLBY_MAT20";
+        }
+        else if (subFormat == KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_MAT21)
+        {
+            return "IEC61937_DOLBY_MAT21";
+        }
+        else if (subFormat == KSDATAFORMAT_SUBTYPE_IEC61937_DTS)
+        {
+            return "IEC61937_DTS";
+        }
+        else if (subFormat == KSDATAFORMAT_SUBTYPE_IEC61937_DTS_HD)
+        {
+            return "IEC61937_DTS_HD";
+        }
+        else if (subFormat == KSDATAFORMAT_SUBTYPE_IEC61937_DTSX_E1)
+        {
+            return "IEC61937_DTSX_E1";
+        }
+        else if (subFormat == KSDATAFORMAT_SUBTYPE_IEC61937_DTSX_E2)
+        {
+            return "IEC61937_DTSX_E2";
+        }
+        else if (subFormat == KSDATAFORMAT_SUBTYPE_DTS_AUDIO)
+        {
+            return "DTS_AUDIO";
+        }
+        else
+        {
+            return std::format("UnknownExtensibleFormat0x{:X}0x{:X}0x{:X}", subFormat.Data1, subFormat.Data2, subFormat.Data3);
+        }
     }
 }

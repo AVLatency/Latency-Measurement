@@ -21,6 +21,8 @@ private:
 	void RecordExtensibleBitsPerSample(WAVEFORMATEXTENSIBLE* extensibleFormat);
 	void RecordExtensibleFormat(WAVEFORMATEXTENSIBLE* extensibleFormat);
 
+	void PopulateIEC61937Formats();
+
 	void PopulateExFormats();
 	void RecordExFormatTag(WAVEFORMATEX* exFormat);
 	void RecordExChannels(WAVEFORMATEX* exFormat);

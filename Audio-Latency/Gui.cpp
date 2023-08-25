@@ -12,6 +12,7 @@
 #include "GuiHelper.h"
 #include "DacLatencyProfiles.h"
 #include <format>
+#include "WasapiOutput.h"
 
 float Gui::DpiScale = 1.0f;
 bool Gui::DpiScaleChanged = false;
@@ -696,7 +697,7 @@ bool Gui::DoGui()
                         || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::eARC
                         || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
                     {
-                        ImGui::Text("HDMI Audio Formats (LPCM)");
+                        ImGui::Text("HDMI Audio Formats");
                         ImGui::PopFont();
                         if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
                         {
@@ -705,7 +706,7 @@ bool Gui::DoGui()
                     }
                     else
                     {
-                        ImGui::Text("Windows Audio Formats (LPCM)");
+                        ImGui::Text("Windows Audio Formats");
                         ImGui::PopFont();
                         ImGui::SameLine(); GuiHelper::HelpMarker("This is the Windows audio format that will be used to send audio to the audio driver."
                             " The final S/PDIF format may be slightly different. For example, 16 bit audio may be sent as 20 bit audio via S/PDIF or the speaker assignment may be disregarded.");
@@ -959,20 +960,23 @@ bool Gui::DoGui()
 
                         for (AveragedResult& result : testManager->SummaryResults)
                         {
-                            if (result.Format->WaveFormat->nChannels == 2)
+                            if (WasapiOutput::GetFormatID(result.Format->WaveFormat) == WAVE_FORMAT_PCM)
                             {
-                                stereoLatency = std::format("{} ms", round(result.AverageLatency()));
-                                stereoFormat = std::format("- LPCM {}", result.Format->FormatString);
-                            }
-                            if (result.Format->WaveFormat->nChannels == 6)
-                            {
-                                fiveOneLatency = std::format("{} ms", round(result.AverageLatency()));
-                                fiveOneFormat = std::format("- LPCM {}", result.Format->FormatString);
-                            }
-                            if (result.Format->WaveFormat->nChannels == 8)
-                            {
-                                sevenOneLatency = std::format("{} ms", round(result.AverageLatency()));
-                                sevenOneFormat = std::format("- LPCM {}", result.Format->FormatString);
+                                if (result.Format->WaveFormat->nChannels == 2)
+                                {
+                                    stereoLatency = std::format("{} ms", round(result.AverageLatency()));
+                                    stereoFormat = std::format("- {}", result.Format->FormatString);
+                                }
+                                if (result.Format->WaveFormat->nChannels == 6)
+                                {
+                                    fiveOneLatency = std::format("{} ms", round(result.AverageLatency()));
+                                    fiveOneFormat = std::format("- {}", result.Format->FormatString);
+                                }
+                                if (result.Format->WaveFormat->nChannels == 8)
+                                {
+                                    sevenOneLatency = std::format("{} ms", round(result.AverageLatency()));
+                                    sevenOneFormat = std::format("- {}", result.Format->FormatString);
+                                }
                             }
                         }
 

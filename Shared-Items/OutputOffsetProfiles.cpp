@@ -258,7 +258,7 @@ void OutputOffsetProfiles::PrepareOffsetStringsForGui()
 		for (int f = 0; f < WindowsWaveFormats::Formats.AllExFormats.size(); f++)
 		{
 			WAVEFORMATEX* format = WindowsWaveFormats::Formats.AllExFormats[f];
-			if (format->wFormatTag == WAVE_FORMAT_PCM && Profiles[i]->FormatFilter(format))
+			if (Profiles[i]->FormatFilter(format))
 			{
 				OutputOffsetProfile::OutputOffset offsetValue = Profiles[i]->GetOffsetFromWaveFormat(format);
 				ss << AudioFormat::GetFormatString(WindowsWaveFormats::Formats.AllExFormats[f], true, false) << ": ";
