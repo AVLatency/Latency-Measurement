@@ -13,6 +13,7 @@
 #include "WasapiOutput.h"
 #include "AudioGraphOutput.h"
 #include "OutputAPIHelper.h"
+#include "OutputOffsetProfiles.h"
 
 float Gui::DpiScale = 1.0f;
 bool Gui::DpiScaleChanged = false;
@@ -295,22 +296,22 @@ bool Gui::DoGui()
                         || waveType == GeneratedSamples::WaveType::TestPattern_ToneHighFreqOnOff
                         || waveType == GeneratedSamples::WaveType::TestPattern_VisuallyIdentifiable)
                     {
-                        if (WasapiOutput::GetFormatID(waveFormat) == WAVE_FORMAT_PCM && waveFormat->wBitsPerSample == 16)
+                        if (AudioFormat::GetFormatID(waveFormat) == WAVE_FORMAT_PCM && waveFormat->wBitsPerSample == 16)
                         {
                             highSampleBits = std::format("{:016b}", WasapiOutput::FloatToINT16(1.0f * TestConfiguration::OutputVolume));
                             lowSampleBits = std::format("{:016b}", WasapiOutput::FloatToINT16(-1.0f * TestConfiguration::OutputVolume));
                         }
-                        else if (WasapiOutput::GetFormatID(waveFormat) == WAVE_FORMAT_PCM && waveFormat->wBitsPerSample == 24)
+                        else if (AudioFormat::GetFormatID(waveFormat) == WAVE_FORMAT_PCM && waveFormat->wBitsPerSample == 24)
                         {
                             highSampleBits = std::format("{:032b}", WasapiOutput::FloatToPaddedINT24(1.0f * TestConfiguration::OutputVolume));
                             lowSampleBits = std::format("{:032b}", WasapiOutput::FloatToPaddedINT24(-1.0f * TestConfiguration::OutputVolume));
                         }
-                        else if (WasapiOutput::GetFormatID(waveFormat) == WAVE_FORMAT_PCM && waveFormat->wBitsPerSample == 32)
+                        else if (AudioFormat::GetFormatID(waveFormat) == WAVE_FORMAT_PCM && waveFormat->wBitsPerSample == 32)
                         {
                             highSampleBits = std::format("{:032b}", WasapiOutput::FloatToINT32(1.0f * TestConfiguration::OutputVolume));
                             lowSampleBits = std::format("{:032b}", WasapiOutput::FloatToINT32(-1.0f * TestConfiguration::OutputVolume));
                         }
-                        else if (WasapiOutput::GetFormatID(waveFormat) == WAVE_FORMAT_IEEE_FLOAT && waveFormat->wBitsPerSample == 32)
+                        else if (AudioFormat::GetFormatID(waveFormat) == WAVE_FORMAT_IEEE_FLOAT && waveFormat->wBitsPerSample == 32)
                         {
                             highSampleBits = std::vformat("{:032b}", std::make_format_args(1.0f * TestConfiguration::OutputVolume));
                             lowSampleBits = std::vformat("{:032b}", std::make_format_args(-1.0f * TestConfiguration::OutputVolume));
@@ -465,7 +466,7 @@ void Gui::RefreshAudioEndpoints()
     {
         for (int i = 0; i < outputAudioEndpoints.size(); i++)
         {
-            outputAudioEndpoints[i].PopulateSupportedFormats(true, true, false, false, AudioEndpoint::AllFormatsFilter);
+            outputAudioEndpoints[i].PopulateSupportedFormats(true, true, false, false);
         }
     }
 }

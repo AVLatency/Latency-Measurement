@@ -6,6 +6,18 @@ AudioFormat::AudioFormat(WAVEFORMATEX* waveFormat) : WaveFormat(waveFormat)
     FormatString = GetFormatString(waveFormat, true, true);
 }
 
+WORD AudioFormat::GetFormatID(WAVEFORMATEX* waveFormat)
+{
+    if (waveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
+    {
+        return EXTRACT_WAVEFORMATEX_ID(&(reinterpret_cast<WAVEFORMATEXTENSIBLE*>(waveFormat)->SubFormat));
+    }
+    else
+    {
+        return waveFormat->wFormatTag;
+    }
+}
+
 std::string AudioFormat::GetCurrentWinAudioFormatString()
 {
     return "Current Windows audio format";
@@ -175,7 +187,7 @@ std::string AudioFormat::GetAudioDataEncodingString(WAVEFORMATEX* waveFormat)
         }
         else if (subFormat == KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL)
         {
-            return "IEC61937_DOLBY_DIGITAL";
+            return "IEC61937_DOLBY_DIGITAL_AC3";
         }
         else if (subFormat == KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL_PLUS)
         {

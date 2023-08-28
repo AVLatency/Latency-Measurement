@@ -960,7 +960,7 @@ bool Gui::DoGui()
 
                         for (AveragedResult& result : testManager->SummaryResults)
                         {
-                            if (WasapiOutput::GetFormatID(result.Format->WaveFormat) == WAVE_FORMAT_PCM)
+                            if (AudioFormat::GetFormatID(result.Format->WaveFormat) == WAVE_FORMAT_PCM)
                             {
                                 if (result.Format->WaveFormat->nChannels == 2)
                                 {

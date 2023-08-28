@@ -204,21 +204,9 @@ INT32 WasapiOutput::FloatToINT32(float sample)
     return (INT32)(round((double)sample * INT_MAX));
 }
 
-WORD WasapiOutput::GetFormatID(WAVEFORMATEX* waveFormat)
-{
-    if (waveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
-    {
-        return EXTRACT_WAVEFORMATEX_ID(&(reinterpret_cast<WAVEFORMATEXTENSIBLE*>(waveFormat)->SubFormat));
-    }
-    else
-    {
-        return waveFormat->wFormatTag;
-    }
-}
-
 WORD WasapiOutput::GetFormatID()
 {
-    return GetFormatID(waveFormat);
+    return AudioFormat::GetFormatID(waveFormat);
 }
 
 HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flags)

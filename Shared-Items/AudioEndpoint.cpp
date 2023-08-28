@@ -45,6 +45,8 @@ void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool 
 
 	if (!FAILED(hr))
 	{
+		// TODO: Update this to work with Dolby subformats
+
 		// Favour formats that have channel masks
 		for (WAVEFORMATEXTENSIBLE* waveFormat : WindowsWaveFormats::Formats.AllExtensibleFormats)
 		{
@@ -74,7 +76,7 @@ void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool 
 						// this format is supported!
 
 						// Only add formats with no channel masks if there are no supported formats with channel masks
-						if (!SupportsFormat(GetFormatID((WAVEFORMATEX*)waveFormat), waveFormat->Format.nChannels, waveFormat->Format.nSamplesPerSec, waveFormat->Format.wBitsPerSample))
+						if (!AlreadyInSupportedFormats(AudioFormat::GetFormatID((WAVEFORMATEX*)waveFormat), waveFormat->Format.nChannels, waveFormat->Format.nSamplesPerSec, waveFormat->Format.wBitsPerSample))
 						{
 							SupportedFormats.push_back((WAVEFORMATEX*)waveFormat);
 						}
@@ -98,7 +100,7 @@ void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool 
 					// WAVEFORMATEX are legacy formats that are typically duplicates of the WAVEFORMATEXTENSIBLE ones
 					// But they are still important because NVIDIA (and possibly other) drivers only support 24 bit HDMI
 					// audio output through these legacy formats.
-					if (!SupportsFormat(GetFormatID(waveFormat), waveFormat->nChannels, waveFormat->nSamplesPerSec, waveFormat->wBitsPerSample))
+					if (!AlreadyInSupportedFormats(AudioFormat::GetFormatID(waveFormat), waveFormat->nChannels, waveFormat->nSamplesPerSec, waveFormat->wBitsPerSample))
 					{
 						SupportedFormats.push_back(waveFormat);
 					}
@@ -154,7 +156,7 @@ int AudioEndpoint::GetFormatIdOrder(const AudioFormat& audioFormat)
 		waveFormatExtensible = reinterpret_cast<WAVEFORMATEXTENSIBLE*>(audioFormat.WaveFormat);
 		subFormat = waveFormatExtensible->SubFormat;
 	}
-	WORD formatId = GetFormatID(audioFormat.WaveFormat);
+	WORD formatId = AudioFormat::GetFormatID(audioFormat.WaveFormat);
 
 	int order = 0;
 
@@ -361,31 +363,19 @@ void AudioEndpoint::SetDefaultFormats(bool includeSurroundAsDefault, bool ensure
 	}
 }
 
-bool AudioEndpoint::SupportsFormat(WORD formatId, int numChannels, int samplesPerSec, int bitsPerSample)
+bool AudioEndpoint::AlreadyInSupportedFormats(WORD formatId, int numChannels, int samplesPerSec, int bitsPerSample)
 {
 	for (AudioFormat& audioFormat : SupportedFormats)
 	{
 		if (audioFormat.WaveFormat->nChannels == numChannels
 			&& audioFormat.WaveFormat->nSamplesPerSec == samplesPerSec
 			&& audioFormat.WaveFormat->wBitsPerSample == bitsPerSample
-			&& GetFormatID(audioFormat.WaveFormat) == formatId)
+			&& AudioFormat::GetFormatID(audioFormat.WaveFormat) == formatId)
 		{
 			return true;
 		}
 	}
 	return false;
-}
-
-WORD AudioEndpoint::GetFormatID(WAVEFORMATEX* waveFormat)
-{
-	if (waveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
-	{
-		return EXTRACT_WAVEFORMATEX_ID(&(reinterpret_cast<WAVEFORMATEXTENSIBLE*>(waveFormat)->SubFormat));
-	}
-	else
-	{
-		return waveFormat->wFormatTag;
-	}
 }
 
 std::vector<AudioFormat*> AudioEndpoint::GetFormats(int numChannels, int samplesPerSec, int bitsPerSample)
@@ -427,45 +417,5 @@ std::vector<AudioFormat*> AudioEndpoint::GetFormats(int numChannels)
 			result.push_back(&audioFormat);
 		}
 	}
-	return result;
-}
-
-bool AudioEndpoint::AllFormatsFilter(WAVEFORMATEX* waveFormat)
-{
-	return true;
-}
-
-bool AudioEndpoint::HdmiFormatsFilter(WAVEFORMATEX* waveFormat)
-{
-	bool result = true;
-
-	// Exclude mono because my HDMI signal analyzer gets all types of confused with a "mono" signal
-	// which suggests that it's not a valid HDMI format, at least when prepared by NVIDIA HDMI audio drivers.
-	if (waveFormat->nChannels < 2)
-	{
-		result = false;
-	}
-
-	if (waveFormat->wBitsPerSample != 16
-		&& waveFormat->wBitsPerSample != 20 // This hasn't been tested because the wave formats list doesn't include 20 bit samples yet.
-		&& waveFormat->wBitsPerSample != 24)
-	{
-		result = false;
-	}
-
-	if (waveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
-	{
-		auto waveFormatExtensible = reinterpret_cast<WAVEFORMATEXTENSIBLE*>(waveFormat);
-
-		// For these two channel masks, Windows HDMI drivers (NVIDIA and Intel at least) replace SPEAKER_BACK (RLC and RRC)
-		// with SPEAKER_SIDE (RL and RR), which is a format that is already included in the wave formats list, so this would
-		// end up just being an incorrectly displayed duplicate.
-		if (waveFormatExtensible->dwChannelMask == KSAUDIO_SPEAKER_QUAD
-			|| waveFormatExtensible->dwChannelMask == KSAUDIO_SPEAKER_5POINT1)
-		{
-			result = false;
-		}
-	}
-
 	return result;
 }

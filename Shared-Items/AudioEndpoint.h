@@ -31,18 +31,7 @@ public:
 	std::vector<AudioFormat*> GetFormats(int numChannels, int samplesPerSec);
 	std::vector<AudioFormat*> GetFormats(int numChannels);
 
-	/// <summary>
-	/// Does not filter any formats
-	/// </summary>
-	static bool AllFormatsFilter(WAVEFORMATEX* waveFormat);
-	/// <summary>
-	/// Filters out non-HDMI formats
-	/// </summary>
-	static bool HdmiFormatsFilter(WAVEFORMATEX* waveFormat);
-
 private:
-	bool SupportsFormat(WORD formatId, int numChannels, int samplesPerSec, int bitsPerSample);
+	bool AlreadyInSupportedFormats(WORD formatId, int numChannels, int samplesPerSec, int bitsPerSample);
 	static int GetFormatIdOrder(const AudioFormat& audioFormat);
-
-	static WORD GetFormatID(WAVEFORMATEX* waveFormat);
 };

@@ -14,7 +14,6 @@ public:
 	void StartPlayback();
 	void StopPlayback();
 
-	static WORD GetFormatID(WAVEFORMATEX* waveFormat);
 	static INT16 FloatToINT16(float sample);
 	static INT32 FloatToPaddedINT24(float sample);
 	static INT32 FloatToINT32(float sample);
