@@ -59,15 +59,6 @@ public:
 
 	static OutputOffsetProfile* CurrentProfile();
 
-private:
-	static void PrepareSubsetListsForGui();
-	static void PrepareOffsetStringsForGui();
-
-	static OutputOffsetProfile::OutputOffset None_GetOffset(int numChannels, int sampleRate, int bitDepth);
-
-	static OutputOffsetProfile::OutputOffset Hdmi_HDV_MB01_GetOffset(int numChannels, int sampleRate, int bitDepth);
-
-
 	/// <summary>
 	/// Does not filter any formats
 	/// </summary>
@@ -78,6 +69,14 @@ private:
 	static bool SpdifAllFormatFilter(WAVEFORMATEX* waveFormat, bool onlyLpcm);
 	static bool SpdifAllFormatFilter(WAVEFORMATEX*);
 	static bool SpdifLpcmFormatFilter(WAVEFORMATEX*);
+
+private:
+	static void PrepareSubsetListsForGui();
+	static void PrepareOffsetStringsForGui();
+
+	static OutputOffsetProfile::OutputOffset None_GetOffset(int numChannels, int sampleRate, int bitDepth);
+
+	static OutputOffsetProfile::OutputOffset Hdmi_HDV_MB01_GetOffset(int numChannels, int sampleRate, int bitDepth);
 
 	static OutputOffsetProfile::OutputOffset Spdif_HDV_MB01_GetOffset(int numChannels, int sampleRate, int bitDepth);
 	static OutputOffsetProfile::OutputOffset Spdif_AYSA11_GetOffset(int numChannels, int sampleRate, int bitDepth);

@@ -45,7 +45,7 @@ void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool 
 
 	if (!FAILED(hr))
 	{
-		// TODO: Update this to work with Dolby subformats
+		// TODO: Update this to work with Dolby subformats and share this logic with OutputOffsetProfiles::PrepareOffsetStringsForGui()
 
 		// Favour formats that have channel masks
 		for (WAVEFORMATEXTENSIBLE* waveFormat : WindowsWaveFormats::Formats.AllExtensibleFormats)
