@@ -22,6 +22,7 @@ private:
 	void RecordExtensibleFormat(WAVEFORMATEXTENSIBLE* extensibleFormat);
 
 	void PopulateIEC61937Formats();
+	void RecordIEC61937Format(WAVEFORMATEXTENSIBLE_IEC61937* IEC61937Format);
 
 	void PopulateExFormats();
 	void RecordExFormatTag(WAVEFORMATEX* exFormat);
@@ -31,5 +32,7 @@ private:
 	void RecordExFormat(WAVEFORMATEX* exFormat);
 
 	void SetBitsPerSample(WAVEFORMATEX* wfx, WORD bitsPerSample);
+
+	void PopulateExDolbyDigitalAC3();
 };
 

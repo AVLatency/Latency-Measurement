@@ -362,7 +362,7 @@ bool OutputOffsetProfiles::HdmiAllFormatsFilter(WAVEFORMATEX* waveFormat, bool o
 		}
 		else
 		{
-			// keep result == true because I believe any configuration of this wave format should be valid over HDMI
+			// keep result == true because all configurations provided by WindowsWaveFormats class are valid over HDMI
 		}
 	}
 	else
@@ -410,7 +410,7 @@ bool OutputOffsetProfiles::SpdifAllFormatFilter(WAVEFORMATEX* waveFormat, bool o
 		}
 		else
 		{
-			// keep result == true because I believe any configuration of this wave format should be valid over S/PDIF
+			// keep result == true because all configurations provided by WindowsWaveFormats class are valid over S/PDIF
 		}
 	}
 	else

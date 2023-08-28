@@ -27,9 +27,19 @@ private:
 	WAVEFORMATEX* waveFormat;
 	int sampleIndex = 0;
 
+	// This is filled in only when waveFormat == WAVE_FORMAT_DOLBY_AC3_SPDIF
+	char* dolbyAC3Samples = nullptr;
+	int dolbyAC3SamplesLength = 0;
+	int dolbyAC3SampleIndex = 0;
+
 	bool stopRequested = false;
 
 	WORD GetFormatID();
 	HRESULT LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flags);
 	bool FinishedPlayback(bool loopIfNeeded);
+
+	/// <summary>
+	/// WARNING: This bakes in current TestConfiguration::OutputVolume, so volume cannot be changed during playback
+	/// </summary>
+	void EncodeDolbyAC3();
 };

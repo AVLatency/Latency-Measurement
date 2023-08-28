@@ -3,6 +3,7 @@
 
 // Needed for AvSetMmThreadCharacteristics and AvRevertMmThreadCharacteristics:
 #include <avrt.h>
+#include <format>
 #pragma comment(lib, "avrt.lib")
 
 const int INT24_MAX = (1 << 23) - 1;
@@ -20,7 +21,10 @@ const int INT24_MAX = (1 << 23) - 1;
 WasapiOutput::WasapiOutput(const AudioEndpoint& endpoint, bool loop, bool firstChannelOnly, float* audioSamples, int audioSamplesLength, WAVEFORMATEX* waveFormat)
 	: endpoint(endpoint), loop(loop), firstChannelOnly(firstChannelOnly), audioSamples(audioSamples), audioSamplesLength(audioSamplesLength), waveFormat(waveFormat)
 {
-	
+    if (AudioFormat::GetFormatID(waveFormat) == WAVE_FORMAT_DOLBY_AC3_SPDIF)
+    {
+        EncodeDolbyAC3();
+    }
 }
 
 WasapiOutput::~WasapiOutput()
@@ -365,10 +369,18 @@ HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flag
             }
         }
     }
+    else if (GetFormatID() == WAVE_FORMAT_DOLBY_AC3_SPDIF)
+    {
+
+    }
     else
     {
         *flags = AUDCLNT_BUFFERFLAGS_SILENT;
-        return -1; // TODO: a proper error message?
+        printf(std::format("Error: Cannot play audio with FormatID: {}", GetFormatID()).c_str());
+#if _DEBUG
+        throw "Error: Cannot play audio format!";
+#endif
+        return -1;
     }
 
     *flags = FinishedPlayback(true) ? AUDCLNT_BUFFERFLAGS_SILENT : 0;
@@ -390,4 +402,10 @@ bool WasapiOutput::FinishedPlayback(bool loopIfNeeded)
     {
         return endOfSamplesReached;
     }
+}
+
+
+void WasapiOutput::EncodeDolbyAC3()
+{
+
 }
