@@ -21,10 +21,6 @@ const int INT24_MAX = (1 << 23) - 1;
 WasapiOutput::WasapiOutput(const AudioEndpoint& endpoint, bool loop, bool firstChannelOnly, float* audioSamples, int audioSamplesLength, WAVEFORMATEX* waveFormat)
 	: endpoint(endpoint), loop(loop), firstChannelOnly(firstChannelOnly), audioSamples(audioSamples), audioSamplesLength(audioSamplesLength), waveFormat(waveFormat)
 {
-    if (AudioFormat::GetFormatID(waveFormat) == WAVE_FORMAT_DOLBY_AC3_SPDIF)
-    {
-        EncodeDolbyAC3();
-    }
 }
 
 WasapiOutput::~WasapiOutput()
@@ -404,8 +400,75 @@ bool WasapiOutput::FinishedPlayback(bool loopIfNeeded)
     }
 }
 
+// Old attempt at using Microsoft Media Foundation Dolby Digital Audio Encoder
+// https://learn.microsoft.com/en-us/windows/win32/medfound/dolby-digital-audio-encoder
+// https://learn.microsoft.com/en-us/windows/win32/medfound/basic-mft-processing-model
+// This encoder is limited to mono and stereo output encoded streams at up to 48000 Hz.
+// These limitations make this encoder not very useful, because if a consumer electronics
+// user wants that audio format, they would be better off just using LPCM.
 
-void WasapiOutput::EncodeDolbyAC3()
-{
-
-}
+// #include "wmcodecdsp.h"
+//#include "mftransform.h"
+//#include "mfapi.h"
+//#pragma comment(lib, "Mfuuid.lib")
+//#pragma comment(lib, "Mfplat")
+//void WasapiOutput::EncodeDolbyAC3()
+//{
+//    //MFStartup(MF_VERSION);
+//
+//    IMFTransform* ppEncoder = NULL;
+//    HRESULT hr = S_OK;
+//    UINT32 count = 0;
+//
+//    IMFActivate** ppActivate = NULL;
+//
+//    MFT_REGISTER_TYPE_INFO info = { 0 };
+//
+//    info.guidMajorType = MFMediaType_Audio;
+//    info.guidSubtype = MFAudioFormat_Dolby_AC3;
+//
+//    hr = MFTEnumEx(
+//        MFT_CATEGORY_AUDIO_ENCODER,
+//        MFT_ENUM_FLAG_SYNCMFT | MFT_ENUM_FLAG_LOCALMFT | MFT_ENUM_FLAG_SORTANDFILTER,
+//        NULL,       // Input type
+//        &info,      // Output type
+//        &ppActivate,
+//        &count
+//    );
+//
+//    if (SUCCEEDED(hr) && count != 0)
+//    {
+//        hr = ppActivate[0]->ActivateObject(IID_PPV_ARGS(&ppEncoder));
+//        if (SUCCEEDED(hr))
+//        {
+//            DWORD inStreamCount = 0;
+//            DWORD outStreamCount = 0;
+//            ppEncoder->GetStreamCount(&inStreamCount, &outStreamCount);
+//            if (inStreamCount > 1 || outStreamCount > 1)
+//            {
+//                printf("Got more than one in stream or out stream. Not sure how to handle this...");
+//            }
+//            DWORD inStreamID = NULL;
+//            DWORD outStreamID = NULL;
+//            ppEncoder->GetStreamIDs(1, &inStreamID, 1, &outStreamID);
+//
+//            IMFMediaType* majorMediaType = NULL;
+//            ppEncoder->GetOutputAvailableType(outStreamID, 0, &majorMediaType);
+//
+//            GUID majorMediaType = MFMediaType_Audio;
+//            ppEncoder->SetOutputType(outStreamID, majorMediaType, 0);
+//        }
+//        else
+//        {
+//            printf("it failed!");
+//        }
+//    }
+//
+//    for (UINT32 i = 0; i < count; i++)
+//    {
+//        ppActivate[i]->Release();
+//    }
+//    CoTaskMemFree(ppActivate);
+//
+//    //MFShutdown();
+//}

@@ -33,6 +33,5 @@ private:
 
 	void SetBitsPerSample(WAVEFORMATEX* wfx, WORD bitsPerSample);
 
-	void PopulateExDolbyDigitalAC3();
+	void PopulateAllDriverSupportedFormats();
 };
-
