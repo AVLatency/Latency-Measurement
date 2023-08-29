@@ -8,6 +8,7 @@
 #include "RecordingAnalyzer.h"
 #include "StringHelper.h"
 #include <format>
+#include "WavHelper.h"
 
 TestManager::TestManager(AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, std::vector<AudioFormat*> selectedFormats, std::string fileString, std::string appDirectory, IResultsWriter& resultsWriter, OutputOffsetProfile* currentProfile, DacLatencyProfile* referenceDacLatency)
 	: outputEndpoint(outputEndpoint), inputEndpoint(inputEndpoint), SelectedFormats(selectedFormats), AppDirectory(appDirectory), resultsWriter(resultsWriter), Time(time(0)), outputOffsetProfile(currentProfile), referenceDacLatency(referenceDacLatency)
@@ -172,7 +173,16 @@ bool TestManager::PerformRecording(AudioFormat* audioFormat)
 			std::string recordingFolder = format("{}/{}/{}", StringHelper::GetRootPath(AppDirectory), TestFileString, audioFormatString);
 			try
 			{
-				RecordingAnalyzer::SaveRecording(*input, recordingFolder, std::format("{}.wav", result.GUID));
+				WavHelper::SaveWavFile(
+					recordingFolder,
+					std::format("{}.wav", result.GUID),
+					input->recordingBuffer1,
+					input->recordingBufferLength,
+					input->waveFormat.Format.nSamplesPerSec,
+					input->waveFormat.Format.nChannels,
+					input->waveFormat.Format.nChannels,
+					false,
+					1.0f);
 			}
 			catch (...)
 			{

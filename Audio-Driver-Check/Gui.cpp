@@ -14,6 +14,7 @@
 #include "AudioGraphOutput.h"
 #include "OutputAPIHelper.h"
 #include "OutputOffsetProfiles.h"
+#include "WavHelper.h"
 
 float Gui::DpiScale = 1.0f;
 bool Gui::DpiScaleChanged = false;
@@ -344,7 +345,15 @@ bool Gui::DoGui()
 
                     if (ImGui::Button(std::format("Save .wav File with {} Channels", numChannelsForSavedFile).c_str()))
                     {
-                        currentSamples->SaveWavFile(".", std::format("{} - {} ch {} Hz vol {:.2}.wav", waveTypeString, numChannelsForSavedFile, currentSamples->SamplesPerSecond, TestConfiguration::OutputVolume), numChannelsForSavedFile, firstChannelOnly, TestConfiguration::OutputVolume);
+                        WavHelper::SaveWavFile(".",
+                            std::format("{} - {} ch {} Hz vol {:.2}.wav", waveTypeString, numChannelsForSavedFile, currentSamples->SamplesPerSecond, TestConfiguration::OutputVolume),
+                            currentSamples->samples,
+                            currentSamples->samplesLength,
+                            currentSamples->SamplesPerSecond,
+                            1,
+                            numChannelsForSavedFile,
+                            firstChannelOnly,
+                            TestConfiguration::OutputVolume);
                     }
                     ImGui::SameLine();
                     ImGui::SetNextItemWidth(75 * DpiScale);
