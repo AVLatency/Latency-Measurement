@@ -341,6 +341,20 @@ bool Gui::DoGui()
                     }
 
                     ImGui::Spacing();
+
+                    if (ImGui::Button(std::format("Save .wav File with {} Channels", numChannelsForSavedFile).c_str()))
+                    {
+                        currentSamples->SaveWavFile(".", "Generated Samples.wav", numChannelsForSavedFile, firstChannelOnly, TestConfiguration::OutputVolume);
+                    }
+                    ImGui::SameLine();
+                    ImGui::SetNextItemWidth(75 * DpiScale);
+                    ImGui::InputInt("Num Channels", &numChannelsForSavedFile);
+                    if (numChannelsForSavedFile < 1)
+                    {
+                        numChannelsForSavedFile = 1;
+                    }
+
+                    ImGui::Spacing();
                 }
                 else if (state == GuiState::RequestedStop)
                 {

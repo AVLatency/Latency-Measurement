@@ -620,7 +620,7 @@ void RecordingAnalyzer::SaveRecording(const WasapiInput& input, std::string path
     f << "RIFF----WAVEfmt ";     // (file size to be filled in later)
     write_word(f, 16, 4);  // size of the fmt chunk
     write_word(f, 1, 2);  // data waveFormat: PCM - integer samples
-    write_word(f, input.recordedAudioNumChannels, 2);  // two channels (stereo file)
+    write_word(f, input.recordedAudioNumChannels, 2);
     write_word(f, input.waveFormat.Format.nSamplesPerSec, 4);  // samples per second (Hz)
     write_word(f, input.waveFormat.Format.nSamplesPerSec * input.recordedAudioNumChannels * (bitsPerSample / 8), 4);  // bytes per second
     write_word(f, (bitsPerSample / 8) * input.recordedAudioNumChannels, 2);  // data block size (size of two integer samples, one for each channel, in bytes)

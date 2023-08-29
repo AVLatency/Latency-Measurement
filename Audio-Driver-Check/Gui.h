@@ -38,6 +38,8 @@ private:
 	float onOffFrequency = 1;
 	GeneratedSamples::WaveType waveType = GeneratedSamples::WaveType::TestPattern_TonePlusHighFreq;
 
+	int numChannelsForSavedFile = 2;
+
 	void AppDescriptionText();
 	void HelpMarker(const char* desc);
 	void OptionallyBoldText(const char* text, bool bold);

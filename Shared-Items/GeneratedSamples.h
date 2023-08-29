@@ -1,5 +1,6 @@
 #pragma once
 #include <audioclient.h>
+#include <string>
 
 struct GeneratedSamples
 {
@@ -61,6 +62,8 @@ public:
 	double TestWaveDurationInSeconds() const;
 
 	static double GetTickFrequency(int sampleRate);
+
+	void SaveWavFile(std::string path, std::string filename, int numChannels, bool firstChannelOnly, float volume);
 
 private:
 	void GenerateLatencyMeasurementSamples();
