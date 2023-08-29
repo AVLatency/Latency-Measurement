@@ -645,7 +645,7 @@ void RecordingAnalyzer::SaveRecording(const WasapiInput& input, std::string path
 
     // Fix the data chunk header to contain the data size
     f.seekp(data_chunk_pos + (unsigned long long)4); // first four are the "data" characters
-    write_word(f, file_length - data_chunk_pos + 8, 4); // size of all the actual audio data in bytes. (Adding 8 to account for the "data----" characters)
+    write_word(f, file_length - (data_chunk_pos + 8), 4); // size of all the actual audio data in bytes. (Adding 8 to account for the "data----" characters)
 }
 
 void RecordingAnalyzer::SaveIndividualResult(IResultsWriter& writer, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result, std::string testRootPath, std::string inputFormat)
