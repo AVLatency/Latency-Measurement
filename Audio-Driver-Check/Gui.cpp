@@ -252,7 +252,7 @@ bool Gui::DoGui()
             }
             if (waveFormat != nullptr)
             {
-                WaveTypeSelection(waveFormat->nSamplesPerSec);
+                std::string waveTypeString = WaveTypeSelection(waveFormat->nSamplesPerSec);
 
                 ImGui::Spacing();
                 if (state == GuiState::SelectAudioDevice && ImGui::Button("Start Output"))
@@ -344,7 +344,7 @@ bool Gui::DoGui()
 
                     if (ImGui::Button(std::format("Save .wav File with {} Channels", numChannelsForSavedFile).c_str()))
                     {
-                        currentSamples->SaveWavFile(".", "Generated Samples.wav", numChannelsForSavedFile, firstChannelOnly, TestConfiguration::OutputVolume);
+                        currentSamples->SaveWavFile(".", std::format("{} - {} ch {} Hz vol {:.2}.wav", waveTypeString, numChannelsForSavedFile, currentSamples->SamplesPerSecond, TestConfiguration::OutputVolume), numChannelsForSavedFile, firstChannelOnly, TestConfiguration::OutputVolume);
                     }
                     ImGui::SameLine();
                     ImGui::SetNextItemWidth(75 * DpiScale);
@@ -497,11 +497,11 @@ void Gui::ClearFormatSelection()
     }
 }
 
-void Gui::WaveTypeSelection(int samplesPerSec)
+std::string Gui::WaveTypeSelection(int samplesPerSec)
 {
     std::string combinedTonesStr = std::format("300 Hz Tone + {} Hz Tone", samplesPerSec / 2);
     std::string blipStr = std::format("{} Hz Blip", samplesPerSec / 2);
-    std::string OnOffToneStr = std::format("{} Hz Tone On/Off", samplesPerSec / 2);
+    std::string OnOffToneStr = std::format("{} Hz Tone On-Off", samplesPerSec / 2);
     // 300 Hz is in GeneratedSamples
     const char* waveTypeComboItems[] = {
         combinedTonesStr.c_str(), // 0
@@ -581,4 +581,6 @@ void Gui::WaveTypeSelection(int samplesPerSec)
         waveType = GeneratedSamples::WaveType::TestPattern_TonePlusHighFreq;
         break;
     }
+
+    return waveTypeComboItems[waveTypeComboCurrentItem];
 }

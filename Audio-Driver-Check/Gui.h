@@ -47,5 +47,5 @@ private:
 	void RefreshAudioEndpoints();
 	void ClearFormatSelection();
 
-	void WaveTypeSelection(int samplesPerSec);
+	std::string WaveTypeSelection(int samplesPerSec);
 };
