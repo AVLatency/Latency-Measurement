@@ -1,4 +1,5 @@
 #include "WindowsWaveFormats.h"
+//#include "wmcodecdsp.h"
 
 WindowsWaveFormats WindowsWaveFormats::Formats;
 
@@ -390,7 +391,7 @@ void WindowsWaveFormats::PopulateAllDriverSupportedFormats()
 	memset(&exFormat, 0, sizeof(WAVEFORMATEX));
 	exFormat.wFormatTag = WAVE_FORMAT_PCM;
 	exFormat.nChannels = 2;
-	exFormat.nSamplesPerSec = 44100;
+	exFormat.nSamplesPerSec = 48000;
 	SetBitsPerSample(&exFormat, 16);
 	exFormat.cbSize = 0;
 
@@ -406,6 +407,67 @@ void WindowsWaveFormats::PopulateAllDriverSupportedFormats()
 	RecordExSamplesPerSec(&exFormat);
 	exFormat.wFormatTag = WAVE_FORMAT_DTS2;
 	RecordExSamplesPerSec(&exFormat);
+	exFormat.wFormatTag = WAVE_FORMAT_DVM;
+	RecordExSamplesPerSec(&exFormat);
+
+	exFormat.wFormatTag = 0xe06d8033; // KSDATAFORMAT_SUBTYPE_DTS_AUDIO
+	RecordExSamplesPerSec(&exFormat);
+
+	exFormat.wFormatTag = 0x00001608; // MEDIASUBTYPE_MPEG_ADTS_AAC
+	RecordExSamplesPerSec(&exFormat);
+
+	exFormat.wFormatTag = 0x00001600; // MEDIASUBTYPE_NOKIA_MPEG_ADTS_AAC
+	RecordExSamplesPerSec(&exFormat);
+
+	exFormat.wFormatTag = 0x0000160A; // MEDIASUBTYPE_VODAFONE_MPEG_ADTS_AAC
+	RecordExSamplesPerSec(&exFormat);
+
+	exFormat.wFormatTag = 0xa2e58eb7; // MEDIASUBTYPE_DTS_HD
+	RecordExSamplesPerSec(&exFormat);
+
+	exFormat.wFormatTag = 0xa7fb87af; // MEDIASUBTYPE_DOLBY_DDPLUS
+	RecordExSamplesPerSec(&exFormat);
+
+	exFormat.wFormatTag = 0xeb27cec4; // MEDIASUBTYPE_DOLBY_TRUEHD
+	RecordExSamplesPerSec(&exFormat);
+
+	WAVEFORMATEXTENSIBLE extensibleFormat;
+	memset(&extensibleFormat, 0, sizeof(WAVEFORMATEXTENSIBLE));
+	extensibleFormat.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
+	extensibleFormat.Format.nChannels = 2;
+	extensibleFormat.Format.nSamplesPerSec = 48000;
+	SetBitsPerSample(&extensibleFormat.Format, 16);
+	extensibleFormat.Format.cbSize = 22;
+	extensibleFormat.Samples.wValidBitsPerSample = (WORD)extensibleFormat.Format.wBitsPerSample;
+	extensibleFormat.dwChannelMask = 0; // This could be all types of who knows!
+
+	extensibleFormat.SubFormat = KSDATAFORMAT_SUBTYPE_DTS_AUDIO;
+	RecordExtensibleFormat(&extensibleFormat);
+
+	// TODO: somehow fill these in(?)
+	//extensibleFormat.SubFormat = MEDIASUBTYPE_MPEG_ADTS_AAC;
+	//RecordExtensibleFormat(&extensibleFormat);
+
+	//extensibleFormat.SubFormat = MEDIASUBTYPE_NOKIA_MPEG_ADTS_AAC;
+	//RecordExtensibleFormat(&extensibleFormat);
+
+	//extensibleFormat.SubFormat = MEDIASUBTYPE_VODAFONE_MPEG_ADTS_AAC;
+	//RecordExtensibleFormat(&extensibleFormat);
+
+	//extensibleFormat.SubFormat = MEDIASUBTYPE_DTS2;
+	//RecordExtensibleFormat(&extensibleFormat);
+
+	//extensibleFormat.SubFormat = MEDIASUBTYPE_DTS_HD;
+	//RecordExtensibleFormat(&extensibleFormat);
+
+	//extensibleFormat.SubFormat = MEDIASUBTYPE_DOLBY_DDPLUS;
+	//RecordExtensibleFormat(&extensibleFormat);
+
+	//extensibleFormat.SubFormat = MEDIASUBTYPE_DOLBY_TRUEHD;
+	//RecordExtensibleFormat(&extensibleFormat);
+
+	//extensibleFormat.SubFormat = MEDIASUBTYPE_DVM;
+	//RecordExtensibleFormat(&extensibleFormat);
 
 	// The following code can be used to determine what IEC61937 formats your driver might support.
 	// My drivers seem to support the following:
