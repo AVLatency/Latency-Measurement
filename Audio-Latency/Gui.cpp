@@ -1013,7 +1013,7 @@ bool Gui::DoGui()
                         for (auto avgResult : testManager->AveragedResults)
                         {
                             const bool is_selected = (resultFormatIndex == n);
-                            std::string formatStr = avgResult.Format == nullptr ? "Current Windows audio format" : avgResult.Format->FormatString;
+                            std::string formatStr = avgResult.Format == nullptr ? AudioFormat::GetCurrentWinAudioFormatString() : avgResult.Format->FormatString;
                             if (ImGui::Selectable(formatStr.c_str(), is_selected))
                             {
                                 resultFormatIndex = n;
@@ -1074,7 +1074,7 @@ bool Gui::DoGui()
                         {
                             for (AudioFormat* format : testManager->FailedFormats)
                             {
-                                std::string formatStr = format == nullptr ? "Current Windows audio format" : format->FormatString;
+                                std::string formatStr = format == nullptr ? AudioFormat::GetCurrentWinAudioFormatString() : format->FormatString;
                                 ImGui::Text(formatStr.c_str());
                             }
                             ImGui::EndListBox();

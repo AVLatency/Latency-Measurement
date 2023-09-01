@@ -216,72 +216,96 @@ void OutputOffsetProfiles::PrepareOffsetStringsForGui()
 	for (int i = 0; i < Profiles.size(); i++)
 	{
 		OutputOffsetProfile* profile = Profiles[i];
-		OutputOffsetProfile::OutputOffset offset = profile->GetOffset(2, 48000, 16);
-		if (offset.verified)
+		if (profile->isCurrentWindowsAudioFormat)
 		{
-			std::string highlightedOffsetValue = std::format("LPCM 2ch-48kHz-16bit: {} ms", offset.value);
+			OutputOffsetProfile::OutputOffset offset = profile->GetOffsetForCurrentWinFormat();
+			std::string highlightedOffsetValue = std::format("{}: {} ms", AudioFormat::GetCurrentWinAudioFormatString(), offset.value);
 			profile->HighlightedVerifiedOffsetsForDisplay.push_back(highlightedOffsetValue);
-		}
-		offset = profile->GetOffset(2, 192000, 16);
-		if (offset.verified)
-		{
-			std::string highlightedOffsetValue = std::format("LPCM 2ch-192kHz-16bit: {} ms", offset.value);
-			profile->HighlightedVerifiedOffsetsForDisplay.push_back(highlightedOffsetValue);
-		}
 
-		offset = profile->GetOffset(6, 48000, 16);
-		if (offset.verified)
-		{
-			std::string highlightedOffsetValue = std::format("LPCM 6ch-48kHz-16bit: {} ms", offset.value);
-			profile->HighlightedVerifiedOffsetsForDisplay.push_back(highlightedOffsetValue);
+			AddOffsetStrToProfileForFormat(profile, nullptr);
 		}
-		offset = profile->GetOffset(6, 192000, 16);
-		if (offset.verified)
+		else
 		{
-			std::string highlightedOffsetValue = std::format("LPCM 6ch-192kHz-16bit: {} ms", offset.value);
-			profile->HighlightedVerifiedOffsetsForDisplay.push_back(highlightedOffsetValue);
-		}
-
-		offset = profile->GetOffset(6, 48000, 16);
-		if (offset.verified)
-		{
-			std::string highlightedOffsetValue = std::format("LPCM 8ch-48kHz-16bit: {} ms", offset.value);
-			profile->HighlightedVerifiedOffsetsForDisplay.push_back(highlightedOffsetValue);
-		}
-		offset = profile->GetOffset(6, 192000, 16);
-		if (offset.verified)
-		{
-			std::string highlightedOffsetValue = std::format("LPCM 8ch-192kHz-16bit: {} ms", offset.value);
-			profile->HighlightedVerifiedOffsetsForDisplay.push_back(highlightedOffsetValue);
-		}
-
-		for (int f = 0; f < WindowsWaveFormats::Formats.AllExFormats.size(); f++)
-		{
-			WAVEFORMATEX* format = WindowsWaveFormats::Formats.AllExFormats[f];
-			AddOffsetStrToProfileForFormat(profile, format);
-		}
-		for (int f = 0; f < WindowsWaveFormats::Formats.AllExtensibleFormats.size(); f++)
-		{
-			WAVEFORMATEX* format = (WAVEFORMATEX*)WindowsWaveFormats::Formats.AllExtensibleFormats[f];
-			auto formatId = AudioFormat::GetFormatID(format);
-			if (formatId == WAVE_FORMAT_PCM || formatId == WAVE_FORMAT_IEEE_FLOAT)
+			OutputOffsetProfile::OutputOffset offset = profile->GetOffset(2, 48000, 16);
+			if (offset.verified)
 			{
-				// PCM and FLOAT are handled by the previous for loop
-				continue;
+				std::string highlightedOffsetValue = std::format("LPCM 2ch-48kHz-16bit: {} ms", offset.value);
+				profile->HighlightedVerifiedOffsetsForDisplay.push_back(highlightedOffsetValue);
+			}
+			offset = profile->GetOffset(2, 192000, 16);
+			if (offset.verified)
+			{
+				std::string highlightedOffsetValue = std::format("LPCM 2ch-192kHz-16bit: {} ms", offset.value);
+				profile->HighlightedVerifiedOffsetsForDisplay.push_back(highlightedOffsetValue);
 			}
 
-			// Since it's not PCM or FLOAT, that means its probably an encoded audio format, so we should add that to the list:
-			AddOffsetStrToProfileForFormat(profile, format);
+			offset = profile->GetOffset(6, 48000, 16);
+			if (offset.verified)
+			{
+				std::string highlightedOffsetValue = std::format("LPCM 6ch-48kHz-16bit: {} ms", offset.value);
+				profile->HighlightedVerifiedOffsetsForDisplay.push_back(highlightedOffsetValue);
+			}
+			offset = profile->GetOffset(6, 192000, 16);
+			if (offset.verified)
+			{
+				std::string highlightedOffsetValue = std::format("LPCM 6ch-192kHz-16bit: {} ms", offset.value);
+				profile->HighlightedVerifiedOffsetsForDisplay.push_back(highlightedOffsetValue);
+			}
+
+			offset = profile->GetOffset(6, 48000, 16);
+			if (offset.verified)
+			{
+				std::string highlightedOffsetValue = std::format("LPCM 8ch-48kHz-16bit: {} ms", offset.value);
+				profile->HighlightedVerifiedOffsetsForDisplay.push_back(highlightedOffsetValue);
+			}
+			offset = profile->GetOffset(6, 192000, 16);
+			if (offset.verified)
+			{
+				std::string highlightedOffsetValue = std::format("LPCM 8ch-192kHz-16bit: {} ms", offset.value);
+				profile->HighlightedVerifiedOffsetsForDisplay.push_back(highlightedOffsetValue);
+			}
+
+			for (int f = 0; f < WindowsWaveFormats::Formats.AllExFormats.size(); f++)
+			{
+				WAVEFORMATEX* format = WindowsWaveFormats::Formats.AllExFormats[f];
+				AddOffsetStrToProfileForFormat(profile, format);
+			}
+			for (int f = 0; f < WindowsWaveFormats::Formats.AllExtensibleFormats.size(); f++)
+			{
+				WAVEFORMATEX* format = (WAVEFORMATEX*)WindowsWaveFormats::Formats.AllExtensibleFormats[f];
+				auto formatId = AudioFormat::GetFormatID(format);
+				if (formatId == WAVE_FORMAT_PCM || formatId == WAVE_FORMAT_IEEE_FLOAT)
+				{
+					// PCM and FLOAT are handled by the previous for loop
+					continue;
+				}
+
+				// Since it's not PCM or FLOAT, that means its probably an encoded audio format, so we should add that to the list:
+				AddOffsetStrToProfileForFormat(profile, format);
+			}
 		}
 	}
 }
 
 void OutputOffsetProfiles::AddOffsetStrToProfileForFormat(OutputOffsetProfile* profile, WAVEFORMATEX* format)
 {
+	std::string audioFormatStr;
+	if (profile->isCurrentWindowsAudioFormat)
+	{
+		audioFormatStr = AudioFormat::GetCurrentWinAudioFormatString();
+	}
+	else
+	{
+		audioFormatStr = AudioFormat::GetFormatString(format, true, false);
+	}
+
 	if (profile->FormatFilter(format))
 	{
-		OutputOffsetProfile::OutputOffset offsetValue = profile->GetOffsetFromWaveFormat(format);
-		std::string offsetStr = std::format("{}: {} ms", AudioFormat::GetFormatString(format, true, false), offsetValue.value);
+		OutputOffsetProfile::OutputOffset offsetValue =
+			profile->isCurrentWindowsAudioFormat
+			? profile->GetOffsetForCurrentWinFormat()
+			: profile->GetOffsetFromWaveFormat(format);
+		std::string offsetStr = std::format("{}: {} ms", audioFormatStr, offsetValue.value);
 		if (offsetValue.verified)
 		{
 			profile->VerifiedOffsetsForDisplay.push_back(offsetStr);
