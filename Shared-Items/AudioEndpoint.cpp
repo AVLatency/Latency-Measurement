@@ -45,8 +45,6 @@ void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool 
 
 	if (!FAILED(hr))
 	{
-		// TODO: Update this to work with Dolby subformats and share this logic with OutputOffsetProfiles::PrepareOffsetStringsForGui()
-
 		// Favour formats that have channel masks
 		for (WAVEFORMATEXTENSIBLE* waveFormat : WindowsWaveFormats::Formats.AllExtensibleFormats)
 		{
@@ -365,6 +363,15 @@ void AudioEndpoint::SetDefaultFormats(bool includeSurroundAsDefault, bool ensure
 
 bool AudioEndpoint::AlreadyInSupportedFormats(WORD formatId, int numChannels, int samplesPerSec, int bitsPerSample)
 {
+	if (formatId != WAVE_FORMAT_PCM
+		&& formatId != WAVE_FORMAT_IEEE_FLOAT)
+	{
+		// This means that it is likely an encoded format.
+		// Encoded formats do not have duplicates because they are manually configured to match
+		// what the audio encoder is able to produce. This means we can simply assume that this
+		// format is not already in the supported formats list.
+		return false;
+	}
 	for (AudioFormat& audioFormat : SupportedFormats)
 	{
 		if (audioFormat.WaveFormat->nChannels == numChannels

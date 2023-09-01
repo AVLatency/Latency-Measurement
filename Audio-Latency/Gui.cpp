@@ -289,7 +289,7 @@ bool Gui::DoGui()
                     ImGui::Spacing();
                     for (int i = 0; i < OutputOffsetProfiles::CurrentProfile()->HighlightedVerifiedOffsetsForDisplay.size(); i++)
                     {
-                        ImGui::Text(OutputOffsetProfiles::CurrentProfile()->HighlightedVerifiedOffsetsForDisplay[i].c_str());
+                        ImGui::TextWrapped(OutputOffsetProfiles::CurrentProfile()->HighlightedVerifiedOffsetsForDisplay[i].c_str());
                     }
 
                     ImGui::Spacing();
@@ -298,7 +298,7 @@ bool Gui::DoGui()
                     {
                         for (int i = 0; i < OutputOffsetProfiles::CurrentProfile()->VerifiedOffsetsForDisplay.size(); i++)
                         {
-                            ImGui::Text(OutputOffsetProfiles::CurrentProfile()->VerifiedOffsetsForDisplay[i].c_str());
+                            ImGui::TextWrapped(OutputOffsetProfiles::CurrentProfile()->VerifiedOffsetsForDisplay[i].c_str());
                         }
                         ImGui::TreePop();
                     }
@@ -307,7 +307,7 @@ bool Gui::DoGui()
                     {
                         for (int i = 0; i < OutputOffsetProfiles::CurrentProfile()->UnverifiedOffsetsForDisplay.size(); i++)
                         {
-                            ImGui::Text(OutputOffsetProfiles::CurrentProfile()->UnverifiedOffsetsForDisplay[i].c_str());
+                            ImGui::TextWrapped(OutputOffsetProfiles::CurrentProfile()->UnverifiedOffsetsForDisplay[i].c_str());
                         }
                         ImGui::TreePop();
                     }

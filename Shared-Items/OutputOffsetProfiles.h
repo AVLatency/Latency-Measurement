@@ -73,6 +73,7 @@ public:
 private:
 	static void PrepareSubsetListsForGui();
 	static void PrepareOffsetStringsForGui();
+	static void AddOffsetStrToProfileForFormat(OutputOffsetProfile* profile, WAVEFORMATEX* format);
 
 	static OutputOffsetProfile::OutputOffset None_GetOffset(int numChannels, int sampleRate, int bitDepth);
 
