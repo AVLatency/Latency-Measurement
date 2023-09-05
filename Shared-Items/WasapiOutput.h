@@ -37,9 +37,4 @@ private:
 	WORD GetFormatID();
 	HRESULT LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flags);
 	bool FinishedPlayback(bool loopIfNeeded);
-
-	/// <summary>
-	/// WARNING: This bakes in current TestConfiguration::OutputVolume, so volume cannot be changed during playback
-	/// </summary>
-	void EncodeDolbyAC3();
 };
