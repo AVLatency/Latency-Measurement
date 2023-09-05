@@ -31,7 +31,7 @@ WasapiInput::~WasapiInput()
 
 void WasapiInput::StartRecording()
 {
-    recordingInProgress = true;
+    recordingInProgress.store(true, std::memory_order_release);
 
     const IID IID_IAudioClient = __uuidof(IAudioClient);
     const IID IID_IAudioCaptureClient = __uuidof(IAudioCaptureClient);
@@ -91,7 +91,7 @@ void WasapiInput::StartRecording()
     EXIT_ON_ERROR(hr)
 
         // Each loop fills about half of the shared buffer.
-        while (bDone == FALSE && !stopRequested)
+        while (bDone == FALSE && !stopRequested.load(std::memory_order_acquire))
         {
             // Sleep for half the buffer duration.
             Sleep(hnsActualDuration / REFTIMES_PER_MILLISEC / 2);
@@ -147,7 +147,7 @@ void WasapiInput::StartRecording()
 
     CoUninitialize();
     
-    recordingInProgress = false;
+    recordingInProgress.store(false, std::memory_order_release);
 }
 
 UINT16 WasapiInput::GetFormatID()
@@ -349,7 +349,8 @@ bool WasapiInput::FinishedRecording(bool flipBuffersIfNeeded)
         if(flipBuffersIfNeeded && endOfBufferReached)
         {
             recordedAudioIndex = 0;
-            recordingToBuffer1 = !recordingToBuffer1;
+            bool newValue = !recordingToBuffer1.load(std::memory_order_acquire);
+            recordingToBuffer1.store(newValue, std::memory_order_release); // This is the only place that a store operation happens
         }
         return false;
     }
@@ -380,10 +381,10 @@ void WasapiInput::ThrowAwayRecording()
 
 void WasapiInput::StopRecording()
 {
-    stopRequested = true;
+    stopRequested.store(true, std::memory_order_release);
 }
 
 float* WasapiInput::CurrentBuffer()
 {
-    return recordingToBuffer1 ? recordingBuffer1 : recordingBuffer2;
+    return recordingToBuffer1.load(std::memory_order_acquire) ? recordingBuffer1 : recordingBuffer2;
 }

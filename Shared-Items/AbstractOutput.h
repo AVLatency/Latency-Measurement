@@ -1,10 +1,12 @@
 #pragma once
+#include <atomic>
+
 class AbstractOutput
 {
 public:
-	bool playbackInProgress = false;
+	std::atomic<bool> playbackInProgress = false;
 
-	bool Mute = false;
+	std::atomic<bool> Mute = false;
 
 	virtual void StartPlayback() = 0;
 	virtual void StopPlayback() = 0;

@@ -33,7 +33,7 @@ private:
 	int audioSamplesLength;
 	int sampleIndex = 0;
 
-	bool stopRequested = false;
+	std::atomic<bool> stopRequested = false;
 
 	AudioGraphWrapper* audioGraph = nullptr;
 	static int lastSampleRate;

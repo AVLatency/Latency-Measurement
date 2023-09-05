@@ -30,7 +30,7 @@ WasapiOutput::~WasapiOutput()
 void WasapiOutput::StartPlayback()
 {
     sampleIndex = 0;
-    playbackInProgress = true;
+    playbackInProgress.store(true, std::memory_order_release);
 
     const IID IID_IAudioClient = __uuidof(IAudioClient);
     const IID IID_IAudioRenderClient = __uuidof(IAudioRenderClient);
@@ -126,7 +126,7 @@ void WasapiOutput::StartPlayback()
     EXIT_ON_ERROR(hr)
 
         // Each loop fills one of the two buffers.
-        while (flags != AUDCLNT_BUFFERFLAGS_SILENT && !stopRequested)
+        while (flags != AUDCLNT_BUFFERFLAGS_SILENT && !stopRequested.load(std::memory_order_acquire))
         {
             // Wait for next buffer event to be signaled.
             DWORD retval = WaitForSingleObject(hEvent, 2000);
@@ -170,12 +170,12 @@ void WasapiOutput::StartPlayback()
     SAFE_RELEASE(pRenderClient)
     CoUninitialize();
 
-    playbackInProgress = false;
+    playbackInProgress.store(false, std::memory_order_release);
 }
 
 void WasapiOutput::StopPlayback()
 {
-    stopRequested = true;
+    stopRequested.store(true, std::memory_order_release);
 }
 
 INT16 WasapiOutput::FloatToINT16(float sample)
@@ -220,7 +220,7 @@ HRESULT WasapiOutput::LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flag
         return S_OK;
     }
 
-    float volume = Mute ? 0 : TestConfiguration::OutputVolume;
+    float volume = Mute.load(std::memory_order_acquire) ? 0 : TestConfiguration::OutputVolume;
     WORD numChannels = waveFormat->nChannels;
     if (GetFormatID() == WAVE_FORMAT_IEEE_FLOAT && waveFormat->wBitsPerSample == 32)
     {

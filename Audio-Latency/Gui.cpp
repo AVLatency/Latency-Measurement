@@ -44,12 +44,12 @@ bool Gui::DoGui()
     bool openMidTestFilesystemErrorDialog = false;
     bool openNoMesaurementsErrorDialog = false;
     bool openDialogVolumeAdjustDisabledCrosstalk = false;
-    if (testManager != nullptr && testManager->ShouldShowNegativeLatencyError && !testManager->HasShownNegativeLatencyError)
+    if (testManager != nullptr && testManager->ShouldShowNegativeLatencyError.load(std::memory_order_acquire) && !testManager->HasShownNegativeLatencyError)
     {
         openNegativeLatencyErrorDialog = true;
         testManager->HasShownNegativeLatencyError = true;
     }
-    if (testManager != nullptr && testManager->ShouldShowFilesystemError && !testManager->HasShownFilesystemError)
+    if (testManager != nullptr && testManager->ShouldShowFilesystemError.load(std::memory_order_acquire) && !testManager->HasShownFilesystemError)
     {
         openMidTestFilesystemErrorDialog = true;
         fileSystemErrorType = FileSystemErrorType::MidTest;
@@ -884,7 +884,7 @@ bool Gui::DoGui()
             }
             else
             {
-                if (testManager->IsFinished)
+                if (testManager->IsFinished.load(std::memory_order_acquire))
                 {
                     resultFormatIndex = 0;
                     state = MeasurementToolGuiState::Results;
@@ -898,7 +898,13 @@ bool Gui::DoGui()
                     ImGui::Text("Measurement in progres...");
                     float overall = testManager->PassCount / (float)testManager->TotalPasses;
                     ImGui::ProgressBar(overall, ImVec2(-FLT_MIN, 0), std::format("Overall: {:.0f}%", overall * 100).c_str());
-                    float currentPass = testManager->RecordingCount / (float)testManager->TotalRecordingsPerPass;
+                    float currentPass = 1.0f;
+                    int totalRecordingPerPass = testManager->TotalRecordingsPerPass;
+                    // these variables of test manager are not 100% thread safe, so guard against divide by zero error:
+                    if (totalRecordingPerPass != 0)
+                    {
+                        currentPass = testManager->RecordingCount / (float)testManager->TotalRecordingsPerPass;
+                    }
                     ImGui::ProgressBar(currentPass, ImVec2(-FLT_MIN, 0), std::format("Current Pass: {:.0f}%", currentPass * 100).c_str());
 
                     if (state != MeasurementToolGuiState::CancellingMeasuring)
@@ -906,7 +912,7 @@ bool Gui::DoGui()
                         ImGui::Spacing();
                         if(ImGui::Button("Stop"))
                         {
-                            testManager->StopRequested = true;
+                            testManager->StopRequested.store(true, std::memory_order_release);
                             state = MeasurementToolGuiState::CancellingMeasuring;
                         }
                     }
@@ -1239,8 +1245,8 @@ void Gui::Finish()
     }
     if (testManager != nullptr)
     {
-        testManager->StopRequested = true;
-        while (!testManager->IsFinished)
+        testManager->StopRequested.store(true, std::memory_order_release);
+        while (!testManager->IsFinished.load(std::memory_order_acquire))
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
@@ -1300,7 +1306,7 @@ void Gui::StartAdjustVolume()
 void Gui::StartTest()
 {
     // Save the old one if it's still in the middle of working. Otherwise, make a new one.
-    if (testManager != nullptr && testManager->IsFinished)
+    if (testManager != nullptr && testManager->IsFinished.load(std::memory_order_acquire))
     {
         delete testManager;
         testManager = nullptr;

@@ -26,6 +26,10 @@ TestManager::TestManager(AudioEndpoint& outputEndpoint, const AudioEndpoint& inp
 		TestFileString.pop_back();
 	}
 
+	TotalPasses = (TestConfiguration::NumMeasurements > 0
+		&& TestConfiguration::MeasureAverageLatency) ? TestConfiguration::NumMeasurements : 1;
+	TotalRecordingsPerPass = SelectedFormats.size() > 0 ? SelectedFormats.size() : 1;
+
 	managerThread = new std::thread([this] { this->StartTest(); });
 }
 
@@ -48,10 +52,6 @@ void TestManager::StartTest()
 {
 	SetThreadExecutionState(ES_DISPLAY_REQUIRED); // Prevent display from turning off while running this tool.
 
-	TotalPasses = (TestConfiguration::NumMeasurements > 0
-		&& TestConfiguration::MeasureAverageLatency) ? TestConfiguration::NumMeasurements : 1;
-	TotalRecordingsPerPass = SelectedFormats.size() > 0 ? SelectedFormats.size() : 1;
-
 	for (int i = 0; i < TotalPasses; i++)
 	{
 		PassCount = i;
@@ -64,7 +64,7 @@ void TestManager::StartTest()
 
 		for (AudioFormat* audioFormat : SelectedFormats)
 		{
-			if (!StopRequested && std::find(FailedFormats.begin(), FailedFormats.end(), audioFormat) == FailedFormats.end())
+			if (!StopRequested.load(std::memory_order_acquire) && std::find(FailedFormats.begin(), FailedFormats.end(), audioFormat) == FailedFormats.end())
 			{
 				bool valid = PerformRecording(audioFormat);
 				if (!valid)
@@ -96,13 +96,13 @@ void TestManager::StartTest()
 		TotalRecordingsPerPass = RecordingCount;
 
 		// Inject a dummy format when we're down to a single recording to force the HDMI Audio Device to re-sync to a new signal format
-		if (TestConfiguration::MeasureAverageLatency && !switchedSampleRates && !StopRequested)
+		if (TestConfiguration::MeasureAverageLatency && !switchedSampleRates && !StopRequested.load(std::memory_order_acquire))
 		{
 			bool formatSwitchResult = PlayFormatSwitch(lastPlayedFormat);
 			if (!formatSwitchResult)
 			{
 				// something has gone very wrong, so bail early since there's no point in doing the same test over and over without switching formats.
-				StopRequested = true;
+				StopRequested.store(true, std::memory_order_release);
 			}
 		}
 	}
@@ -120,7 +120,7 @@ void TestManager::StartTest()
 		{
 			if (result.AverageLatency() <= -0.5)
 			{
-				ShouldShowNegativeLatencyError = true;
+				ShouldShowNegativeLatencyError.store(true, std::memory_order_release);
 			}
 		}
 	}
@@ -131,12 +131,12 @@ void TestManager::StartTest()
 	}
 	catch (...)
 	{
-		ShouldShowFilesystemError = true;
+		ShouldShowFilesystemError.store(true, std::memory_order_release);
 	}
 
 	SetThreadExecutionState(0); // Reset prevent display from turning off while running this tool.
 
-	IsFinished = true;
+	IsFinished.store(true, std::memory_order_release);
 }
 
 bool TestManager::PerformRecording(AudioFormat* audioFormat)
@@ -186,7 +186,7 @@ bool TestManager::PerformRecording(AudioFormat* audioFormat)
 			}
 			catch (...)
 			{
-				ShouldShowFilesystemError = true;
+				ShouldShowFilesystemError.store(true, std::memory_order_release);
 			}
 		}
 		if (TestConfiguration::SaveIndividualRecordingResults)
@@ -198,7 +198,7 @@ bool TestManager::PerformRecording(AudioFormat* audioFormat)
 			}
 			catch (...)
 			{
-				ShouldShowFilesystemError = true;
+				ShouldShowFilesystemError.store(true, std::memory_order_release);
 			}
 		}
 

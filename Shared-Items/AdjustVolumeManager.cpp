@@ -207,7 +207,7 @@ void AdjustVolumeManager::Tick()
 {
 	if (working)
 	{
-		if (!input->recordingInProgress && !output->playbackInProgress)
+		if (!input->recordingInProgress.load(std::memory_order_acquire) && !output->playbackInProgress.load(std::memory_order_acquire))
 		{
 			inputThread->join();
 			outputThread->join();
@@ -216,14 +216,20 @@ void AdjustVolumeManager::Tick()
 		}
 		else
 		{
+			// WARNING: NOT TOTALLY THREAD SAFE
+			// This code expects there to be plenty of time to copy out the buffer and analyize it
+			// here on the main thread before the input thread flips the buffer again. I think this
+			// will basically always be the case, but I'm leaving this note for the chance that this
+			// part of the code breaks on certain computer configurations.
+
 			// Read buffers and get things in a nice state for the GUI
-			if (lastBufferFlipWasTo1 && !input->recordingToBuffer1)
+			if (lastBufferFlipWasTo1 && !input->recordingToBuffer1.load(std::memory_order_acquire))
 			{
 				// just flipped to buffer 2; Buffer 1 is now ready.
 				lastBufferFlipWasTo1 = !lastBufferFlipWasTo1;
 				CopyBuffer(input->recordingBuffer1, input->recordingBufferLength);
 			}
-			else if (!lastBufferFlipWasTo1 && input->recordingToBuffer1)
+			else if (!lastBufferFlipWasTo1 && input->recordingToBuffer1.load(std::memory_order_acquire))
 			{
 				// just flipped to buffer 1; Buffer 2 is now ready.
 				lastBufferFlipWasTo1 = !lastBufferFlipWasTo1;
@@ -235,6 +241,8 @@ void AdjustVolumeManager::Tick()
 
 void AdjustVolumeManager::CopyBuffer(float* sourceBuffer, int sourceBufferLength)
 {
+	// WARNING: NOT TOTALLY THREAD SAFE (see note above in AdjustVolumeManager::Tick())
+
 	if (!paused)
 	{
 		int perChannelSourceBufferLength = sourceBufferLength / input->recordedAudioNumChannels;
@@ -467,7 +475,7 @@ void AdjustVolumeManager::SetChannelGrade(VolumeAnalysis& analysis, const float&
 void AdjustVolumeManager::TogglePause()
 {
 	paused = !paused;
-	output->Mute = paused;
+	output->Mute.store(paused, std::memory_order_release);
 }
 
 void AdjustVolumeManager::Stop()

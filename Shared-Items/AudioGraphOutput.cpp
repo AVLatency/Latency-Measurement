@@ -17,7 +17,7 @@ AudioGraphOutput::~AudioGraphOutput()
 void AudioGraphOutput::StartPlayback()
 {
 	sampleIndex = 0;
-	playbackInProgress = true;
+	playbackInProgress.store(true, std::memory_order_release);
 	DestroyGraph();
 	audioGraph = new AudioGraphWrapper();
 	CreateGraphAsync(audioGraph).get();
@@ -25,13 +25,13 @@ void AudioGraphOutput::StartPlayback()
 	while (true)
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
-		if (stopRequested)
+		if (stopRequested.load(std::memory_order_acquire))
 		{
 			break;
 		}
 	}
 	DestroyGraph();
-	playbackInProgress = false;
+	playbackInProgress.store(false, std::memory_order_release);
 }
 
 IAsyncAction AudioGraphOutput::CreateGraphAsync(AudioGraphWrapper* audioGraph)
@@ -108,13 +108,13 @@ IAsyncAction AudioGraphOutput::StartPlaybackAsync()
 		else
 		{
 			printf("Error: No frameInputNode\n");
-			playbackInProgress = false;
+			playbackInProgress.store(false, std::memory_order_release);
 		}
 	}
 	else // could not create output node
 	{
 		printf(std::format("Error: Could not create output device. Status: {}\n", (int)createDeviceResult.Status()).c_str());
-		playbackInProgress = false;
+		playbackInProgress.store(false, std::memory_order_release);
 	}
 }
 
@@ -140,7 +140,7 @@ void AudioGraphOutput::AudioOutputCallback(AudioFrameInputNode sender, FrameInpu
 			IMemoryBufferReference reference = buffer.CreateReference();
 			float* outputFloatData = (float*)reference.data();
 
-			float volume = Mute ? 0 : TestConfiguration::OutputVolume;
+			float volume = Mute.load(std::memory_order_acquire) ? 0 : TestConfiguration::OutputVolume;
 			for (int i = 0; i < numSamplesNeeded * channelCount; i += channelCount)
 			{
 				if (!FinishedPlayback(true))
@@ -172,13 +172,13 @@ void AudioGraphOutput::AudioOutputCallback(AudioFrameInputNode sender, FrameInpu
 
 	if (FinishedPlayback(true))
 	{
-		stopRequested = true;
+		stopRequested.store(true, std::memory_order_release);
 	}
 }
 
 void AudioGraphOutput::StopPlayback()
 {
-	stopRequested = true;
+	stopRequested.store(true, std::memory_order_release);
 }
 
 bool AudioGraphOutput::FinishedPlayback(bool loopIfNeeded)

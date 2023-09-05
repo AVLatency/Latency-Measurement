@@ -15,18 +15,19 @@
 class TestManager
 {
 public:
-	bool IsFinished = false;
-	bool StopRequested = false;
-	int TotalPasses = 1;
-	int TotalRecordingsPerPass = 1;
-	int PassCount = 0;
-	int RecordingCount = 0;
+	std::atomic<bool> IsFinished = false;
+	std::atomic<bool> StopRequested = false;
 
-	bool ShouldShowFilesystemError = false;
-	bool HasShownFilesystemError = false;
+	int TotalPasses = 1; // written on manager thread, read by the GUI on its thread. If GUI reads out of date value it's fine.
+	int TotalRecordingsPerPass = 1; // written on manager thread, read by the GUI on its thread. If GUI reads out of date value it's fine.
+	int PassCount = 0; // written on manager thread, read by the GUI on its thread. If GUI reads out of date value it's fine.
+	int RecordingCount = 0; // written on manager thread, read by the GUI on its thread. If GUI reads out of date value it's fine.
 
-	bool ShouldShowNegativeLatencyError = false;
-	bool HasShownNegativeLatencyError = false;
+	std::atomic<bool> ShouldShowFilesystemError = false;
+	bool HasShownFilesystemError = false; // only accessed by the GUI thread
+
+	std::atomic<bool> ShouldShowNegativeLatencyError = false;
+	bool HasShownNegativeLatencyError = false; // only accessed by the GUI thread
 
 	std::vector<AudioFormat*> SelectedFormats;
 	std::vector<AudioFormat*> FailedFormats;

@@ -147,7 +147,7 @@ bool Gui::DoGui()
         }
         else if (state == GuiState::RequestedStop)
         {
-            if (!output->playbackInProgress)
+            if (!output->playbackInProgress.load(std::memory_order_acquire))
             {
                 Finish(false);
                 state = GuiState::SelectAudioDevice;
@@ -367,7 +367,7 @@ bool Gui::DoGui()
                 }
                 else if (state == GuiState::RequestedStop)
                 {
-                    if (!output->playbackInProgress)
+                    if (!output->playbackInProgress.load(std::memory_order_acquire))
                     {
                         Finish(false);
                         state = GuiState::SelectAudioDevice;
@@ -426,7 +426,7 @@ void Gui::Finish(bool requestStop)
         {
             output->StopPlayback();
         }
-        if (!output->playbackInProgress)
+        if (!output->playbackInProgress.load(std::memory_order_acquire))
         {
             outputThread->join();
             delete outputThread;

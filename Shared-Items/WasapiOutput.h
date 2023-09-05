@@ -32,7 +32,7 @@ private:
 	int dolbyAC3SamplesLength = 0;
 	int dolbyAC3SampleIndex = 0;
 
-	bool stopRequested = false;
+	std::atomic<bool> stopRequested = false;
 
 	WORD GetFormatID();
 	HRESULT LoadData(UINT32 bufferFrameCount, BYTE* pData, DWORD* flags);

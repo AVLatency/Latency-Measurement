@@ -40,11 +40,8 @@ public:
 		PeakLevelGrade Grade = PeakLevelGrade::Quiet;
 	};
 
-	AbstractOutput* output = nullptr;
-	WasapiInput* input = nullptr;
-
-	bool working = false;
-	bool paused = false;
+	bool working = false; // only accessed through the GUI main thread
+	bool paused = false; // only accessed through the GUI main thread
 
 	VolumeAnalysis LeftVolumeAnalysis;
 	VolumeAnalysis RightVolumeAnalysis;
@@ -65,6 +62,9 @@ public:
 	void Stop();
 
 private:
+	AbstractOutput* output = nullptr;
+	WasapiInput* input = nullptr;
+
 	const double recordBufferDurationInSeconds = 0.5;
 	bool lastBufferFlipWasTo1 = true;
 	std::thread* outputThread = nullptr;
