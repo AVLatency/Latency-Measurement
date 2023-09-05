@@ -14,4 +14,4 @@ The project can be built using Visual Studio with the "Desktop development with 
 
 ## License
 
-All of the software in this repository is released under the [MIT license](https://github.com/AVLatency/Latency-Measurement/blob/main/LICENSE), which means you can do most anything you'd like with it, including commercial use, modifications, and distribution. This software uses the [Dear ImGui](https://github.com/ocornut/imgui) library for its graphical interfaces, which is also released under the [MIT license](https://github.com/ocornut/imgui/blob/master/LICENSE.txt).
+All of the software in this repository is released under the [MIT license](https://github.com/AVLatency/Latency-Measurement/blob/main/LICENSE), which means you can do most anything you'd like with it, including commercial use, modifications, and distribution. This software uses the [Dear ImGui](https://github.com/ocornut/imgui) library for its graphical interfaces, which is also released under the [MIT license](https://github.com/ocornut/imgui/blob/7f38773b738e8d37b1a3c1d627205821300ef765/LICENSE.txt).
