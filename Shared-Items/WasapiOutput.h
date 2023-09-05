@@ -6,6 +6,13 @@
 class WasapiOutput : public AbstractOutput
 {
 public:
+	struct OutputTiming
+	{
+		float BufferSizeInMilliseconds;
+		LARGE_INTEGER BeforeStartQpcTime;
+		LARGE_INTEGER AfterStartQpcTime;
+	};
+
 	///<param name="firstChannelOnly">If true, audio will only be output to the first channel. Otherwise audio will be output to all channels</param>
 	///<param name="audioSamples">These provided samples must remain in memory so long as WasapiOutput might be reading them. They will not be deleted by WasapiOutput.</param>
 	WasapiOutput(const AudioEndpoint& endpoint, bool loop, bool firstChannelOnly, float* audioSamples, int audioSamplesLength, WAVEFORMATEX* waveFormat);
@@ -13,6 +20,8 @@ public:
 
 	void StartPlayback();
 	void StopPlayback();
+
+	OutputTiming OutTiming;
 
 	static INT16 FloatToINT16(float sample);
 	static INT32 FloatToPaddedINT24(float sample);

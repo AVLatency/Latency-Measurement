@@ -4,6 +4,7 @@
 // Needed for AvSetMmThreadCharacteristics and AvRevertMmThreadCharacteristics:
 #include <avrt.h>
 #include <format>
+#include "QpcHelper.h"
 #pragma comment(lib, "avrt.lib")
 
 const int INT24_MAX = (1 << 23) - 1;
@@ -29,6 +30,10 @@ WasapiOutput::~WasapiOutput()
 
 void WasapiOutput::StartPlayback()
 {
+    // Notes on low latency audio playback:
+    // https://learn.microsoft.com/en-us/windows-hardware/drivers/audio/low-latency-audio
+    // https://learn.microsoft.com/en-us/windows/win32/api/audioclient/nf-audioclient-iaudioclient-initialize
+
     sampleIndex = 0;
     playbackInProgress.store(true, std::memory_order_release);
 
@@ -97,6 +102,8 @@ void WasapiOutput::StartPlayback()
     hr = pAudioClient->GetBufferSize(&bufferFrameCount);
     EXIT_ON_ERROR(hr)
 
+        OutTiming.BufferSizeInMilliseconds = 1000 * bufferFrameCount / (float)waveFormat->nSamplesPerSec;
+
         hr = pAudioClient->GetService(
             IID_IAudioRenderClient,
             (void**)&pRenderClient);
@@ -122,7 +129,9 @@ void WasapiOutput::StartPlayback()
         EXIT_ON_ERROR(hr)
     }
 
+    QueryPerformanceCounter(&OutTiming.BeforeStartQpcTime);
     hr = pAudioClient->Start();  // Start playing.
+    QueryPerformanceCounter(&OutTiming.AfterStartQpcTime);
     EXIT_ON_ERROR(hr)
 
         // Each loop fills one of the two buffers.

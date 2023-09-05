@@ -35,6 +35,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)IResultsWriter.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)OutputOffsetProfile.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ProfileResources.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)QpcHelper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ResourceLoader.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)StringHelper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)RecordingAnalyzer.h" />
@@ -68,6 +69,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)IResultsWriter.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)GuiHelper.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)OutputOffsetProfile.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)QpcHelper.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ResourceLoader.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)StringHelper.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)RecordingAnalyzer.cpp" />
