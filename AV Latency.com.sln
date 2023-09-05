@@ -5,8 +5,6 @@ VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Audio-Latency", "Audio-Latency\Audio-Latency.vcxproj", "{1362B23C-8D81-4F0F-9EEC-7553EF8BC7C7}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TwoDacConsistencyLogger", "TwoDacConsistencyLogger\TwoDacConsistencyLogger.vcxproj", "{9F316E83-5AE5-4939-A723-305A94F48005}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Shared-Items", "Shared-Items\Shared-Items.vcxitems", "{A764D106-357F-410C-B0BC-B42AB75A37BC}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Audio-Generator-Driver-Check", "Audio-Driver-Check\Audio-Driver-Check.vcxproj", "{B9A75E69-1F38-4704-B45D-B485D6683BBC}"
@@ -33,18 +31,6 @@ Global
 		{1362B23C-8D81-4F0F-9EEC-7553EF8BC7C7}.Release|x64.Build.0 = Release|x64
 		{1362B23C-8D81-4F0F-9EEC-7553EF8BC7C7}.Release|x86.ActiveCfg = Release|Win32
 		{1362B23C-8D81-4F0F-9EEC-7553EF8BC7C7}.Release|x86.Build.0 = Release|Win32
-		{9F316E83-5AE5-4939-A723-305A94F48005}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{9F316E83-5AE5-4939-A723-305A94F48005}.Debug|Any CPU.Build.0 = Debug|Win32
-		{9F316E83-5AE5-4939-A723-305A94F48005}.Debug|x64.ActiveCfg = Debug|x64
-		{9F316E83-5AE5-4939-A723-305A94F48005}.Debug|x64.Build.0 = Debug|x64
-		{9F316E83-5AE5-4939-A723-305A94F48005}.Debug|x86.ActiveCfg = Debug|Win32
-		{9F316E83-5AE5-4939-A723-305A94F48005}.Debug|x86.Build.0 = Debug|Win32
-		{9F316E83-5AE5-4939-A723-305A94F48005}.Release|Any CPU.ActiveCfg = Release|Win32
-		{9F316E83-5AE5-4939-A723-305A94F48005}.Release|Any CPU.Build.0 = Release|Win32
-		{9F316E83-5AE5-4939-A723-305A94F48005}.Release|x64.ActiveCfg = Release|x64
-		{9F316E83-5AE5-4939-A723-305A94F48005}.Release|x64.Build.0 = Release|x64
-		{9F316E83-5AE5-4939-A723-305A94F48005}.Release|x86.ActiveCfg = Release|Win32
-		{9F316E83-5AE5-4939-A723-305A94F48005}.Release|x86.Build.0 = Release|Win32
 		{B9A75E69-1F38-4704-B45D-B485D6683BBC}.Debug|Any CPU.ActiveCfg = Debug|Win32
 		{B9A75E69-1F38-4704-B45D-B485D6683BBC}.Debug|Any CPU.Build.0 = Debug|Win32
 		{B9A75E69-1F38-4704-B45D-B485D6683BBC}.Debug|x64.ActiveCfg = Debug|x64
