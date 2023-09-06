@@ -46,6 +46,8 @@ public:
 	static OutputOffsetProfile* HdmiAudioPassthrough_None;
 	static OutputOffsetProfile* HdmiAudioPassthrough_None_CurrentWinAudioFormat;
 
+	static OutputOffsetProfile* RelativeWinAudio_Wasapi;
+
 	static std::vector<OutputOffsetProfile*> Profiles;
 	static int SelectedProfileIndex;
 

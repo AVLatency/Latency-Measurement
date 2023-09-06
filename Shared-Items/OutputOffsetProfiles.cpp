@@ -28,6 +28,8 @@ OutputOffsetProfile* OutputOffsetProfiles::HdmiAudioPassthrough_HDV_MB01 = NULL;
 OutputOffsetProfile* OutputOffsetProfiles::HdmiAudioPassthrough_None = NULL;
 OutputOffsetProfile* OutputOffsetProfiles::HdmiAudioPassthrough_None_CurrentWinAudioFormat = NULL;
 
+OutputOffsetProfile* OutputOffsetProfiles::RelativeWinAudio_Wasapi = NULL;
+
 std::vector<OutputOffsetProfile*> OutputOffsetProfiles::Profiles;
 int OutputOffsetProfiles::SelectedProfileIndex = 0;
 
@@ -189,6 +191,9 @@ void OutputOffsetProfiles::InitializeProfiles(ProfileResources& resources)
 	HdmiAudioPassthrough_None_CurrentWinAudioFormat->isNoOffset = true;
 	HdmiAudioPassthrough_None_CurrentWinAudioFormat->isCurrentWindowsAudioFormat = true;
 	Profiles.push_back(HdmiAudioPassthrough_None_CurrentWinAudioFormat);
+
+	RelativeWinAudio_Wasapi = new OutputOffsetProfile(OutputOffsetProfile::OutputType::RelativeWinAudio, "WASAPI Exclusive", None_GetOffset, AllFormatsFilter);
+	Profiles.push_back(RelativeWinAudio_Wasapi);
 
 	PrepareSubsetListsForGui();
 	PrepareOffsetStringsForGui();

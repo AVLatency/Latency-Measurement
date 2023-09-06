@@ -10,8 +10,24 @@
 #include <format>
 #include "WavHelper.h"
 
-TestManager::TestManager(AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, std::vector<AudioFormat*> selectedFormats, std::string fileString, std::string appDirectory, IResultsWriter& resultsWriter, OutputOffsetProfile* currentProfile, DacLatencyProfile* referenceDacLatency)
-	: outputEndpoint(outputEndpoint), inputEndpoint(inputEndpoint), SelectedFormats(selectedFormats), AppDirectory(appDirectory), resultsWriter(resultsWriter), Time(time(0)), outputOffsetProfile(currentProfile), referenceDacLatency(referenceDacLatency)
+TestManager::TestManager(AudioEndpoint& outputEndpoint,
+	AudioEndpoint* outputEndpoint2,
+	const AudioEndpoint& inputEndpoint,
+	std::vector<AudioFormat*> selectedFormats,
+	std::string fileString,
+	std::string appDirectory,
+	IResultsWriter& resultsWriter,
+	OutputOffsetProfile* currentProfile,
+	DacLatencyProfile* referenceDacLatency)
+	: outputEndpoint(outputEndpoint),
+	outputEndpoint2(outputEndpoint2),
+	inputEndpoint(inputEndpoint),
+	SelectedFormats(selectedFormats),
+	AppDirectory(appDirectory),
+	resultsWriter(resultsWriter),
+	Time(time(0)),
+	outputOffsetProfile(currentProfile),
+	referenceDacLatency(referenceDacLatency)
 {
 	TestFileString = std::format("{}~{}~{}", StringHelper::GetTimeString(Time, true), OutputOffsetProfile::OutputTypeNameFileSafe(currentProfile->OutType) , fileString);
 
@@ -158,11 +174,23 @@ bool TestManager::PerformRecording(AudioFormat* audioFormat)
 		}
 		std::thread outputThread{ [output] { output->StartPlayback(); } };
 
+		AbstractOutput* output2 = nullptr;
+		std::thread* output2Thread = nullptr;
+		if (outputEndpoint2 != nullptr)
+		{
+			output2 = new WasapiOutput(*outputEndpoint2, false, true, generatedSamples->samples, generatedSamples->samplesLength, audioFormat->WaveFormat);
+			output2Thread = new std::thread ([output2] { output2->StartPlayback(); });
+		}
+
 		WasapiInput* input = new WasapiInput(inputEndpoint, false, generatedSamples->TestWaveDurationInSeconds());
 		std::thread inputThread{ [input] { input->StartRecording(); } };
 
 		outputThread.join();
 		inputThread.join();
+		if (output2Thread != nullptr)
+		{
+			output2Thread->join();
+		}
 
 		RecordingResult result = RecordingAnalyzer::AnalyzeRecording(*generatedSamples, *input, audioFormat, outputOffsetProfile, referenceDacLatency);
 		Results.push_back(result);

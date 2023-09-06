@@ -31,6 +31,9 @@ std::string OutputOffsetProfile::OutputTypeName(OutputOffsetProfile::OutputType 
 	case OutputOffsetProfile::OutputType::HdmiAudioPassthrough:
 		return "HDMI Audio Passthrough";
 		break;
+	case OutputOffsetProfile::OutputType::RelativeWinAudio:
+		return "Relative Windows Audio";
+		break;
 	default:
 		throw "Attempting to get OutputTypeName for an OutputType that has not been handled.";
 	}
@@ -60,6 +63,9 @@ std::string OutputOffsetProfile::OutputTypeNameFileSafe(OutputOffsetProfile::Out
 		break;
 	case OutputOffsetProfile::OutputType::HdmiAudioPassthrough:
 		return "HDMI Passthrgh";
+		break;
+	case OutputOffsetProfile::OutputType::RelativeWinAudio:
+		return "Relative Win";
 		break;
 	default:
 		throw "Attempting to get OutputTypeNameFileSafe for an OutputType that has not been handled.";

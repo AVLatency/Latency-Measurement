@@ -467,7 +467,12 @@ bool Gui::DoGui()
                 }
                 else
                 {
-                    if (ImGui::BeginCombo("Output Device", SelectedAudioOutputEndpoint().Name.c_str()))
+                    std::string outDeviceString = "Output Device";
+                    if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::RelativeWinAudio)
+                    {
+                        outDeviceString = "Baseline Windows Audio Output";
+                    }
+                    if (ImGui::BeginCombo(outDeviceString.c_str(), SelectedAudioOutputEndpoint().Name.c_str()))
                     {
                         for (int i = 0; i < outputAudioEndpoints.size(); i++)
                         {
@@ -483,16 +488,36 @@ bool Gui::DoGui()
                         ImGui::EndCombo();
                     }
                     ImGui::SameLine();
-                    if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Hdmi
-                        || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::ARC
-                        || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::eARC
-                        || OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
+                    if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::RelativeWinAudio)
                     {
-                        GuiHelper::HelpMarker("Select your HDMI audio output.");
+                        GuiHelper::HelpMarker("Select the Windows audio output that measurements will be compared against. For example, a built-in analog headphone output of your computer.");
                     }
                     else
                     {
-                        GuiHelper::HelpMarker("Select your audio output.");
+                        GuiHelper::HelpMarker("Select your computer's output that is connected to the input of your Dual-Out Reference Device.");
+                    }
+
+                    if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::RelativeWinAudio)
+                    {
+                        if (ImGui::BeginCombo("Windows Audio Output Under Test", outputAudioEndpoints[outputDevice2Index].Name.c_str()))
+                        {
+                            for (int i = 0; i < outputAudioEndpoints.size(); i++)
+                            {
+                                const bool is_selected = (outputDevice2Index == i);
+                                if (ImGui::Selectable(outputAudioEndpoints[i].Name.c_str(), is_selected))
+                                {
+                                    outputDevice2Index = i;
+                                }
+                                // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                                if (is_selected)
+                                    ImGui::SetItemDefaultFocus();
+                            }
+                            ImGui::EndCombo();
+                        }
+                        ImGui::SameLine();
+                        GuiHelper::HelpMarker("Select the Windows audio output will be compared against the Baseline Windows Audio Output.");
+
+                        ImGui::Spacing();
                     }
                 }
 
@@ -542,6 +567,7 @@ bool Gui::DoGui()
 
             if (state >= MeasurementToolGuiState::AdjustVolume)
             {
+                // TODO: adjust this screen quite a bit for Relative Windows Audio output type
                 std::string titleText = "Left Channel Input (Analog Out of Dual-Out Reference Device)";
                 if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
                 {
@@ -1339,7 +1365,12 @@ void Gui::StartTest()
             OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough
             ? DacLatencyProfiles::CurrentProfile() : &DacLatencyProfiles::None;
 
-        testManager = new TestManager(SelectedAudioOutputEndpoint(), inputAudioEndpoints[inputDeviceIndex], selectedFormats, fileString, APP_FOLDER, (IResultsWriter&)ResultsWriter::Writer, OutputOffsetProfiles::CurrentProfile(), currentDacProfile);
+        AudioEndpoint* outputEndpoint2 = nullptr;
+        if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::RelativeWinAudio)
+        {
+            outputEndpoint2 = &outputAudioEndpoints[outputDevice2Index];
+        }
+        testManager = new TestManager(SelectedAudioOutputEndpoint(), outputEndpoint2, inputAudioEndpoints[inputDeviceIndex], selectedFormats, fileString, APP_FOLDER, (IResultsWriter&)ResultsWriter::Writer, OutputOffsetProfiles::CurrentProfile(), currentDacProfile);
     }
 }
 
