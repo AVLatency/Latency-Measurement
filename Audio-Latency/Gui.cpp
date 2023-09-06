@@ -179,7 +179,7 @@ bool Gui::DoGui()
             ImGui::SetNextItemWidth(200 * DpiScale);
             if(ImGui::BeginCombo("Audio Latency Type", OutputOffsetProfile::OutputTypeName((OutputOffsetProfile::OutputType)outputTypeIndex).c_str()))
             {
-                for (int i = 0; i < (int)OutputOffsetProfile::OutputType::ENUM_LENGTH; i++)
+                for (int i = 0; i < (int)OutputOffsetProfile::OutputType::ENUM_LENGTH - 1; i++) // Minus 1 added to disable unfinished "Relative Windows Audio" output type.
                 {
                     const bool is_selected = (outputTypeIndex == i);
                     if (ImGui::Selectable(OutputOffsetProfile::OutputTypeName((OutputOffsetProfile::OutputType)i).c_str(), is_selected))
