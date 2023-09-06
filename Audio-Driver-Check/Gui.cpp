@@ -343,7 +343,7 @@ bool Gui::DoGui()
 
                     ImGui::Spacing();
 
-                    if (ImGui::Button(std::format("Save .wav File with {} Channels", numChannelsForSavedFile).c_str()))
+                    if (ImGui::Button(std::format("Save .wav File with {} Channels and {} Loop(s)", numChannelsForSavedFile, numLoopsForSavedFile).c_str()))
                     {
                         WavHelper::SaveWavFile(".",
                             std::format("{} - {} ch {} Hz vol {:.2}.wav", waveTypeString, numChannelsForSavedFile, currentSamples->SamplesPerSecond, TestConfiguration::OutputVolume),
@@ -353,7 +353,8 @@ bool Gui::DoGui()
                             1,
                             numChannelsForSavedFile,
                             firstChannelOnly,
-                            TestConfiguration::OutputVolume);
+                            TestConfiguration::OutputVolume,
+                            numLoopsForSavedFile);
                     }
                     ImGui::SameLine();
                     ImGui::SetNextItemWidth(75 * DpiScale);
@@ -361,6 +362,14 @@ bool Gui::DoGui()
                     if (numChannelsForSavedFile < 1)
                     {
                         numChannelsForSavedFile = 1;
+                    }
+
+                    ImGui::SameLine();
+                    ImGui::SetNextItemWidth(75 * DpiScale);
+                    ImGui::InputInt("Num Loops", &numLoopsForSavedFile);
+                    if (numLoopsForSavedFile < 1)
+                    {
+                        numLoopsForSavedFile = 1;
                     }
 
                     ImGui::Spacing();

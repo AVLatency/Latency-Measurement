@@ -39,6 +39,7 @@ private:
 	GeneratedSamples::WaveType waveType = GeneratedSamples::WaveType::TestPattern_TonePlusHighFreq;
 
 	int numChannelsForSavedFile = 2;
+	int numLoopsForSavedFile = 1;
 
 	void AppDescriptionText();
 	void HelpMarker(const char* desc);

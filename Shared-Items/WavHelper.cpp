@@ -18,7 +18,7 @@ namespace little_endian_io
 }
 using namespace little_endian_io;
 
-void WavHelper::SaveWavFile(std::string path, std::string filename, float* samples, int samplesLength, int samplesPerSecond, int numInputChannels, int numOutputChannels, bool firstChannelOnly, float volume)
+void WavHelper::SaveWavFile(std::string path, std::string filename, float* samples, int samplesLength, int samplesPerSecond, int numInputChannels, int numOutputChannels, bool firstChannelOnly, float volume, int loopCount)
 {
     filesystem::create_directories(filesystem::path(path));
 
@@ -45,28 +45,31 @@ void WavHelper::SaveWavFile(std::string path, std::string filename, float* sampl
     f << "data----";  // (chunk size to be filled in later)
 
     // Write the audio samples
-    if (numInputChannels == 1)
+    for (int loop = 0; loop < loopCount; loop++)
     {
-        for (int i = 0; i < samplesLength; i++)
+        if (numInputChannels == 1)
         {
-            for (int c = 0; c < numOutputChannels; c++)
+            for (int i = 0; i < samplesLength; i++)
             {
-                if (c == 0 || !firstChannelOnly)
+                for (int c = 0; c < numOutputChannels; c++)
                 {
-                    write_word(f, (INT16)(round(samples[i] * volume * SHRT_MAX)), 2);
-                }
-                else
-                {
-                    write_word(f, (INT16)0, 2);
+                    if (c == 0 || !firstChannelOnly)
+                    {
+                        write_word(f, (INT16)(round(samples[i] * volume * SHRT_MAX)), 2);
+                    }
+                    else
+                    {
+                        write_word(f, (INT16)0, 2);
+                    }
                 }
             }
         }
-    }
-    else
-    {
-        for (int i = 0; i < samplesLength; i++)
+        else
         {
-            write_word(f, (INT16)(round(samples[i] * volume * SHRT_MAX)), 2);
+            for (int i = 0; i < samplesLength; i++)
+            {
+                write_word(f, (INT16)(round(samples[i] * volume * SHRT_MAX)), 2);
+            }
         }
     }
 
