@@ -43,5 +43,5 @@ bool TestConfiguration::Ch2AutoThresholdDetection = true;
 float TestConfiguration::Ch2DetectionThreshold = 0.05f * 2.0f;
 bool TestConfiguration::Ch2CableCrosstalkDetection = true;
 
-int TestConfiguration::AttemptsBeforeFail = 6;
+int TestConfiguration::AttemptsBeforeFail = 10;
 bool TestConfiguration::MeasureAverageLatency = true;
