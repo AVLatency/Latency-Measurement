@@ -224,8 +224,11 @@ void OutputOffsetProfiles::PrepareOffsetStringsForGui()
 		if (profile->isCurrentWindowsAudioFormat)
 		{
 			OutputOffsetProfile::OutputOffset offset = profile->GetOffsetForCurrentWinFormat();
-			std::string highlightedOffsetValue = std::format("{}: {} ms", AudioFormat::GetCurrentWinAudioFormatString(), offset.value);
-			profile->HighlightedVerifiedOffsetsForDisplay.push_back(highlightedOffsetValue);
+			if (offset.verified)
+			{
+				std::string highlightedOffsetValue = std::format("{}: {} ms", AudioFormat::GetCurrentWinAudioFormatString(), offset.value);
+				profile->HighlightedVerifiedOffsetsForDisplay.push_back(highlightedOffsetValue);
+			}
 
 			AddOffsetStrToProfileForFormat(profile, nullptr);
 		}

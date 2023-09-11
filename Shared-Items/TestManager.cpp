@@ -162,7 +162,7 @@ bool TestManager::PerformRecording(SupportedAudioFormat* audioFormat)
 	GeneratedSamples* generatedSamples = new GeneratedSamples(sampleRate, GeneratedSamples::WaveType::LatencyMeasurement);
 
 	bool validResult = false;
-	for (int i = 0; i < TestConfiguration::AttemptsBeforeFail; i++)
+	for (int i = 0; i < TestConfiguration::AttemptsBeforeFail && !StopRequested.load(std::memory_order_acquire); i++)
 	{
 		AbstractOutput* output;
 		if (audioFormat == nullptr)
