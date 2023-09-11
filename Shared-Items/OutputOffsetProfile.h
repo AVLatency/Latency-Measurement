@@ -51,6 +51,7 @@ public:
 	/// Used if a device takes in a digital audio format but then outputs a different audio format. For example,
 	/// a DAC that takes in 5 channel audio, but then outputs a digital audio stream that incorrectly
 	/// has only 2 channel audio. An example is an HDMI Audio Extractor that is used as a S/PDIF generator.
+	/// This is also used to filter out formats that do not have an output offset measured.
 	/// </summary>
 	bool (*FormatFilter)(AudioFormat*);
 
