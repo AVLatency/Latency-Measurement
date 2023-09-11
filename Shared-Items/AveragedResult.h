@@ -10,7 +10,7 @@ struct AveragedResult
 public:
     time_t Time;
     const SupportedAudioFormat* Format;
-    const AudioEndpoint& OutputEndpoint;
+    AudioEndpoint* OutputEndpoint;
 
     /// <summary>
     /// Before taking output offset profile into account
@@ -40,7 +40,7 @@ public:
     float MinLatency() const;
     float MaxLatency() const;
 
-    AveragedResult(time_t time, const SupportedAudioFormat* format, const AudioEndpoint& outputEndpoint, OutputOffsetProfile* outputOffsetProfile, float outputOffsetFromProfile, bool verified, std::string referenceDacName, float referenceDacLatency)
+    AveragedResult(time_t time, const SupportedAudioFormat* format, AudioEndpoint* outputEndpoint, OutputOffsetProfile* outputOffsetProfile, float outputOffsetFromProfile, bool verified, std::string referenceDacName, float referenceDacLatency)
         : Time(time), Format(format), OutputEndpoint(outputEndpoint), OffsetProfile(outputOffsetProfile), OutputOffsetFromProfile(outputOffsetFromProfile), Verified(verified), ReferenceDacName(referenceDacName), ReferenceDacLatency(referenceDacLatency) {};
 };
 

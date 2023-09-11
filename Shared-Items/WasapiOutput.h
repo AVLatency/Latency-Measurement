@@ -15,7 +15,7 @@ public:
 
 	///<param name="firstChannelOnly">If true, audio will only be output to the first channel. Otherwise audio will be output to all channels</param>
 	///<param name="audioSamples">These provided samples must remain in memory so long as WasapiOutput might be reading them. They will not be deleted by WasapiOutput.</param>
-	WasapiOutput(const AudioEndpoint& endpoint, bool loop, bool firstChannelOnly, float* audioSamples, int audioSamplesLength, WAVEFORMATEX* waveFormat);
+	WasapiOutput(AudioEndpoint* endpoint, bool loop, bool firstChannelOnly, float* audioSamples, int audioSamplesLength, WAVEFORMATEX* waveFormat);
 	~WasapiOutput();
 
 	void StartPlayback();
@@ -28,7 +28,7 @@ public:
 	static INT32 FloatToINT32(float sample);
 
 private:
-	const AudioEndpoint& endpoint;
+	const AudioEndpoint* endpoint;
 	bool loop;
 	bool firstChannelOnly;
 	float* audioSamples;

@@ -15,9 +15,9 @@ const IID IID_IMMDeviceEnumerator = __uuidof(IMMDeviceEnumerator);
 /// <summary>
 /// Taken from https://docs.microsoft.com/en-us/windows/win32/coreaudio/device-properties
 /// </summary>
-std::vector<AudioEndpoint> AudioEndpointHelper::GetAudioEndPoints(EDataFlow type)
+std::vector<AudioEndpoint*> AudioEndpointHelper::GetAudioEndPoints(EDataFlow type)
 {
-	std::vector<AudioEndpoint> result;
+	std::vector<AudioEndpoint*> result;
 
     HRESULT hr = S_OK;
     IMMDeviceEnumerator* pEnumerator = NULL;
@@ -77,7 +77,7 @@ std::vector<AudioEndpoint> AudioEndpointHelper::GetAudioEndPoints(EDataFlow type
             //printf("Endpoint %d: \"%S\" (%S)\n",
             //    i, varName.pwszVal, pwszID);
         
-        AudioEndpoint endpoint(pEndpoint, (char*)_bstr_t(varName.pwszVal), (char*)_bstr_t(pwszID));
+        AudioEndpoint* endpoint = new AudioEndpoint(pEndpoint, (char*)_bstr_t(varName.pwszVal), (char*)_bstr_t(pwszID));
         result.push_back(endpoint);
 
         CoTaskMemFree(pwszID);
@@ -166,7 +166,7 @@ AudioEndpoint* AudioEndpointHelper::GetDefaultAudioEndPoint(EDataFlow type)
     return nullptr;
 }
 
-int AudioEndpointHelper::GetInputMixFormatSampleRate(const AudioEndpoint& endpoint)
+int AudioEndpointHelper::GetInputMixFormatSampleRate(AudioEndpoint* endpoint)
 {
     const IID IID_IAudioClient = __uuidof(IAudioClient);
     HRESULT hr;
@@ -177,7 +177,7 @@ int AudioEndpointHelper::GetInputMixFormatSampleRate(const AudioEndpoint& endpoi
     hr = CoInitialize(NULL);
     EXIT_ON_ERROR(hr)
 
-    hr = endpoint.Device->Activate(
+    hr = endpoint->Device->Activate(
         IID_IAudioClient, CLSCTX_ALL,
         NULL, (void**)&pAudioClient);
     EXIT_ON_ERROR(hr)

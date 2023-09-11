@@ -34,8 +34,8 @@ private:
 	int outputDeviceIndex = 0;
 	int outputDevice2Index = 0;
 	int inputDeviceIndex = 0;
-	std::vector<AudioEndpoint> outputAudioEndpoints; // TODO: refs and pointers to these are used here and there, which isn't safe.
-	std::vector<AudioEndpoint> inputAudioEndpoints; // TODO: refs and pointers to these are used here and there, which isn't safe.
+	std::vector<AudioEndpoint*> outputAudioEndpoints;
+	std::vector<AudioEndpoint*> inputAudioEndpoints;
 	AudioEndpoint* defaultAudioOutputEndpoint = nullptr;
 
 	int lastCheckedInputSampleRate = 0;
@@ -46,7 +46,7 @@ private:
 	TestManager* testManager = nullptr;
 
 	void RefreshAudioEndpoints();
-	AudioEndpoint& SelectedAudioOutputEndpoint();
+	AudioEndpoint* SelectedAudioOutputEndpoint();
 
 	void StartSelectAudioDevices();
 	void StartAdjustVolume();

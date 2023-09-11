@@ -172,12 +172,12 @@ bool Gui::DoGui()
         }
         else
         {
-            if (ImGui::BeginCombo("Output Device", outputAudioEndpoints[outputDeviceIndex].Name.c_str()))
+            if (ImGui::BeginCombo("Output Device", outputAudioEndpoints[outputDeviceIndex]->Name.c_str()))
             {
                 for (int i = 0; i < outputAudioEndpoints.size(); i++)
                 {
                     const bool is_selected = (outputDeviceIndex == i);
-                    if (ImGui::Selectable(outputAudioEndpoints[i].Name.c_str(), is_selected))
+                    if (ImGui::Selectable(outputAudioEndpoints[i]->Name.c_str(), is_selected))
                     {
                         outputDeviceIndex = i;
                     }
@@ -189,8 +189,8 @@ bool Gui::DoGui()
             }
 
             std::stringstream copyableFormatList;
-            std::vector<SupportedAudioFormat*>& supportedFormats = outputAudioEndpoints[outputDeviceIndex].SupportedFormats;
-            std::vector<SupportedAudioFormat*>& duplicateFormats = outputAudioEndpoints[outputDeviceIndex].DuplicateSupportedFormats;
+            std::vector<SupportedAudioFormat*>& supportedFormats = outputAudioEndpoints[outputDeviceIndex]->SupportedFormats;
+            std::vector<SupportedAudioFormat*>& duplicateFormats = outputAudioEndpoints[outputDeviceIndex]->DuplicateSupportedFormats;
             ImGui::BeginChild("formatsChildWindow", ImVec2(0, 30 * ImGui::GetTextLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar);
             {
                 for (SupportedAudioFormat* format : supportedFormats)
@@ -508,24 +508,32 @@ void Gui::OptionallyBoldText(const char* text, bool bold)
 
 void Gui::RefreshAudioEndpoints()
 {
+    if (outputAudioEndpoints.size() > 0)
+    {
+        for (AudioEndpoint* endpoint : outputAudioEndpoints)
+        {
+            delete endpoint;
+        }
+        outputAudioEndpoints.clear();
+    }
     outputAudioEndpoints = AudioEndpointHelper::GetAudioEndPoints(eRender);
     outputDeviceIndex = 0;
     if (outputAudioEndpoints.size() > 0)
     {
         for (int i = 0; i < outputAudioEndpoints.size(); i++)
         {
-            outputAudioEndpoints[i].PopulateSupportedFormats(true, true, false, false, OutputOffsetProfiles::AllFormatsFilter);
+            outputAudioEndpoints[i]->PopulateSupportedFormats(true, true, false, false, OutputOffsetProfiles::AllFormatsFilter);
         }
     }
 }
 
 void Gui::ClearFormatSelection()
 {
-    for (SupportedAudioFormat* format : outputAudioEndpoints[outputDeviceIndex].SupportedFormats)
+    for (SupportedAudioFormat* format : outputAudioEndpoints[outputDeviceIndex]->SupportedFormats)
     {
         format->UserSelected = false;
     }
-    for (SupportedAudioFormat* format : outputAudioEndpoints[outputDeviceIndex].DuplicateSupportedFormats)
+    for (SupportedAudioFormat* format : outputAudioEndpoints[outputDeviceIndex]->DuplicateSupportedFormats)
     {
         format->UserSelected = false;
     }

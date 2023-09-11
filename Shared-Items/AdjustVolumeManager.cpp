@@ -13,7 +13,7 @@
               if ((punk) != NULL)  \
                 { (punk)->Release(); (punk) = NULL; }
 
-AdjustVolumeManager::AdjustVolumeManager(const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, int targetTickMonitorSampleLength, int targetFullMonitorSampleLength, const float& userLeftThreshold, const float& userRightThreshold)
+AdjustVolumeManager::AdjustVolumeManager(AudioEndpoint * outputEndpoint, AudioEndpoint * inputEndpoint, int targetTickMonitorSampleLength, int targetFullMonitorSampleLength, const float& userLeftThreshold, const float& userRightThreshold)
 	: TargetTickMonitorSampleLength(targetTickMonitorSampleLength), TargetFullMonitorSampleLength(targetFullMonitorSampleLength), UserLeftThreshold(userLeftThreshold), UserRightThreshold(userRightThreshold)
 {
 	// Always restart these when starting up volume adjustment. These should normally not be disabled.
@@ -111,13 +111,13 @@ void AdjustVolumeManager::SafeResetVolumeAnalysis(VolumeAnalysis& analysis)
 /// <summary>
 /// Attempts to find a 2 channel, 48 kHz, 16-bit PCM wave format that the driver supports in exclusive mode.
 /// </summary>
-WAVEFORMATEX* AdjustVolumeManager::GetWaveFormat(const AudioEndpoint& endpoint)
+WAVEFORMATEX* AdjustVolumeManager::GetWaveFormat(AudioEndpoint* endpoint)
 {
 	WAVEFORMATEX* result = NULL;
 
 	const IID IID_IAudioClient = __uuidof(IAudioClient);
 	IAudioClient* pAudioClient = NULL;
-	HRESULT hr = endpoint.Device->Activate(IID_IAudioClient, CLSCTX_ALL, NULL, (void**)&pAudioClient);
+	HRESULT hr = endpoint->Device->Activate(IID_IAudioClient, CLSCTX_ALL, NULL, (void**)&pAudioClient);
 	if (!FAILED(hr))
 	{
 		WAVEFORMATEXTENSIBLE* extensibleFormat = new WAVEFORMATEXTENSIBLE();

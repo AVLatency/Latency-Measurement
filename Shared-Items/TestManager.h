@@ -43,7 +43,7 @@ public:
 	/// <summary>
 	/// Will start the test on a new thread
 	/// </summary>
-	TestManager(AudioEndpoint& outputEndpoint, AudioEndpoint* outputEndpoint2, const AudioEndpoint& inputEndpoint, std::vector<SupportedAudioFormat*> selectedFormats, std::string fileString, std::string appDirectory, IResultsWriter& resultsWriter, OutputOffsetProfile* currentProfile, DacLatencyProfile* referenceDacLatency);
+	TestManager(AudioEndpoint* outputEndpoint, AudioEndpoint* outputEndpoint2, AudioEndpoint* inputEndpoint, std::vector<SupportedAudioFormat*> selectedFormats, std::string fileString, std::string appDirectory, IResultsWriter& resultsWriter, OutputOffsetProfile* currentProfile, DacLatencyProfile* referenceDacLatency);
 	~TestManager();
 	/// <summary>
 	/// Should be called from the originating thread when IsFinished == true. This will join and delete the test thread.
@@ -54,9 +54,9 @@ private:
 	std::string timeString;
 
 	std::thread* managerThread = NULL;
-	AudioEndpoint& outputEndpoint;
+	AudioEndpoint* outputEndpoint;
 	AudioEndpoint* outputEndpoint2; // Second output endpoint for Relative Windows Audio output type
-	const AudioEndpoint& inputEndpoint;
+	AudioEndpoint* inputEndpoint;
 
 	IResultsWriter& resultsWriter;
 

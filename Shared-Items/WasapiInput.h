@@ -17,7 +17,7 @@ public:
 
 	WAVEFORMATEXTENSIBLE waveFormat{};
 
-	WasapiInput(const AudioEndpoint& endpoint, bool loop, double bufferDurationInSeconds);
+	WasapiInput(AudioEndpoint* endpoint, bool loop, double bufferDurationInSeconds);
 	~WasapiInput();
 	void StartRecording();
 	void StopRecording();
@@ -32,7 +32,7 @@ private:
 	double bufferDurationInSeconds;
 	int recordedAudioIndex = 0;
 	std::atomic<bool> stopRequested = false;
-	const AudioEndpoint& endpoint;
+	AudioEndpoint* endpoint;
 
 	UINT16 GetFormatID();
 	HRESULT SetFormat(WAVEFORMATEX* wfex);

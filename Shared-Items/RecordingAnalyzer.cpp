@@ -561,7 +561,7 @@ std::vector<RecordingAnalyzer::TickPosition> RecordingAnalyzer::GetTicks(float* 
     */
 }
 
-std::vector<AveragedResult> RecordingAnalyzer::AnalyzeResults(std::vector<RecordingResult> results, time_t tTime, const AudioEndpoint& outputEndpoint)
+std::vector<AveragedResult> RecordingAnalyzer::AnalyzeResults(std::vector<RecordingResult> results, time_t tTime, AudioEndpoint* outputEndpoint)
 {
     std::vector<AveragedResult> averagedResults;
 
@@ -592,7 +592,7 @@ std::vector<AveragedResult> RecordingAnalyzer::AnalyzeResults(std::vector<Record
     return averagedResults;
 }
 
-void RecordingAnalyzer::SaveIndividualResult(IResultsWriter& writer, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result, std::string testRootPath, std::string inputFormat)
+void RecordingAnalyzer::SaveIndividualResult(IResultsWriter& writer, AudioEndpoint* outputEndpoint, AudioEndpoint* inputEndpoint, RecordingResult& result, std::string testRootPath, std::string inputFormat)
 {
     filesystem::create_directories(filesystem::path(testRootPath));
 

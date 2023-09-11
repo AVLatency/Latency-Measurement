@@ -19,7 +19,7 @@ const int INT24_MAX = (1 << 23) - 1;
               if ((punk) != NULL)  \
                 { (punk)->Release(); (punk) = NULL; }
 
-WasapiOutput::WasapiOutput(const AudioEndpoint& endpoint, bool loop, bool firstChannelOnly, float* audioSamples, int audioSamplesLength, WAVEFORMATEX* waveFormat)
+WasapiOutput::WasapiOutput(AudioEndpoint* endpoint, bool loop, bool firstChannelOnly, float* audioSamples, int audioSamplesLength, WAVEFORMATEX* waveFormat)
 	: endpoint(endpoint), loop(loop), firstChannelOnly(firstChannelOnly), audioSamples(audioSamples), audioSamplesLength(audioSamplesLength), waveFormat(waveFormat)
 {
 }
@@ -54,7 +54,7 @@ void WasapiOutput::StartPlayback()
     hr = CoInitialize(NULL);
     EXIT_ON_ERROR(hr)
 
-        hr = endpoint.Device->Activate(
+        hr = endpoint->Device->Activate(
             IID_IAudioClient, CLSCTX_ALL,
             NULL, (void**)&pAudioClient);
     EXIT_ON_ERROR(hr)

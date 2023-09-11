@@ -472,12 +472,12 @@ bool Gui::DoGui()
                     {
                         outDeviceString = "Baseline Windows Audio Output";
                     }
-                    if (ImGui::BeginCombo(outDeviceString.c_str(), SelectedAudioOutputEndpoint().Name.c_str()))
+                    if (ImGui::BeginCombo(outDeviceString.c_str(), SelectedAudioOutputEndpoint()->Name.c_str()))
                     {
                         for (int i = 0; i < outputAudioEndpoints.size(); i++)
                         {
                             const bool is_selected = (outputDeviceIndex == i);
-                            if (ImGui::Selectable(outputAudioEndpoints[i].Name.c_str(), is_selected))
+                            if (ImGui::Selectable(outputAudioEndpoints[i]->Name.c_str(), is_selected))
                             {
                                 outputDeviceIndex = i;
                             }
@@ -499,12 +499,12 @@ bool Gui::DoGui()
 
                     if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::RelativeWinAudio)
                     {
-                        if (ImGui::BeginCombo("Windows Audio Output Under Test", outputAudioEndpoints[outputDevice2Index].Name.c_str()))
+                        if (ImGui::BeginCombo("Windows Audio Output Under Test", outputAudioEndpoints[outputDevice2Index]->Name.c_str()))
                         {
                             for (int i = 0; i < outputAudioEndpoints.size(); i++)
                             {
                                 const bool is_selected = (outputDevice2Index == i);
-                                if (ImGui::Selectable(outputAudioEndpoints[i].Name.c_str(), is_selected))
+                                if (ImGui::Selectable(outputAudioEndpoints[i]->Name.c_str(), is_selected))
                                 {
                                     outputDevice2Index = i;
                                 }
@@ -521,12 +521,12 @@ bool Gui::DoGui()
                     }
                 }
 
-                if (ImGui::BeginCombo("Input Device", inputAudioEndpoints[inputDeviceIndex].Name.c_str()))
+                if (ImGui::BeginCombo("Input Device", inputAudioEndpoints[inputDeviceIndex]->Name.c_str()))
                 {
                     for (int i = 0; i < inputAudioEndpoints.size(); i++)
                     {
                         const bool is_selected = (inputDeviceIndex == i);
-                        if (ImGui::Selectable(inputAudioEndpoints[i].Name.c_str(), is_selected))
+                        if (ImGui::Selectable(inputAudioEndpoints[i]->Name.c_str(), is_selected))
                         {
                             inputDeviceIndex = i;
                         }
@@ -679,13 +679,13 @@ bool Gui::DoGui()
                 else if (state == MeasurementToolGuiState::FinishingAdjustVolume)
                 {
                     state = MeasurementToolGuiState::MeasurementConfig;
-                    SelectedAudioOutputEndpoint().PopulateSupportedFormats(
+                    SelectedAudioOutputEndpoint()->PopulateSupportedFormats(
                         false,
                         IncludeSurroundAsDefault(),
                         OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Analog,
                         true,
                         OutputOffsetProfiles::CurrentProfile()->FormatFilter);
-                    strcpy_s(TestNotes::Notes.DutModel, SelectedAudioOutputEndpoint().Name.c_str());
+                    strcpy_s(TestNotes::Notes.DutModel, SelectedAudioOutputEndpoint()->Name.c_str());
                     if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::HdmiAudioPassthrough)
                     {
                         SetDutPassthroughOutputType();
@@ -739,7 +739,7 @@ bool Gui::DoGui()
                     }
                     ImGui::Spacing();
 
-                    std::vector<SupportedAudioFormat*>& supportedFormats = SelectedAudioOutputEndpoint().SupportedFormats;
+                    std::vector<SupportedAudioFormat*>& supportedFormats = SelectedAudioOutputEndpoint()->SupportedFormats;
 
                     if (ImGui::Button("Select Default"))
                     {
@@ -747,7 +747,7 @@ bool Gui::DoGui()
                         {
                             format->UserSelected = false;
                         }
-                        SelectedAudioOutputEndpoint().SetDefaultFormats(
+                        SelectedAudioOutputEndpoint()->SetDefaultFormats(
                             IncludeSurroundAsDefault(),
                             OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::Analog,
                             true);
@@ -1281,6 +1281,24 @@ void Gui::Finish()
 
 void Gui::RefreshAudioEndpoints()
 {
+    if (outputAudioEndpoints.size() > 0)
+    {
+        for (AudioEndpoint* endpoint : outputAudioEndpoints)
+        {
+            delete endpoint;
+        }
+        outputAudioEndpoints.clear();
+    }
+
+    if (inputAudioEndpoints.size() > 0)
+    {
+        for (AudioEndpoint* endpoint : inputAudioEndpoints)
+        {
+            delete endpoint;
+        }
+        inputAudioEndpoints.clear();
+    }
+
     outputAudioEndpoints = AudioEndpointHelper::GetAudioEndPoints(eRender);
     inputAudioEndpoints = AudioEndpointHelper::GetAudioEndPoints(eCapture);
     if (defaultAudioOutputEndpoint != nullptr)
@@ -1292,11 +1310,11 @@ void Gui::RefreshAudioEndpoints()
     inputDeviceIndex = 0;
 }
 
-AudioEndpoint& Gui::SelectedAudioOutputEndpoint()
+AudioEndpoint* Gui::SelectedAudioOutputEndpoint()
 {
     if (OutputOffsetProfiles::CurrentProfile()->isCurrentWindowsAudioFormat)
     {
-        return *defaultAudioOutputEndpoint;
+        return defaultAudioOutputEndpoint;
     }
     else
     {
@@ -1346,7 +1364,7 @@ void Gui::StartTest()
         }
         else
         {
-            for (SupportedAudioFormat* format : SelectedAudioOutputEndpoint().SupportedFormats)
+            for (SupportedAudioFormat* format : SelectedAudioOutputEndpoint()->SupportedFormats)
             {
                 if (format->UserSelected)
                 {
@@ -1368,7 +1386,7 @@ void Gui::StartTest()
         AudioEndpoint* outputEndpoint2 = nullptr;
         if (OutputOffsetProfiles::CurrentProfile()->OutType == OutputOffsetProfile::OutputType::RelativeWinAudio)
         {
-            outputEndpoint2 = &outputAudioEndpoints[outputDevice2Index];
+            outputEndpoint2 = outputAudioEndpoints[outputDevice2Index];
         }
         testManager = new TestManager(SelectedAudioOutputEndpoint(), outputEndpoint2, inputAudioEndpoints[inputDeviceIndex], selectedFormats, fileString, APP_FOLDER, (IResultsWriter&)ResultsWriter::Writer, OutputOffsetProfiles::CurrentProfile(), currentDacProfile);
     }

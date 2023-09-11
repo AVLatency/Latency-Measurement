@@ -11,22 +11,6 @@ AudioEndpoint::AudioEndpoint(IMMDevice * device, std::string name, std::string i
     device->AddRef();
 }
 
-AudioEndpoint::AudioEndpoint(const AudioEndpoint & other)
-{
-    Device = other.Device;
-    Device->AddRef();
-    Name = other.Name;
-    ID = other.ID;
-}
-
-AudioEndpoint::AudioEndpoint(const AudioEndpoint&& other)
-{
-    Device = other.Device;
-    Device->AddRef();
-    Name = other.Name;
-    ID = other.ID;
-}
-
 AudioEndpoint::~AudioEndpoint()
 {
 	SAFE_RELEASE(Device);
@@ -35,21 +19,21 @@ AudioEndpoint::~AudioEndpoint()
 
 void AudioEndpoint::ClearFormats()
 {
-	for (SupportedAudioFormat* format : SupportedFormats)
-	{
-		delete format;
-	}
 	if (SupportedFormats.size() > 0)
 	{
+		for (SupportedAudioFormat* format : SupportedFormats)
+		{
+			delete format;
+		}
 		SupportedFormats.clear();
 	}
 
-	for (SupportedAudioFormat* format : DuplicateSupportedFormats)
-	{
-		delete format;
-	}
 	if (DuplicateSupportedFormats.size() > 0)
 	{
+		for (SupportedAudioFormat* format : DuplicateSupportedFormats)
+		{
+			delete format;
+		}
 		DuplicateSupportedFormats.clear();
 	}
 }

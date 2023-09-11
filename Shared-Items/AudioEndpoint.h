@@ -20,8 +20,6 @@ public:
 	std::vector<SupportedAudioFormat*> DuplicateSupportedFormats;
 	
 	AudioEndpoint(IMMDevice* device, std::string name, std::string id);
-	AudioEndpoint(const AudioEndpoint& other); // TODO: Get rid of this when AudioEndpointHelper is updated to return AudioEndpoint*
-	AudioEndpoint(const AudioEndpoint&& other); // TODO: Get rid of this when AudioEndpointHelper is updated to return AudioEndpoint*
 	~AudioEndpoint();
 	void ClearFormats();
 

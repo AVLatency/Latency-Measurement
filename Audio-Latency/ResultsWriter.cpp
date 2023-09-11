@@ -4,7 +4,7 @@
 
 ResultsWriter ResultsWriter::Writer;
 
-void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstream& detailedResultsStream, const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, RecordingResult& result, std::string inputFormat)
+void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstream& detailedResultsStream, AudioEndpoint* outputEndpoint, AudioEndpoint* inputEndpoint, RecordingResult& result, std::string inputFormat)
 {
     SupportedAudioFormat* format = result.Format;
     std::string formatString = format == nullptr ? "CurrentWindowsAudioFormat" : format->Format->FormatString;
@@ -71,8 +71,8 @@ void ResultsWriter::WriteIndividualRecordingResults(bool writeHeader, std::fstre
         writeHeader ? detailedResultsStream << "Reference DAC Latency Value (ms)," : detailedResultsStream << "\"" << result.ReferenceDacLatency << "\",";
     }
     writeHeader ? detailedResultsStream << "," : detailedResultsStream << "\"" << "\",";
-    writeHeader ? detailedResultsStream << "Audio Output Device," : detailedResultsStream << "\"" << outputEndpoint.Name << " (" << outputEndpoint.ID << ")" << "\",";
-    writeHeader ? detailedResultsStream << "Audio Input Device," : detailedResultsStream << "\"" << inputEndpoint.Name << " (" << inputEndpoint.ID << ")" << "\",";
+    writeHeader ? detailedResultsStream << "Audio Output Device," : detailedResultsStream << "\"" << outputEndpoint->Name << " (" << outputEndpoint->ID << ")" << "\",";
+    writeHeader ? detailedResultsStream << "Audio Input Device," : detailedResultsStream << "\"" << inputEndpoint->Name << " (" << inputEndpoint->ID << ")" << "\",";
     writeHeader ? detailedResultsStream << "Audio Input Format," : detailedResultsStream << "\"" << inputFormat << "\",";
     writeHeader ? detailedResultsStream << "," : detailedResultsStream << "\"" << "\",";
     writeHeader ? detailedResultsStream << "DEBUG INFO FOLLOWS -->," : detailedResultsStream << "\"" << "DEBUG INFO FOLLOWS -->" << "\",";
@@ -176,7 +176,7 @@ void ResultsWriter::WriteFinalResultsLine(bool writeHeader, std::fstream& result
         writeHeader ? resultsStream << "Reference DAC Latency Value (ms)," : resultsStream << "\"" << result.ReferenceDacLatency << "\",";
     }
     writeHeader ? resultsStream << "," : resultsStream << "\"" << "\",";
-    writeHeader ? resultsStream << "Audio Output Device" : resultsStream << "\"" << result.OutputEndpoint.Name << " (" << result.OutputEndpoint.ID << ")" << "\"";
+    writeHeader ? resultsStream << "Audio Output Device" : resultsStream << "\"" << result.OutputEndpoint->Name << " (" << result.OutputEndpoint->ID << ")" << "\"";
 
     resultsStream << std::endl;
 

@@ -12,7 +12,7 @@
                 { (punk)->Release(); (punk) = NULL; }
 
 
-WasapiInput::WasapiInput(const AudioEndpoint& endpoint, bool loop, double bufferDurationInSeconds)
+WasapiInput::WasapiInput(AudioEndpoint* endpoint, bool loop, double bufferDurationInSeconds)
     : endpoint(endpoint), loop(loop), bufferDurationInSeconds(bufferDurationInSeconds)
 {
 }
@@ -53,7 +53,7 @@ void WasapiInput::StartRecording()
     hr = CoInitialize(NULL);
     EXIT_ON_ERROR(hr)
 
-        hr = endpoint.Device->Activate(
+        hr = endpoint->Device->Activate(
             IID_IAudioClient, CLSCTX_ALL,
             NULL, (void**)&pAudioClient);
     EXIT_ON_ERROR(hr)

@@ -11,9 +11,9 @@
 #include "WavHelper.h"
 #include "ExternalMediaPlayerOutput.h"
 
-TestManager::TestManager(AudioEndpoint& outputEndpoint,
+TestManager::TestManager(AudioEndpoint* outputEndpoint,
 	AudioEndpoint* outputEndpoint2,
-	const AudioEndpoint& inputEndpoint,
+	AudioEndpoint* inputEndpoint,
 	std::vector<SupportedAudioFormat*> selectedFormats,
 	std::string fileString,
 	std::string appDirectory,
@@ -183,7 +183,7 @@ bool TestManager::PerformRecording(SupportedAudioFormat* audioFormat)
 		std::thread* output2Thread = nullptr;
 		if (outputEndpoint2 != nullptr)
 		{
-			output2 = new WasapiOutput(*outputEndpoint2, false, true, generatedSamples->samples, generatedSamples->samplesLength, audioFormat->Format->GetWaveFormat());
+			output2 = new WasapiOutput(outputEndpoint2, false, true, generatedSamples->samples, generatedSamples->samplesLength, audioFormat->Format->GetWaveFormat());
 			output2Thread = new std::thread ([output2] { output2->StartPlayback(); });
 		}
 
@@ -261,42 +261,42 @@ bool TestManager::PlayFormatSwitch(SupportedAudioFormat* lastPlayedFormat)
 
 	// First, see if the stereo 48 kHz 16 bit is an option:
 	{
-		std::vector<SupportedAudioFormat*> formats = outputEndpoint.GetWaveFormatExFormats(2, 48000, 16);
+		std::vector<SupportedAudioFormat*> formats = outputEndpoint->GetWaveFormatExFormats(2, 48000, 16);
 		waveFormat = FindFormatSwitchFormat(formats, lastPlayedFormat);
 	}
 
 	if (waveFormat == nullptr)
 	{
 		// Next, see if the stereo 44.1 kHz 16 bit is an option:
-		std::vector<SupportedAudioFormat*> formats = outputEndpoint.GetWaveFormatExFormats(2, 44100, 16);
+		std::vector<SupportedAudioFormat*> formats = outputEndpoint->GetWaveFormatExFormats(2, 44100, 16);
 		waveFormat = FindFormatSwitchFormat(formats, lastPlayedFormat);
 	}
 
 	if (waveFormat == nullptr)
 	{
 		// Next, see if the stereo 48 kHz is an option:
-		std::vector<SupportedAudioFormat*> formats = outputEndpoint.GetWaveFormatExFormats(2, 48000);
+		std::vector<SupportedAudioFormat*> formats = outputEndpoint->GetWaveFormatExFormats(2, 48000);
 		waveFormat = FindFormatSwitchFormat(formats, lastPlayedFormat);
 	}
 
 	if (waveFormat == nullptr)
 	{
 		// Next, see if the stereo 44.1 kHz is an option:
-		std::vector<SupportedAudioFormat*> formats = outputEndpoint.GetWaveFormatExFormats(2, 44100);
+		std::vector<SupportedAudioFormat*> formats = outputEndpoint->GetWaveFormatExFormats(2, 44100);
 		waveFormat = FindFormatSwitchFormat(formats, lastPlayedFormat);
 	}
 
 	if (waveFormat == nullptr)
 	{
 		// Next, see if the stereo is an option:
-		std::vector<SupportedAudioFormat*> formats = outputEndpoint.GetWaveFormatExFormats(2);
+		std::vector<SupportedAudioFormat*> formats = outputEndpoint->GetWaveFormatExFormats(2);
 		waveFormat = FindFormatSwitchFormat(formats, lastPlayedFormat);
 	}
 
 	if (waveFormat == nullptr)
 	{
 		// This will probably only happen the measurements are coming back invalid due to a hardware configuraion issue.
-		for (const SupportedAudioFormat* f : outputEndpoint.SupportedFormats)
+		for (const SupportedAudioFormat* f : outputEndpoint->SupportedFormats)
 		{
 			if (lastPlayedFormat != f && std::find(FailedFormats.begin(), FailedFormats.end(), f) == FailedFormats.end())
 			{

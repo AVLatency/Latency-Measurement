@@ -55,7 +55,7 @@ public:
 
 	int GoodGradeCount = 0;
 
-	AdjustVolumeManager(const AudioEndpoint& outputEndpoint, const AudioEndpoint& inputEndpoint, int targetTickMonitorSampleLength, int targetFullMonitorSampleLength, const float& userLeftThreshold, const float& userRightThreshold);
+	AdjustVolumeManager(AudioEndpoint* outputEndpoint, AudioEndpoint* inputEndpoint, int targetTickMonitorSampleLength, int targetFullMonitorSampleLength, const float& userLeftThreshold, const float& userRightThreshold);
 	~AdjustVolumeManager();
 	void Tick();
 	void TogglePause();
@@ -72,7 +72,7 @@ private:
 	GeneratedSamples* generatedSamples = nullptr;
 
 	void SafeResetVolumeAnalysis(VolumeAnalysis& analysis);
-	WAVEFORMATEX* GetWaveFormat(const AudioEndpoint& endpoint);
+	WAVEFORMATEX* GetWaveFormat(AudioEndpoint* endpoint);
 	void SetBitsPerSample(WAVEFORMATEX* wfx, WORD bitsPerSample);
 
 	void CopyBuffer(float* sourceBuffer, int sourceBufferLength);
