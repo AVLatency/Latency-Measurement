@@ -35,7 +35,7 @@ public:
 	static std::string OutputTypeName(OutputOffsetProfile::OutputType outputType);
 	static std::string OutputTypeNameFileSafe(OutputOffsetProfile::OutputType outputType);
 	
-	OutputOffsetProfile(OutputType type, std::string name, OutputOffset (*getOffsetFunc)(int numChannels, int sampleRate, int bitDepth), bool (*formatFilter)(WAVEFORMATEX*));
+	OutputOffsetProfile(OutputType type, std::string name, OutputOffset (*getLpcmOffsetFunc)(int numChannels, int sampleRate, int bitDepth), OutputOffset(*getFileOffsetFunc)(FileAudioFormats::FileId id), bool (*formatFilter)(AudioFormat*));
 
 	OutputType OutType = OutputType::None;
 	std::string Name;
@@ -44,15 +44,18 @@ public:
 	bool isNoOffset = false; // Flag to help things like the TestManager and GUI know if this is the "None" offset profile.
 	bool isCurrentWindowsAudioFormat = false; // If true, the AudioGraphOutput should be used instead of WasapiOutput
 
-	OutputOffset(*GetOffset)(int numChannels, int sampleRate, int bitDepth);
+	OutputOffset(*GetLpcmOffset)(int numChannels, int sampleRate, int bitDepth);
+	OutputOffset(*GetFileOffset)(FileAudioFormats::FileId id);
+
 	/// <summary>
 	/// Used if a device takes in a digital audio format but then outputs a different audio format. For example,
 	/// a DAC that takes in 5 channel audio, but then outputs a digital audio stream that incorrectly
 	/// has only 2 channel audio. An example is an HDMI Audio Extractor that is used as a S/PDIF generator.
 	/// </summary>
-	bool (*FormatFilter)(WAVEFORMATEX*);
+	bool (*FormatFilter)(AudioFormat*);
 
-	OutputOffset GetOffsetFromWaveFormat(WAVEFORMATEX* waveFormat);
+	OutputOffset GetOffsetForFormat(AudioFormat* format);
+	OutputOffset GetOffsetForWaveFormat(WAVEFORMATEX* waveFormat);
 	OutputOffset GetOffsetForCurrentWinFormat();
 
 

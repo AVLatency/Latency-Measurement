@@ -189,18 +189,22 @@ bool Gui::DoGui()
             }
 
             std::stringstream copyableFormatList;
-            std::vector<AudioFormat>& supportedFormats = outputAudioEndpoints[outputDeviceIndex].SupportedFormats;
-            std::vector<AudioFormat>& duplicateFormats = outputAudioEndpoints[outputDeviceIndex].DuplicateSupportedFormats;
+            std::vector<SupportedAudioFormat*>& supportedFormats = outputAudioEndpoints[outputDeviceIndex].SupportedFormats;
+            std::vector<SupportedAudioFormat*>& duplicateFormats = outputAudioEndpoints[outputDeviceIndex].DuplicateSupportedFormats;
             ImGui::BeginChild("formatsChildWindow", ImVec2(0, 30 * ImGui::GetTextLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar);
             {
-                for (AudioFormat& format : supportedFormats)
+                for (SupportedAudioFormat* format : supportedFormats)
                 {
-                    if (ImGui::Selectable(format.FormatString.c_str(), &format.UserSelected))
+                    if (format->Format->type == AudioFormat::FormatType::File)
+                    {
+                        continue;
+                    }
+                    if (ImGui::Selectable(format->Format->FormatString.c_str(), &format->UserSelected))
                     {
                         ClearFormatSelection();
-                        format.UserSelected = true;
+                        format->UserSelected = true;
                     }
-                    copyableFormatList << format.FormatString << std::endl;
+                    copyableFormatList << format->Format->FormatString << std::endl;
                 }
 
                 ImGui::Spacing();
@@ -210,14 +214,18 @@ bool Gui::DoGui()
                 ImGui::PopFont();
                 ImGui::Spacing();
 
-                for (AudioFormat& format : duplicateFormats)
+                for (SupportedAudioFormat* format : duplicateFormats)
                 {
-                    if (ImGui::Selectable(format.FormatString.c_str(), &format.UserSelected))
+                    if (format->Format->type == AudioFormat::FormatType::File)
+                    {
+                        continue;
+                    }
+                    if (ImGui::Selectable(format->Format->FormatString.c_str(), &format->UserSelected))
                     {
                         ClearFormatSelection();
-                        format.UserSelected = true;
+                        format->UserSelected = true;
                     }
-                    copyableFormatList << format.FormatString << std::endl;
+                    copyableFormatList << format->Format->FormatString << std::endl;
                 }
 
             }
@@ -232,21 +240,29 @@ bool Gui::DoGui()
             }
 
             WAVEFORMATEX* waveFormat = nullptr;
-            for (AudioFormat& format : supportedFormats)
+            for (SupportedAudioFormat* format : supportedFormats)
             {
-                if (format.UserSelected)
+                if (format->Format->type == AudioFormat::FormatType::File)
                 {
-                    waveFormat = format.WaveFormat;
+                    continue;
+                }
+                if (format->UserSelected && format->Format->type == AudioFormat::FormatType::WaveFormatEx)
+                {
+                    waveFormat = format->Format->GetWaveFormat();
                     break;
                 }
             }
             if (waveFormat == nullptr)
             {
-                for (AudioFormat& format : duplicateFormats)
+                for (SupportedAudioFormat* format : duplicateFormats)
                 {
-                    if (format.UserSelected)
+                    if (format->Format->type == AudioFormat::FormatType::File)
                     {
-                        waveFormat = format.WaveFormat;
+                        continue;
+                    }
+                    if (format->UserSelected && format->Format->type == AudioFormat::FormatType::WaveFormatEx)
+                    {
+                        waveFormat = format->Format->GetWaveFormat();
                         break;
                     }
                 }
@@ -505,13 +521,13 @@ void Gui::RefreshAudioEndpoints()
 
 void Gui::ClearFormatSelection()
 {
-    for (AudioFormat& format : outputAudioEndpoints[outputDeviceIndex].SupportedFormats)
+    for (SupportedAudioFormat* format : outputAudioEndpoints[outputDeviceIndex].SupportedFormats)
     {
-        format.UserSelected = false;
+        format->UserSelected = false;
     }
-    for (AudioFormat& format : outputAudioEndpoints[outputDeviceIndex].DuplicateSupportedFormats)
+    for (SupportedAudioFormat* format : outputAudioEndpoints[outputDeviceIndex].DuplicateSupportedFormats)
     {
-        format.UserSelected = false;
+        format->UserSelected = false;
     }
 }
 

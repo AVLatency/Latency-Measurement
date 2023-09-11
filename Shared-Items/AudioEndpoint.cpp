@@ -30,14 +30,33 @@ AudioEndpoint::AudioEndpoint(const AudioEndpoint&& other)
 AudioEndpoint::~AudioEndpoint()
 {
 	SAFE_RELEASE(Device);
+	ClearFormats();
 }
 
-void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool includeSurroundAsDefault, bool ensureOneFormat, bool selectDefaults, bool (*formatFilter)(WAVEFORMATEX*))
+void AudioEndpoint::ClearFormats()
 {
+	for (SupportedAudioFormat* format : SupportedFormats)
+	{
+		delete format;
+	}
 	if (SupportedFormats.size() > 0)
 	{
 		SupportedFormats.clear();
 	}
+
+	for (SupportedAudioFormat* format : DuplicateSupportedFormats)
+	{
+		delete format;
+	}
+	if (DuplicateSupportedFormats.size() > 0)
+	{
+		DuplicateSupportedFormats.clear();
+	}
+}
+
+void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool includeSurroundAsDefault, bool ensureOneFormat, bool selectDefaults, bool (*formatFilter)(AudioFormat*))
+{
+	ClearFormats();
 
 	const IID IID_IAudioClient = __uuidof(IAudioClient);
 	IAudioClient* pAudioClient = NULL;
@@ -46,26 +65,28 @@ void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool 
 	if (!FAILED(hr))
 	{
 		// Favour formats that have channel masks
-		for (WAVEFORMATEXTENSIBLE* waveFormat : WindowsWaveFormats::Formats.AllExtensibleFormats)
+		for (AudioFormat* format : WindowsWaveFormats::Formats.AllExtensibleAudioFormats)
 		{
-			if (formatFilter((WAVEFORMATEX*)waveFormat))
+			if (formatFilter(format))
 			{
+				WAVEFORMATEXTENSIBLE* waveFormat = reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->GetWaveFormat());
 				if (waveFormat->dwChannelMask != 0)
 				{
 					hr = pAudioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, (WAVEFORMATEX*)waveFormat, NULL);
 					if (hr == S_OK)
 					{
 						// this format is supported!
-						SupportedFormats.push_back((WAVEFORMATEX*)waveFormat);
+						SupportedFormats.push_back(new SupportedAudioFormat(format));
 					}
 				}
 			}
 		}
 		// Next, look at formats that don't have channel masks
-		for (WAVEFORMATEXTENSIBLE* waveFormat : WindowsWaveFormats::Formats.AllExtensibleFormats)
+		for (AudioFormat* format : WindowsWaveFormats::Formats.AllExtensibleAudioFormats)
 		{
-			if (formatFilter((WAVEFORMATEX*)waveFormat))
+			if (formatFilter(format))
 			{
+				WAVEFORMATEXTENSIBLE* waveFormat = reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->GetWaveFormat());
 				if (waveFormat->dwChannelMask == 0)
 				{
 					hr = pAudioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, (WAVEFORMATEX*)waveFormat, NULL);
@@ -76,63 +97,88 @@ void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool 
 						// Only add formats with no channel masks if there are no supported formats with channel masks
 						if (!AlreadyInSupportedFormats(AudioFormat::GetFormatID((WAVEFORMATEX*)waveFormat), waveFormat->Format.nChannels, waveFormat->Format.nSamplesPerSec, waveFormat->Format.wBitsPerSample))
 						{
-							SupportedFormats.push_back((WAVEFORMATEX*)waveFormat);
+							SupportedFormats.push_back(new SupportedAudioFormat(format));
 						}
 						else if (includeDuplicateFormats)
 						{
-							DuplicateSupportedFormats.push_back((WAVEFORMATEX*)waveFormat);
+							DuplicateSupportedFormats.push_back(new SupportedAudioFormat(format));
 						}
 					}
 				}
 			}
 		}
-		for (WAVEFORMATEX* waveFormat : WindowsWaveFormats::Formats.AllExFormats)
+		for (AudioFormat* format : WindowsWaveFormats::Formats.AllExAudioFormats)
 		{
-			if (formatFilter(waveFormat))
+			if (formatFilter(format))
 			{
-				hr = pAudioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, waveFormat, NULL);
+				hr = pAudioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, format->GetWaveFormat(), NULL);
 				if (hr == S_OK)
 				{
 					// this format is supported!
+					WAVEFORMATEX* waveFormat = format->GetWaveFormat();
 
 					// WAVEFORMATEX are legacy formats that are typically duplicates of the WAVEFORMATEXTENSIBLE ones
 					// But they are still important because NVIDIA (and possibly other) drivers only support 24 bit HDMI
 					// audio output through these legacy formats.
 					if (!AlreadyInSupportedFormats(AudioFormat::GetFormatID(waveFormat), waveFormat->nChannels, waveFormat->nSamplesPerSec, waveFormat->wBitsPerSample))
 					{
-						SupportedFormats.push_back(waveFormat);
+						SupportedFormats.push_back(new SupportedAudioFormat(format));
 					}
 					else if (includeDuplicateFormats)
 					{
-						DuplicateSupportedFormats.push_back(waveFormat);
+						DuplicateSupportedFormats.push_back(new SupportedAudioFormat(format));
 					}
 				}
 			}
 		}
 
+		// Next, add on File audio formats:
+		for (AudioFormat* format : FileAudioFormats::Formats.AllFileFormats)
+		{
+			if (formatFilter(format))
+			{
+				SupportedFormats.push_back(new SupportedAudioFormat(format));
+			}
+		}
+
 		// Sort supported formats
-		auto sortFunc = [](const AudioFormat& a, const AudioFormat& b) {
-			int aFormatOrder = GetFormatIdOrder(a);
-			int bFormatOrder = GetFormatIdOrder(b);
-			if (aFormatOrder != bFormatOrder)
+		auto sortFunc = [](const SupportedAudioFormat* a, const SupportedAudioFormat* b) {
+			if (a->Format->type == AudioFormat::FormatType::File && b->Format->type == AudioFormat::FormatType::File)
 			{
-				return aFormatOrder < bFormatOrder;
+				return false;
 			}
-			else if (a.WaveFormat->nChannels != b.WaveFormat->nChannels)
+			else if (a->Format->type == AudioFormat::FormatType::File && b->Format->type == AudioFormat::FormatType::WaveFormatEx)
 			{
-				return a.WaveFormat->nChannels < b.WaveFormat->nChannels;
+				return true;
 			}
-			else if (a.WaveFormat->nSamplesPerSec != b.WaveFormat->nSamplesPerSec)
+			else if (a->Format->type == AudioFormat::FormatType::WaveFormatEx && b->Format->type == AudioFormat::FormatType::File)
 			{
-				return a.WaveFormat->nSamplesPerSec < b.WaveFormat->nSamplesPerSec;
-			}
-			else if (a.WaveFormat->wBitsPerSample != b.WaveFormat->wBitsPerSample)
-			{
-				return a.WaveFormat->wBitsPerSample < b.WaveFormat->wBitsPerSample;
+				return false;
 			}
 			else
 			{
-				return a.FormatString < b.FormatString;
+				int aFormatOrder = GetFormatIdOrder(a->Format->GetWaveFormat());
+				int bFormatOrder = GetFormatIdOrder(b->Format->GetWaveFormat());
+				if (aFormatOrder != bFormatOrder)
+				{
+					return aFormatOrder < bFormatOrder;
+				}
+				else if (a->Format->GetWaveFormat()->nChannels != b->Format->GetWaveFormat()->nChannels)
+				{
+					return a->Format->GetWaveFormat()->nChannels < b->Format->GetWaveFormat()->nChannels;
+				}
+				else if (a->Format->GetWaveFormat()->nSamplesPerSec != b->Format->GetWaveFormat()->nSamplesPerSec)
+				{
+					return a->Format->GetWaveFormat()->nSamplesPerSec < b->Format->GetWaveFormat()->nSamplesPerSec;
+				}
+				else if (a->Format->GetWaveFormat()->wBitsPerSample != b->Format->GetWaveFormat()->wBitsPerSample)
+				{
+					return a->Format->GetWaveFormat()->wBitsPerSample < b->Format->GetWaveFormat()->wBitsPerSample;
+				}
+				else
+				{
+					return a->Format->FormatString < b->Format->FormatString;
+				}
 			}
 		};
 
@@ -145,16 +191,16 @@ void AudioEndpoint::PopulateSupportedFormats(bool includeDuplicateFormats, bool 
 	SAFE_RELEASE(pAudioClient);
 }
 
-int AudioEndpoint::GetFormatIdOrder(const AudioFormat& audioFormat)
+int AudioEndpoint::GetFormatIdOrder(WAVEFORMATEX* waveFormat)
 {
 	WAVEFORMATEXTENSIBLE* waveFormatExtensible = nullptr;
 	GUID subFormat;
-	if (audioFormat.WaveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
+	if (waveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
 	{
-		waveFormatExtensible = reinterpret_cast<WAVEFORMATEXTENSIBLE*>(audioFormat.WaveFormat);
+		waveFormatExtensible = reinterpret_cast<WAVEFORMATEXTENSIBLE*>(waveFormat);
 		subFormat = waveFormatExtensible->SubFormat;
 	}
-	WORD formatId = AudioFormat::GetFormatID(audioFormat.WaveFormat);
+	WORD formatId = AudioFormat::GetFormatID(waveFormat);
 
 	int order = 0;
 
@@ -210,15 +256,15 @@ void AudioEndpoint::SetDefaultFormats(bool includeSurroundAsDefault, bool ensure
 {
 	bool foundFormat = true;
 
-	std::vector<AudioFormat*> stereoFormats = GetFormats(2, 48000, 16);
+	std::vector<SupportedAudioFormat*> stereoFormats = GetWaveFormatExFormats(2, 48000, 16);
 	if (stereoFormats.size() > 1)
 	{
 		// This means there are multiple formats that all have non-zero channel masks, so pick the channel mask we care about
-		for (AudioFormat* format : stereoFormats)
+		for (SupportedAudioFormat* format : stereoFormats)
 		{
-			if (format->WaveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
+			if (format->Format->GetWaveFormat()->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
 			{
-				if (reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->WaveFormat)->dwChannelMask == (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT))
+				if (reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->Format->GetWaveFormat())->dwChannelMask == (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT))
 				{
 					format->DefaultSelection = true;
 					if (selectDefaults)
@@ -240,7 +286,7 @@ void AudioEndpoint::SetDefaultFormats(bool includeSurroundAsDefault, bool ensure
 	else if (ensureOneFormat)
 	{
 		// We didn't find any, but maybe there are some at a different sample rate or bit rate:
-		std::vector<AudioFormat*> stereoFormats = GetFormats(2);
+		std::vector<SupportedAudioFormat*> stereoFormats = GetWaveFormatExFormats(2);
 		if (stereoFormats.size() > 0)
 		{
 			// We didn't get our preference as described above, so just go with whatever one
@@ -259,17 +305,17 @@ void AudioEndpoint::SetDefaultFormats(bool includeSurroundAsDefault, bool ensure
 
 	if (includeSurroundAsDefault)
 	{
-		std::vector<AudioFormat*> fivePointOneFormats = GetFormats(6, 48000, 16);
+		std::vector<SupportedAudioFormat*> fivePointOneFormats = GetWaveFormatExFormats(6, 48000, 16);
 		if (fivePointOneFormats.size() > 1)
 		{
 			bool foundIt = false;
 			// This means there are multiple formats that all have non-zero channel masks, so pick the channel mask we care about
-			for (AudioFormat* format : fivePointOneFormats)
+			for (SupportedAudioFormat* format : fivePointOneFormats)
 			{
-				if (format->WaveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
+				if (format->Format->GetWaveFormat()->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
 				{
 					// KSAUDIO_SPEAKER_5POINT1_SURROUND (using side/surround speakers)
-					if (reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->WaveFormat)->dwChannelMask == (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_SIDE_LEFT | SPEAKER_SIDE_RIGHT))
+					if (reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->Format->GetWaveFormat())->dwChannelMask == (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_SIDE_LEFT | SPEAKER_SIDE_RIGHT))
 					{
 						foundFormat = true;
 						format->DefaultSelection = true;
@@ -283,13 +329,13 @@ void AudioEndpoint::SetDefaultFormats(bool includeSurroundAsDefault, bool ensure
 			}
 			if (!foundIt)
 			{
-				for (AudioFormat* format : fivePointOneFormats)
+				for (SupportedAudioFormat* format : fivePointOneFormats)
 				{
-					if (format->WaveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
+					if (format->Format->GetWaveFormat()->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
 					{
 						// KSAUDIO_SPEAKER_5POINT1 (using rear left/right of center speakers)
 						// Note: This format is excluded for HDMI, so this will never happen for HDMI formats.
-						if (reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->WaveFormat)->dwChannelMask == (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT))
+						if (reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->Format->GetWaveFormat())->dwChannelMask == (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT))
 						{
 							foundFormat = true;
 							format->DefaultSelection = true;
@@ -312,16 +358,16 @@ void AudioEndpoint::SetDefaultFormats(bool includeSurroundAsDefault, bool ensure
 			}
 		}
 
-		std::vector<AudioFormat*> sevenPointOneFormats = GetFormats(8, 48000, 16);
+		std::vector<SupportedAudioFormat*> sevenPointOneFormats = GetWaveFormatExFormats(8, 48000, 16);
 		if (sevenPointOneFormats.size() > 1)
 		{
 			// This means there are multiple formats that all have non-zero channel masks, so pick the channel mask we care about
-			for (AudioFormat* format : sevenPointOneFormats)
+			for (SupportedAudioFormat* format : sevenPointOneFormats)
 			{
-				if (format->WaveFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
+				if (format->Format->GetWaveFormat()->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
 				{
 					// KSAUDIO_SPEAKER_7POINT1_SURROUND
-					if (reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->WaveFormat)->dwChannelMask == (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT | SPEAKER_SIDE_LEFT | SPEAKER_SIDE_RIGHT))
+					if (reinterpret_cast<WAVEFORMATEXTENSIBLE*>(format->Format->GetWaveFormat())->dwChannelMask == (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT | SPEAKER_SIDE_LEFT | SPEAKER_SIDE_RIGHT))
 					{
 						foundFormat = true;
 						format->DefaultSelection = true;
@@ -348,10 +394,10 @@ void AudioEndpoint::SetDefaultFormats(bool includeSurroundAsDefault, bool ensure
 	{
 		if (SupportedFormats.size() > 0)
 		{
-			SupportedFormats[0].DefaultSelection = true;
+			SupportedFormats[0]->DefaultSelection = true;
 			if (selectDefaults)
 			{
-				SupportedFormats[0].UserSelected = true;
+				SupportedFormats[0]->UserSelected = true;
 			}
 		}
 		else
@@ -372,12 +418,13 @@ bool AudioEndpoint::AlreadyInSupportedFormats(WORD formatId, int numChannels, in
 		// format is not already in the supported formats list.
 		return false;
 	}
-	for (AudioFormat& audioFormat : SupportedFormats)
+	for (SupportedAudioFormat* audioFormat : SupportedFormats)
 	{
-		if (audioFormat.WaveFormat->nChannels == numChannels
-			&& audioFormat.WaveFormat->nSamplesPerSec == samplesPerSec
-			&& audioFormat.WaveFormat->wBitsPerSample == bitsPerSample
-			&& AudioFormat::GetFormatID(audioFormat.WaveFormat) == formatId)
+		if (audioFormat->Format->type == AudioFormat::FormatType::WaveFormatEx
+			&& audioFormat->Format->GetWaveFormat()->nChannels == numChannels
+			&& audioFormat->Format->GetWaveFormat()->nSamplesPerSec == samplesPerSec
+			&& audioFormat->Format->GetWaveFormat()->wBitsPerSample == bitsPerSample
+			&& AudioFormat::GetFormatID(audioFormat->Format->GetWaveFormat()) == formatId)
 		{
 			return true;
 		}
@@ -385,43 +432,46 @@ bool AudioEndpoint::AlreadyInSupportedFormats(WORD formatId, int numChannels, in
 	return false;
 }
 
-std::vector<AudioFormat*> AudioEndpoint::GetFormats(int numChannels, int samplesPerSec, int bitsPerSample)
+std::vector<SupportedAudioFormat*> AudioEndpoint::GetWaveFormatExFormats(int numChannels, int samplesPerSec, int bitsPerSample)
 {
-	std::vector<AudioFormat*> result;
-	for (AudioFormat& audioFormat : SupportedFormats)
+	std::vector<SupportedAudioFormat*> result;
+	for (SupportedAudioFormat* audioFormat : SupportedFormats)
 	{
-		if (audioFormat.WaveFormat->nChannels == numChannels
-			&& audioFormat.WaveFormat->nSamplesPerSec == samplesPerSec
-			&& audioFormat.WaveFormat->wBitsPerSample == bitsPerSample)
+		if (audioFormat->Format->type == AudioFormat::FormatType::WaveFormatEx
+			&& audioFormat->Format->GetWaveFormat()->nChannels == numChannels
+			&& audioFormat->Format->GetWaveFormat()->nSamplesPerSec == samplesPerSec
+			&& audioFormat->Format->GetWaveFormat()->wBitsPerSample == bitsPerSample)
 		{
-			result.push_back(&audioFormat);
+			result.push_back(audioFormat);
 		}
 	}
 	return result;
 }
 
-std::vector<AudioFormat*> AudioEndpoint::GetFormats(int numChannels, int samplesPerSec)
+std::vector<SupportedAudioFormat*> AudioEndpoint::GetWaveFormatExFormats(int numChannels, int samplesPerSec)
 {
-	std::vector<AudioFormat*> result;
-	for (AudioFormat& audioFormat : SupportedFormats)
+	std::vector<SupportedAudioFormat*> result;
+	for (SupportedAudioFormat* audioFormat : SupportedFormats)
 	{
-		if (audioFormat.WaveFormat->nChannels == numChannels
-			&& audioFormat.WaveFormat->nSamplesPerSec == samplesPerSec)
+		if (audioFormat->Format->type == AudioFormat::FormatType::WaveFormatEx
+			&& audioFormat->Format->GetWaveFormat()->nChannels == numChannels
+			&& audioFormat->Format->GetWaveFormat()->nSamplesPerSec == samplesPerSec)
 		{
-			result.push_back(&audioFormat);
+			result.push_back(audioFormat);
 		}
 	}
 	return result;
 }
 
-std::vector<AudioFormat*> AudioEndpoint::GetFormats(int numChannels)
+std::vector<SupportedAudioFormat*> AudioEndpoint::GetWaveFormatExFormats(int numChannels)
 {
-	std::vector<AudioFormat*> result;
-	for (AudioFormat& audioFormat : SupportedFormats)
+	std::vector<SupportedAudioFormat*> result;
+	for (SupportedAudioFormat* audioFormat : SupportedFormats)
 	{
-		if (audioFormat.WaveFormat->nChannels == numChannels)
+		if (audioFormat->Format->type == AudioFormat::FormatType::WaveFormatEx
+			&& audioFormat->Format->GetWaveFormat()->nChannels == numChannels)
 		{
-			result.push_back(&audioFormat);
+			result.push_back(audioFormat);
 		}
 	}
 	return result;

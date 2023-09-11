@@ -5,7 +5,7 @@
 class ExternalMediaPlayerOutput : public AbstractOutput
 {
 public:
-	ExternalMediaPlayerOutput(std::string filePath, bool loop);
+	ExternalMediaPlayerOutput(std::string fileName, bool loop);
 	~ExternalMediaPlayerOutput();
 
 	void StartPlayback();
@@ -13,7 +13,7 @@ public:
 
 private:
 	std::atomic<bool> stopRequested = false;
-	std::string filePath;
+	std::string fileName;
 	bool loop;
 };
 

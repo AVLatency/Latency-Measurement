@@ -72,17 +72,29 @@ std::string OutputOffsetProfile::OutputTypeNameFileSafe(OutputOffsetProfile::Out
 	}
 }
 
-OutputOffsetProfile::OutputOffsetProfile(OutputType type, std::string name, OutputOffset(*getOffsetFunc)(int numChannels, int sampleRate, int bitDepth), bool (*formatFilter)(WAVEFORMATEX*))
-	: OutType(type), Name(name), GetOffset(getOffsetFunc), FormatFilter(formatFilter), Image(AVLTexture()), isNoOffset(false), isCurrentWindowsAudioFormat(false)
+OutputOffsetProfile::OutputOffsetProfile(OutputType type, std::string name, OutputOffset(*getLpcmOffsetFunc)(int numChannels, int sampleRate, int bitDepth), OutputOffset(*getFileOffsetFunc)(FileAudioFormats::FileId id), bool (*formatFilter)(AudioFormat*))
+	: OutType(type), Name(name), GetLpcmOffset(getLpcmOffsetFunc), GetFileOffset(getFileOffsetFunc), FormatFilter(formatFilter), Image(AVLTexture()), isNoOffset(false), isCurrentWindowsAudioFormat(false)
 {
 }
 
-OutputOffsetProfile::OutputOffset OutputOffsetProfile::GetOffsetFromWaveFormat(WAVEFORMATEX* waveFormat)
+OutputOffsetProfile::OutputOffset OutputOffsetProfile::GetOffsetForFormat(AudioFormat* format)
 {
-	return GetOffset(waveFormat->nChannels, waveFormat->nSamplesPerSec, waveFormat->wBitsPerSample);
+	if (format->type == AudioFormat::FormatType::WaveFormatEx)
+	{
+		return GetOffsetForWaveFormat(format->GetWaveFormat());
+	}
+	else
+	{
+		return GetFileOffset(format->FileId);
+	}
+}
+
+OutputOffsetProfile::OutputOffset OutputOffsetProfile::GetOffsetForWaveFormat(WAVEFORMATEX* waveFormat)
+{
+	return GetLpcmOffset(waveFormat->nChannels, waveFormat->nSamplesPerSec, waveFormat->wBitsPerSample);
 }
 
 OutputOffsetProfile::OutputOffset OutputOffsetProfile::GetOffsetForCurrentWinFormat()
 {
-	return GetOffset(0, 0, 0);
+	return GetLpcmOffset(0, 0, 0);
 }

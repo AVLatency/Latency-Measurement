@@ -15,11 +15,11 @@ using namespace std;
 const std::string RecordingAnalyzer::validRecordingsFilename{ "Valid-Individual-Recordings.csv" };
 const std::string RecordingAnalyzer::invalidRecordingsFilename{ "Invalid-Individual-Recordings.csv" };
 
-RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& generatedSamples, const WasapiInput& input, AudioFormat* format, OutputOffsetProfile* currentProfile, DacLatencyProfile* referenceDacLatency)
+RecordingResult RecordingAnalyzer::AnalyzeRecording(const GeneratedSamples& generatedSamples, const WasapiInput& input, SupportedAudioFormat* format, OutputOffsetProfile* currentProfile, DacLatencyProfile* referenceDacLatency)
 {
     OutputOffsetProfile::OutputOffset offset = currentProfile->isCurrentWindowsAudioFormat
         ? currentProfile->GetOffsetForCurrentWinFormat()
-        : currentProfile->GetOffsetFromWaveFormat(format->WaveFormat);
+        : currentProfile->GetOffsetForFormat(format->Format);
     RecordingResult result(format, currentProfile, offset.value, offset.verified, referenceDacLatency->Name, referenceDacLatency->Latency);
 
     // Extract individual channels for analysis

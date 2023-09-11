@@ -27,6 +27,11 @@ void WindowsWaveFormats::PopulateExtensibleFormats()
 	RecordExtensibleSubFormat(&extensibleFormat);
 
 	PopulateIEC61937Formats();
+
+	for (WAVEFORMATEXTENSIBLE* waveFormat : AllExtensibleFormats)
+	{
+		AllExtensibleAudioFormats.push_back(new AudioFormat((WAVEFORMATEX*)waveFormat));
+	}
 }
 
 void WindowsWaveFormats::RecordExtensibleSubFormat(WAVEFORMATEXTENSIBLE* extensibleFormat)
@@ -288,6 +293,11 @@ void WindowsWaveFormats::PopulateExFormats()
 	exFormat.cbSize = 0;
 
 	RecordExFormatTag(&exFormat);
+
+	for (WAVEFORMATEX* waveFormat : AllExFormats)
+	{
+		AllExAudioFormats.push_back(new AudioFormat(waveFormat));
+	}
 }
 
 void WindowsWaveFormats::RecordExFormatTag(WAVEFORMATEX* exFormat)

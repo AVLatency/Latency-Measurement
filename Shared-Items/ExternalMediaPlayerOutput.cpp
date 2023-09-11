@@ -3,7 +3,7 @@
 //#include <shellapi.h>
 #include <format>
 
-ExternalMediaPlayerOutput::ExternalMediaPlayerOutput(std::string filePath, bool loop) : filePath(filePath), loop(loop)
+ExternalMediaPlayerOutput::ExternalMediaPlayerOutput(std::string filePath, bool loop) : fileName(fileName), loop(loop)
 {
 }
 
@@ -15,6 +15,7 @@ void ExternalMediaPlayerOutput::StartPlayback()
 {
     do
     {
+        std::string filePath = std::format("Audio Files\\{}", fileName);
         system(std::format("\"\"C:\\Program Files (x86)\\K-Lite Codec Pack\\MPC-HC64\\mpc-hc64.exe\" \"{}\" /play /close \"", filePath).c_str());
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
         if (stopRequested.load(std::memory_order_acquire))

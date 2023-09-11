@@ -27,6 +27,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)DacLatencyProfiles.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)DebugLog.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ExternalMediaPlayerOutput.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)FileAudioFormats.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)FilesystemCheck.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)FontHelper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)GeneratedSamples.h" />
@@ -44,6 +45,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)RecordingSingleChannelResult.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)stb_image.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)stb_image_dx11.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)SupportedAudioFormat.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)TestConfiguration.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)TestManager.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)WasapiInput.h" />
@@ -64,6 +66,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)DacLatencyProfiles.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)DebugLog.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ExternalMediaPlayerOutput.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)FileAudioFormats.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)FilesystemCheck.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)FontHelper.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)GeneratedSamples.cpp" />
@@ -76,6 +79,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)StringHelper.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)RecordingAnalyzer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)stb_image_dx11.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)SupportedAudioFormat.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)TestConfiguration.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)TestManager.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)WasapiInput.cpp" />

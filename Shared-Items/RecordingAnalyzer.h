@@ -31,7 +31,7 @@ public:
 		float magnitude;
 	};
 
-	static RecordingResult AnalyzeRecording(const GeneratedSamples& generatedSamples, const WasapiInput& input, AudioFormat* format, OutputOffsetProfile* currentProfile, DacLatencyProfile* referenceDacLatency);
+	static RecordingResult AnalyzeRecording(const GeneratedSamples& generatedSamples, const WasapiInput& input, SupportedAudioFormat* format, OutputOffsetProfile* currentProfile, DacLatencyProfile* referenceDacLatency);
 	static std::vector<AveragedResult> AnalyzeResults(std::vector<RecordingResult> results, time_t tTime, const AudioEndpoint& outputEndpoint);
 	static std::vector<TickPosition> GetTicks(float* recordedSamples, int recordedSamplesLength, int sampleRate, double expectedTickFrequency, int numTicks, float threshold);
 

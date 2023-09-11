@@ -210,7 +210,7 @@ bool Gui::DoGui()
                 ImGui::SameLine(); GuiHelper::HelpMarker("This profile describes the time offset between the analog output and the HDMI output of the Dual-Out Reference Device for different audio formats.");
                 ImGui::Spacing();
 
-                int deviceColWidth = 300;
+                int deviceColWidth = 275;
                 int descriptionColWidth = 450;
                 if (ImGui::BeginTable("DualOutRefDeviceTable", 3))
                 {
@@ -739,13 +739,13 @@ bool Gui::DoGui()
                     }
                     ImGui::Spacing();
 
-                    std::vector<AudioFormat>& supportedFormats = SelectedAudioOutputEndpoint().SupportedFormats;
+                    std::vector<SupportedAudioFormat*>& supportedFormats = SelectedAudioOutputEndpoint().SupportedFormats;
 
                     if (ImGui::Button("Select Default"))
                     {
-                        for (AudioFormat& format : supportedFormats)
+                        for (SupportedAudioFormat* format : supportedFormats)
                         {
-                            format.UserSelected = false;
+                            format->UserSelected = false;
                         }
                         SelectedAudioOutputEndpoint().SetDefaultFormats(
                             IncludeSurroundAsDefault(),
@@ -755,25 +755,25 @@ bool Gui::DoGui()
                     ImGui::SameLine();
                     if (ImGui::Button("Select All"))
                     {
-                        for (AudioFormat& format : supportedFormats)
+                        for (SupportedAudioFormat* format : supportedFormats)
                         {
-                            format.UserSelected = true;
+                            format->UserSelected = true;
                         }
                     }
                     ImGui::SameLine();
                     if (ImGui::Button("Select None"))
                     {
-                        for (AudioFormat& format : supportedFormats)
+                        for (SupportedAudioFormat* format : supportedFormats)
                         {
-                            format.UserSelected = false;
+                            format->UserSelected = false;
                         }
                     }
 
                     ImGui::BeginChild("formatsChildWindow", ImVec2(0, 15 * ImGui::GetTextLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar);
                     {
-                        for (AudioFormat& format : supportedFormats)
+                        for (SupportedAudioFormat* format : supportedFormats)
                         {
-                            ImGui::Checkbox(format.FormatString.c_str(), &format.UserSelected);
+                            ImGui::Checkbox(format->Format->FormatString.c_str(), &format->UserSelected);
                         }
                     }
                     ImGui::EndChild();
@@ -992,22 +992,22 @@ bool Gui::DoGui()
 
                         for (AveragedResult& result : testManager->SummaryResults)
                         {
-                            if (AudioFormat::GetFormatID(result.Format->WaveFormat) == WAVE_FORMAT_PCM)
+                            if (result.Format->Format->type == AudioFormat::FormatType::WaveFormatEx && AudioFormat::GetFormatID(result.Format->Format->GetWaveFormat()) == WAVE_FORMAT_PCM)
                             {
-                                if (result.Format->WaveFormat->nChannels == 2)
+                                if (result.Format->Format->GetWaveFormat()->nChannels == 2)
                                 {
                                     stereoLatency = std::format("{} ms", round(result.AverageLatency()));
-                                    stereoFormat = std::format("- {}", result.Format->FormatString);
+                                    stereoFormat = std::format("- {}", result.Format->Format->FormatString);
                                 }
-                                if (result.Format->WaveFormat->nChannels == 6)
+                                if (result.Format->Format->GetWaveFormat()->nChannels == 6)
                                 {
                                     fiveOneLatency = std::format("{} ms", round(result.AverageLatency()));
-                                    fiveOneFormat = std::format("- {}", result.Format->FormatString);
+                                    fiveOneFormat = std::format("- {}", result.Format->Format->FormatString);
                                 }
-                                if (result.Format->WaveFormat->nChannels == 8)
+                                if (result.Format->Format->GetWaveFormat()->nChannels == 8)
                                 {
                                     sevenOneLatency = std::format("{} ms", round(result.AverageLatency()));
-                                    sevenOneFormat = std::format("- {}", result.Format->FormatString);
+                                    sevenOneFormat = std::format("- {}", result.Format->Format->FormatString);
                                 }
                             }
                         }
@@ -1038,14 +1038,14 @@ bool Gui::DoGui()
                     ImGui::Text("Successful Formats:");
                     ImGui::BeginGroup();
 
-                    const AudioFormat* selectedFormat = nullptr;
+                    const SupportedAudioFormat* selectedFormat = nullptr;
                     ImGui::BeginChild("", ImVec2(350 * DpiScale, 15 * ImGui::GetTextLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar);
                     {
                         int n = 0;
                         for (auto avgResult : testManager->AveragedResults)
                         {
                             const bool is_selected = (resultFormatIndex == n);
-                            std::string formatStr = avgResult.Format == nullptr ? AudioFormat::GetCurrentWinAudioFormatString() : avgResult.Format->FormatString;
+                            std::string formatStr = avgResult.Format == nullptr ? AudioFormat::GetCurrentWinAudioFormatString() : avgResult.Format->Format->FormatString;
                             if (ImGui::Selectable(formatStr.c_str(), is_selected))
                             {
                                 resultFormatIndex = n;
@@ -1104,9 +1104,9 @@ bool Gui::DoGui()
                         ImGui::PopTextWrapPos();
                         if (ImGui::BeginListBox("", ImVec2(ImVec2(350 * DpiScale, 10 * ImGui::GetTextLineHeightWithSpacing()))))
                         {
-                            for (AudioFormat* format : testManager->FailedFormats)
+                            for (SupportedAudioFormat* format : testManager->FailedFormats)
                             {
-                                std::string formatStr = format == nullptr ? AudioFormat::GetCurrentWinAudioFormatString() : format->FormatString;
+                                std::string formatStr = format == nullptr ? AudioFormat::GetCurrentWinAudioFormatString() : format->Format->FormatString;
                                 ImGui::Text(formatStr.c_str());
                             }
                             ImGui::EndListBox();
@@ -1339,18 +1339,18 @@ void Gui::StartTest()
     }
     if (testManager == nullptr)
     {
-        std::vector<AudioFormat*> selectedFormats;
+        std::vector<SupportedAudioFormat*> selectedFormats;
         if (OutputOffsetProfiles::CurrentProfile()->isCurrentWindowsAudioFormat)
         {
             selectedFormats.push_back(nullptr);
         }
         else
         {
-            for (AudioFormat& format : SelectedAudioOutputEndpoint().SupportedFormats)
+            for (SupportedAudioFormat* format : SelectedAudioOutputEndpoint().SupportedFormats)
             {
-                if (format.UserSelected)
+                if (format->UserSelected)
                 {
-                    selectedFormats.push_back(&format);
+                    selectedFormats.push_back(format);
                 }
             }
         }

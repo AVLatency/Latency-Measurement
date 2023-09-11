@@ -41,7 +41,7 @@ void OutputOffsetProfiles::InitializeProfiles(ProfileResources& resources)
 	// HDMI AUDIO LATENCY PROFILES
 	// *****************************************************
 
-	Hdmi_HDV_MB01 = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Hdmi, "HDV-MB01", Hdmi_HDV_MB01_GetOffset, HdmiLpcmFormatsFilter);
+	Hdmi_HDV_MB01 = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Hdmi, "HDV-MB01", Hdmi_HDV_MB01_GetOffset, None_GetOffset, HdmiLpcmFormatsFilter);
 	Hdmi_HDV_MB01->Image = resources.Hdmi_HDV_MB01_Texture;
 	Hdmi_HDV_MB01->Description =
 		"The HDV-MB01 is sold under these names:\n\n"
@@ -51,11 +51,11 @@ void OutputOffsetProfiles::InitializeProfiles(ProfileResources& resources)
 		"- OREI HDA - 912";
 	Profiles.push_back(Hdmi_HDV_MB01);
 
-	Hdmi_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Hdmi, "Other", None_GetOffset, HdmiAllFormatsFilter);
+	Hdmi_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Hdmi, "Other", None_GetOffset, None_GetOffset, HdmiAllFormatsFilter);
 	Hdmi_None->isNoOffset = true;
 	Profiles.push_back(Hdmi_None);
 
-	Hdmi_None_CurrentWinAudioFormat = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Hdmi, "Other (Current Windows audio format)", None_GetOffset, AllFormatsFilter);
+	Hdmi_None_CurrentWinAudioFormat = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Hdmi, "Other (Current Windows audio format)", None_GetOffset, None_GetOffset, AllFormatsFilter);
 	Hdmi_None_CurrentWinAudioFormat->isNoOffset = true;
 	Hdmi_None_CurrentWinAudioFormat->isCurrentWindowsAudioFormat = true;
 	Profiles.push_back(Hdmi_None_CurrentWinAudioFormat);
@@ -64,7 +64,7 @@ void OutputOffsetProfiles::InitializeProfiles(ProfileResources& resources)
 	// S/PDIF AUDIO LATENCY PROFILES
 	// *****************************************************
 
-	Spdif_HDV_MB01 = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Spdif, "HDV-MB01", Spdif_HDV_MB01_GetOffset, SpdifLpcmFormatFilter);
+	Spdif_HDV_MB01 = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Spdif, "HDV-MB01", Spdif_HDV_MB01_GetOffset, None_GetOffset, SpdifLpcmFormatFilter);
 	Spdif_HDV_MB01->Image = resources.Spdif_HDV_MB01_Texture;
 	Spdif_HDV_MB01->Description =
 		"The HDV-MB01 is sold under these names:\n\n"
@@ -85,7 +85,7 @@ void OutputOffsetProfiles::InitializeProfiles(ProfileResources& resources)
 		"2ch-192kHz-24bit\n";
 	Profiles.push_back(Spdif_HDV_MB01);
 
-	Spdif_AYSA11 = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Spdif, "AYSA11", Spdif_AYSA11_GetOffset, SpdifLpcmFormatFilter);
+	Spdif_AYSA11 = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Spdif, "AYSA11", Spdif_AYSA11_GetOffset, None_GetOffset, SpdifLpcmFormatFilter);
 	Spdif_AYSA11->Description =
 		"Supported S/PDIF Formats:\n\n"
 
@@ -99,7 +99,7 @@ void OutputOffsetProfiles::InitializeProfiles(ProfileResources& resources)
 		"2ch-192kHz-24bit\n";
 	Profiles.push_back(Spdif_AYSA11);
 
-	Spdif_LiNKFOR_USB_DAC = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Spdif, "LiNKFOR USB DAC", Spdif_LiNKFOR_USB_DAC_GetOffset, SpdifLpcmFormatFilter);
+	Spdif_LiNKFOR_USB_DAC = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Spdif, "LiNKFOR USB DAC", Spdif_LiNKFOR_USB_DAC_GetOffset, None_GetOffset, SpdifLpcmFormatFilter);
 	Spdif_LiNKFOR_USB_DAC->Description =
 		"Supported S/PDIF Formats:\n\n"
 
@@ -107,11 +107,11 @@ void OutputOffsetProfiles::InitializeProfiles(ProfileResources& resources)
 		"2ch-48kHz-16bit\n";
 	Profiles.push_back(Spdif_LiNKFOR_USB_DAC);
 
-	Spdif_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Spdif, "Other", None_GetOffset, SpdifAllFormatFilter);
+	Spdif_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Spdif, "Other", None_GetOffset, None_GetOffset, SpdifAllFormatFilter);
 	Spdif_None->isNoOffset = true;
 	Profiles.push_back(Spdif_None);
 
-	Spdif_None_CurrentWinAudioFormat = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Spdif, "Other (Current Windows audio format)", None_GetOffset, AllFormatsFilter);
+	Spdif_None_CurrentWinAudioFormat = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Spdif, "Other (Current Windows audio format)", None_GetOffset, None_GetOffset, AllFormatsFilter);
 	Spdif_None_CurrentWinAudioFormat->isNoOffset = true;
 	Spdif_None_CurrentWinAudioFormat->isCurrentWindowsAudioFormat = true;
 	Profiles.push_back(Spdif_None_CurrentWinAudioFormat);
@@ -121,18 +121,18 @@ void OutputOffsetProfiles::InitializeProfiles(ProfileResources& resources)
 	// *****************************************************
 
 #ifdef _DEBUG
-	Arc_ExampleReferenceSetup = new OutputOffsetProfile(OutputOffsetProfile::OutputType::ARC, "Example ARC Reference Setup", Arc_ExampleReferenceSetup_GetOffset, AllFormatsFilter);
+	Arc_ExampleReferenceSetup = new OutputOffsetProfile(OutputOffsetProfile::OutputType::ARC, "Example ARC Reference Setup", Arc_ExampleReferenceSetup_GetOffset, None_GetOffset, AllFormatsFilter);
 	Arc_ExampleReferenceSetup->Image = resources.Arc_ExampleDevice_Texture;
 	Arc_ExampleReferenceSetup->Description =
 		"This is a DEBUG-only example ARC Receiver Latency reference device/setup that can be used as a starting point for creating new Output Offset Profiles.";
 	Profiles.push_back(Arc_ExampleReferenceSetup);
 #endif //_DEBUG
 
-	Arc_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::ARC, "Other", None_GetOffset, AllFormatsFilter);
+	Arc_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::ARC, "Other", None_GetOffset, None_GetOffset, AllFormatsFilter);
 	Arc_None->isNoOffset = true;
 	Profiles.push_back(Arc_None);
 
-	Arc_None_CurrentWinAudioFormat = new OutputOffsetProfile(OutputOffsetProfile::OutputType::ARC, "Other (Current Windows audio format)", None_GetOffset, AllFormatsFilter);
+	Arc_None_CurrentWinAudioFormat = new OutputOffsetProfile(OutputOffsetProfile::OutputType::ARC, "Other (Current Windows audio format)", None_GetOffset, None_GetOffset, AllFormatsFilter);
 	Arc_None_CurrentWinAudioFormat->isNoOffset = true;
 	Arc_None_CurrentWinAudioFormat->isCurrentWindowsAudioFormat = true;
 	Profiles.push_back(Arc_None_CurrentWinAudioFormat);
@@ -142,18 +142,18 @@ void OutputOffsetProfiles::InitializeProfiles(ProfileResources& resources)
 	// *****************************************************
 
 #ifdef _DEBUG
-	EArc_ExampleReferenceSetup = new OutputOffsetProfile(OutputOffsetProfile::OutputType::eARC, "Example eARC Reference Setup", EArc_ExampleReferenceSetup_GetOffset, AllFormatsFilter);
+	EArc_ExampleReferenceSetup = new OutputOffsetProfile(OutputOffsetProfile::OutputType::eARC, "Example eARC Reference Setup", EArc_ExampleReferenceSetup_GetOffset, None_GetOffset, AllFormatsFilter);
 	EArc_ExampleReferenceSetup->Image = resources.EArc_ExampleDevice_Texture;
 	EArc_ExampleReferenceSetup->Description =
 		"This is a DEBUG-only example eARC Receiver Latency reference device/setup that can be used as a starting point for creating new Output Offset Profiles.";
 	Profiles.push_back(EArc_ExampleReferenceSetup);
 #endif //_DEBUG
 
-	EArc_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::eARC, "Other", None_GetOffset, AllFormatsFilter);
+	EArc_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::eARC, "Other", None_GetOffset, None_GetOffset, AllFormatsFilter);
 	EArc_None->isNoOffset = true;
 	Profiles.push_back(EArc_None);
 
-	EArc_None_CurrentWinAudioFormat = new OutputOffsetProfile(OutputOffsetProfile::OutputType::eARC, "Other (Current Windows audio format)", None_GetOffset, AllFormatsFilter);
+	EArc_None_CurrentWinAudioFormat = new OutputOffsetProfile(OutputOffsetProfile::OutputType::eARC, "Other (Current Windows audio format)", None_GetOffset, None_GetOffset, AllFormatsFilter);
 	EArc_None_CurrentWinAudioFormat->isNoOffset = true;
 	EArc_None_CurrentWinAudioFormat->isCurrentWindowsAudioFormat = true;
 	Profiles.push_back(EArc_None_CurrentWinAudioFormat);
@@ -162,14 +162,14 @@ void OutputOffsetProfiles::InitializeProfiles(ProfileResources& resources)
 	// ANALOG AUDIO LATENCY PROFILES
 	// *****************************************************
 
-	Analog_BasicYSplitter = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Analog, "Basic Analog Y Splitter", Analog_BasicYSplitter_GetOffset, AllFormatsFilter);
+	Analog_BasicYSplitter = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Analog, "Basic Analog Y Splitter", Analog_BasicYSplitter_GetOffset, None_GetOffset, AllFormatsFilter);
 	Analog_BasicYSplitter->Image = resources.Analog_YSplitter_Texture;
 	Analog_BasicYSplitter->Description =
 		"For measuring analog audio latency, a basic analog Y splitter can be used to produce "
 		"two identical outputs that can act as a \"Dual-Out Reference\".";
 	Profiles.push_back(Analog_BasicYSplitter);
 
-	Analog_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Analog, "Other", None_GetOffset, AllFormatsFilter);
+	Analog_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::Analog, "Other", None_GetOffset, None_GetOffset, AllFormatsFilter);
 	Analog_None->isNoOffset = true;
 	Profiles.push_back(Analog_None);
 
@@ -178,21 +178,21 @@ void OutputOffsetProfiles::InitializeProfiles(ProfileResources& resources)
 	// *****************************************************
 
 	// A copy of the Hdmi_HDV_MB01 profile, but with OutputType::HdmiAudioPassthrough
-	HdmiAudioPassthrough_HDV_MB01 = new OutputOffsetProfile(OutputOffsetProfile::OutputType::HdmiAudioPassthrough, "HDV-MB01", Hdmi_HDV_MB01_GetOffset, HdmiLpcmFormatsFilter);
+	HdmiAudioPassthrough_HDV_MB01 = new OutputOffsetProfile(OutputOffsetProfile::OutputType::HdmiAudioPassthrough, "HDV-MB01", Hdmi_HDV_MB01_GetOffset, None_GetOffset, HdmiLpcmFormatsFilter);
 	HdmiAudioPassthrough_HDV_MB01->Image = Hdmi_HDV_MB01->Image;
 	HdmiAudioPassthrough_HDV_MB01->Description = Hdmi_HDV_MB01->Description;
 	Profiles.push_back(HdmiAudioPassthrough_HDV_MB01);
 
-	HdmiAudioPassthrough_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::HdmiAudioPassthrough, "Other", None_GetOffset, HdmiAllFormatsFilter);
+	HdmiAudioPassthrough_None = new OutputOffsetProfile(OutputOffsetProfile::OutputType::HdmiAudioPassthrough, "Other", None_GetOffset, None_GetOffset, HdmiAllFormatsFilter);
 	HdmiAudioPassthrough_None->isNoOffset = true;
 	Profiles.push_back(HdmiAudioPassthrough_None);
 
-	HdmiAudioPassthrough_None_CurrentWinAudioFormat = new OutputOffsetProfile(OutputOffsetProfile::OutputType::HdmiAudioPassthrough, "Other (Current Windows audio format)", None_GetOffset, AllFormatsFilter);
+	HdmiAudioPassthrough_None_CurrentWinAudioFormat = new OutputOffsetProfile(OutputOffsetProfile::OutputType::HdmiAudioPassthrough, "Other (Current Windows audio format)", None_GetOffset, None_GetOffset, AllFormatsFilter);
 	HdmiAudioPassthrough_None_CurrentWinAudioFormat->isNoOffset = true;
 	HdmiAudioPassthrough_None_CurrentWinAudioFormat->isCurrentWindowsAudioFormat = true;
 	Profiles.push_back(HdmiAudioPassthrough_None_CurrentWinAudioFormat);
 
-	RelativeWinAudio_Wasapi = new OutputOffsetProfile(OutputOffsetProfile::OutputType::RelativeWinAudio, "WASAPI Exclusive", None_GetOffset, AllFormatsFilter);
+	RelativeWinAudio_Wasapi = new OutputOffsetProfile(OutputOffsetProfile::OutputType::RelativeWinAudio, "WASAPI Exclusive", None_GetOffset, None_GetOffset, AllFormatsFilter);
 	Profiles.push_back(RelativeWinAudio_Wasapi);
 
 	PrepareSubsetListsForGui();
@@ -231,58 +231,64 @@ void OutputOffsetProfiles::PrepareOffsetStringsForGui()
 		}
 		else
 		{
-			OutputOffsetProfile::OutputOffset offset = profile->GetOffset(2, 48000, 16);
+			OutputOffsetProfile::OutputOffset offset = profile->GetLpcmOffset(2, 48000, 16);
 			if (offset.verified)
 			{
 				std::string highlightedOffsetValue = std::format("LPCM 2ch-48kHz-16bit: {} ms", offset.value);
 				profile->HighlightedVerifiedOffsetsForDisplay.push_back(highlightedOffsetValue);
 			}
-			offset = profile->GetOffset(2, 192000, 16);
+			offset = profile->GetLpcmOffset(2, 192000, 16);
 			if (offset.verified)
 			{
 				std::string highlightedOffsetValue = std::format("LPCM 2ch-192kHz-16bit: {} ms", offset.value);
 				profile->HighlightedVerifiedOffsetsForDisplay.push_back(highlightedOffsetValue);
 			}
 
-			offset = profile->GetOffset(6, 48000, 16);
+			offset = profile->GetLpcmOffset(6, 48000, 16);
 			if (offset.verified)
 			{
 				std::string highlightedOffsetValue = std::format("LPCM 6ch-48kHz-16bit: {} ms", offset.value);
 				profile->HighlightedVerifiedOffsetsForDisplay.push_back(highlightedOffsetValue);
 			}
-			offset = profile->GetOffset(6, 192000, 16);
+			offset = profile->GetLpcmOffset(6, 192000, 16);
 			if (offset.verified)
 			{
 				std::string highlightedOffsetValue = std::format("LPCM 6ch-192kHz-16bit: {} ms", offset.value);
 				profile->HighlightedVerifiedOffsetsForDisplay.push_back(highlightedOffsetValue);
 			}
 
-			offset = profile->GetOffset(6, 48000, 16);
+			offset = profile->GetLpcmOffset(6, 48000, 16);
 			if (offset.verified)
 			{
 				std::string highlightedOffsetValue = std::format("LPCM 8ch-48kHz-16bit: {} ms", offset.value);
 				profile->HighlightedVerifiedOffsetsForDisplay.push_back(highlightedOffsetValue);
 			}
-			offset = profile->GetOffset(6, 192000, 16);
+			offset = profile->GetLpcmOffset(6, 192000, 16);
 			if (offset.verified)
 			{
 				std::string highlightedOffsetValue = std::format("LPCM 8ch-192kHz-16bit: {} ms", offset.value);
 				profile->HighlightedVerifiedOffsetsForDisplay.push_back(highlightedOffsetValue);
 			}
 
-			for (int f = 0; f < WindowsWaveFormats::Formats.AllExFormats.size(); f++)
+			for (AudioFormat* format : FileAudioFormats::Formats.AllFileFormats)
 			{
-				WAVEFORMATEX* format = WindowsWaveFormats::Formats.AllExFormats[f];
 				AddOffsetStrToProfileForFormat(profile, format);
 			}
-			for (int f = 0; f < WindowsWaveFormats::Formats.AllExtensibleFormats.size(); f++)
+
+			for (AudioFormat* format : WindowsWaveFormats::Formats.AllExAudioFormats)
 			{
-				WAVEFORMATEX* format = (WAVEFORMATEX*)WindowsWaveFormats::Formats.AllExtensibleFormats[f];
-				auto formatId = AudioFormat::GetFormatID(format);
-				if (formatId == WAVE_FORMAT_PCM || formatId == WAVE_FORMAT_IEEE_FLOAT)
+				AddOffsetStrToProfileForFormat(profile, format);
+			}
+			for (AudioFormat* format : WindowsWaveFormats::Formats.AllExtensibleAudioFormats)
+			{
+				if (format->type == AudioFormat::FormatType::WaveFormatEx)
 				{
-					// PCM and FLOAT are handled by the previous for loop
-					continue;
+					auto formatId = AudioFormat::GetFormatID(format->GetWaveFormat());
+					if (formatId == WAVE_FORMAT_PCM || formatId == WAVE_FORMAT_IEEE_FLOAT)
+					{
+						// PCM and FLOAT are handled by the previous for loop
+						continue;
+					}
 				}
 
 				// Since it's not PCM or FLOAT, that means its probably an encoded audio format, so we should add that to the list:
@@ -292,7 +298,7 @@ void OutputOffsetProfiles::PrepareOffsetStringsForGui()
 	}
 }
 
-void OutputOffsetProfiles::AddOffsetStrToProfileForFormat(OutputOffsetProfile* profile, WAVEFORMATEX* format)
+void OutputOffsetProfiles::AddOffsetStrToProfileForFormat(OutputOffsetProfile* profile, AudioFormat* format)
 {
 	std::string audioFormatStr;
 	if (profile->isCurrentWindowsAudioFormat)
@@ -301,7 +307,7 @@ void OutputOffsetProfiles::AddOffsetStrToProfileForFormat(OutputOffsetProfile* p
 	}
 	else
 	{
-		audioFormatStr = AudioFormat::GetFormatString(format, true, false);
+		audioFormatStr = format->FormatString;
 	}
 
 	if (profile->FormatFilter(format))
@@ -309,7 +315,7 @@ void OutputOffsetProfiles::AddOffsetStrToProfileForFormat(OutputOffsetProfile* p
 		OutputOffsetProfile::OutputOffset offsetValue =
 			profile->isCurrentWindowsAudioFormat
 			? profile->GetOffsetForCurrentWinFormat()
-			: profile->GetOffsetFromWaveFormat(format);
+			: profile->GetOffsetForFormat(format);
 		std::string offsetStr = std::format("{}: {} ms", audioFormatStr, offsetValue.value);
 		if (offsetValue.verified)
 		{
@@ -323,6 +329,12 @@ void OutputOffsetProfiles::AddOffsetStrToProfileForFormat(OutputOffsetProfile* p
 }
 
 OutputOffsetProfile::OutputOffset OutputOffsetProfiles::None_GetOffset(int numChannels, int sampleRate, int bitDepth)
+{
+	OutputOffsetProfile::OutputOffset result;
+	return result;
+}
+
+OutputOffsetProfile::OutputOffset OutputOffsetProfiles::None_GetOffset(FileAudioFormats::FileId id)
 {
 	OutputOffsetProfile::OutputOffset result;
 	return result;
@@ -358,16 +370,28 @@ OutputOffsetProfile::OutputOffset OutputOffsetProfiles::Hdmi_HDV_MB01_GetOffset(
 	return result;
 }
 
-bool OutputOffsetProfiles::AllFormatsFilter(WAVEFORMATEX* waveFormat)
+bool OutputOffsetProfiles::AllFormatsFilter(AudioFormat* format)
 {
 	return true;
 }
 
-bool OutputOffsetProfiles::HdmiAllFormatsFilter(WAVEFORMATEX* waveFormat, bool onlyLpcm)
+bool OutputOffsetProfiles::HdmiAllFormatsFilter(AudioFormat* format, bool onlyLpcm)
 {
 	bool result = true;
+	WAVEFORMATEX* waveFormat = format->GetWaveFormat();
 
-	if (AudioFormat::GetFormatID(waveFormat) == WAVE_FORMAT_PCM)
+	if (format->type == AudioFormat::FormatType::File)
+	{
+		if (onlyLpcm)
+		{
+			result = false;
+		}
+		else
+		{
+			// HDMI is able to handle all the file formats included in this toolkit
+		}
+	}
+	else if (AudioFormat::GetFormatID(waveFormat) == WAVE_FORMAT_PCM)
 	{
 		// Exclude mono because my HDMI signal analyzer gets all types of confused with a "mono" signal
 		// which suggests that it's not a valid HDMI format, at least when prepared by NVIDIA HDMI audio drivers.
@@ -417,21 +441,33 @@ bool OutputOffsetProfiles::HdmiAllFormatsFilter(WAVEFORMATEX* waveFormat, bool o
 	return result;
 }
 
-bool OutputOffsetProfiles::HdmiAllFormatsFilter(WAVEFORMATEX* waveFormat)
+bool OutputOffsetProfiles::HdmiAllFormatsFilter(AudioFormat* format)
 {
-	return HdmiAllFormatsFilter(waveFormat, false);
+	return HdmiAllFormatsFilter(format, false);
 }
 
-bool OutputOffsetProfiles::HdmiLpcmFormatsFilter(WAVEFORMATEX* waveFormat)
+bool OutputOffsetProfiles::HdmiLpcmFormatsFilter(AudioFormat* format)
 {
-	return HdmiAllFormatsFilter(waveFormat, true);
+	return HdmiAllFormatsFilter(format, true);
 }
 
-bool OutputOffsetProfiles::SpdifAllFormatFilter(WAVEFORMATEX* waveFormat, bool onlyLpcm)
+bool OutputOffsetProfiles::SpdifAllFormatFilter(AudioFormat* format, bool onlyLpcm)
 {
 	bool result = true;
+	WAVEFORMATEX* waveFormat = format->GetWaveFormat();
 
-	if (AudioFormat::GetFormatID(waveFormat) == WAVE_FORMAT_PCM)
+	if (format->type == AudioFormat::FormatType::File)
+	{
+		if (onlyLpcm)
+		{
+			result = false;
+		}
+		else
+		{
+			// I guess this is OK? TODO: Better filtering based on what S/PDIF can actually handle
+		}
+	}
+	else if (AudioFormat::GetFormatID(format->GetWaveFormat()) == WAVE_FORMAT_PCM)
 	{
 		if (waveFormat->nChannels != 2)
 		{
@@ -465,14 +501,14 @@ bool OutputOffsetProfiles::SpdifAllFormatFilter(WAVEFORMATEX* waveFormat, bool o
 	return result;
 }
 
-bool OutputOffsetProfiles::SpdifAllFormatFilter(WAVEFORMATEX* waveFormat)
+bool OutputOffsetProfiles::SpdifAllFormatFilter(AudioFormat* format)
 {
-	return SpdifAllFormatFilter(waveFormat, false);
+	return SpdifAllFormatFilter(format, false);
 }
 
-bool OutputOffsetProfiles::SpdifLpcmFormatFilter(WAVEFORMATEX* waveFormat)
+bool OutputOffsetProfiles::SpdifLpcmFormatFilter(AudioFormat* format)
 {
-	return SpdifAllFormatFilter(waveFormat, true);
+	return SpdifAllFormatFilter(format, true);
 }
 
 OutputOffsetProfile::OutputOffset OutputOffsetProfiles::Spdif_HDV_MB01_GetOffset(int numChannels, int sampleRate, int bitDepth)

@@ -9,7 +9,7 @@ struct AveragedResult
 {
 public:
     time_t Time;
-    const AudioFormat* Format;
+    const SupportedAudioFormat* Format;
     const AudioEndpoint& OutputEndpoint;
 
     /// <summary>
@@ -40,7 +40,7 @@ public:
     float MinLatency() const;
     float MaxLatency() const;
 
-    AveragedResult(time_t time, const AudioFormat* format, const AudioEndpoint& outputEndpoint, OutputOffsetProfile* outputOffsetProfile, float outputOffsetFromProfile, bool verified, std::string referenceDacName, float referenceDacLatency)
+    AveragedResult(time_t time, const SupportedAudioFormat* format, const AudioEndpoint& outputEndpoint, OutputOffsetProfile* outputOffsetProfile, float outputOffsetFromProfile, bool verified, std::string referenceDacName, float referenceDacLatency)
         : Time(time), Format(format), OutputEndpoint(outputEndpoint), OffsetProfile(outputOffsetProfile), OutputOffsetFromProfile(outputOffsetFromProfile), Verified(verified), ReferenceDacName(referenceDacName), ReferenceDacLatency(referenceDacLatency) {};
 };
 

@@ -9,11 +9,12 @@
 #include "StringHelper.h"
 #include <format>
 #include "WavHelper.h"
+#include "ExternalMediaPlayerOutput.h"
 
 TestManager::TestManager(AudioEndpoint& outputEndpoint,
 	AudioEndpoint* outputEndpoint2,
 	const AudioEndpoint& inputEndpoint,
-	std::vector<AudioFormat*> selectedFormats,
+	std::vector<SupportedAudioFormat*> selectedFormats,
 	std::string fileString,
 	std::string appDirectory,
 	IResultsWriter& resultsWriter,
@@ -72,13 +73,13 @@ void TestManager::StartTest()
 	{
 		PassCount = i;
 		RecordingCount = 0;
-		AudioFormat* lastPlayedFormat = nullptr;
+		SupportedAudioFormat* lastPlayedFormat = nullptr;
 
 		// for determining if a format switch tone is necessary:
 		int firstSampleRate = -1;
 		bool switchedSampleRates = false;
 
-		for (AudioFormat* audioFormat : SelectedFormats)
+		for (SupportedAudioFormat* audioFormat : SelectedFormats)
 		{
 			if (!StopRequested.load(std::memory_order_acquire) && std::find(FailedFormats.begin(), FailedFormats.end(), audioFormat) == FailedFormats.end())
 			{
@@ -93,11 +94,11 @@ void TestManager::StartTest()
 				{
 					if (firstSampleRate == -1)
 					{
-						firstSampleRate = audioFormat->WaveFormat->nSamplesPerSec;
+						firstSampleRate = audioFormat->Format->GetSamplesPerSec();
 					}
 					else
 					{
-						if (firstSampleRate != audioFormat->WaveFormat->nSamplesPerSec)
+						if (firstSampleRate != audioFormat->Format->GetSamplesPerSec())
 						{
 							switchedSampleRates = true;
 						}
@@ -155,9 +156,9 @@ void TestManager::StartTest()
 	IsFinished.store(true, std::memory_order_release);
 }
 
-bool TestManager::PerformRecording(AudioFormat* audioFormat)
+bool TestManager::PerformRecording(SupportedAudioFormat* audioFormat)
 {
-	int sampleRate = audioFormat == nullptr ? AudioGraphOutput::CurrentWindowsSampleRate() : audioFormat->WaveFormat->nSamplesPerSec;
+	int sampleRate = audioFormat == nullptr ? AudioGraphOutput::CurrentWindowsSampleRate() : audioFormat->Format->GetSamplesPerSec();
 	GeneratedSamples* generatedSamples = new GeneratedSamples(sampleRate, GeneratedSamples::WaveType::LatencyMeasurement);
 
 	bool validResult = false;
@@ -168,9 +169,13 @@ bool TestManager::PerformRecording(AudioFormat* audioFormat)
 		{
 			output = new AudioGraphOutput(false, true, generatedSamples->samples, generatedSamples->samplesLength);
 		}
-		else
+		else if (audioFormat->Format->type == AudioFormat::FormatType::WaveFormatEx)
 		{
-			output = new WasapiOutput(outputEndpoint, false, true, generatedSamples->samples, generatedSamples->samplesLength, audioFormat->WaveFormat);
+			output = new WasapiOutput(outputEndpoint, false, true, generatedSamples->samples, generatedSamples->samplesLength, audioFormat->Format->GetWaveFormat());
+		}
+		else if (audioFormat->Format->type == AudioFormat::FormatType::File)
+		{
+			output = new ExternalMediaPlayerOutput(audioFormat->Format->FileName, false);
 		}
 		std::thread outputThread{ [output] { output->StartPlayback(); } };
 
@@ -178,11 +183,16 @@ bool TestManager::PerformRecording(AudioFormat* audioFormat)
 		std::thread* output2Thread = nullptr;
 		if (outputEndpoint2 != nullptr)
 		{
-			output2 = new WasapiOutput(*outputEndpoint2, false, true, generatedSamples->samples, generatedSamples->samplesLength, audioFormat->WaveFormat);
+			output2 = new WasapiOutput(*outputEndpoint2, false, true, generatedSamples->samples, generatedSamples->samplesLength, audioFormat->Format->GetWaveFormat());
 			output2Thread = new std::thread ([output2] { output2->StartPlayback(); });
 		}
 
-		WasapiInput* input = new WasapiInput(inputEndpoint, false, generatedSamples->TestWaveDurationInSeconds());
+		float recordingDuration = generatedSamples->TestWaveDurationInSeconds();
+		if (audioFormat->Format->type == AudioFormat::FormatType::File)
+		{
+			recordingDuration = audioFormat->Format->FileDuration + TestConfiguration::AdditionalRecordingTimeForFilePlayback;
+		}
+		WasapiInput* input = new WasapiInput(inputEndpoint, false, recordingDuration);
 		std::thread inputThread{ [input] { input->StartRecording(); } };
 
 		outputThread.join();
@@ -197,7 +207,7 @@ bool TestManager::PerformRecording(AudioFormat* audioFormat)
 		
 		if (TestConfiguration::SaveIndividualWavFiles)
 		{
-			std::string audioFormatString = audioFormat == nullptr ? AudioFormat::GetCurrentWinAudioFormatString() : audioFormat->FormatString;
+			std::string audioFormatString = audioFormat == nullptr ? AudioFormat::GetCurrentWinAudioFormatString() : audioFormat->Format->FormatString;
 			std::string recordingFolder = format("{}/{}/{}", StringHelper::GetRootPath(AppDirectory), TestFileString, audioFormatString);
 			try
 			{
@@ -245,52 +255,52 @@ bool TestManager::PerformRecording(AudioFormat* audioFormat)
 	return validResult;
 }
 
-bool TestManager::PlayFormatSwitch(AudioFormat* lastPlayedFormat)
+bool TestManager::PlayFormatSwitch(SupportedAudioFormat* lastPlayedFormat)
 {
 	WAVEFORMATEX* waveFormat = nullptr;
 
 	// First, see if the stereo 48 kHz 16 bit is an option:
 	{
-		std::vector<AudioFormat*> formats = outputEndpoint.GetFormats(2, 48000, 16);
+		std::vector<SupportedAudioFormat*> formats = outputEndpoint.GetWaveFormatExFormats(2, 48000, 16);
 		waveFormat = FindFormatSwitchFormat(formats, lastPlayedFormat);
 	}
 
 	if (waveFormat == nullptr)
 	{
 		// Next, see if the stereo 44.1 kHz 16 bit is an option:
-		std::vector<AudioFormat*> formats = outputEndpoint.GetFormats(2, 44100, 16);
+		std::vector<SupportedAudioFormat*> formats = outputEndpoint.GetWaveFormatExFormats(2, 44100, 16);
 		waveFormat = FindFormatSwitchFormat(formats, lastPlayedFormat);
 	}
 
 	if (waveFormat == nullptr)
 	{
 		// Next, see if the stereo 48 kHz is an option:
-		std::vector<AudioFormat*> formats = outputEndpoint.GetFormats(2, 48000);
+		std::vector<SupportedAudioFormat*> formats = outputEndpoint.GetWaveFormatExFormats(2, 48000);
 		waveFormat = FindFormatSwitchFormat(formats, lastPlayedFormat);
 	}
 
 	if (waveFormat == nullptr)
 	{
 		// Next, see if the stereo 44.1 kHz is an option:
-		std::vector<AudioFormat*> formats = outputEndpoint.GetFormats(2, 44100);
+		std::vector<SupportedAudioFormat*> formats = outputEndpoint.GetWaveFormatExFormats(2, 44100);
 		waveFormat = FindFormatSwitchFormat(formats, lastPlayedFormat);
 	}
 
 	if (waveFormat == nullptr)
 	{
 		// Next, see if the stereo is an option:
-		std::vector<AudioFormat*> formats = outputEndpoint.GetFormats(2);
+		std::vector<SupportedAudioFormat*> formats = outputEndpoint.GetWaveFormatExFormats(2);
 		waveFormat = FindFormatSwitchFormat(formats, lastPlayedFormat);
 	}
 
 	if (waveFormat == nullptr)
 	{
 		// This will probably only happen the measurements are coming back invalid due to a hardware configuraion issue.
-		for (const AudioFormat& f : outputEndpoint.SupportedFormats)
+		for (const SupportedAudioFormat* f : outputEndpoint.SupportedFormats)
 		{
-			if (lastPlayedFormat != &f && std::find(FailedFormats.begin(), FailedFormats.end(), &f) == FailedFormats.end())
+			if (lastPlayedFormat != f && std::find(FailedFormats.begin(), FailedFormats.end(), f) == FailedFormats.end())
 			{
-				waveFormat = f.WaveFormat;
+				waveFormat = f->Format->GetWaveFormat();
 				break;
 			}
 		}
@@ -307,19 +317,29 @@ bool TestManager::PlayFormatSwitch(AudioFormat* lastPlayedFormat)
 	std::thread outputThread{ [output] { output->StartPlayback(); } };
 	outputThread.join();
 	delete output;
+	delete generatedSamples;
 
 	return true;
 }
 
-WAVEFORMATEX* TestManager::FindFormatSwitchFormat(std::vector<AudioFormat*> formats, AudioFormat* lastPlayedFormat)
+WAVEFORMATEX* TestManager::FindFormatSwitchFormat(std::vector<SupportedAudioFormat*> formats, SupportedAudioFormat* lastPlayedFormat)
 {
 	if (formats.size() > 0)
 	{
-		for (AudioFormat* f : formats)
+		for (SupportedAudioFormat* f : formats)
 		{
 			if (lastPlayedFormat != f && std::find(FailedFormats.begin(), FailedFormats.end(), f) == FailedFormats.end())
 			{
-				return f->WaveFormat;
+				if (f->Format->type == AudioFormat::FormatType::File)
+				{
+#if _DEBUG
+					throw "TestManager::FindFormatSwitchFormat formats vector incrrectly contains AudioFormat::FormatType::File types";
+#endif
+				}
+				else
+				{
+					return f->Format->GetWaveFormat();
+				}
 			}
 		}
 	}
@@ -344,18 +364,20 @@ void TestManager::PopulateSummaryResults()
 		}
 		else
 		{
-			if (avgResult.Format->DefaultSelection)
+			if (avgResult.Format->DefaultSelection
+				&& avgResult.Format->Format->type == AudioFormat::FormatType::WaveFormatEx
+				&& AudioFormat::GetFormatID(avgResult.Format->Format->GetWaveFormat()) == WAVE_FORMAT_PCM)
 			{
 				SummaryResults.push_back(avgResult);
-				if (avgResult.Format->WaveFormat->nChannels == 2)
+				if (avgResult.Format->Format->GetNumChannels() == 2)
 				{
 					foundStereo = true;
 				}
-				else if (avgResult.Format->WaveFormat->nChannels == 6)
+				else if (avgResult.Format->Format->GetNumChannels() == 6)
 				{
 					foundFiveOne = true;
 				}
-				else if (avgResult.Format->WaveFormat->nChannels == 8)
+				else if (avgResult.Format->Format->GetNumChannels() == 8)
 				{
 					foundSevenOne = true;
 				}
@@ -365,32 +387,34 @@ void TestManager::PopulateSummaryResults()
 
 	for (AveragedResult avgResult : AveragedResults)
 	{
-		if (!foundStereo
-			&& avgResult.Format != nullptr
-			&& avgResult.Format->WaveFormat->nChannels == 2
-			&& avgResult.Format->WaveFormat->nSamplesPerSec == 48000
-			&& avgResult.Format->WaveFormat->wBitsPerSample == 16)
+		if (avgResult.Format != nullptr
+			&& avgResult.Format->Format->type == AudioFormat::FormatType::WaveFormatEx
+			&& AudioFormat::GetFormatID(avgResult.Format->Format->GetWaveFormat()) == WAVE_FORMAT_PCM)
 		{
-			SummaryResults.push_back(avgResult);
-			foundStereo = true;
-		}
-		if (!foundFiveOne
-			&& avgResult.Format != nullptr
-			&& avgResult.Format->WaveFormat->nChannels == 6
-			&& avgResult.Format->WaveFormat->nSamplesPerSec == 48000
-			&& avgResult.Format->WaveFormat->wBitsPerSample == 16)
-		{
-			SummaryResults.push_back(avgResult);
-			foundFiveOne = true;
-		}
-		if (!foundSevenOne
-			&& avgResult.Format != nullptr
-			&& avgResult.Format->WaveFormat->nChannels == 8
-			&& avgResult.Format->WaveFormat->nSamplesPerSec == 48000
-			&& avgResult.Format->WaveFormat->wBitsPerSample == 16)
-		{
-			SummaryResults.push_back(avgResult);
-			foundSevenOne = true;
+			if (!foundStereo
+				&&avgResult.Format->Format->GetNumChannels() == 2
+				&& avgResult.Format->Format->GetSamplesPerSec() == 48000
+				&& avgResult.Format->Format->GetBitsPerSample() == 16)
+			{
+				SummaryResults.push_back(avgResult);
+				foundStereo = true;
+			}
+			if (!foundFiveOne
+				&& avgResult.Format->Format->GetNumChannels() == 6
+				&& avgResult.Format->Format->GetSamplesPerSec() == 48000
+				&& avgResult.Format->Format->GetBitsPerSample() == 16)
+			{
+				SummaryResults.push_back(avgResult);
+				foundFiveOne = true;
+			}
+			if (!foundSevenOne
+				&& avgResult.Format->Format->GetNumChannels() == 8
+				&& avgResult.Format->Format->GetSamplesPerSec() == 48000
+				&& avgResult.Format->Format->GetBitsPerSample() == 16)
+			{
+				SummaryResults.push_back(avgResult);
+				foundSevenOne = true;
+			}
 		}
 	}
 }

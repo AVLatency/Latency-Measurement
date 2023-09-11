@@ -29,8 +29,8 @@ public:
 	std::atomic<bool> ShouldShowNegativeLatencyError = false;
 	bool HasShownNegativeLatencyError = false; // only accessed by the GUI thread
 
-	std::vector<AudioFormat*> SelectedFormats;
-	std::vector<AudioFormat*> FailedFormats;
+	std::vector<SupportedAudioFormat*> SelectedFormats;
+	std::vector<SupportedAudioFormat*> FailedFormats;
 
 	std::vector<RecordingResult> Results;
 	std::vector<AveragedResult> AveragedResults;
@@ -43,7 +43,7 @@ public:
 	/// <summary>
 	/// Will start the test on a new thread
 	/// </summary>
-	TestManager(AudioEndpoint& outputEndpoint, AudioEndpoint* outputEndpoint2, const AudioEndpoint& inputEndpoint, std::vector<AudioFormat*> selectedFormats, std::string fileString, std::string appDirectory, IResultsWriter& resultsWriter, OutputOffsetProfile* currentProfile, DacLatencyProfile* referenceDacLatency);
+	TestManager(AudioEndpoint& outputEndpoint, AudioEndpoint* outputEndpoint2, const AudioEndpoint& inputEndpoint, std::vector<SupportedAudioFormat*> selectedFormats, std::string fileString, std::string appDirectory, IResultsWriter& resultsWriter, OutputOffsetProfile* currentProfile, DacLatencyProfile* referenceDacLatency);
 	~TestManager();
 	/// <summary>
 	/// Should be called from the originating thread when IsFinished == true. This will join and delete the test thread.
@@ -64,9 +64,9 @@ private:
 	DacLatencyProfile* referenceDacLatency;
 
 	void StartTest();
-	bool PerformRecording(AudioFormat* audioFormat);
-	bool PlayFormatSwitch(AudioFormat* lastPlayedFormat);
-	WAVEFORMATEX* FindFormatSwitchFormat(std::vector<AudioFormat*> formats, AudioFormat* lastPlayedFormat);
+	bool PerformRecording(SupportedAudioFormat* audioFormat);
+	bool PlayFormatSwitch(SupportedAudioFormat* lastPlayedFormat);
+	WAVEFORMATEX* FindFormatSwitchFormat(std::vector<SupportedAudioFormat*> formats, SupportedAudioFormat* lastPlayedFormat);
 	void PopulateSummaryResults();
 };
 

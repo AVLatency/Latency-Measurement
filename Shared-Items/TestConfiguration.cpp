@@ -11,6 +11,7 @@ bool TestConfiguration::SaveIndividualRecordingResults = true;
 bool TestConfiguration::SaveIndividualWavFiles = IS_DEBUG;
 int TestConfiguration::NumMeasurements = 10;
 float TestConfiguration::AdditionalRecordingTime = 0.42;
+float TestConfiguration::AdditionalRecordingTimeForFilePlayback = 1.42; // An extra second added on by default to give time for the media player to open
 int TestConfiguration::InitialIgnoreLength = 10;
 float TestConfiguration::OutputVolume = 0.75f;
 float TestConfiguration::LeadInDuration = 0.4f;

@@ -12,6 +12,11 @@ public:
 	/// </summary>
 	static float AdditionalRecordingTime;
 	/// <summary>
+	/// In seconds. This will increase the overall recording time, but only during file playback.
+	/// The base recording time will be the duration of the file.
+	/// </summary>
+	static float AdditionalRecordingTimeForFilePlayback;
+	/// <summary>
 	/// In milliseconds. This is the time during the start of the recording that will be ignored.
 	/// </summary>
 	static int InitialIgnoreLength;

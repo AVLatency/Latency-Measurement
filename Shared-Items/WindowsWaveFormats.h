@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <audioclient.h>
+#include "AudioFormat.h"
 
 class WindowsWaveFormats
 {
@@ -8,7 +9,9 @@ public:
 	static WindowsWaveFormats Formats;
 
 	std::vector<WAVEFORMATEXTENSIBLE*> AllExtensibleFormats;
+	std::vector<AudioFormat*> AllExtensibleAudioFormats;
 	std::vector<WAVEFORMATEX*> AllExFormats;
+	std::vector<AudioFormat*> AllExAudioFormats;
 
 	WindowsWaveFormats();
 

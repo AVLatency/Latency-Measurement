@@ -1,9 +1,64 @@
 #include "AudioFormat.h"
 #include <format>
 
-AudioFormat::AudioFormat(WAVEFORMATEX* waveFormat) : WaveFormat(waveFormat)
+AudioFormat::AudioFormat(WAVEFORMATEX* waveFormat) : waveFormat(waveFormat)
 {
-    FormatString = GetFormatString(waveFormat, true, true);
+    type = FormatType::WaveFormatEx;
+    FormatString = GetWaveFormatString(waveFormat, true, true);
+}
+
+AudioFormat::AudioFormat(FileParameters& params) : FileId(params.id), FileName(params.fileName), FileDuration(params.duration), FileSamplesPerSec(params.samplesPerSec), FileNumChannels(params.numChannels)
+{
+    type = FormatType::File;
+    FormatString = params.fileName;
+}
+
+WAVEFORMATEX* AudioFormat::GetWaveFormat() const
+{
+    if (type == FormatType::WaveFormatEx)
+    {
+        return waveFormat;
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
+DWORD AudioFormat::GetSamplesPerSec() const
+{
+    if (type == FormatType::WaveFormatEx)
+    {
+        return waveFormat->nSamplesPerSec;
+    }
+    else
+    {
+        return FileSamplesPerSec;
+    }
+}
+
+WORD AudioFormat::GetNumChannels() const
+{
+    if (type == FormatType::WaveFormatEx)
+    {
+        return waveFormat->nChannels;
+    }
+    else
+    {
+        return FileNumChannels;
+    }
+}
+
+WORD AudioFormat::GetBitsPerSample() const
+{
+    if (type == FormatType::WaveFormatEx)
+    {
+        return waveFormat->wBitsPerSample;
+    }
+    else
+    {
+        return FileBitsPerSample;
+    }
 }
 
 WORD AudioFormat::GetFormatID(WAVEFORMATEX* waveFormat)
@@ -23,7 +78,7 @@ std::string AudioFormat::GetCurrentWinAudioFormatString()
     return "Current Windows audio format";
 }
 
-std::string AudioFormat::GetFormatString(WAVEFORMATEX* waveFormat, bool includeEncoding, bool includeChannelInfo)
+std::string AudioFormat::GetWaveFormatString(WAVEFORMATEX* waveFormat, bool includeEncoding, bool includeChannelInfo)
 {
     std::string encodingStr = std::format("{} ", GetAudioDataEncodingString(waveFormat));
     std::string channelInfoStr = std::format("-{}", GetChannelInfoString(waveFormat));
@@ -99,6 +154,23 @@ std::string AudioFormat::GetChannelInfoString(WAVEFORMATEX* waveFormat)
         }
     }
     return result;
+}
+
+std::string AudioFormat::GetChannelInfoString(AudioFormat* format)
+{
+    if (format == nullptr)
+    {
+        return "Default.Speakers";
+    }
+
+    if (format->type == FormatType::File)
+    {
+        return format->FileSpeakersDescription;
+    }
+    else
+    {
+        return GetChannelInfoString(format->GetWaveFormat());
+    }
 }
 
 std::string AudioFormat::GetAudioDataEncodingString(WAVEFORMATEX* waveFormat)
@@ -233,5 +305,22 @@ std::string AudioFormat::GetAudioDataEncodingString(WAVEFORMATEX* waveFormat)
         {
             return std::format("UnknownExtensibleFormat0x{:X}0x{:X}0x{:X}", subFormat.Data1, subFormat.Data2, subFormat.Data3);
         }
+    }
+}
+
+std::string AudioFormat::GetAudioDataEncodingString(AudioFormat* format)
+{
+    if (format == nullptr)
+    {
+        return "UnknownEncoding";
+    }
+
+    if (format->type == FormatType::File)
+    {
+        return format->FileEncoding;
+    }
+    else
+    {
+        return GetAudioDataEncodingString(format->GetWaveFormat());
     }
 }

@@ -2,6 +2,7 @@
 #include "OutputOffsetProfile.h"
 #include <vector>
 #include "ProfileResources.h"
+#include "FileAudioFormats.h"
 
 /// <summary>
 /// Describes the offset between digital output and analog output of
@@ -64,20 +65,21 @@ public:
 	/// <summary>
 	/// Does not filter any formats
 	/// </summary>
-	static bool AllFormatsFilter(WAVEFORMATEX* waveFormat);
-	static bool HdmiAllFormatsFilter(WAVEFORMATEX* waveFormat, bool onlyLpcm);
-	static bool HdmiAllFormatsFilter(WAVEFORMATEX* waveFormat);
-	static bool HdmiLpcmFormatsFilter(WAVEFORMATEX* waveFormat);
-	static bool SpdifAllFormatFilter(WAVEFORMATEX* waveFormat, bool onlyLpcm);
-	static bool SpdifAllFormatFilter(WAVEFORMATEX*);
-	static bool SpdifLpcmFormatFilter(WAVEFORMATEX*);
+	static bool AllFormatsFilter(AudioFormat* format);
+	static bool HdmiAllFormatsFilter(AudioFormat* format, bool onlyLpcm);
+	static bool HdmiAllFormatsFilter(AudioFormat* format);
+	static bool HdmiLpcmFormatsFilter(AudioFormat* format);
+	static bool SpdifAllFormatFilter(AudioFormat* format, bool onlyLpcm);
+	static bool SpdifAllFormatFilter(AudioFormat* format);
+	static bool SpdifLpcmFormatFilter(AudioFormat* format);
 
 private:
 	static void PrepareSubsetListsForGui();
 	static void PrepareOffsetStringsForGui();
-	static void AddOffsetStrToProfileForFormat(OutputOffsetProfile* profile, WAVEFORMATEX* format);
+	static void AddOffsetStrToProfileForFormat(OutputOffsetProfile* profile, AudioFormat* format);
 
 	static OutputOffsetProfile::OutputOffset None_GetOffset(int numChannels, int sampleRate, int bitDepth);
+	static OutputOffsetProfile::OutputOffset None_GetOffset(FileAudioFormats::FileId id);
 
 	static OutputOffsetProfile::OutputOffset Hdmi_HDV_MB01_GetOffset(int numChannels, int sampleRate, int bitDepth);
 

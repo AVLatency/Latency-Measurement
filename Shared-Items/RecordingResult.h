@@ -10,7 +10,7 @@ struct RecordingResult
 public:
     std::string GUID;
     time_t Time;
-    AudioFormat* Format; // Will be nullptr when current windows audio format is used by OffsetProfile
+    SupportedAudioFormat* Format; // Will be nullptr when current windows audio format is used by OffsetProfile
     RecordingSingleChannelResult Channel1;
     RecordingSingleChannelResult Channel2;
 
@@ -30,7 +30,7 @@ public:
     /// </summary>
     float ReferenceDacLatency;
 
-    RecordingResult(AudioFormat* format, OutputOffsetProfile* outputOffsetProfile, float outputOffsetFromProfile, bool verified, std::string referenceDacName, float referenceDacLatency)
+    RecordingResult(SupportedAudioFormat* format, OutputOffsetProfile* outputOffsetProfile, float outputOffsetFromProfile, bool verified, std::string referenceDacName, float referenceDacLatency)
         : GUID(StringHelper::GetGuidString()), Time(time(0)), Format(format), OffsetProfile(outputOffsetProfile), OutputOffsetFromProfile(outputOffsetFromProfile), Verified(verified), ReferenceDacName(referenceDacName), ReferenceDacLatency(referenceDacLatency) {}
 
     void SetRecordingSampleRate(int value) { Channel1.RecordingSampleRate = value; Channel2.RecordingSampleRate = value; }
